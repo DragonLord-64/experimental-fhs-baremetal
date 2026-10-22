@@ -14,6 +14,14 @@ navigation are provisioned. Local anonymous Viewer access is enabled; login is
 disabled. `local-demo` / `local-demo-only` is public bootstrap configuration,
 not a real credential. Keep the loopback binding. Prometheus/exporter are internal.
 
+## Screenshots
+
+Synthetic demo mesh capacity and switch ports:
+
+![Mesh capacity](screenshots/mesh-capacity.png)
+
+![Switch ports](screenshots/switch-ports.png)
+
 ## Edit and refresh
 
 `scenarios.json` uses `ok`, `degraded`, `fault`, `unknown`, `notdeployed`.
@@ -86,4 +94,4 @@ privileged devices, host network, real inventory or credentials are used.
 
 Offline/HTTP checks: `python3 tests/test_unit.py`. The supervisor's bounded
 `tests/validate_runtime.py` uses its own Docker/browser test tooling; these are
-not launch dependencies. ZIP and screenshots are written outside this folder.
+not launch dependencies. ZIP and runtime evidence are written outside this folder.
