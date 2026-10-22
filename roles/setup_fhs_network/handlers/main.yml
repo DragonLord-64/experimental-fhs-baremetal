@@ -1,0 +1,6 @@
+---
+- name: Restart systemd-networkd
+  listen: fhs network changed
+  ansible.builtin.systemd:
+    name: systemd-networkd
+    state: restarted

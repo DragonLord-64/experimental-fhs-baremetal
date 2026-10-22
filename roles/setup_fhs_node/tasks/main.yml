@@ -1,0 +1,33 @@
+---
+# roles/fhs_node_setup/tasks/main.yml
+
+- name: Cleanup previous Kubernetes installation
+  ansible.builtin.import_tasks: cleanup.yml
+  tags: [cleanup, never]
+  when: "'cleanup' in ansible_run_tags"
+
+- name: Configure pre-requisites
+  ansible.builtin.import_tasks: prereqs.yml
+  tags: [prereq]
+
+- name: Install containerd
+  ansible.builtin.include_tasks: install-containerd.yml
+  tags: [containerd]
+
+- name: Install kubeadm, kubelet, and kubectl
+  ansible.builtin.include_tasks: install-k8s-packages.yml
+  tags: [install-k8s]
+
+- name: Create kubeadm directory
+  ansible.builtin.file:
+    path: /etc/kubernetes/kubeadm
+    state: directory
+    mode: "0755"
+  tags: [install-k8s, join-config]
+
+- name: Render template and copy directly to remote nodes
+  ansible.builtin.template:
+    src: kubeadm-join.yaml.j2
+    dest: /etc/kubernetes/kubeadm/kubeadm-join.yaml
+    mode: "0600"
+  tags: [install-k8s, join-config]

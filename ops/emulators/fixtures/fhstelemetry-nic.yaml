@@ -1,0 +1,5 @@
+  name: "nic"
+  internalms: 10000
+  fields:
+    - name: "NIC temperature"
+      value: 50.0

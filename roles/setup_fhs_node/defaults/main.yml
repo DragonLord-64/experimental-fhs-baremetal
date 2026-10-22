@@ -1,0 +1,13 @@
+---
+# roles/fhs_node_setup/defaults/main.yml
+# Defaults have LOW precedence - easily overridable by users
+# Use for values that users commonly customize
+k8s_repo_version: "v1.31"
+k8s_pkg_version: "1.31.4" # Change this patch number if needed
+
+k8s_packages:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+k8s_taints: []

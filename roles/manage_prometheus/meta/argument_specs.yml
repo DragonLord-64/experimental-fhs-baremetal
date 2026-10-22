@@ -1,0 +1,19 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure Prometheus and Node Exporter
+    options:
+      manage_prometheus_file_directory: {type: path, required: true}
+      manage_prometheus_apt_version: {type: str}
+      manage_prometheus_prometheus_tar: {type: str, required: true}
+      manage_prometheus_node_tar: {type: str, required: true}
+      manage_prometheus_user: {type: str, default: prometheus}
+      manage_prometheus_node_user: {type: str, default: node_exporter}
+      manage_prometheus_data_dir: {type: path, default: /var/lib/prometheus}
+      manage_prometheus_enable_auth: {type: bool, default: false}
+      manage_prometheus_user_cred: {type: str, no_log: true}
+      manage_prometheus_prometheus_port: {type: int, default: 9090}
+      manage_prometheus_retention_size: {type: str, default: 15GB}
+      manage_prometheus_retention_time: {type: str, default: 14d}
+      manage_prometheus_scrape_interval: {type: str, default: 15s}
+      manage_prometheus_evaluation_interval: {type: str, default: 15s}

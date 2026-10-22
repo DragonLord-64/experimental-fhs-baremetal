@@ -1,0 +1,82 @@
+---
+- name: Download and Package Mixed Git/Release Assets
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    output_directory: "/provision/files.d/external_archives"
+
+    download_list:
+      - name: "node_exporter"
+        type: "direct_download"
+        url: "https://github.com"
+        dest_filename: "node_exporter-1.12.1.linux-amd64.tar.gz"
+
+      - name: "ska-mid-cbf-fhs-bist"
+        type: "gitlab_repo"
+        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-bist"
+        version: "main"
+
+      - name: "ska-mid-cbf-fhs-prometheus-exporter"
+        type: "gitlab_repo"
+        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-prometheus-exporter"
+        version: "0.0.5-rc3"
+
+      - name: "prometheus"
+        type: "direct_download"
+        url: "https://github.com"
+        dest_filename: "prometheus-3.13.2.linux-amd64.tar.gz"
+
+      - name: "ska-mid-cbf-bitstreams"
+        type: "gitlab_repo"
+        project_path: "ska-telescope/ska-mid-cbf/infra/ska-mid-cbf-bitstreams"
+        version: "1.2.0"
+      
+      - name: "ska-mid-cbf-fsp-corr-bitstreams"
+        type: "gitlab_repo"
+        project_path: "ska-telescope/ska-mid-cbf/infra/ska-mid-cbf-fsp-corr-bitstreams"
+        version: "0.1.0"
+
+      - name: "ska-mid-cbf-fhs-fsp-grpc-controller"
+        type: "gitlab_repo"
+        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-fsp-grpc-controller"
+        version: "0.0.3"
+
+      - name: "ska-mid-cbf-fhs-vcc-grpc-controller"
+        type: "gitlab_repo"
+        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-vcc-grpc-controller"
+        version: "0.0.3"
+    
+      - name: "ska-mid-cbf-fhs-grpc-protos"
+        type: "gitlab_repo"
+        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-grpc-protos"
+        version: "0.0.1"
+
+      - name: "grpcurl"
+        type: "direct_download"
+        url: "https://github.com/fullstorydev/grpcurl/releases/download/v1.9.3/grpcurl_1.9.3_linux_amd64.deb"
+        dest_filename: "grpcurl_1.9.3_linux_amd64.deb"
+
+  tasks:
+    - name: Ensure dedicated output directory exists
+      ansible.builtin.file:
+        path: "{{ output_directory }}"
+        state: directory
+        mode: "0755"
+
+    - name: Download direct release tarballs (GitHub items)
+      ansible.builtin.get_url:
+        url: "{{ item.url }}"
+        dest: "{{ output_directory }}/{{ item.dest_filename }}"
+        mode: "0644"
+      loop: "{{ download_list }}"
+      when: item.type == 'direct_download'
+
+    - name: Download GitLab repositories using web archive format
+      ansible.builtin.get_url:
+        # Constructing the exact pattern: .../repo/-/archive/branch/repo-branch.tar.gz?ref_type=heads
+        url: "https://gitlab.com/{{ item.project_path }}/-/archive/{{ item.version }}/{{ item.name }}-{{ item.version }}.tar.gz"
+        dest: "{{ output_directory }}/{{ item.name }}-{{ item.version }}.tar.gz"
+        mode: "0644"
+      loop: "{{ download_list }}"
+      when: item.type == 'gitlab_repo'

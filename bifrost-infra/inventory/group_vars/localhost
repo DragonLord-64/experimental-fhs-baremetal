@@ -1,0 +1,99 @@
+---
+# The ironic API URL for bifrost operations.  Defaults to localhost.
+# ironic_url: "http://localhost:6385/"
+
+# The network interface that bifrost will be operating on.  Defaults
+# to virbr0 in roles, can be overridden here.
+network_interface: "eno2"
+internal_ip: 192.168.1.7
+
+cleaning: true
+cleaning_disk_erase: false
+# password to use between services
+#service_password: aSecretPassword473z
+# mysql_username: Default mysql admin username
+mysql_username: root
+# mysql_password: Default mysql admin user password
+mysql_password:
+
+noauth_mode: true
+
+# Override bifrost_venv_env to clear OS_CLOUD so it doesn't conflict with
+# OS_AUTH_TYPE=none in validation tasks (OS_CLOUD=bifrost is set in the
+# container ENV by the Dockerfile and would cause a FixedEndpointPlugin error).
+bifrost_venv_env:
+  VIRTUAL_ENV: "{{ lookup('env', 'VENV') or '/var/lib/kolla/venv' }}"
+  PATH: "{{ (lookup('env', 'VENV') or '/var/lib/kolla/venv') + '/bin:' + ansible_env.PATH }}"
+  OS_CLOUD: ""
+
+# The path to the SSH key to be utilized for testing and burn-in
+# to configuration drives. When set, it should be set in both baremetal
+# and localhost groups, however this is only an override to the default.
+ssh_public_key_path: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
+
+# If testing is true, then the environment is setup for using libvirt
+# virtual machines for the hardware instead of real hardware.
+# testing: true
+
+# The default port to download files via.  Required for IPA URL generation.
+# Presently the defaults are located in the roles, however if changed both
+# the localhost and baremetal group files must be updated.
+file_url_port: 8080
+
+# IPA Image parameters.  If these are changed, they must be changed in
+# Both localhost and baremetal groups.  Presently the defaults
+# in each role should be sufficient for proper operation.
+# ipa_kernel: "{{http_boot_folder}}/ipa.kernel"
+# ipa_ramdisk: "{{http_boot_folder}}/ipa.initramfs"
+# ipa_kernel_url: "http://{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] }}:{{file_url_port}}/ipa.kernel"
+# ipa_ramdisk_url: "http://{{ hostvars[inventory_hostname]['ansible_' + network_interface]['ipv4']['address'] }}:{{file_url_port}}/ipa.initramfs"
+
+# The http_boot_folder defines the root folder for the webserver.
+# If this setting is changed, it must be applied to both the baremetal
+# and localhost groups. Presently the role defaults are set to the value
+# below.
+# http_boot_folder: /var/lib/ironic/httpboot
+
+# The settings for the name of the image to be deployed along with the
+# on disk location are below.  If changed, these settings must be applied
+# to both the baremetal and localhost groups.  If the file is already on
+# disk, then the image generation will not take place, otherwise an image
+# will be generated using diskimage-builder.
+deploy_image_filename: "deployment_image.qcow2"
+deploy_image: "{{http_boot_folder}}/{{deploy_image_filename}}"
+
+# Setting to utilize diskimage-builder to create a bootable image.
+create_image_via_dib: "{{ not (download_custom_deploy_image | default(use_cirros) | default(false) | bool) }}"
+dib_image_type: vm
+
+# Create IPA image instead of downloading an pre-made IPA image.
+# create_ipa_image: true
+
+# Dnsmasq default route for clients. If not defined, dnsmasq will push to
+# clients as default route the same IP of the dnsmasq server.
+# Default: undefined
+# dnsmasq_router: "{{ ipv4_gateway }}"
+
+# Dnsmasq default nameserver for clients. If not defined, this setting
+# will be ignored.
+# Default: undefined
+# dnsmasq_dns_servers: 8.8.8.8,8.8.4.4
+download_ipa: false
+# Create IPA image instead of downloading an pre-made IPA image.
+create_ipa_image: true
+ipa_extra_dib_elements: "devuser dynamic-login enable-serial-console"
+ipa_build_dib_packages: 
+  - "mdadm"
+
+
+dib_env_vars:
+  DIB_DEV_USER_USERNAME: "username"
+  DIB_DEV_USER_PASSWORD: "password"
+  DIB_DEV_USER_PWDLESS_SUDO: "yes"
+  DIB_DEV_USER_AUTHORIZED_KEYS: "{{ lookup('file', '~/.ssh/id_rsa.pub')}}"
+
+
+extra_ironic_config:
+  deploy:
+    erase_devices_priority: 0
+    erase_devices_metadata_priority: 10

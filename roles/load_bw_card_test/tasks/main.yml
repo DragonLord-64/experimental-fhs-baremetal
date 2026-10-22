@@ -1,0 +1,92 @@
+---
+- name: Print deployment initialization
+  ansible.builtin.debug:
+    msg: "Deploying bitstream on {{ ansible_hostname }} ..."
+
+- name: Ensure target output directory exists
+  ansible.builtin.file:
+    path: "{{ bitstream_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: bittware
+    mode: '0755'
+  become: true
+
+- name: Ensure unzip is installed on target
+  ansible.builtin.package:
+    name: unzip
+    state: present
+  become: true
+
+- name: Copy and extract archive from controller to remote target
+  ansible.builtin.unarchive:
+    src: "{{ local_archive_path }}"
+    dest: "{{ bitstream_dir }}"
+    remote_src: false
+
+- name: Identify the correct standard .rbf bitstream file
+  ansible.builtin.find:
+    paths: "{{ bitstream_dir }}"
+    patterns: "ia860m_cardtest01_bbrev4_std_v*.rbf"
+  register: found_bitstream
+
+- name: Program FPGA Card 0 and Card 1 in parallel
+  ansible.builtin.shell: "echo 'y' | {{ venv_path }}/bin/bw_bmc_fpga_load -c{{ item }} program {{ found_bitstream.files | map(attribute='path') | first | basename }}"
+  args:
+    chdir: "{{ bitstream_dir }}"
+  environment:
+    VIRTUAL_ENV: "{{ venv_path }}"
+  loop:
+    - 0
+    - 1
+  async: 600
+  poll: 0
+  register: fpga_programming_jobs
+  become: true
+
+- name: Wait for FPGA card programming to complete
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: job_results
+  until: job_results.finished
+  retries: 120
+  delay: 5
+  loop: "{{ fpga_programming_jobs.results }}"
+  become: true
+  ignore_errors: true
+
+- name: Save programming logs to disk
+  ansible.builtin.copy:
+    content: "{{ item.stdout }}\n{{ item.stderr }}"
+    dest: "{{ workspace_dir }}/bw_card{{ item.item }}_program.log"
+    mode: '0644'
+  loop: "{{ job_results.results }}"
+  become: true
+
+- name: Load newly programmed image onto FPGA cards
+  ansible.builtin.command: "{{ venv_path }}/bin/bw_bmc_fpga_load -c{{ item }} load {{ found_bitstream.files | map(attribute='path') | first | basename }}"
+  args:
+    chdir: "{{ bitstream_dir }}"
+  environment:
+    VIRTUAL_ENV: "{{ venv_path }}"
+  loop:
+    - 0
+    - 1
+  become: true
+
+- name: Check current status of both FPGA cards
+  ansible.builtin.command: "{{ venv_path }}/bin/bw_bmc_fpga_load -c{{ item }} current"
+  args:
+    chdir: "{{ bitstream_dir }}"
+  environment:
+    VIRTUAL_ENV: "{{ venv_path }}"
+  loop:
+    - 0
+    - 1
+  register: current_status_output
+  become: true
+
+- name: Display current card status
+  ansible.builtin.debug:
+    msg: "{{ item.stdout_lines }}"
+  loop: "{{ current_status_output.results }}"

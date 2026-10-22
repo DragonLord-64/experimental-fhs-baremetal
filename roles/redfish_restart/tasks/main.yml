@@ -1,0 +1,19 @@
+- name: Get last boot time
+  ansible.builtin.command: uptime -p
+  register: last_boot
+  changed_when: false
+
+- name: Show pre restart uptime
+  ansible.builtin.debug:
+    msg: "Last boot: {{ last_boot.stdout }}"
+
+- name: Restart manager power gracefully
+  delegate_to: localhost
+  community.general.redfish_command:
+    category: Systems
+    command: PowerGracefulRestart
+    resource_id: Self
+    baseuri: "{{ redfish.address }}"
+    username: "{{ redfish.username }}"
+    password: "{{ redfish.password }}"
+    wait: true

@@ -1,0 +1,17 @@
+fields:
+  - name: "test_ddr5_inventory"
+    value: True
+  - name: "test_nvme_inventory"
+    value: True
+  - name: "test_daemon_status_sshd"
+    value: True
+  - name: "test_daemon_status_systemd_networkd"
+    value: True
+  - name: "test_boot_logs"
+    value: True
+  - name: "test_pcie_enumeration"
+    value: True
+  - name: "test_pcie_link_integrity"
+    value: True
+name: "bist"
+intervalms: 10000

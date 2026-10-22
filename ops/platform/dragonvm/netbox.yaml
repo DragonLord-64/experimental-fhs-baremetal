@@ -1,0 +1,49 @@
+# VM-only network/storage/resource differences; upstream source stays in platform/.
+fullnameOverride: netbox
+basePath: netbox/
+image:
+  tag: v4.7.0
+  digest: sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba
+postgresql:
+  enabled: false
+valkey:
+  enabled: false
+externalDatabase:
+  host: netbox-postgresql
+  existingSecretName: netbox-database
+  existingSecretKey: password
+tasksDatabase:
+  host: netbox-valkey-primary
+  existingSecretName: netbox-valkey
+  existingSecretKey: valkey-password
+cachingDatabase:
+  host: netbox-valkey-primary
+  existingSecretName: netbox-valkey
+  existingSecretKey: valkey-password
+existingSecret: netbox-config
+superuser:
+  existingSecret: netbox-superuser
+ingress:
+  enabled: false
+service:
+  type: ClusterIP
+persistence:
+  storageClass: fhs-retain
+  size: 1Gi
+resources:
+  requests: {cpu: 100m, memory: 512Mi}
+  limits: {cpu: '2', memory: 1536Mi}
+worker:
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits: {cpu: '1', memory: 768Mi}
+global:
+  storageClass: fhs-retain
+# Source computed values use legacy flat probe paths; this chart uses httpGet.path.
+readinessProbe:
+  path: null
+startupProbe:
+  path: null
+# Avoid concurrent Django schema migrations on this single-instance lab.
+updateStrategy:
+  type: Recreate

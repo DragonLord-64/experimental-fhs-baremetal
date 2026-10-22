@@ -1,0 +1,39 @@
+plugin: netbox.netbox.nb_inventory
+api_endpoint: https://rmdskadevdu011.mda.ca/netbox/
+
+interfaces: true
+ip_addresses: true
+
+# Configuration settings. See https://docs.ansible.com/projects/ansible/latest/collections/netbox/netbox/nb_inventory_inventory.html#parameters
+validate_certs: false
+config_context: true
+use_extra_vars: true
+flatten_custom_fields: true
+
+fetch_all_builtins: true
+modules: true
+inventory_items: true
+
+# Formatting to match local inventory style, filtering active device with a primary IP to avoid pulling in other devices.
+query_filters:
+  - status: "active"
+device_query_filters:
+  - has_primary_ip: 'true'
+group_by:
+  - device_roles
+# Add this block at the bottom of your NetBox inventory file
+groups:
+  teraboxes: "device_role.slug == 'fpga-host-server'"
+
+# For access, required to have an access token set up for the user.
+token:
+  type: Bearer
+  value:  !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          38363938346462333533616335343033343530313662623432383932653562653534303736623938
+          6661393433623663356437636632306537383536666362640a373634343062366562343262633865
+          36626165633062656437323233623861383930663738636264396639363561373330376136656630
+          6331633861386462340a623230633033373663333136373964346431636232646462373931333835
+          36363961373838656662653437326231333465386335326532336464333632336362316336613839
+          36326262313666336537316639613431616165366565376462343530653636383063663565623532
+          326561663937656232313839323836343232

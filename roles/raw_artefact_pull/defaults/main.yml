@@ -1,0 +1,8 @@
+---
+raw_artefacts: []
+raw_artefact_http_proxy: ""
+raw_artefact_https_proxy: ""
+raw_artefact_no_proxy: ""
+raw_artefact_registry_mirror: ""
+raw_artefact_tls_verify: true
+raw_artefact_timeout: 30

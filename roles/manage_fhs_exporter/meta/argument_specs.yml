@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure the FHS Prometheus exporter
+    options:
+      manage_exporters_exporter_file: {type: path, required: true}
+      fhs_exporter_port: {type: int, default: 9110}
+      fhs_exporter_log_level:
+        type: str
+        default: DEBUG
+        choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+      fhs_exporter_venv_path: {type: path, default: /opt/venvs/fhs}

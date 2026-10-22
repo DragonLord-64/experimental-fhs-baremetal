@@ -1,0 +1,17 @@
+---
+argument_specs:
+  main:
+    short_description: Create FHS user accounts with sudo and SSH keys
+    options:
+      fhs_users:
+        type: list
+        elements: dict
+        default: []
+        options:
+          name: {type: str, required: true}
+          password: {type: str, no_log: true}
+          ssh_keys: {type: list, elements: str, default: []}
+      fhs_keys_dir: {type: path, default: /provision/files.d/dev-ssh-keys.d}
+      fhs_user_groups: {type: list, elements: str, default: [sudo, bittware]}
+      fhs_sudoers_file: {type: path, default: /etc/sudoers.d/10-sudo-group}
+      fhs_sudoers_content: {type: str}

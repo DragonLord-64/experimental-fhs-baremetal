@@ -1,0 +1,11 @@
+---
+argument_specs:
+  main:
+    short_description: Install DPDK, Arkville, and NVIDIA DOCA
+    options:
+      dpdk_local_path: {type: path, default: /provision/files.d/}
+      dpdk_tarball_filename: {type: str, default: dpdk.tar.gz}
+      arkville_release: {type: str, default: "25.11"}
+      arkville_local_path: {type: path, default: /provision/files.d/arkville/archive}
+      doca_local_path: {type: path, default: /provision/files.d/}
+      doca_deb_filename: {type: str, default: doca-host_3.3.0-088000-26.01-ubuntu2404_amd64.deb}

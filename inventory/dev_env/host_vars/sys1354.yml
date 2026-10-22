@@ -1,0 +1,18 @@
+---
+ansible_host: 192.168.8.45
+
+redfish:
+  address: "192.168.8.44"
+
+fpga_card0_sn: 8190690
+fpga_card1_sn: 8190730
+terabox_nic0_sn: MT2253J12855
+
+nvme0_serial_number: "S5P2NS0X311139X"
+nvme1_serial_number: "S5P2NS0X311147B"
+
+# This server's FPGA cards and NIC are in different PCI slots than the
+# standard terabox layout in group_vars/teraboxes.yml.
+fpga_card0_bdf_detri: "01:00.1"
+fpga_card0_bdf_ark: "01:00.0"
+terabox_nic0_bdf: "81:00.0"

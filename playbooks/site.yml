@@ -1,0 +1,177 @@
+---
+# Primary FHS site playbook. Hosts are targeted by group (defined in
+# `inventory/dev_env/hosts.yml`); per-group plays apply the relevant role.
+#
+# Each role is tagged with its role name so a provisioning run can select an
+# exact set of roles, for example:
+#   ansible-playbook playbooks/provision.yml --tags manage_users,setup_fhs_network
+
+- name: Foundation (users + network)
+  hosts: all
+  become: true
+  gather_facts: false
+  tags: [foundation]
+  tasks:
+    - name: Apply users role
+      ansible.builtin.include_role:
+        name: manage_users
+        apply:
+          tags: [manage_users]
+      tags: [manage_users]
+    - name: Apply network_setup role
+      ansible.builtin.include_role:
+        name: setup_fhs_network
+        apply:
+          tags: [setup_fhs_network]
+      tags: [setup_fhs_network]
+
+- name: (local dev only) Setup local dev password
+  hosts: all
+  become: true
+  gather_facts: false
+  tags: [local_dev]
+  tasks:
+    - name: Create or update user account with password
+      ansible.builtin.user:
+        name: "{{ local_dev_user }}"
+        password: "{{ local_dev_user_pass }}"
+        state: present
+      tags: [local_dev_user]
+
+- name: Distribution access
+  hosts: all
+  become: true
+  gather_facts: false
+  tags: [distribution]
+  tasks:
+    - name: Apply apt_repo_access
+      ansible.builtin.include_role:
+        name: setup_apt_source
+        apply:
+          tags: [setup_apt_source]
+      tags: [setup_apt_source]
+    - name: Apply pip_index
+      ansible.builtin.include_role:
+        name: setup_pip_source
+        apply:
+          tags: [setup_pip_source]
+      tags: [setup_pip_source]
+    - name: Apply Git proxy
+      ansible.builtin.include_role:
+        name: setup_git_proxy
+        apply:
+          tags: [setup_git_proxy]
+      tags: [setup_git_proxy]
+
+- name: Environment setup
+  hosts: all
+  become: true
+  gather_facts: false
+  tags: [environment]
+  tasks:
+    - name: Install venvs
+      ansible.builtin.include_role:
+        name: manage_venvs
+        apply:
+          tags: [manage_venvs]
+      tags: [manage_venvs]
+    - name: BittWare SDK install
+      ansible.builtin.include_role:
+        name: manage_bittware_sdk
+        apply:
+          tags: [manage_bittware_sdk]
+      tags: [manage_bittware_sdk]
+    - name: Create gitlab-runner user
+      ansible.builtin.include_role:
+        name: manage_gitlab-runner
+        apply:
+          tags: [manage_gitlab-runner]
+      tags: [manage_gitlab-runner]
+
+- name: DPDK, Arkville, and DOCA install
+  hosts: all
+  gather_facts: false
+  tags: [dpdk_arkville]
+  tasks:
+    - name: Install dpdk, arkville, and doca
+      ansible.builtin.include_role:
+        name: manage_dpdk_ark_doca
+        apply:
+          tags: [manage_dpdk_ark_doca]
+      tags: [manage_dpdk_ark_doca]
+
+- name: FHS nodes
+  hosts: fhs_nodes
+  become: true
+  gather_facts: true
+  tags: [fhs_node]
+  tasks:
+    - name: Set up FHS node
+      ansible.builtin.include_role:
+        name: setup_fhs_node
+        apply:
+          tags: [setup_fhs_node]
+      tags: [setup_fhs_node]
+    - name: Install FHS BIST
+      ansible.builtin.include_role:
+        name: manage_fhs_bist
+        apply:
+          tags: [manage_fhs_bist]
+      tags: [manage_fhs_bist]
+    - name: Apply Ubuntu 24 CIS hardening
+      ansible.builtin.include_role:
+        name: ubuntu24_cis
+        apply:
+          tags: [ubuntu24_cis]
+      vars:
+        audit_only: false
+      tags: [ubuntu24_cis]
+
+
+- name: FHS services
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Install Poetry
+      ansible.builtin.include_role:
+        name: manage_poetry
+        apply:
+          tags: [manage_poetry]
+      tags: [manage_poetry]
+    - name: Install FHS gRPC service
+      ansible.builtin.include_role:
+        name: manage_fhs_grpc
+        apply:
+          tags: [manage_fhs_grpc]
+      tags: [manage_fhs_grpc]
+    - name: Install FHS exporter
+      ansible.builtin.include_role:
+        name: manage_fhs_exporter
+        apply:
+          tags: [manage_fhs_exporter]
+      tags: [manage_fhs_exporter]
+    - name: Install Prometheus
+      ansible.builtin.include_role:
+        name: manage_prometheus
+        apply:
+          tags: [manage_prometheus]
+      tags: [manage_prometheus]
+    - name: Install Filebeat
+      ansible.builtin.include_role:
+        name: filebeat
+        apply:
+          tags: [filebeat]
+      tags: [filebeat]
+
+- name: FPGA hosts
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Setup FPGA cards and server
+      ansible.builtin.include_role:
+        name: setup_fpga_host
+        apply:
+          tags: [setup_fpga_host]
+      tags: [setup_fpga_host]

@@ -1,0 +1,16 @@
+---
+ansible_host: 192.168.8.35
+sys_mac_address: a8:a1:59:fb:a7:b5
+manage_prometheus_enable_auth: true
+manage_prometheus_user_cred: $2b$12$nk3YaT9.oGhFHSFA084eWeai85B0TjTujC7fZSD9ktAOheOxfiWTO
+
+##############################################################################
+## BIST role variables
+##############################################################################
+
+fpga_card0_sn: 8190641
+fpga_card1_sn: 8190640
+terabox_nic0_sn: MT2253J12826
+
+nvme0_serial_number: "S73VNU0X506079D"
+nvme1_serial_number: "S73VNU0X506093V"

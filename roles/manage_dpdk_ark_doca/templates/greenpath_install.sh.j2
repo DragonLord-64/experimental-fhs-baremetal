@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# DPDK metadata path
+export PKG_CONFIG_PATH="/opt/arkville/dpdk/install/lib/x86_64-linux-gnu/pkgconfig"
+
+COMPILER_FLAGS=(
+    -I /opt/arkville/dpdk/install/include 
+    -I /opt/arkville/arkville_25.11/sw/dpdk/app/common         
+    -I /opt/arkville/arkville_25.11/sw/pci/cpp 
+    -I ../exports             
+    -I ../common_ska  
+    -fpermissive -std=c++20 -O3  
+    -I/usr/local/include -march=native -mrtm               
+    -I/usr/include/x86_64-linux-gnu -I/usr/include/libnl3 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include       
+    
+    ska_test_greenpath.cpp 
+    ska_test_greenpath.h    
+    
+    {{ bittware_testing_notebooks_dir }}/dependencies/terabox-bsp/terabox/app/common/cmac.cpp          
+    {{ bittware_testing_notebooks_dir }}/dependencies/terabox-bsp/terabox/app/common/l2_filter.cpp 
+    {{ bittware_testing_notebooks_dir }}/dependencies/terabox-bsp/terabox/app/common/mbuf_packets.c 
+    {{ bittware_testing_notebooks_dir }}/dependencies/terabox-bsp/terabox/app/common/aligned_mbufs.c 
+    
+    -o build/ska_test_greenpath-static          
+    -Wl,--whole-archive          
+    $(pkg-config --libs --static libdpdk)          
+    -Wl,--no-whole-archive          
+    -lstdc++ -lpci -lz -lresolv -ldl -lrt -pthread         
+)
+
+g++ "${COMPILER_FLAGS[@]}"

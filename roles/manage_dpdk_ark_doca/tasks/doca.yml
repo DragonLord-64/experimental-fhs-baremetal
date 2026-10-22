@@ -1,0 +1,40 @@
+---
+- name: Copy local DOCA repository deb artifact from localhost to target host
+  ansible.builtin.copy:
+    src: "{{ doca_local_path }}/{{ doca_deb_filename }}"
+    dest: "/usr/share/{{ doca_deb_filename }}"
+    mode: "0644"
+  become: true
+
+- name: Install DOCA repository configuration package
+  ansible.builtin.apt:
+    deb: "/usr/share/{{ doca_deb_filename }}"
+  become: true
+
+- name: Find all unpacked DOCA repository directory paths
+  ansible.builtin.find:
+    paths: /usr/share/
+    file_type: directory
+    patterns: "doca-host-*"
+  register: found_doca_dirs
+
+- name: Add local DOCA-host repository sources using local keyring
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ item.path }}/repo/doca_keyring.gpg] file:{{ item.path }}/repo ./"
+    filename: "doca-local"
+    state: present
+    update_cache: false # Skip cache update during loop to save time
+  loop: "{{ found_doca_dirs.files }}"
+  when: found_doca_dirs.matched > 0
+  become: true
+
+- name: Force apt cache update
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+
+- name: Install mft
+  ansible.builtin.apt:
+    name: mft
+    state: present
+  become: true

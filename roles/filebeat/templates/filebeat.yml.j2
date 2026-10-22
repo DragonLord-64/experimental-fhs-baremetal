@@ -1,0 +1,49 @@
+# Managed by Ansible. Publishing credentials only;
+path.home: {{ filebeat_path_home | to_json }}
+path.data: {{ filebeat_path_data | to_json }}
+path.logs: {{ filebeat_path_logs | to_json }}
+filebeat.inputs:
+  - type: journald
+    id: server-journal
+    seek: {{ filebeat_journald_seek | to_json }}
+    since: {{ filebeat_journald_since | to_json }}
+{% if filebeat_journald_include_matches %}
+    include_matches.match: {{ filebeat_journald_include_matches | to_json }}
+{% endif %}
+processors:
+  - add_host_metadata: {}
+  # Filebeat translates journald PRIORITY to log.syslog.priority.
+  # Preserve that field and add the readable level for valid priorities only.
+  - script:
+      lang: javascript
+      id: journal_priority_level
+      source: |
+        function process(event) {
+          var priority = event.Get("log.syslog.priority");
+          if (typeof priority !== "number" && typeof priority !== "string") return;
+          var key = String(priority);
+          if (!/^[0-7]$/.test(key)) return;
+          var levels = ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"];
+          event.Put("log.level", levels[Number(key)]);
+        }
+output.elasticsearch:
+  hosts: {{ filebeat_elasticsearch_hosts | to_json }}
+  username: {{ filebeat_credentials.filebeat_elasticsearch_username | replace('${', '$${') | to_json }}
+  password: {{ filebeat_credentials.filebeat_elasticsearch_password | replace('${', '$${') | to_json }}
+  worker: {{ filebeat_output_workers }}
+  bulk_max_size: {{ filebeat_output_bulk_max_size }}
+  ssl.verification_mode: {{ filebeat_ssl_verification_mode | to_json }}
+{% if filebeat_ssl_certificate_authorities %}
+  ssl.certificate_authorities: {{ filebeat_ssl_certificate_authorities | to_json }}
+{% endif %}
+# Use Filebeat's default versioned filebeat-* destination and preloaded template/ILM.
+setup.template.enabled: false
+setup.ilm.enabled: true
+setup.ilm.check_exists: false
+setup.ilm.overwrite: false
+queue.mem.events: {{ filebeat_queue_mem_events }}
+logging.level: {{ filebeat_logging_level | to_json }}
+logging.to_files: false
+logging.to_stderr: true
+logging.metrics.enabled: true
+logging.metrics.period: {{ filebeat_logging_metrics_period | to_json }}

@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Configure Git to use the internal HTTP proxy
+    options:
+      git_proxy_url: {type: str, required: true}
+      git_url_rewrites:
+        type: list
+        elements: dict
+        options:
+          target: {type: str, required: true}
+          instead_of: {type: str, required: true}

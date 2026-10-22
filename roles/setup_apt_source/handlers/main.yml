@@ -1,0 +1,6 @@
+---
+- name: Refresh apt cache
+  listen: fhs apt repo changed
+  ansible.builtin.apt:
+    update_cache: true
+  when: apt_repo_run_update | bool

@@ -1,0 +1,11 @@
+---
+- name: Converge — pip_index
+  hosts: all
+  become: true
+  vars:
+    pip_index_url: "http://devpi.test.invalid/root/pypi/+simple/"
+    pip_trusted_hosts: [devpi.test.invalid]
+  tasks:
+    - name: Apply pip_index
+      ansible.builtin.import_role:
+        name: pip_index

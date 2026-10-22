@@ -1,0 +1,14 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure a devpi package mirror
+    options:
+      devpi_user: {type: str, default: devpi}
+      devpi_group: {type: str, default: devpi}
+      devpi_data_dir: {type: path, default: /opt/devpi}
+      devpi_venv: {type: path, default: /opt/devpi-venv}
+      devpi_python: {type: path, default: /usr/bin/python3}
+      devpi_packages: {type: list, elements: str}
+      devpi_host: {type: str, default: 0.0.0.0}
+      devpi_http_port: {type: int, default: 3141}
+      devpi_apt_packages: {type: list, elements: str}

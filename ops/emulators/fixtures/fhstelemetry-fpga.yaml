@@ -1,0 +1,1017 @@
+name: "fpga"
+intervalms: 10000
+fields:
+  - name: "FPGA Temperature"
+    value: 55.0
+  - name: "QSFP0 Temperature"
+    value: 50.0
+  - name: "QSFP1 Temperature"
+    value: 50.0
+  - name: "QSFP2 Temperature"
+    value: 50.0
+  - name: "Front Temperature"
+    value: 50.0
+  - name: "FPGA FabricTemperature"
+    value: 50.0
+  - name: "FPGA FTILE Temperature"
+    value: 50.0
+  - name: "BMC Temperature"
+    value: 60.0
+  - name: "VCC 12V0 PCIe Voltage"
+    value: 12.0
+  - name: "VCC 12V0 PCIe Current"
+    value: 4.0
+  - name: "VCC 12V0 PCIe Power"
+    value: 48.0
+  - name: "VCC 12V0 EXT Voltage"
+    value: 11.5
+  - name: "VCC 12V0 EXT Current"
+    value: 4.0
+  - name: "VCC 12V0 EXT Power"
+    value: 46.0
+  - name: "Total Input Power"
+    value: 94.0
+  - name: "VCC QSFP Voltage"
+    value: 3.0
+  - name: "VCC QSFP Current"
+    value: 0.06
+  - name: "SmartVID Voltage"
+    value: 0.7989623668193818
+  - name: "programmed_bitstreams"
+    value: "bittware_ia860m_rev4-ska_vcc_base-ska_vcc_persona.rbf,bittware_ia860m_rev4-ska_vcc_base-ska_vcc_persona-z_mi007899_p-250925-cip-4148-1.rbf,bittware_ia860m_rev4-ska_vcc_base-ska_vcc_persona-will-250912-CIP_3770.rbf"
+  - name: "Eth200g_0 rx_mac fragments"
+    value: 0
+  - name: "Eth200g_0 rx_mac jabbers"
+    value: 0
+  - name: "Eth200g_0 rx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac pause_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_0 rx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_0 rx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_0 rx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_0 rx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_0 rx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_0 rx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_0 rx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_0 rx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_0 rx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_0 rx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_0 rx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_0 rx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_0 rx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_0 rx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_0 rx_mac pause"
+    value: 0
+  - name: "Eth200g_0 rx_mac runt"
+    value: 0
+  - name: "Eth200g_0 rx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_0 rx_mac length_error"
+    value: 0
+  - name: "Eth200g_0 rx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_0 rx_mac pfc"
+    value: 0
+  - name: "Eth200g_0 rx_mac malformed"
+    value: 0
+  - name: "Eth200g_0 rx_mac dropped"
+    value: 0
+  - name: "Eth200g_0 rx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_0 rx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_0 rx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_0 tx_mac fragments"
+    value: 0
+  - name: "Eth200g_0 tx_mac jabbers"
+    value: 0
+  - name: "Eth200g_0 tx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac pause_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_0 tx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_0 tx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_0 tx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_0 tx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_0 tx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_0 tx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_0 tx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_0 tx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_0 tx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_0 tx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_0 tx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_0 tx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_0 tx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_0 tx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_0 tx_mac pause"
+    value: 0
+  - name: "Eth200g_0 tx_mac runt"
+    value: 0
+  - name: "Eth200g_0 tx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_0 tx_mac length_error"
+    value: 0
+  - name: "Eth200g_0 tx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_0 tx_mac pfc"
+    value: 0
+  - name: "Eth200g_0 tx_mac malformed"
+    value: 0
+  - name: "Eth200g_0 tx_mac dropped"
+    value: 0
+  - name: "Eth200g_0 tx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_0 tx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_0 tx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_0 rx_fec corrected_codewords"
+    value: "0"
+  - name: "Eth200g_0 rx_fec uncorrected_codewords"
+    value: "0"
+  - name: "Eth200g_0 tx_pll_locked"
+    value: true
+  - name: "Eth200g_0 tx_lanes_stable"
+    value: true
+  - name: "Eth200g_0 rx_cdr_locked"
+    value: true
+  - name: "Eth200g_0 rx_deskew"
+    value: true
+  - name: "Eth200g_0 rx_deskew_change"
+    value: false
+  - name: "Eth200g_0 rx_pcs_ready"
+    value: true
+  - name: "Eth200g_0 tx_ready"
+    value: true
+  - name: "Eth200g_0 rx_ready"
+    value: true
+  - name: "Eth200g_0 ready"
+    value: true
+  - name: "Eth200g_1 rx_mac fragments"
+    value: 0
+  - name: "Eth200g_1 rx_mac jabbers"
+    value: 0
+  - name: "Eth200g_1 rx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac pause_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_1 rx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_1 rx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_1 rx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_1 rx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_1 rx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_1 rx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_1 rx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_1 rx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_1 rx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_1 rx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_1 rx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_1 rx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_1 rx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_1 rx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_1 rx_mac pause"
+    value: 0
+  - name: "Eth200g_1 rx_mac runt"
+    value: 0
+  - name: "Eth200g_1 rx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_1 rx_mac length_error"
+    value: 0
+  - name: "Eth200g_1 rx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_1 rx_mac pfc"
+    value: 0
+  - name: "Eth200g_1 rx_mac malformed"
+    value: 0
+  - name: "Eth200g_1 rx_mac dropped"
+    value: 0
+  - name: "Eth200g_1 rx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_1 rx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_1 rx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_1 tx_mac fragments"
+    value: 0
+  - name: "Eth200g_1 tx_mac jabbers"
+    value: 0
+  - name: "Eth200g_1 tx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac pause_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_1 tx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_1 tx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_1 tx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_1 tx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_1 tx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_1 tx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_1 tx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_1 tx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_1 tx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_1 tx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_1 tx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_1 tx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_1 tx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_1 tx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_1 tx_mac pause"
+    value: 0
+  - name: "Eth200g_1 tx_mac runt"
+    value: 0
+  - name: "Eth200g_1 tx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_1 tx_mac length_error"
+    value: 0
+  - name: "Eth200g_1 tx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_1 tx_mac pfc"
+    value: 0
+  - name: "Eth200g_1 tx_mac malformed"
+    value: 0
+  - name: "Eth200g_1 tx_mac dropped"
+    value: 0
+  - name: "Eth200g_1 tx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_1 tx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_1 tx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_1 rx_fec corrected_codewords"
+    value: "0"
+  - name: "Eth200g_1 rx_fec uncorrected_codewords"
+    value: "0"
+  - name: "Eth200g_1 tx_pll_locked"
+    value: true
+  - name: "Eth200g_1 tx_lanes_stable"
+    value: true
+  - name: "Eth200g_1 rx_cdr_locked"
+    value: true
+  - name: "Eth200g_1 rx_deskew"
+    value: true
+  - name: "Eth200g_1 rx_deskew_change"
+    value: false
+  - name: "Eth200g_1 rx_pcs_ready"
+    value: true
+  - name: "Eth200g_1 tx_ready"
+    value: true
+  - name: "Eth200g_1 rx_ready"
+    value: true
+  - name: "Eth200g_1 ready"
+    value: true
+  - name: "Eth200g_2 rx_mac fragments"
+    value: 0
+  - name: "Eth200g_2 rx_mac jabbers"
+    value: 0
+  - name: "Eth200g_2 rx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac pause_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_2 rx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_2 rx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_2 rx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_2 rx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_2 rx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_2 rx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_2 rx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_2 rx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_2 rx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_2 rx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_2 rx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_2 rx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_2 rx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_2 rx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_2 rx_mac pause"
+    value: 0
+  - name: "Eth200g_2 rx_mac runt"
+    value: 0
+  - name: "Eth200g_2 rx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_2 rx_mac length_error"
+    value: 0
+  - name: "Eth200g_2 rx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_2 rx_mac pfc"
+    value: 0
+  - name: "Eth200g_2 rx_mac malformed"
+    value: 0
+  - name: "Eth200g_2 rx_mac dropped"
+    value: 0
+  - name: "Eth200g_2 rx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_2 rx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_2 rx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_2 tx_mac fragments"
+    value: 0
+  - name: "Eth200g_2 tx_mac jabbers"
+    value: 0
+  - name: "Eth200g_2 tx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac pause_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_2 tx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_2 tx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_2 tx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_2 tx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_2 tx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_2 tx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_2 tx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_2 tx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_2 tx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_2 tx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_2 tx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_2 tx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_2 tx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_2 tx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_2 tx_mac pause"
+    value: 0
+  - name: "Eth200g_2 tx_mac runt"
+    value: 0
+  - name: "Eth200g_2 tx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_2 tx_mac length_error"
+    value: 0
+  - name: "Eth200g_2 tx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_2 tx_mac pfc"
+    value: 0
+  - name: "Eth200g_2 tx_mac malformed"
+    value: 0
+  - name: "Eth200g_2 tx_mac dropped"
+    value: 0
+  - name: "Eth200g_2 tx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_2 tx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_2 tx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_2 rx_fec corrected_codewords"
+    value: "0"
+  - name: "Eth200g_2 rx_fec uncorrected_codewords"
+    value: "0"
+  - name: "Eth200g_2 tx_pll_locked"
+    value: true
+  - name: "Eth200g_2 tx_lanes_stable"
+    value: true
+  - name: "Eth200g_2 rx_cdr_locked"
+    value: true
+  - name: "Eth200g_2 rx_deskew"
+    value: true
+  - name: "Eth200g_2 rx_deskew_change"
+    value: false
+  - name: "Eth200g_2 rx_pcs_ready"
+    value: true
+  - name: "Eth200g_2 tx_ready"
+    value: true
+  - name: "Eth200g_2 rx_ready"
+    value: true
+  - name: "Eth200g_2 ready"
+    value: true
+  - name: "Eth200g_3 rx_mac fragments"
+    value: 0
+  - name: "Eth200g_3 rx_mac jabbers"
+    value: 0
+  - name: "Eth200g_3 rx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac pause_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_3 rx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_3 rx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_3 rx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_3 rx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_3 rx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_3 rx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_3 rx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_3 rx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_3 rx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_3 rx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_3 rx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_3 rx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_3 rx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_3 rx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_3 rx_mac pause"
+    value: 0
+  - name: "Eth200g_3 rx_mac runt"
+    value: 0
+  - name: "Eth200g_3 rx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_3 rx_mac length_error"
+    value: 0
+  - name: "Eth200g_3 rx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_3 rx_mac pfc"
+    value: 0
+  - name: "Eth200g_3 rx_mac malformed"
+    value: 0
+  - name: "Eth200g_3 rx_mac dropped"
+    value: 0
+  - name: "Eth200g_3 rx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_3 rx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_3 rx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_3 tx_mac fragments"
+    value: 0
+  - name: "Eth200g_3 tx_mac jabbers"
+    value: 0
+  - name: "Eth200g_3 tx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac pause_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_3 tx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_3 tx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_3 tx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_3 tx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_3 tx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_3 tx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_3 tx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_3 tx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_3 tx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_3 tx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_3 tx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_3 tx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_3 tx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_3 tx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_3 tx_mac pause"
+    value: 0
+  - name: "Eth200g_3 tx_mac runt"
+    value: 0
+  - name: "Eth200g_3 tx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_3 tx_mac length_error"
+    value: 0
+  - name: "Eth200g_3 tx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_3 tx_mac pfc"
+    value: 0
+  - name: "Eth200g_3 tx_mac malformed"
+    value: 0
+  - name: "Eth200g_3 tx_mac dropped"
+    value: 0
+  - name: "Eth200g_3 tx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_3 tx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_3 tx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_3 rx_fec corrected_codewords"
+    value: "0"
+  - name: "Eth200g_3 rx_fec uncorrected_codewords"
+    value: "0"
+  - name: "Eth200g_3 tx_pll_locked"
+    value: true
+  - name: "Eth200g_3 tx_lanes_stable"
+    value: true
+  - name: "Eth200g_3 rx_cdr_locked"
+    value: true
+  - name: "Eth200g_3 rx_deskew"
+    value: true
+  - name: "Eth200g_3 rx_deskew_change"
+    value: false
+  - name: "Eth200g_3 rx_pcs_ready"
+    value: true
+  - name: "Eth200g_3 tx_ready"
+    value: true
+  - name: "Eth200g_3 rx_ready"
+    value: true
+  - name: "Eth200g_3 ready"
+    value: true
+  - name: "Eth200g_4 rx_mac fragments"
+    value: 0
+  - name: "Eth200g_4 rx_mac jabbers"
+    value: 0
+  - name: "Eth200g_4 rx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac pause_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_4 rx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_4 rx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_4 rx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_4 rx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_4 rx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_4 rx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_4 rx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_4 rx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_4 rx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_4 rx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_4 rx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_4 rx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_4 rx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_4 rx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_4 rx_mac pause"
+    value: 0
+  - name: "Eth200g_4 rx_mac runt"
+    value: 0
+  - name: "Eth200g_4 rx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_4 rx_mac length_error"
+    value: 0
+  - name: "Eth200g_4 rx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_4 rx_mac pfc"
+    value: 0
+  - name: "Eth200g_4 rx_mac malformed"
+    value: 0
+  - name: "Eth200g_4 rx_mac dropped"
+    value: 0
+  - name: "Eth200g_4 rx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_4 rx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_4 rx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_4 tx_mac fragments"
+    value: 0
+  - name: "Eth200g_4 tx_mac jabbers"
+    value: 0
+  - name: "Eth200g_4 tx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac pause_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_4 tx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_4 tx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_4 tx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_4 tx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_4 tx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_4 tx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_4 tx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_4 tx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_4 tx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_4 tx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_4 tx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_4 tx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_4 tx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_4 tx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_4 tx_mac pause"
+    value: 0
+  - name: "Eth200g_4 tx_mac runt"
+    value: 0
+  - name: "Eth200g_4 tx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_4 tx_mac length_error"
+    value: 0
+  - name: "Eth200g_4 tx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_4 tx_mac pfc"
+    value: 0
+  - name: "Eth200g_4 tx_mac malformed"
+    value: 0
+  - name: "Eth200g_4 tx_mac dropped"
+    value: 0
+  - name: "Eth200g_4 tx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_4 tx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_4 tx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_4 rx_fec corrected_codewords"
+    value: "0"
+  - name: "Eth200g_4 rx_fec uncorrected_codewords"
+    value: "0"
+  - name: "Eth200g_4 tx_pll_locked"
+    value: true
+  - name: "Eth200g_4 tx_lanes_stable"
+    value: true
+  - name: "Eth200g_4 rx_cdr_locked"
+    value: true
+  - name: "Eth200g_4 rx_deskew"
+    value: true
+  - name: "Eth200g_4 rx_deskew_change"
+    value: false
+  - name: "Eth200g_4 rx_pcs_ready"
+    value: true
+  - name: "Eth200g_4 tx_ready"
+    value: true
+  - name: "Eth200g_4 rx_ready"
+    value: true
+  - name: "Eth200g_4 ready"
+    value: true
+  - name: "Eth200g_5 rx_mac fragments"
+    value: 0
+  - name: "Eth200g_5 rx_mac jabbers"
+    value: 0
+  - name: "Eth200g_5 rx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac pause_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_5 rx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_5 rx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_5 rx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_5 rx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_5 rx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_5 rx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_5 rx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_5 rx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_5 rx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_5 rx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_5 rx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_5 rx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_5 rx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_5 rx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_5 rx_mac pause"
+    value: 0
+  - name: "Eth200g_5 rx_mac runt"
+    value: 0
+  - name: "Eth200g_5 rx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_5 rx_mac length_error"
+    value: 0
+  - name: "Eth200g_5 rx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_5 rx_mac pfc"
+    value: 0
+  - name: "Eth200g_5 rx_mac malformed"
+    value: 0
+  - name: "Eth200g_5 rx_mac dropped"
+    value: 0
+  - name: "Eth200g_5 rx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_5 rx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_5 rx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_5 tx_mac fragments"
+    value: 0
+  - name: "Eth200g_5 tx_mac jabbers"
+    value: 0
+  - name: "Eth200g_5 tx_mac fcs_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac pause_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac multicast data_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac multicast ctrl_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac multicast data_ok"
+    value: 1
+  - name: "Eth200g_5 tx_mac multicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_5 tx_mac broadcast data_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac broadcast ctrl_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac broadcast data_ok"
+    value: 1
+  - name: "Eth200g_5 tx_mac broadcast ctrl_ok"
+    value: 1
+  - name: "Eth200g_5 tx_mac unicast data_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac unicast ctrl_err"
+    value: 0
+  - name: "Eth200g_5 tx_mac unicast data_ok"
+    value: 1
+  - name: "Eth200g_5 tx_mac unicast ctrl_ok"
+    value: 1
+  - name: "Eth200g_5 tx_mac packet_count_64b"
+    value: 100
+  - name: "Eth200g_5 tx_mac packet_count_65to127b"
+    value: 100
+  - name: "Eth200g_5 tx_mac packet_count_128to255b"
+    value: 100
+  - name: "Eth200g_5 tx_mac packet_count_256to511b"
+    value: 100
+  - name: "Eth200g_5 tx_mac packet_count_512to1023b"
+    value: 100
+  - name: "Eth200g_5 tx_mac packet_count_1024to1518b"
+    value: 100
+  - name: "Eth200g_5 tx_mac packet_count_1519tomaxb"
+    value: 100
+  - name: "Eth200g_5 tx_mac packet_count_oversize"
+    value: 100
+  - name: "Eth200g_5 tx_mac pause"
+    value: 0
+  - name: "Eth200g_5 tx_mac runt"
+    value: 0
+  - name: "Eth200g_5 tx_mac frame_starts"
+    value: 0
+  - name: "Eth200g_5 tx_mac length_error"
+    value: 0
+  - name: "Eth200g_5 tx_mac pfc_error"
+    value: 0
+  - name: "Eth200g_5 tx_mac pfc"
+    value: 0
+  - name: "Eth200g_5 tx_mac malformed"
+    value: 0
+  - name: "Eth200g_5 tx_mac dropped"
+    value: 0
+  - name: "Eth200g_5 tx_mac bad_length_type"
+    value: 0
+  - name: "Eth200g_5 tx_mac payload_bytes"
+    value: 1000
+  - name: "Eth200g_5 tx_mac total_bytes"
+    value: 10000
+  - name: "Eth200g_5 rx_fec corrected_codewords"
+    value: "0"
+  - name: "Eth200g_5 rx_fec uncorrected_codewords"
+    value: "0"
+  - name: "Eth200g_5 tx_pll_locked"
+    value: true
+  - name: "Eth200g_5 tx_lanes_stable"
+    value: true
+  - name: "Eth200g_5 rx_cdr_locked"
+    value: true
+  - name: "Eth200g_5 rx_deskew"
+    value: true
+  - name: "Eth200g_5 rx_deskew_change"
+    value: false
+  - name: "Eth200g_5 rx_pcs_ready"
+    value: true
+  - name: "Eth200g_5 tx_ready"
+    value: true
+  - name: "Eth200g_5 rx_ready"
+    value: true
+  - name: "Eth200g_5 ready"
+    value: true
+  - name: "loaded_bitstream"
+    value: "bittware_ia860m-ska_vcc_base-ska_vcc_persona_jt_test.rbf"
+  - name: "qsfp_presence"
+    value: "QSFP0,QSFP1,QSFP2"

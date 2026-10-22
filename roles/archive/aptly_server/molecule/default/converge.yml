@@ -1,0 +1,12 @@
+---
+- name: Converge — aptly_server
+  hosts: all
+  become: true
+  vars:
+    aptly_gpg_key_length: 2048   # smaller key for faster test
+    aptly_mirrors: []            # no real mirrors in the test
+    aptly_serve_http: false      # don't start the HTTP API
+  tasks:
+    - name: Apply aptly_server
+      ansible.builtin.import_role:
+        name: aptly_server

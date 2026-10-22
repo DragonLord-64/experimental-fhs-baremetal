@@ -1,0 +1,39 @@
+---
+- name: Verify — devpi_server
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Devpi venv interpreter exists
+      ansible.builtin.stat:
+        path: /opt/devpi-venv/bin/devpi-server
+      register: devpi_bin
+    - name: Devpi user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: devpi
+    - name: Data dir initialised
+      ansible.builtin.stat:
+        path: /opt/devpi/.nodeinfo
+      register: nodeinfo
+    - name: Unit file installed
+      ansible.builtin.stat:
+        path: /etc/systemd/system/devpi.service
+      register: unit
+    - name: Assert all
+      ansible.builtin.assert:
+        that:
+          - devpi_bin.stat.exists
+          - devpi_bin.stat.executable
+          - nodeinfo.stat.exists
+          - unit.stat.exists
+    - name: Devpi.service is active
+      ansible.builtin.systemd:
+        name: devpi.service
+        state: started
+      check_mode: true
+      register: svc
+    - name: Assert service is running
+      ansible.builtin.assert:
+        that:
+          - not svc.changed

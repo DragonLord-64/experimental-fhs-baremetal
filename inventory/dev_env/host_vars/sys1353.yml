@@ -1,0 +1,13 @@
+---
+ansible_host: 192.168.8.31
+sys_mac_address: a8:a1:59:f8:7d:a5
+
+redfish:
+  address: "192.168.8.30"
+
+# Per-host overrides for fpga role feature flags go here, e.g.:
+# fpga_update_grub: true
+# fpga_kernel_cmdline:
+#   - iommu=pt
+#   - amd_iommu=on
+#   - hugepages=16

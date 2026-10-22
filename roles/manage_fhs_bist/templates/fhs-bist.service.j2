@@ -1,0 +1,18 @@
+[Unit]
+Description=SKA Mid.CBF FHS BIST Service
+After=multi-user.target
+
+[Service]
+Type=simple
+# Standard practice: Run as a dedicated unprivileged user instead of root
+User={{ bist_user }}
+Group={{ bist_group }}
+
+WorkingDirectory={{ app_dir }}
+
+# Point directly to the virtual environment python runner or script
+ExecStart={{ venv_dir }}/bin/pytest -m startup
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

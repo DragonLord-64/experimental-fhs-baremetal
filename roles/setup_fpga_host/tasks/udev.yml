@@ -1,0 +1,9 @@
+---
+- name: Install VFIO udev rules
+  ansible.builtin.copy:
+    src: "{{ fpga_vfio_rules_file }}"
+    dest: "{{ fpga_udev_rules_dir }}/{{ fpga_vfio_rules_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: fpga udev changed

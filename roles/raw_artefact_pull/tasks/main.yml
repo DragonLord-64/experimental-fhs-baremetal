@@ -1,0 +1,30 @@
+---
+- name: Pull and unpack OCI artefacts
+  raw_artefact:
+    registry: "{{ item.registry }}"
+    repository: "{{ item.repository }}"
+    reference: "{{ item.reference }}"
+    dest_path: "{{ item.dest_path }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    create: "{{ item.create | default(false) }}"
+    username: "{{ item.username | default(omit) }}"
+    password: "{{ item.password | default(omit) }}"
+    http_proxy: >-
+      {{ item.http_proxy | default(raw_artefact_http_proxy) }}
+    https_proxy: >-
+      {{ item.https_proxy | default(raw_artefact_https_proxy) }}
+    no_proxy: "{{ item.no_proxy | default(raw_artefact_no_proxy) }}"
+    registry_mirror: >-
+      {{ item.registry_mirror | default(raw_artefact_registry_mirror) }}
+    tls_verify: "{{ raw_artefact_tls_verify }}"
+    timeout: "{{ raw_artefact_timeout }}"
+  loop: "{{ raw_artefacts }}"
+  loop_control:
+    label: >-
+      {{ item.registry }}/{{ item.repository }}:{{ item.reference }}
+      -> {{ item.dest_path }}
+  no_log: >-
+    {{ not (debug | default(false)) and
+       (item.username is defined or item.password is defined) }}

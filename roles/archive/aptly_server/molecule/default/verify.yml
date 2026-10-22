@@ -1,0 +1,37 @@
+---
+- name: Verify — aptly_server
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Aptly binary present
+      ansible.builtin.stat:
+        path: /usr/bin/aptly
+      register: aptly_bin
+    - name: Assert binary
+      ansible.builtin.assert:
+        that:
+          - aptly_bin.stat.exists
+    - name: Aptly user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: aptly
+    - name: Aptly data dir
+      ansible.builtin.stat:
+        path: /var/aptly
+      register: aptly_dir
+    - name: Assert data dir owned by aptly
+      ansible.builtin.assert:
+        that:
+          - aptly_dir.stat.exists
+          - aptly_dir.stat.pw_name == "aptly"
+    - name: Signing key generated
+      ansible.builtin.command: gpg --list-secret-keys --batch --with-colons fhs-aptly@local.invalid
+      become: true
+      become_user: aptly
+      register: gpg_keys
+      changed_when: false
+    - name: Assert signing key present
+      ansible.builtin.assert:
+        that:
+          - "'fhs-aptly@local.invalid' in gpg_keys.stdout"

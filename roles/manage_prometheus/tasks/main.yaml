@@ -1,0 +1,115 @@
+- name: Verify Prometheus data retention size is under 200G
+  ansible.builtin.assert:
+    that:
+      - (manage_prometheus_retention_size | regex_replace('[Gg][Bb]?', '') | trim | float) < 200.0
+    fail_msg: "Prometheus retention size ({{ manage_prometheus_retention_size }}) must be strictly less than 200G!"
+    success_msg: "Retention size validation passed."
+  when: manage_prometheus_retention_size is defined
+
+- name: Create Prometheus service user
+  ansible.builtin.user:
+    name: "{{ manage_prometheus_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+  tags: [prometheus_config]
+
+- name: Create Node Exporter service user
+  ansible.builtin.user:
+    name: "{{ manage_prometheus_node_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+  tags: [prometheus_config]
+
+- name: Create Prometheus data directory
+  ansible.builtin.file:
+    path: "{{ manage_prometheus_data_dir }}"
+    state: directory
+    owner: "{{ manage_prometheus_user }}"
+    group: "{{ manage_prometheus_user }}"
+    mode: "0750"
+  tags: [prometheus_config]
+
+- name: Create remote prom directory on target
+  ansible.builtin.file:
+    path: /usr/local/bin/prometheus/
+    state: directory
+    mode: "0755"
+
+- name: Copy external Prometheus version from control host to target
+  ansible.builtin.unarchive:
+    src: "{{ manage_prometheus_file_directory }}/{{ manage_prometheus_prometheus_tar }}.tar.gz"
+    dest: /usr/local/bin/prometheus/
+    remote_src: false
+    mode: "0755"
+  become: true
+
+- name: Set up directory for prometheus configuration
+  ansible.builtin.file:
+    path: /etc/prometheus
+    state: directory
+    owner: "{{ manage_prometheus_user }}"
+    group: "{{ manage_prometheus_user }}"
+    mode: "0755"
+  tags: [prometheus_config]
+
+- name: Use template to add site config
+  ansible.builtin.template:
+    src: site.yml.j2
+    dest: /etc/prometheus/site.yml
+    owner: "{{ manage_prometheus_user }}"
+    group: "{{ manage_prometheus_user }}"
+    mode: "0640"
+  notify: Restart Prometheus service
+  tags: [prometheus_config]
+
+- name: Load config file to target
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: "{{ manage_prometheus_user }}"
+    group: "{{ manage_prometheus_user }}"
+    mode: "0640"
+  notify: Restart Prometheus service
+  tags: [prometheus_config]
+
+- name: Copy service file to remote systemd
+  ansible.builtin.template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    mode: "0644"
+  notify: Restart Prometheus service
+
+- name: Copy node exporter executable from control host to target
+  ansible.builtin.unarchive:
+    src: "{{ manage_prometheus_file_directory }}/{{ manage_prometheus_node_tar }}.tar.gz"
+    dest: /usr/local/bin/prometheus/
+    remote_src: false
+    mode: "0755"
+  become: true
+
+- name: Upload Node service file
+  ansible.builtin.template:
+    src: node.service.j2
+    dest: /etc/systemd/system/node.service
+    mode: "0644"
+  notify: Restart Node Exporter service
+
+- name: Enable and start Prometheus service
+  ansible.builtin.service:
+    name: prometheus
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  tags: [prometheus_config]
+
+- name: Enable and start Node Exporter service
+  ansible.builtin.service:
+    name: node
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  tags: [prometheus_config]

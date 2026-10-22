@@ -1,0 +1,13 @@
+- name: Get last boot time
+  ansible.builtin.command: uptime -p
+  register: uptime
+  changed_when: false
+
+- name: Get system time
+  ansible.builtin.command: date
+  register: curr_time
+  changed_when: false
+
+- name: Show last boot time/uptime
+  ansible.builtin.debug:
+    msg: "Uptime: {{ uptime.stdout }}, current time is {{ curr_time.stdout }}"

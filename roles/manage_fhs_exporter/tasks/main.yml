@@ -1,0 +1,78 @@
+---
+- name: Install apt packages for exporters
+  ansible.builtin.apt:
+    name:
+      - ipmitool
+      - ethtool
+      - mft
+    state: present
+
+- name: Create required installation and configuration directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+  loop:
+    - /etc/prometheus/rules
+    - /etc/prometheus/targets
+    - /etc/exporters/config
+
+- name: Copy local source tar.gz exporter file to temporary installation path
+  ansible.builtin.copy:
+    src: "{{ manage_exporters_exporter_file }}"
+    dest: "/tmp/{{ manage_exporters_exporter_file | basename }}"
+    mode: "0644"
+
+- name: Extract Prometheus aggregation rules from archive
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ manage_exporters_exporter_file | basename }}"
+    dest: /etc/prometheus/rules/
+    remote_src: true
+    extra_opts:
+      - --strip-components=3
+      - --wildcards
+      - "*/etc/prometheus_config/aggregation_rules.yml"
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Extract Prometheus threshold rules from archive
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ manage_exporters_exporter_file | basename }}"
+    dest: /etc/prometheus/rules/
+    remote_src: true
+    extra_opts:
+      - --strip-components=3
+      - --wildcards
+      - "*/etc/prometheus_config/threshold_rules.yml"
+    mode: "0644"
+  notify: Restart Exporter
+
+- name: Pip install the exporter directly from the temp archive path
+  ansible.builtin.pip:
+    name: "/tmp/{{ manage_exporters_exporter_file | basename }}"
+    virtualenv: "{{ fhs_exporter_venv_path }}"
+    state: forcereinstall
+
+- name: Deploy FHS Exporter target configuration for File Service Discovery
+  ansible.builtin.template:
+    src: fhs_exporter.yml.j2
+    dest: /etc/prometheus/targets/fhs_exporter.yml
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Template service file to remote systemd
+  ansible.builtin.template:
+    src: fhs-exporter.service.j2
+    dest: /etc/systemd/system/fhs-exporter.service
+    mode: "0644"
+  notify:
+    - Reload Systemd Daemon
+    - Restart Exporter
+
+- name: Clean up temporary installer archive
+  ansible.builtin.file:
+    path: "/tmp/{{ manage_exporters_exporter_file | basename }}"
+    state: absent

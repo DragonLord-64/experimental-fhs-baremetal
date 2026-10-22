@@ -1,0 +1,4 @@
+---
+bootstrap_site: "MDA"
+bootstrap_role: "Nexus Switch"
+ansible_user: admin

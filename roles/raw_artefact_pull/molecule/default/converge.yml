@@ -1,0 +1,110 @@
+---
+- name: Converge - Run raw_artefact_pull role (direct registry)
+  hosts: target
+  gather_facts: true
+  vars:
+    raw_artefact_tls_verify: false
+    raw_artefact_timeout: 30
+    raw_artefacts:
+      - registry: registry:5000
+        repository: test/fixture
+        reference: v1.0.0
+        dest_path: /tmp/raw_artefact_pull_test
+        create: true
+  roles:
+    - role: raw_artefact_pull
+
+- name: Converge - Run raw_artefact_pull role (via mirror substitution)
+  hosts: target
+  gather_facts: false
+  vars:
+    raw_artefact_tls_verify: false
+    raw_artefact_timeout: 30
+    raw_artefact_registry_mirror: registry:5000
+    raw_artefacts:
+      - registry: nonexistent.invalid:9999
+        repository: test/fixture
+        reference: v1.0.0
+        dest_path: /tmp/raw_artefact_pull_test_mirror
+        create: true
+  roles:
+    - role: raw_artefact_pull
+
+- name: >-
+    Converge - Run raw_artefact_pull role (per-artefact override beats
+    role default)
+  hosts: target
+  gather_facts: false
+  vars:
+    raw_artefact_tls_verify: false
+    raw_artefact_timeout: 30
+    raw_artefact_registry_mirror: nonexistent-role-default.invalid:9999
+    raw_artefacts:
+      - registry: nonexistent.invalid:9999
+        registry_mirror: registry:5000
+        repository: test/fixture
+        reference: v1.0.0
+        dest_path: /tmp/raw_artefact_pull_test_override
+        create: true
+  roles:
+    - role: raw_artefact_pull
+
+- name: Converge - Run raw_artefact_pull role (multi-layer artefact)
+  hosts: target
+  gather_facts: false
+  vars:
+    raw_artefact_tls_verify: false
+    raw_artefact_timeout: 30
+    raw_artefacts:
+      - registry: registry:5000
+        repository: test/multilayer
+        reference: v2.0.0
+        dest_path: /tmp/raw_artefact_pull_multilayer
+        create: true
+  roles:
+    - role: raw_artefact_pull
+
+- name: Converge - Test create:false failure (missing dest_path)
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Pull with create:false to nonexistent path (expect failure)
+      raw_artefact:
+        registry: registry:5000
+        repository: test/fixture
+        reference: v1.0.0
+        dest_path: /tmp/nonexistent_path_for_create_false_test
+        create: false
+        tls_verify: false
+        timeout: 30
+      register: create_false_result
+      ignore_errors: true
+
+    - name: Store failure state for verify
+      ansible.builtin.set_fact:
+        create_false_failed: "{{ create_false_result is failed }}"
+        create_false_msg: "{{ create_false_result.msg | default('') }}"
+
+    - name: Persist create:false result for verify
+      ansible.builtin.copy:
+        content: >-
+          {{ {'failed': create_false_failed,
+              'msg': create_false_msg} | to_nice_json }}
+        dest: /tmp/create_false_result.json
+
+- name: Converge - Run raw_artefact_pull role (credentialed auth)
+  hosts: target
+  gather_facts: false
+  vars:
+    raw_artefact_tls_verify: false
+    raw_artefact_timeout: 30
+    raw_artefacts:
+      - registry: registry_auth:5000
+        repository: private/fixture
+        reference: v1.0.0
+        dest_path: /tmp/raw_artefact_pull_auth
+        create: true
+        username: testuser
+        password: testpass
+  roles:
+    - role: raw_artefact_pull

@@ -1,0 +1,7 @@
+---
+# URL of the Squid forward proxy used for Git HTTP and HTTPS traffic.
+git_proxy_url: ""
+
+# System-wide URL rewrite policy. Git uses the longest matching insteadOf
+# value, allowing a more-specific entry to override a general block rule.
+git_url_rewrites: []

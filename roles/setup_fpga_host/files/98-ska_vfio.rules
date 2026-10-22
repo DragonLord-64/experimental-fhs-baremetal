@@ -1,0 +1,18 @@
+# VFIO rules for SKA DeTrI bittware cards
+#
+# This rules file should be located in /etc/udev/rules.d/
+# vfio-pci-bind.sh must be located in /usr/lib/udev/ and must be executable.
+
+SUBSYSTEM!="pci", GOTO="vfio_pci_bind_rules_end"
+ACTION=="remove", GOTO="vfio_pci_cleanup"
+
+ATTR{vendor}=="0x1172", ATTR{device}=="0xde71", TAG="vfio-pci-bind"
+ATTR{vendor}=="0x1D6C", ATTR{device}=="0x1022", TAG="vfio-pci-bind"
+TAG=="vfio-pci-bind", RUN+="bittware-bind-vfio.sh %k"
+
+LABEL="vfio_pci_cleanup"
+ATTR{vendor}=="0x1172", ATTR{device}=="0xde71", TAG="vfio-pci-cleanup"
+ATTR{vendor}=="0x1D6C", ATTR{device}=="0x1022", TAG="vfio-pci-cleanup"
+TAG=="vfio-pci-cleanup", RUN+="bittware-vfio-cleanup.sh %k"
+
+LABEL="vfio_pci_bind_rules_end"

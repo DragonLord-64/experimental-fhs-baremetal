@@ -1,0 +1,66 @@
+---
+# This file applies to plays that run `hosts: target` — most importantly
+# install.yaml, which triggers the DIB image build. Variables in
+# group_vars/baremetal and group_vars/localhost do NOT apply to those plays,
+# so anything the build needs must be declared here.
+
+network_interface: "eno2"
+internal_ip: 192.168.1.7
+
+dhcp_pool_start: "192.168.1.200"
+dhcp_pool_end: "192.168.1.250"
+
+noauth_mode: true
+
+cleaning: true
+cleaning_disk_erase: false
+
+# We don't have an OCI registry running on 192.168.122.1:5500 and the test
+# cycle reads images from /var/lib/ironic/httpboot directly. Disable the
+# registry push step in bifrost-create-dib-image to avoid `oras login` errors.
+enable_oci_registry_upload: false
+
+# Override bifrost_venv_env to clear OS_CLOUD so it doesn't conflict with
+# OS_AUTH_TYPE=none in validation tasks (OS_CLOUD=bifrost is set in the
+# container ENV by the Dockerfile and would cause a FixedEndpointPlugin error).
+# Must be set in the target group because install.yaml runs `hosts: target`.
+bifrost_venv_env:
+  VIRTUAL_ENV: "{{ lookup('env', 'VENV') or '/var/lib/kolla/venv' }}"
+  PATH: "{{ (lookup('env', 'VENV') or '/var/lib/kolla/venv') + '/bin:' + ansible_env.PATH }}"
+  OS_CLOUD: ""
+
+# SSH key baked into the deployment image via DIB devuser element, and used
+# at deploy time by config-drive injection.
+ssh_public_key_path: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
+
+# Image filename and DIB toggle — install.yaml passes these to the DIB role.
+deploy_image_filename: "deployment_image.qcow2"
+deploy_image: "{{http_boot_folder}}/{{deploy_image_filename}}"
+create_image_via_dib: "{{ not (download_custom_deploy_image | default(use_cirros) | default(false) | bool) }}"
+dib_image_type: vm
+
+# IPA ramdisk: build it locally rather than downloading.
+download_ipa: false
+create_ipa_image: true
+ipa_extra_dib_elements: "devuser dynamic-login enable-serial-console"
+ipa_build_dib_packages:
+  - "mdadm"
+
+
+
+redfish_kernel_params: "ipa-debug=1"
+# DIB env vars baked into the deployment image at build time.
+# Read by the bifrost-create-dib-image role as a play-level variable, so
+# they must be visible to the `target` play (i.e. defined here, not only
+# in group_vars/baremetal or group_vars/localhost).
+dib_env_vars:
+  DIB_DEV_USER_USERNAME: "username"
+  DIB_DEV_USER_PASSWORD: "password"
+  DIB_DEV_USER_PWDLESS_SUDO: "yes"
+  DIB_DEV_USER_AUTHORIZED_KEYS: "{{ lookup('file', '~/.ssh/id_rsa.pub')}}"
+
+# Custom metadata-only cleaning settings
+extra_ironic_config:
+  deploy:
+    erase_devices_priority: 0
+    erase_devices_metadata_priority: 10

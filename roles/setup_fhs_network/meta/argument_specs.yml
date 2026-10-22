@@ -1,0 +1,15 @@
+---
+argument_specs:
+  main:
+    short_description: Configure systemd-networkd for FHS hosts
+    options:
+      network_dir: {type: path, default: /etc/systemd/network}
+      sys_mac_address: {type: str}
+      ansible_host: {type: str}
+      network_interface_prefix: {type: str, default: "16"}
+      network_dns: {type: list, elements: str}
+      network_ntp: {type: list, elements: str}
+      network_managed_files: {type: list, elements: str}
+      network_disable_cloud_init: {type: bool, default: true}
+      network_remove_legacy_netplan: {type: bool, default: true}
+      network_legacy_netplan_file: {type: path, default: /etc/netplan/50-cloud-init.yaml}

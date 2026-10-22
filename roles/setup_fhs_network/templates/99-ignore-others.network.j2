@@ -1,0 +1,7 @@
+{{ ansible_managed | comment }}
+# Don't block boot waiting for unmatched NICs.
+[Match]
+Name=*
+
+[Link]
+RequiredForOnline=no

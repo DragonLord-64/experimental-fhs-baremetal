@@ -1,0 +1,9 @@
+/*
+Adding extra width so content
+takes up more of the screen.
+Not provided in ska theme
+*/
+
+.wy-nav-content {
+    max-width: 1500px !important;
+}

@@ -1,0 +1,4 @@
+{% if manage_prometheus_enable_auth %}
+basic_auth_users:
+  admin: {{ manage_prometheus_user_cred }}
+{% endif %}

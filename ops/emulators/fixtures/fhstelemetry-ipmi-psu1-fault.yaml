@@ -1,0 +1,115 @@
+name: "ipmi"
+intervalms: 10000
+fields:
+  - name: "VOLT_3.3VSB"
+    value: 3.360
+  - name: "VOLT_5VSB"
+    value: 5.160
+  - name: "VOLT_VCORE0"
+    value: 1.140
+  - name: "VOLT_VCORE1"
+    value: 0.820
+  - name: "VOLT_P0_VSOC"
+    value: 1.000
+  - name: "VOLT_VDD_11"
+    value: 1.100
+  - name: "VOLT_VDDIO"
+    value: 1.100
+  - name: "VOLT_VDD_33"
+    value: 3.360
+  - name: "VOLT_VDD_18"
+    value: 1.800
+  - name: "VOLT_BAT"
+    value: 3.100
+  - name: "VOLT_3V"
+    value: 3.320
+  - name: "VOLT_5V"
+    value: 5.010
+  - name: "VOLT_12V"
+    value: 11.900
+  - name: "FAN1"
+    value: 9000.000
+  - name: "FAN2"
+    value: 15400.000
+  - name: "FAN3"
+    value: 32000.000
+  - name: "FAN4"
+    value: 10800.000
+  - name: "FAN5"
+    value: 15200.000
+  - name: "FAN6"
+    value: 17000.000
+  - name: "FAN6_2"
+    value: 16000.000
+  - name: "TEMP_CPU"
+    value: 48.0
+  - name: "FSC_INDEX"
+    value: 53.0
+  - name: "TEMP_DDR5_A1"
+    value: 35.0
+  - name: "TEMP_DDR5_B1"
+    value: 33.0
+  - name: "TEMP_DDR5_C1"
+    value: 32.0
+  - name: "TEMP_DDR5_E1"
+    value: 32.0
+  - name: "TEMP_DDR5_G1"
+    value: 36.0
+  - name: "TEMP_DDR5_H1"
+    value: 33.0
+  - name: "TEMP_DDR5_I1"
+    value: 33.0
+  - name: "TEMP_DDR5_K1"
+    value: 32.0
+  - name: "TEMP_MB1"
+    value: 28.0
+  - name: "TEMP_MB2"
+    value: 29.0
+  - name: "TEMP_OUTLET1"
+    value: 33.0
+  - name: "TEMP_OUTLET2"
+    value: 30.00
+  - name: "TEMP_LAN"
+    value: 36.0
+  - name: "VOLT_PSU1_VIN"
+    value: 121.0
+  - name: "CUR_PSU1_IOUT"
+    value: 36.5
+  - name: "PWR_PSU1_PIN"
+    value: 498.0
+  - name: "PWR_PSU1_POUT"
+    value: 426.0
+  - name: "FAN_PSU1"
+    value: 21300.0
+  - name: "STS_PSU1"
+    value: 0.0
+  - name: "STS_PSU1_FAN"
+    value: 1.0
+  - name: "STS_PSU1_AC_LOST"
+    value: 0.0
+  - name: "VOLT_PSU2_VIN"
+    value: 122.0
+  - name: "CUR_PSU2_IOUT"
+    value: 36.5
+  - name: "PWR_PSU2_PIN"
+    value: 120.0
+  - name: "PWR_PSU2_POUT"
+    value: 422.0
+  - name: "FAN_PSU2"
+    value: 21200.0
+  - name: "STS_PSU2"
+    value: 0.0
+  - name: "STS_PSU2_FAN"
+    value: 0.0
+  - name: "STS_PSU2_AC_LOST"
+    value: 0.0
+  - name: "PROCHOT_CPU"
+    value: 0.0
+  - name: "CPU1_THERMTRIP"
+    value: 0.0
+  - name: "STS_CPU_MCE"
+    value: 0.0
+  - name: "WATCHDOG2"
+    value: 0.0
+  - name: "ChassisIntr"
+    value: 0.0

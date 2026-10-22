@@ -1,0 +1,26 @@
+---
+devpi_user: devpi
+devpi_group: devpi
+
+# Where devpi data lives (passed as --serverdir to devpi-server).
+devpi_data_dir: /opt/devpi
+
+# Where the dedicated venv lives.
+devpi_venv: /opt/devpi-venv
+devpi_python: /usr/bin/python3
+
+# Versions installed into the venv. Pin in inventory for reproducibility.
+devpi_packages:
+  - devpi-server
+  - devpi-web
+  - devpi-client
+
+# Listen settings for devpi-server.
+devpi_host: "0.0.0.0"
+devpi_http_port: 3141
+
+# Apt prerequisites.
+devpi_apt_packages:
+  - python3-venv
+  - python3-pip
+  - build-essential

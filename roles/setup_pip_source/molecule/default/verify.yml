@@ -1,0 +1,15 @@
+---
+- name: Verify — pip_index
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Read /etc/pip.conf
+      ansible.builtin.slurp:
+        src: /etc/pip.conf
+      register: pipconf
+    - name: Assert index-url and trusted-host
+      ansible.builtin.assert:
+        that:
+          - "'index-url = http://devpi.test.invalid/root/pypi/+simple/' in (pipconf.content | b64decode)"
+          - "'trusted-host = devpi.test.invalid' in (pipconf.content | b64decode)"

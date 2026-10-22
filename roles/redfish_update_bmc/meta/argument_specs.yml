@@ -1,0 +1,13 @@
+---
+argument_specs:
+  main:
+    short_description: Update BMC firmware through Redfish
+    options:
+      redfish:
+        type: dict
+        required: true
+        options:
+          address: {type: str, required: true}
+          username: {type: str, required: true}
+          password: {type: str, required: true, no_log: true}
+      redfish_update_bmc_image: {type: str, required: true}

@@ -1,0 +1,9 @@
+nodeRegistration:
+  name: {{ inventory_hostname }}
+
+  taints:
+{% for taint in hostvars[inventory_hostname].k8s_taints | default([]) %}
+    - key: "{{ taint.key }}"
+      value: "{{ taint.value | default('') }}"
+      effect: "{{ taint.effect }}"
+{% endfor %}

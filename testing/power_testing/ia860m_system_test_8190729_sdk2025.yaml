@@ -1,0 +1,81 @@
+TestOptions:
+  stop_on_fail: False
+
+Cards:
+  UUT1:
+    name: UUT1
+    interfaces: PCI
+    product: IA-860M
+    serial_number: "8190729"
+
+Suite:
+  Tests:
+  - SystemInfo: System information
+    # state: Disabled
+
+  - ShellCommand: System information
+    # state: Disabled
+    options:
+      command:  'whoami && hostname -f'
+
+  - FirmwareVersion: # report versions for all firmware on the card
+
+  - PCIe:  # PCIe link check
+    # state: Disabled
+    options:
+      gen: 0  # Auto check against capabilities
+      width: 0  # Auto check against capabilities
+
+  - TestLoop:
+    options:
+      report_interval: 10.0
+      duration: 300.0
+      period: 10.0
+      count: 0
+
+    Tests:
+    - QSFPDDFTILE:
+      state: Disabled # Requires QSFP-DD loopback module
+      options:
+        report_interval: 10
+        modules: []
+        inject_errors: []
+        timeout_secs: 5
+        num_errors: 1
+        acceptable_ber: 1.00e-12
+
+    - PowerBurnerAdv:
+      options:
+        report_interval: 2
+        profile: "860_burner_profile.csv"
+
+    - Clocks:
+      # state: Disabled
+      options:
+        report_interval: 10
+        clock_warn: null
+        clock_ignore: 'HBM2e Fabric Clock 0|HBM2e Fabric Clock 1|User Clock 1'
+        test_external: false
+        just_read: false
+        measure_period: 10.0
+        tolerance: 0.01
+
+    - HBM2:
+      # state: Disabled
+      options:
+        report_interval: 10
+        #mem_check_count: 1
+        recalibrate_interval: 0
+        pattern: 32
+        calibration_timeout: 5.0
+
+    - Sensors: SDM sensors via PCI
+      # state: Disabled
+      options:
+        report_interval: 10
+        ignore_status: null
+        ignored: null
+        unavailable: 'SDM_TEMP_(7|8|10)|QSFP0 Temperature|QSFP1 Temperature|QSFP2 Temperature|DIMM0 Temperature|DIMM1 Temperature|SmartVID Voltage'
+        disabled: null
+        bmc_interface: PCI
+        all_sensors: false

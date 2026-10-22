@@ -1,0 +1,63 @@
+# Isolated dragonvm lab; no production targets.
+server:
+  persistentVolume:
+    enabled: true
+    storageClass: fhs-retain
+    size: 2Gi
+    accessModes:
+    - ReadWriteOnce
+  retention: 1d
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: '1'
+      memory: 512Mi
+  service:
+    enabled: true
+    type: ClusterIP
+    servicePort: 9090
+  global:
+    scrape_interval: 5s
+    scrape_timeout: 3s
+  retentionSize: 1GB
+  strategy:
+    type: Recreate
+  fullnameOverride: monitoring-prometheus
+  image:
+    repository: docker.io/prom/prometheus
+    tag: v3.15.0
+    digest: sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
+  alertingFiles: {}
+serverFiles:
+  recording_rules.yml:
+    groups:
+    - name: data_rates
+      interval: 30s
+      rules:
+      - record: instance:nexus_vlans_inBcastOctets:rate1m
+        expr: rate(nexus_vlans_inBcastOctets[1m])
+      - record: instance:nexus_vlans_inBcastPkts:rate1m
+        expr: rate(nexus_vlans_inBcastPkts[1m])
+      - record: instance:nexus_interfaces_broadcastPkts:rate1m
+        expr: rate(nexus_interfaces_broadcastPkts[1m])
+  prometheus.yml:
+    scrape_configs:
+    - job_name: switch-telegraf
+      static_configs:
+      - targets:
+        - switch-telegraf:9273
+    rule_files:
+    - /etc/config/recording_rules.yml
+alertmanager:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
+kube-state-metrics:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+configmapReload:
+  prometheus:
+    enabled: false

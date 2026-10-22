@@ -1,0 +1,6 @@
+terabox:
+ hosts:
+  sys1413:
+   ansible_host: 192.168.8.37
+   ansible_user: terabox1501b
+
