@@ -44,19 +44,20 @@ python3 -m unittest discover -s ops/agent-pipeline/tests -v
 
 Read the controller README before use. Configure checks for the actual task; example checks validate only the controller. The controller does not itself commit, push or deploy.
 
-## Validation and current blocker
+## Validation and executable selection
 
 See [VALIDATION.md](../ops/agent-pipeline/VALIDATION.md).
 
 - Local and dragonvm fake-agent integration suites: 11 tests passed each.
 - Actual tmux monitoring verified locally and remotely.
 - On dragonvm, pause, redirect, fresh resume, logs and cancel were acknowledged.
-- Real authenticated Codex execution remains unverified. Remote configured model `gpt-6.1-sol` and config-isolated CLI default `gpt-5.5` were both rejected by the remote ChatGPT login before task execution. The controller correctly reported `blocked`.
-- Remote hostname: `dragon-lord-Virtual-Machine`; Codex CLI 0.142.5, Python 3.14.4, Git 2.53.0, tmux installed.
+- Earlier real runs correctly reported `blocked` when the old CLI rejected configured model `gpt-6.1-sol` and its isolated default `gpt-5.5`. Diagnosis found noninteractive SSH selected `/usr/local/bin/codex` 0.142.5, while the updated `/home/dragon-lord/.local/bin/codex` was 0.163.0. The updated executable completed an authenticated inference with `gpt-6.1-sol`; model preferences were unchanged.
+- Bounded real pipeline `real-updated-codex` reached `done` with three fresh workers, no review retries and a 180-second stage limit. Independent review passed; configured checks verified exact `smoke.txt` bytes and all 11 controller tests passed in 7.736 seconds. Local suite rerun: 11 passed in 8.594 seconds. See validation for evidence paths and limits.
+- Remote hostname: `dragon-lord-Virtual-Machine`; Python 3.14.4, Git 2.53.0, tmux installed. Both Codex installations report a ChatGPT login. Pin the updated absolute executable path in automation; noninteractive SSH PATH excludes the user installation.
 - SSH access worked using `ssh -F ~/.ssh/config dragonvm`; the builder reported an ownership/permission problem with system SSH configuration when not selecting the user config explicitly.
 - Temporary remote evidence: `/tmp/fhs-agent-pipeline-test.dyLkY1/ops/agent-pipeline/runs/{real-smoke,real-isolated-smoke}`. Preserve needed evidence before temporary cleanup.
 
-Next immediate step: resolve remote account/CLI model compatibility, then repeat a bounded real end-to-end smoke in an isolated checkout. Do not treat fake-agent tests as proof that a real coding task completes. Do not silently change the user's model preferences.
+Do not treat fake-agent tests as proof that a real coding task completes. Do not silently change the user's model preferences.
 
 ## Test infrastructure direction
 

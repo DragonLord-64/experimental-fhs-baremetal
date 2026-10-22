@@ -12,6 +12,8 @@ Requires Python 3.10+, Git and an authenticated Codex CLI. tmux is optional. Run
 
 Write the task in a text file. Copy `config.example.json` and replace `checks` with the actual task's acceptance commands. Each command is an argv array, not a shell string. The example checks this controller only; it does not validate Ansible changes. Checks run with your user's permissions: use trusted commands and disposable environments.
 
+Set `codex` to the absolute CLI path for automation, for example `"codex": "/home/dragon-lord/.local/bin/codex"` on dragonvm. Check that executable's `--version` and `login status` in the same noninteractive SSH environment used to launch the runner. An interactive shell can select a different installation: dragonvm's noninteractive `codex` selected `/usr/local/bin/codex` 0.142.5 while the updated user installation was 0.163.0. The older executable rejected the configured model; the updated executable ran it successfully. Keep the user's configured model unless a change is explicitly requested.
+
 ```bash
 python3 ops/agent-pipeline/pipeline.py start --task-file /tmp/task.txt --config /tmp/pipeline.json
 python3 ops/agent-pipeline/pipeline.py status TASK
@@ -58,4 +60,4 @@ Treat run files as sensitive: agent output may contain environment details. Do n
 python3 -m unittest discover -s ops/agent-pipeline/tests -v
 ```
 
-Tests use a fake Codex executable, with no model calls. CLI flags were checked against installed `codex exec --help` and [official noninteractive documentation](https://developers.openai.com/codex/noninteractive). See [validation](VALIDATION.md) for dragonvm results and the account/model blocker in the real smoke test.
+Tests use a fake Codex executable, with no model calls. CLI flags were checked against installed `codex exec --help` and [official noninteractive documentation](https://developers.openai.com/codex/noninteractive). See [validation](VALIDATION.md) for dragonvm results and executable selection in the real smoke test.
