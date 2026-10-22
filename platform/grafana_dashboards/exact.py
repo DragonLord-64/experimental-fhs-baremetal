@@ -31,6 +31,42 @@ def inventory():
     out.append({'rack':rack,'unit':unit,'id':unit+f'-FHS{member}','fhs':f'FHS{member}','kind':'server','position_u':slot,'height_u':2,'face':'front','deployed':deployed(unit)});slot+=2
  return out
 
+def labelled(value, **labels):
+    expr='vector('+str(value)+')'
+    for key,value in labels.items():expr='label_replace('+expr+','+json.dumps(key)+','+json.dumps(str(value))+',"","")'
+    return expr
+
+
+def expected_host():
+    """Explicit deployed membership, independent of exporter availability."""
+    known=' or '.join(labelled(1,unit=p['unit'],fhs=p['fhs']) for p in inventory() if p['deployed'] and p['kind']=='server')
+    return '('+labelled(1,unit='$unit',fhs='$fhs')+') and on(unit,fhs) ('+known+')'
+
+
+def expected_interface():
+    known=' or '.join(labelled(1,source=source,interface=interface) for source,interfaces in json.loads((ROOT/'deployed-interfaces.json').read_text()).items() for interface in interfaces)
+    return '('+labelled(1,source='$switch',interface='$interface')+') and on(source,interface) ('+known+')'
+
+
+def expected_mesh():
+    known=' or '.join(labelled(1,vcc='VCCUnit'+str(v),fsp='FSPUnit'+str(f)) for v in range(1,5) for f in range(1,4))
+    return '('+labelled(1,vcc='VCCUnit$vccu',fsp='FSPUnit$fspu')+') and on(vcc,fsp) ('+known+')'
+
+
+def inventory_fallback(observed, expected):
+    # 3/4 are DISPLAY STATES only. Do not apply this to numeric sensor readings.
+    return '('+observed+') or on() (3 * ('+expected+')) or on() vector(4)'
+
+
+def classification(panel):
+    """Keep absent inventory distinct from deployed but missing observations."""
+    defaults=panel['fieldConfig']['defaults']
+    mappings=defaults.setdefault('mappings',[])
+    value=next((m for m in mappings if m['type']=='value'),None)
+    if value is None:value={'type':'value','options':{}};mappings.append(value)
+    value['options'].update({'3':{'text':'TELEMETRY MISSING','color':GRAY},'4':{'text':'NOT DEPLOYED','color':GRAY}})
+
+
 def build(g,base):
  ds=g.DS
  dashboards=base
@@ -88,19 +124,19 @@ def build(g,base):
  for p,(title,expr) in zip(mp[1:5],counts):p['title']=title;p['targets']=[target(expr)]
  mp=mp[:6]
  selected=g.mesh_query()+' and on(vcc,fsp) label_replace(label_replace(vector(1),"vcc","VCCUnit$vccu","",""),"fsp","FSPUnit$fspu","","")'
- status=g.panel('VCC $vccu ↔ FSP $fspu · observed status',selected,0,24,8,3,states={0:('DOWN','red'),1:('UP','green')});mp.append(status)
+ status=g.panel('VCC $vccu ↔ FSP $fspu · observed status',inventory_fallback(selected,expected_mesh()),0,24,8,3,states={0:('DOWN','red'),1:('UP','green')});classification(status);mp.append(status)
  for x,title in [(8,'Rate · unavailable'),(16,'Capacity · unavailable')]:mp.append(g.panel(title,'vector(0) == 1',x,24,8,3))
  mp.append(note('[Open selected VCC switch]('+g.url('switch',dynamic={'switch':'VCCUnit${vccu}-switch','unit':'VCCUnit${vccu}'})+') · Rates/history unavailable in this telemetry contract; ND units are not emulated.',27,2))
  dashboards['mesh']['panels']=mp
  # Compact two-column component rows with status square and grouped readings.
  components=json.loads((ROOT/'components.json').read_text());fp=[note('**FHS $unit / $fhs** · Status at left, observed readings at right. Gray = missing telemetry. Illustrative temperature70/85°C and fan4000/1000RPM limits. Native flag meanings need hardware validation.')]
- fp.append(g.panel('Overall hardware health',g.health('$unit','$fhs'),0,2,8,3,states={0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')}))
+ overall=g.panel('Overall hardware health',inventory_fallback(g.health('$unit','$fhs'),expected_host()),0,2,8,3,states={0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')});classification(overall);fp.append(overall)
  for i,(title,expr) in enumerate([('Components',str(len(components))),('Deployed FHS','16'),('Not deployed FHS','116')]):
   count=g.panel(title,'vector('+expr+')',8+i*5,2,5 if i<2 else 6,3);count['options']['colorMode']='value';count['fieldConfig']['defaults']['color']={'mode':'fixed','fixedColor':'#5794F2'};fp.append(count)
  for i,c in enumerate(components):
   x=(i%2)*12;y=5+(i//2)*3
   expr=g.reading_query({'name':'sts_psu'+c['title'][-1]+'_fan'},c['source']) if c['title'].startswith('PSU ') else g.component_health(c)
-  sp=g.panel(c['title'],expr,x,y,2,3,states={0:('Healthy','green'),1:('Fault','red')} if c['title'].startswith('PSU ') else {0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')});sp['title']='';sp['options']['textMode']='value';sp['options']['text']={'valueSize':11,'titleSize':10};fp.append(sp)
+  sp=g.panel(c['title'],inventory_fallback(expr,expected_host()),x,y,2,3,states={0:('Healthy','green'),1:('Fault','red')} if c['title'].startswith('PSU ') else {0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')});classification(sp);sp['title']='';sp['options']['textMode']='value';sp['options']['text']={'valueSize':11,'titleSize':10};fp.append(sp)
   readings=g.panel(c['title']+' · readings','vector(0) == 1',x+2,y,10,3);readings['targets']=[];readings['fieldConfig']['overrides']=[]
   for n,r in enumerate(c['readings']):
    readings['targets'].append(target(g.reading_query(r,c['source']),r['label'],chr(65+n)))
@@ -151,7 +187,7 @@ def build(g,base):
  sw.append(g.panel('Last-known LLDP neighbors','nexus_lldp_id{job="$switch_job",source="$switch"}',0,27,24,7,kind='table',link=g.url('interface',dynamic={'interface':'${__data.fields.interface:percentencode}'})))
  dashboards['switch']['panels']=sw
  # Existing detail has readable peer before raw metadata; tighten its vertical geometry.
- details=dashboards['interface']['panels'];details[0]['gridPos'].update(w=24,h=3)
+ details=dashboards['interface']['panels'];details[0]['targets'][0]['expr']=inventory_fallback(details[0]['targets'][0]['expr'],expected_interface());classification(details[0]);details[0]['gridPos'].update(w=24,h=3)
  for p in details[1:]:p['gridPos']['y']-=2
  # VLAN configured allowance and explicit directed routes: unavailable is not empty configuration.
  vp=dashboards['vlan']['panels'];vp[0]=note('**VLAN $vlan · CONFIGURATION VIEW** · VCC left, FSP right. Allowed VLANs and explicit directed translations are unavailable in the lab. No direct, inverse or transitive allowance is inferred from LLDP or link state.')

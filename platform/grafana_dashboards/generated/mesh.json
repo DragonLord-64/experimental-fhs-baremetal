@@ -28437,7 +28437,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "min by(vcc,fsp) (label_replace(label_replace(((max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\",operSt=\"up\"}) or (0 * max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\"}))) * on(source,interface) group_left(sysName) max by(source,interface,sysName) (nexus_lldp_id{job=\"$switch_job\",source=~\"VCCUnit.*\",sysName=~\"FSPUnit.*-switch\"})),\"vcc\",\"$1\",\"source\",\"(VCCUnit[0-9]+)-switch\"),\"fsp\",\"$1\",\"sysName\",\"(FSPUnit[0-9]+)-switch\") or label_replace(label_replace(((max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\",operSt=\"up\"}) or (0 * max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\"}))) * on(source,interface) group_left(sysName) max by(source,interface,sysName) (nexus_lldp_id{job=\"$switch_job\",source=~\"FSPUnit.*\",sysName=~\"VCCUnit.*-switch\"})),\"vcc\",\"$1\",\"sysName\",\"(VCCUnit[0-9]+)-switch\"),\"fsp\",\"$1\",\"source\",\"(FSPUnit[0-9]+)-switch\")) and on(vcc,fsp) label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit$vccu\",\"\",\"\"),\"fsp\",\"FSPUnit$fspu\",\"\",\"\")",
+          "expr": "(min by(vcc,fsp) (label_replace(label_replace(((max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\",operSt=\"up\"}) or (0 * max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\"}))) * on(source,interface) group_left(sysName) max by(source,interface,sysName) (nexus_lldp_id{job=\"$switch_job\",source=~\"VCCUnit.*\",sysName=~\"FSPUnit.*-switch\"})),\"vcc\",\"$1\",\"source\",\"(VCCUnit[0-9]+)-switch\"),\"fsp\",\"$1\",\"sysName\",\"(FSPUnit[0-9]+)-switch\") or label_replace(label_replace(((max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\",operSt=\"up\"}) or (0 * max by (source,interface) (nexus_interfaces_vdcId{job=\"$switch_job\"}))) * on(source,interface) group_left(sysName) max by(source,interface,sysName) (nexus_lldp_id{job=\"$switch_job\",source=~\"FSPUnit.*\",sysName=~\"VCCUnit.*-switch\"})),\"vcc\",\"$1\",\"sysName\",\"(VCCUnit[0-9]+)-switch\"),\"fsp\",\"$1\",\"source\",\"(FSPUnit[0-9]+)-switch\")) and on(vcc,fsp) label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit$vccu\",\"\",\"\"),\"fsp\",\"FSPUnit$fspu\",\"\",\"\")) or on() (3 * ((label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit$vccu\",\"\",\"\"),\"fsp\",\"FSPUnit$fspu\",\"\",\"\")) and on(vcc,fsp) (label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit1\",\"\",\"\"),\"fsp\",\"FSPUnit1\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit1\",\"\",\"\"),\"fsp\",\"FSPUnit2\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit1\",\"\",\"\"),\"fsp\",\"FSPUnit3\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit2\",\"\",\"\"),\"fsp\",\"FSPUnit1\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit2\",\"\",\"\"),\"fsp\",\"FSPUnit2\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit2\",\"\",\"\"),\"fsp\",\"FSPUnit3\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit3\",\"\",\"\"),\"fsp\",\"FSPUnit1\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit3\",\"\",\"\"),\"fsp\",\"FSPUnit2\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit3\",\"\",\"\"),\"fsp\",\"FSPUnit3\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit4\",\"\",\"\"),\"fsp\",\"FSPUnit1\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit4\",\"\",\"\"),\"fsp\",\"FSPUnit2\",\"\",\"\") or label_replace(label_replace(vector(1),\"vcc\",\"VCCUnit4\",\"\",\"\"),\"fsp\",\"FSPUnit3\",\"\",\"\")))) or on() vector(4)",
           "instant": true,
           "range": false,
           "format": "time_series"
@@ -28473,6 +28473,14 @@
                 "1": {
                   "text": "UP",
                   "color": "green"
+                },
+                "3": {
+                  "text": "TELEMETRY MISSING",
+                  "color": "#555963"
+                },
+                "4": {
+                  "text": "NOT DEPLOYED",
+                  "color": "#555963"
                 }
               }
             },

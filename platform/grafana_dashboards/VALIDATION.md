@@ -121,3 +121,21 @@ and blank-label edit text. Query success does not establish hardware health.
 Incomplete scrape coverage keeps some deployed FHS components Unknown;
 switch optics/hardware and VLAN configuration are unavailable. Independent
 review and full rack/mesh/peer click and title-rename checks remain pending.
+
+### Drilldown inventory classification repair
+
+Fresh review found P2: absent selections and deployed missing telemetry both
+showed Unknown in detail views. Status-only fallbacks now use explicit lab
+membership: code3 = TELEMETRY MISSING, code4 = NOT DEPLOYED. Numeric sensor
+readings never receive these display sentinels.
+
+23/23 tests pass on dragonvm. Nine actual Prometheus checks passed: FHS missing,
+absent and observed Degraded; interface absent, simulated missing observations
+and observed Down; mesh absent, simulated missing observations and observed Down.
+The simulated cases replace the observation expression with an empty vector;
+they do not claim a live outage was induced. Three owned dashboards imported.
+Four actual browser assertions/captures passed, showing deployed FSP1 as
+TELEMETRY MISSING, absent FSP4 as NOT DEPLOYED, and absent interface/mesh
+selections as NOT DEPLOYED. Evidence: `/tmp/fhs-grafana-p2-live` on dragonvm.
+Independent repair review accepted the source, 23 tests and four screenshots.
+Full navigation limits below remain open.

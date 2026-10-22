@@ -160,3 +160,17 @@ class PrototypeContracts(unittest.TestCase):
                 self.assertNotIn('vlan_match_',t['expr']);self.assertNotIn('vlan_catalog_',t['expr'])
         self.assertTrue(any('Chassis temperature'==p['title'] for p in d['switch']['panels']))
         self.assertTrue(any('Transceiver' in p['title'] for p in d['switch']['panels']))
+
+class DrilldownClassification(unittest.TestCase):
+    def test_status_panels_have_distinct_absent_and_missing_states(self):
+        d=g.build()
+        status=[next(p for p in d['fhs']['panels'] if p['title']=='Overall hardware health'),next(p for p in d['interface']['panels'] if p['title']=='Interface operational state'),next(p for p in d['mesh']['panels'] if 'observed status' in p['title'])]
+        for p in status:
+            values=next(m['options'] for m in p['fieldConfig']['defaults']['mappings'] if m['type']=='value')
+            self.assertEqual('TELEMETRY MISSING',values['3']['text']);self.assertEqual('NOT DEPLOYED',values['4']['text'])
+            self.assertIn('or on() vector(4)',p['targets'][0]['expr'])
+            self.assertIn('3 * (',p['targets'][0]['expr'])
+    def test_display_fallback_is_never_used_for_numeric_readings(self):
+        for p in g.build()['fhs']['panels']:
+            if p['title'].endswith('· readings'):
+                for t in p['targets']:self.assertNotIn('or on() vector(4)',t['expr'])
