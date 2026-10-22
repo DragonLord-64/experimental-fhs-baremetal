@@ -28,3 +28,12 @@ ansible-playbook -i inventory/dev_env playbooks/provision.yml --skip-tags hardwa
 
 
 See [Usage](../docs/src/playbooks/usage.md) for details
+
+## Operational NetBox and switch playbooks
+
+- `netbox/`: server/switch discovery, NetBox updates and protected Bifrost inventory export.
+- `switch-poap/`: POAP script, Bifrost DHCP integration and Nexus configuration.
+
+These directories were promoted intact from development; task and plugin behavior is unchanged. Run only against explicitly authorized targets with private credentials. See [commands and prerequisites](../docs/src/playbooks/development.md). Other development playbooks remain in place.
+
+[Archived playbooks](archive/README.md) retain the former CIS audit/prototype, node, BIST, gRPC, exporter/Prometheus, EXDS and Filebeat entry points with their current directions. The card test remains under development.

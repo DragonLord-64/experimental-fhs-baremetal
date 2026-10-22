@@ -41,10 +41,11 @@
     benchmark: UBUNTU24-CIS
     benchmark_version: v1.0.0
     get_audit_binary_method: copy
-    audit_bin_copy_location: "{{ playbook_dir }}/artifacts/goss/goss-v0.4.8"
+    # Review note: preserve the existing sibling artifacts after moving this playbook into archive.
+    audit_bin_copy_location: "{{ playbook_dir }}/../artifacts/goss/goss-v0.4.8"
     audit_content: archive
     audit_conf_source: >-
-      {{ playbook_dir }}/artifacts/ubuntu24-cis-audit/ubuntu24-cis-audit-benchmark-v1.0.0.tar.gz
+      {{ playbook_dir }}/../artifacts/ubuntu24-cis-audit/ubuntu24-cis-audit-benchmark-v1.0.0.tar.gz
     audit_conf_dest: /opt
     audit_log_dir: /opt
     fetch_audit_output: true

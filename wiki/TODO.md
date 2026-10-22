@@ -9,7 +9,7 @@ Style requirement: match the user's existing documentation voice. Keep descripti
 - [x] Document the current monitoring architecture and deployment, including how telemetry reaches its consumers.
 - [ ] Document Grafana setup, data sources, dashboard provisioning, and normal usage.
 - [x] Review development playbooks and document those now used operationally, including NetBox imports; distinguish supported workflows from experiments.
-- [x] Document switch POAP provisioning in `playbooks/development/switch-poap/`, including the POAP script, Nexus configuration, and Bifrost DHCP integration.
+- [x] Document switch POAP provisioning in `playbooks/switch-poap/`, including the POAP script, Nexus configuration, and Bifrost DHCP integration.
 - [x] Check documented commands, tags, paths, and diagrams against current code, then verify the Read the Docs build and links.
 
 Keep entries concise. Move executable scope and acceptance criteria into GitHub issues when work begins.

@@ -1,6 +1,6 @@
-# Development playbooks
+# NetBox and switch playbooks
 
-These operational helpers live under `playbooks/development/`; the directory name does not imply a dry run. Run from `/provision` with the required collections, Python packages and private variables available.
+NetBox discovery/export lives under `playbooks/netbox/`; switch POAP and Nexus configuration live under `playbooks/switch-poap/`. Their tasks, plugins and supporting scripts moved together without behavior changes. Other development playbooks remain in place. Run from `/provision` with the required collections, Python packages and private variables available.
 
 ## NetBox discovery and export
 
@@ -10,7 +10,7 @@ These operational helpers live under `playbooks/development/`; the directory nam
 | `netbox/netbox_import_nexus.yml` | Reads Nexus inventory, software and transceivers over `network_cli`, then populates NetBox. Targets `nexus`. |
 | `netbox/bifrost_export.yml` | Reads selected NetBox servers and protected Redfish credentials; writes private inventory without enrollment. |
 
-Install the NetBox helper dependencies from `playbooks/development/netbox/requirements.yml` and `requirements.txt`. Imports require authorized hardware access and writable NetBox credentials. They are not documentation checks. See [inventory and export](../guide/using_netbox_inventory.md).
+Install the NetBox helper dependencies from `playbooks/netbox/requirements.yml` and `requirements.txt`. Imports require authorized hardware access and writable NetBox credentials. They are not documentation checks. See [inventory and export](../guide/using_netbox_inventory.md).
 
 ## Switch POAP
 
@@ -20,10 +20,10 @@ Install the NetBox helper dependencies from `playbooks/development/netbox/requir
 4. Port settings (`--tags ports`) and physical breakout (`--tags breakout`) are separate opt-ins. `nexus_ports.yml` supplies declarations; default native 400G is not proof of physical support. Breakout resets selected interfaces and requires hardware review.
 
 ```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/development/switch-poap/configure_bifrost_dhcp.yml --list-hosts
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/development/switch-poap/configure_nexus.yml --list-tags
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/switch-poap/configure_bifrost_dhcp.yml --list-hosts
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/switch-poap/configure_nexus.yml --list-tags
 ```
 
 Listing is read-only but inventory polling needs private access. Even without opt-in tags, Nexus authentication tasks run; do not use an untagged execution as a safety check. No physical POAP or Cisco telemetry validation is claimed for the private lab.
 
-[NetBox helpers](https://github.com/DragonLord-64/experimental-fhs-baremetal/tree/development/playbooks/development/netbox) and [switch POAP implementation](https://github.com/DragonLord-64/experimental-fhs-baremetal/tree/development/playbooks/development/switch-poap).
+[NetBox helpers](https://github.com/DragonLord-64/experimental-fhs-baremetal/tree/development/playbooks/netbox) and [switch POAP implementation](https://github.com/DragonLord-64/experimental-fhs-baremetal/tree/development/playbooks/switch-poap).

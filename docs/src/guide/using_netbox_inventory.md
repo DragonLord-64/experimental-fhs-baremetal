@@ -53,17 +53,17 @@ The two outputs have different consumers. Writing YAML does not enroll or image 
 
 ## Provisioning export ownership
 
-`playbooks/development/netbox/bifrost_export.yml` reads NetBox and writes Bifrost-compatible YAML. It selects a device type (default `TeraBox1501b`) and interfaces tagged `provisioning-interface`, reads native out-of-band and primary IPv4 addresses, and combines approved custom fields with protected Redfish credentials. Simulated devices are rejected. It validates MAC uniqueness and required fields before writing mode `0600` output; a newly created output directory is mode `0700`.
+`playbooks/netbox/bifrost_export.yml` reads NetBox and writes Bifrost-compatible YAML. It selects a device type (default `TeraBox1501b`) and interfaces tagged `provisioning-interface`, reads native out-of-band and primary IPv4 addresses, and combines approved custom fields with protected Redfish credentials. Simulated devices are rejected. It validates MAC uniqueness and required fields before writing mode `0600` output; a newly created output directory is mode `0700`.
 
 ```bash
-ansible-playbook playbooks/development/netbox/bifrost_export.yml --ask-vault-pass \
+ansible-playbook playbooks/netbox/bifrost_export.yml --ask-vault-pass \
   -e netbox_credentials_file=<PRIVATE_NETBOX_VARS> \
   -e redfish_credentials_file=<PRIVATE_REDFISH_VARS> \
   -e bifrost_output=<PRIVATE_OUTPUT_PATH>
 ```
 
-The protected files supply `netbox_url`, `netbox_token` and `redfish_credentials` (`defaults` and optional per-device entries). The default output is `playbooks/development/netbox/output/baremetal.yml`; always choose a protected destination. Export does not enroll, deploy or modify NetBox. Enrollment and imaging remain separate Bifrost operations. No implemented post-provisioning role-to-IP deployment export is established by this playbook.
+The protected files supply `netbox_url`, `netbox_token` and `redfish_credentials` (`defaults` and optional per-device entries). The default output is `playbooks/netbox/output/baremetal.yml`; always choose a protected destination. Export does not enroll, deploy or modify NetBox. Enrollment and imaging remain separate Bifrost operations. No implemented post-provisioning role-to-IP deployment export is established by this playbook.
 
 See [development playbooks](../playbooks/development.md) for discovery/import and switch POAP, and [provisioning design](../design/provisioning-interface.md) for the intended physical sequence.
 
-[Inventory configuration](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/inventory/dev_env/netbox-inv.yml) and [export implementation](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/playbooks/development/netbox/bifrost_export.yml).
+[Inventory configuration](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/inventory/dev_env/netbox-inv.yml) and [export implementation](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/playbooks/netbox/bifrost_export.yml).
