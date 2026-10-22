@@ -1,6 +1,6 @@
 # Experimental test environment plan
 
-Status: planning; infrastructure and test workflows below are proposed, not yet implemented.
+Status (2026-10-21): the agent pipeline has passed a bounded real three-worker run on dragonvm. The dedicated Kubernetes cluster and corrected live smoke checks passed; the corrected run exited successfully; both smoke namespaces and their PVs are gone. Monitoring, provisioning and hardware test workflows remain proposed.
 
 ## Purpose and source
 
@@ -12,18 +12,22 @@ GitHub rejected the original history because it contains files over 100 MB. This
 ## Compute and budget
 
 - Use this Linux server for development and lightweight checks. At inspection it had four CPU cores, 16 GB RAM, about 3.2 GB available RAM, full swap, and 315 GB free disk.
-- The user plans to provide a Linux VM on a Windows gaming PC using Hyper-V. Confirm available resources before choosing VM sizing.
+- Confirmed `dragonvm` is the Hyper-V Linux guest: Ubuntu 26.04, eight CPUs, 11 GiB RAM (about 7 GiB available) and 67 GB free disk at inspection. Docker and minikube are installed. Nested virtualization for provisioning target VMs remains unverified.
 - Target no cloud spend initially; monthly cloud spending must remain below US$10. No cloud resources have been authorized or purchased.
 - Never shut down, reboot, suspend, hibernate, halt, or power off this server.
 
 ## Test layers
 
+Replicate the user's environment as closely as practical on dragonvm and run integration tests there, with local orchestration. Assess the latest development configuration and NetBox values before deploying the stack. No full-stack deployment has been performed.
+
+The original checkout `/home/dragonlord/ska-mid-cbf-fhs-baremetal` was fast-forwarded to official development `87dc794`. It contains the monitoring-to-platform rename, current NetBox values and tracked `bifrost-infra` source missing from the experimental snapshot. Assess and adapt that source before importing: Bifrost currently assumes privileged containers, host networking, real inventory and DHCP. The exact NetBox chart version is unconfirmed; the image tag is blank in values and requires chart default/version resolution. Resolve versions before close replication.
+
 1. Fast checks: Ansible linting and syntax, Helm rendering, and focused custom-module tests.
-2. Kubernetes integration: disposable clusters on the Linux test VM; kind is the initial candidate. Exercise monitoring deployment and verify metrics and logs flow.
+2. Kubernetes integration: dedicated minikube `fhs-test` profile on dragonvm, Docker driver and containerd, four CPUs and 4096 MiB RAM. Kubernetes `v1.37.1` is running with a Ready node; the existing `monitoring` profile and default context are preserved. [Bootstrap and smoke checks](../ops/kubernetes/README.md) are implemented; live node/system readiness, DNS, Service traffic and PVC write/read checks passed. The corrected run exited successfully; both smoke namespaces and their PVs are gone. Monitoring deployment and metrics/log flow remain deferred.
 3. Provisioning: disposable target VMs and isolated provisioning networks for Bifrost and system configuration roles. Check nested virtualization support before implementing this on Hyper-V. Use simulated management interfaces where appropriate.
 4. Hardware: separate lab validation for FPGA cards, NIC behavior, and Cisco switches. Simulations do not establish physical hardware correctness.
 
-Use the same test commands locally and in CI. Record the tested commit and retain logs, reports, and screenshots. A dedicated runner on the test VM is proposed; pipeline implementation is still to be decided.
+Use the same test commands locally and in CI. Record the tested commit and retain logs, reports, and screenshots. The [agent pipeline](../ops/agent-pipeline/README.md) is implemented and has completed a bounded real run on dragonvm; see its [validation evidence](../ops/agent-pipeline/VALIDATION.md). A dedicated CI runner remains proposed.
 
 ## Workflow example: Grafana dashboards
 

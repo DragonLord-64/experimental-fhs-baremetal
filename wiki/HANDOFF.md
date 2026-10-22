@@ -6,7 +6,7 @@ Build an isolated environment for developing, testing and reviewing SKA Mid CBF 
 
 - Working checkout: `/home/dragonlord/experimental-fhs-baremetal`.
 - Private remote: `https://github.com/DragonLord-64/experimental-fhs-baremetal`, branch `development`.
-- Original checkout: `/home/dragonlord/ska-mid-cbf-fhs-baremetal`; left untouched.
+- Original checkout: `/home/dragonlord/ska-mid-cbf-fhs-baremetal`; fast-forwarded to official development `87dc794` for current configuration assessment.
 - Never push to official SKA repositories. Experimental upstream push URL is `/dev/null`.
 - Never shut down, reboot, suspend, hibernate, halt or power off this server.
 
@@ -63,9 +63,13 @@ Do not treat fake-agent tests as proof that a real coding task completes. Do not
 
 The development server has four CPU cores and 16 GB RAM. Inspection found about 3.2 GB RAM available, swap full, and 315 GB free disk. Use it primarily for editing and lightweight checks.
 
-The user plans a Linux VM on a Windows gaming PC using Hyper-V. VM resources and nested virtualization remain to be confirmed. Do not assume dragonvm is that planned VM without checking. Aim for zero cloud spend; the user's ceiling is below US$10/month. No cloud purchase authorized.
+Confirmed dragonvm is the Hyper-V Linux guest: Ubuntu 26.04, eight CPUs, 11 GiB RAM (about 7 GiB available) and 67 GB free disk at inspection. Nested virtualization remains unverified. Aim for zero cloud spend; the user's ceiling is below US$10/month. No cloud purchase authorized.
 
-Planned layers: lint/syntax and focused module tests; disposable Kubernetes monitoring tests (kind proposed); Molecule containers for suitable roles; VMs for networking/kernel/boot behavior; isolated Bifrost provisioning networks; separate physical FPGA/NIC/Cisco verification. These test environments have not been implemented by this conversation.
+The dedicated minikube `fhs-test` profile is running Kubernetes `v1.37.1` with containerd `2.3.4`, Docker driver, four CPUs and 4096 MiB RAM. The node is Ready; the existing `monitoring` profile and default context are preserved. [Bootstrap and smoke checks](../ops/kubernetes/README.md) are implemented; the corrected live checks passed for node/system readiness, DNS, Service traffic and PVC persistence across separate writer/reader pods. The corrected run exited successfully; both smoke namespaces and their PVs are gone.
+
+Latest official source includes the monitoring-to-platform rename, NetBox values and tracked `bifrost-infra` missing from the experimental snapshot. No source import yet. Before VM use, adapt Bifrost privilege, host networking, real inventory and DHCP assumptions to an isolated disposable environment. NetBox chart version remains unconfirmed; its blank image tag requires chart default/version resolution.
+
+Remaining layers: lint/syntax and focused module tests; Kubernetes monitoring integration; Molecule containers for suitable roles; VMs for networking/kernel/boot behavior; isolated Bifrost provisioning networks; separate physical FPGA/NIC/Cisco verification. NetBox, Grafana, Telegraf and Bifrost deployment is deferred until the latest development configuration and NetBox values are assessed. Replicate the user's environment closely on dragonvm and run integration tests there, with local orchestration.
 
 ## Role review findings
 
