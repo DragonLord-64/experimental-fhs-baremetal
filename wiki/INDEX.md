@@ -8,5 +8,6 @@ Keep reusable understanding beside its evidence, following DragonMind's linked-n
 - [Resource layout and NetBox direction](resource-layout.md)
 - [Dated log](LOG.md)
 - [To-do](TODO.md)
+- [Conversation handoff](HANDOFF.md)
 
 Future notes can cover telemetry contracts, dashboard verification, provisioning tests, and lab procedures as those subjects are investigated.
