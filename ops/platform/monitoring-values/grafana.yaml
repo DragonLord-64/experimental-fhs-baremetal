@@ -1,0 +1,41 @@
+# Isolated dragonvm lab; no production targets.
+fullnameOverride: monitoring-grafana
+image:
+  registry: docker.io
+  repository: grafana/grafana
+  tag: 13.2.3
+  sha: b28bae15e219c998fb0e0424ed724930cc61b1f61fb404d47c862f9a23f9e572
+admin:
+  existingSecret: monitoring-grafana-admin
+  userKey: admin-user
+  passwordKey: admin-password
+persistence:
+  enabled: true
+  type: pvc
+  storageClassName: fhs-retain
+  size: 1Gi
+deploymentStrategy:
+  type: Recreate
+initChownData:
+  enabled: false
+testFramework:
+  enabled: false
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 384Mi
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      uid: prometheus
+      type: prometheus
+      access: proxy
+      url: http://monitoring-prometheus.{{ .Release.Namespace }}.svc:9090
+      isDefault: true
+service:
+  type: ClusterIP

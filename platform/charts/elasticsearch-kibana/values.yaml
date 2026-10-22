@@ -1,0 +1,44 @@
+# Fresh Elasticsearch/Kibana installation; Secret values are supplied separately.
+existingSecret: elastic-credentials
+elasticsearch:
+  image:
+    repository: docker.io/library/elasticsearch
+    tag: 9.5.5
+    digest: sha256:320bef0140dcaa30527babaae9d7a41c0ccc001e97ab87c08171d867b89e8f4f
+  persistence:
+    storageClass: ''
+    size: 20Gi
+  heap: 1g
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: '2'
+      memory: 4Gi
+  service:
+    type: ClusterIP
+kibana:
+  basePath: ''
+  publicBaseUrl: ''
+  ingress:
+    enabled: false
+    className: replace-me
+    host: kibana.example.invalid
+    annotations: {}
+    tlsSecretName: ''
+  enabled: true
+  image:
+    repository: docker.io/library/kibana
+    tag: 9.5.5
+    digest: sha256:2302bf43b02d7497f54961cdf1308a51d2f00a9c94d4dc30a6cf1540fcc16476
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: '1'
+      memory: 2Gi
+# Optional publisher bootstrap; existingSecret must also contain filebeat-password.
+filebeat:
+  enabled: false

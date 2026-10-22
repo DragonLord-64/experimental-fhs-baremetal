@@ -69,9 +69,9 @@ The dedicated minikube `fhs-test` profile is running Kubernetes `v1.37.1` with c
 
 The persistent lab's stop/start took 7.62/48.2 seconds before full-stack deployment; PVC persistence and post-resume smoke checks passed. All owned fixtures were reclaimed, but minikube's known post-restart reclamation issue requires a stable storage/reclaim choice before full-stack destructive lifecycle tests; see [evidence and limits](../ops/kubernetes/README.md).
 
-Latest official source includes the monitoring-to-platform rename, NetBox values and tracked `bifrost-infra` missing from the experimental snapshot. No source import yet. Before VM use, adapt Bifrost privilege, host networking, real inventory and DHCP assumptions to an isolated disposable environment. NetBox chart version remains unconfirmed; its blank image tag requires chart default/version resolution.
+Latest official source includes the monitoring-to-platform rename, NetBox values and tracked `bifrost-infra` missing from the experimental snapshot. The platform source is now imported with provenance; the production Bifrost launcher remains outside the lab. Before VM use, adapt Bifrost privilege, host networking, real inventory and DHCP assumptions to an isolated disposable environment. The source NetBox chart version was absent; the lab selects verified chart `8.3.67` and pins its resolved `v4.7.0` image.
 
-Remaining layers: lint/syntax and focused module tests; Kubernetes monitoring integration; Molecule containers for suitable roles; VMs for networking/kernel/boot behavior; isolated Bifrost provisioning networks; separate physical FPGA/NIC/Cisco verification. NetBox, Grafana, Telegraf and Bifrost deployment is deferred until the latest development configuration and NetBox values are assessed. Replicate the user's environment closely on dragonvm and run integration tests there, with local orchestration.
+Remaining layers: lint/syntax and focused module tests; Kubernetes monitoring integration; Molecule containers for suitable roles; VMs for networking/kernel/boot behavior; isolated Bifrost provisioning networks; separate physical FPGA/NIC/Cisco verification. The modular platform is now implemented and tested on dragonvm; see [platform validation](../ops/platform/VALIDATION.md). Independent releases reuse imported development `87dc794` values plus VM overrides. The default deployment performs readiness and authenticated functional checks; `deploy --with-bifrost` adds a restricted Ironic API smoke, without guest provisioning. Static retained volumes avoid the changing minikube provisioner identity. NetBox database persistence passed pod recreation and full cluster down/up. Replicate the user's environment closely on dragonvm and run integration tests there, with local orchestration.
 
 ## Role review findings
 
@@ -112,3 +112,9 @@ Match the user's existing writing voice: super brief, practical, actual tags and
 The user likes the current overall docs structure and diagrams. At least the FHS configuration PNG was opened and readable. Preserve useful structure while reconciling drift.
 
 Backlog covers NetBox and imports, monitoring architecture/deployment, Grafana setup, development playbooks now used operationally, switch POAP under `playbooks/development/switch-poap/`, and checking commands, diagrams, links and docs builds. These are recorded tasks, not completed documentation migrations.
+
+## Modular platform handoff
+
+Run `./ops/platform/deploy.sh` on dragonvm from `~/fhs-test-environment`; Helm is user-local `~/.local/bin/helm` v3.19.0. Source import and pinned versions are documented in [ops/platform](../ops/platform/README.md), with [actual checks](../ops/platform/VALIDATION.md). Namespace `fhs-platform`, context `fhs-test`; default context remains `monitoring`. Fresh secrets stay only in the cluster. The Docker cluster container has a 6 GiB limit; a new lifecycle profile requests the same. HostPath PV capacities do not enforce quotas; watch shared VM disk and memory.
+
+Bifrost actual image/API and nested KVM capability checks passed in [separate isolation](../ops/provisioning/README.md). No conductor, DHCP, PXE, guest boot or physical provisioning was tested. Monitoring emulators are a separate follow-on; do not claim Cisco or FHS protocol checks from the synthetic PDU test. No official SKA push is authorized.

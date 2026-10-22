@@ -6,6 +6,7 @@ Keep reusable understanding beside its evidence, following DragonMind's linked-n
 - [Decisions and open questions](decisions.md)
 - [Source map](sources.md)
 - [Resource layout and NetBox direction](resource-layout.md)
+- [VCC and FSP unit topology](unit-topology.md)
 - [Dated log](LOG.md)
 - [To-do](TODO.md)
 - [Conversation handoff](HANDOFF.md)

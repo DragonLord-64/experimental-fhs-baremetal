@@ -9,7 +9,7 @@ case "${1:-}" in
     command -v docker >/dev/null
     docker info >/dev/null
     minikube start --profile="$profile" --driver=docker --container-runtime=containerd \
-      --cpus=4 --memory=4096 --kubernetes-version="${KUBERNETES_VERSION:-v1.37.1}" \
+      --cpus=4 --memory=6144 --kubernetes-version="${KUBERNETES_VERSION:-v1.37.1}" \
       --keep-context --interactive=false --wait=all --wait-timeout=5m
     minikube -p "$profile" kubectl -- --context="$profile" --request-timeout=30s \
       create namespace fhs-test --dry-run=client -o yaml | \
