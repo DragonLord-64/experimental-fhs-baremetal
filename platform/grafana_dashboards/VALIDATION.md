@@ -139,3 +139,56 @@ TELEMETRY MISSING, absent FSP4 as NOT DEPLOYED, and absent interface/mesh
 selections as NOT DEPLOYED. Evidence: `/tmp/fhs-grafana-p2-live` on dragonvm.
 Independent repair review accepted the source, 23 tests and four screenshots.
 Full navigation limits below remain open.
+
+### Servers-only file fixture — 2026-10-22 implementation
+
+Continued the interrupted source diff against
+`12c2063a532f246611aa55c74595efe069a8b90f`. All changes remain inside this
+folder. `python3 -m unittest discover -s platform/grafana_dashboards/tests -q`:
+46 passed, including deterministic generation, 116/16 disjoint partition,
+feed consumption/provenance, observed-only readings and offline patch guards.
+The old absent-rack assertion now counts 44 switches and separately checks
+116 fixture-labelled servers; no sensor assertions were removed.
+
+`python3 platform/grafana_dashboards/promql_tests.py > /tmp/fhs-promql.test.json`
+produces eight groups / 56 executable expression cases. Promtool is absent;
+these expressions have **not** been executed here. Python compilation and
+`git diff --check` passed. Supervisor must run `promtool test rules` on that
+file, then perform the [collector and six-view acceptance](SUPERVISOR.md#visual-fixture-supervisor-only).
+No live mutation, import, commit, push or baseline-ref change was performed.
+The requested session handoff document and local baseline branch were absent;
+remote baseline immutability is unverified. No live acceptance claimed.
+
+### Review correction — actual coverage preservation
+
+The read-only fixture gate now compares all 16 actual hosts with observed-only
+status instead of requiring healthy coverage. It still requires all 116 visual
+hosts green and explicitly checks missing fspu1 / degraded fspu2-fhs1.
+`python3 -m unittest discover -s platform/grafana_dashboards/tests -v`:
+47 passed, including incomplete actual coverage remaining unknown and rejection
+of changed actual/visual statuses. No live validation performed.
+
+### Stale fixture correction — 2026-10-22
+
+Screen reproduced the stale 3m FSPUnit4/FHS1 regression: expected unknown 3,
+got ok 0. `visual_status()` now checks timestamps on each original raw selector
+before OR/reduction; provenance and explicit visual inventory filters remain.
+The existing regression and other tests are unchanged.
+
+- `python3 -m unittest discover -s platform/grafana_dashboards/tests -q`: 47 passed.
+- `python3 platform/grafana_dashboards/promql_tests.py > /tmp/fhs-visual-promql.test.json`
+  followed by `/home/dragon-lord/fhs-grafana-visual-inputs-20261022/promtool test rules /tmp/fhs-visual-promql.test.json`:
+  actual Promtool 3.15.0 SUCCESS, eight groups / 56 cases.
+- Repeated dashboard generation produced identical files; diff whitespace check
+  against `12c2063a532f246611aa55c74595efe069a8b90f` passed.
+
+SHA256 for fresh independent review:
+
+```text
+exact.py 04256cd1eac09206bc2bf73b4fc1fddf58f19eb14eb439fcfea13c4f1a56e1fc
+promql_tests.py 376c60639ae361dcb1ec34c7a8e3ff379f6ee813260a387d17e4cf7ab06633e8
+generated Promtool input 9a8038c8637ac74b6b83c1555ade97faf20525ef3d3744782fc6874d26b5872a
+```
+
+Source checks only. Independent review and supervisor collector/import/browser
+acceptance remain pending; no deployment, import, commit or push performed.

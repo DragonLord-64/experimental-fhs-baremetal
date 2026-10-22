@@ -77,3 +77,28 @@ See [supervisor operations](SUPERVISOR.md) and [validation](VALIDATION.md).
 Imports use bounded ownership discovery and optimistic ID/version checks;
 foreign-folder conflicts fail closed. Credentials and browser sessions remain
 outside Git. Independent source/visual review precedes commit and push.
+
+## Servers-only visual fixture
+
+[visual-inventory.json](visual-inventory.json) is the file authority for 116
+nonemulated FHS identities, validated against the 132-server inventory and
+16 actual hosts (including all four missing fspu1 hosts). Raw labels stay native;
+display identities stay lowercase. Generate the status-only collector file:
+
+```bash
+python3 platform/grafana_dashboards/visual_fixture.py --output platform/grafana_dashboards/visual-status.prom
+python3 platform/grafana_dashboards/generate.py
+```
+
+`fhs_visual_status{unit="FSPUnit4",fhs="FHS1",origin="visual_fixture"} 0`
+means **visual fixture / not observed**, never observed hardware health.
+Rack and overall detail consume this feed only for the explicit visual set,
+with `job="node-emulator"`, matching provenance and scrape age below 90 seconds.
+Missing/stale/invalid feed data stays unknown. Observed health wins; actual
+hosts never accept fixture fallback. Component status and unsupported numeric
+readings remain unknown. No `up`, sensors, rates, capacity, switches or mesh
+are synthesized. The collector rescrapes a static file: age measures scrape
+freshness, not an observation or file edit time.
+
+Use the existing collector; no extra endpoint or worker. See the guarded
+[supervisor procedure](SUPERVISOR.md#visual-fixture-supervisor-only).

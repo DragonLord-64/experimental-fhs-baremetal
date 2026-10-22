@@ -44,6 +44,43 @@ def expected_host():
     return '('+labelled(1,unit='$unit',fhs='$fhs')+') and on(unit,fhs) ('+known+')'
 
 
+def visual_hosts():
+    """File authority, checked against the full inventory and all actual hosts."""
+    hosts=json.loads((ROOT/'visual-inventory.json').read_text())
+    identities=[(h['unit'],h['fhs']) for h in hosts]
+    expected={(h['unit'],h['fhs']) for h in inventory() if h['kind']=='server' and not h['deployed']}
+    if len(identities)!=116 or set(identities)!=expected:
+        raise ValueError('Visual inventory must contain exactly the 116 nonemulated servers')
+    return hosts
+
+
+def visual_status(unit='$unit', fhs='$fhs'):
+    # Separate raw identities, provenance and freshness; never accept actual hosts.
+    hosts=visual_hosts()
+    groups=[]
+    for role in ('VCC','FSP'):
+        units=sorted({h['unit'] for h in hosts if h['unit'].startswith(role)})
+        members=sorted({h['fhs'] for h in hosts if h['unit'].startswith(role)})
+        if {(u,f) for u in units for f in members} != {(h['unit'],h['fhs']) for h in hosts if h['unit'].startswith(role)}:
+            raise ValueError('Visual inventory cannot be represented by disjoint role groups')
+        groups.append('fhs_visual_status{job="node-emulator",origin="visual_fixture",unit="'+unit+'",fhs="'+fhs+'",unit=~"'+'|'.join(units)+'",fhs=~"'+'|'.join(members)+'"}')
+    # timestamp must see original scrape samples: OR/reduction results carry
+    # evaluation time and would make an old fixture appear perpetually fresh.
+    fresh=['(('+raw+' == 0) and (time() - timestamp('+raw+') < 90))' for raw in groups]
+    return 'max('+' or '.join(fresh)+')'
+
+
+def visual_membership(unit='$unit', fhs='$fhs'):
+    known=' or '.join(labelled(1,**h) for h in visual_hosts())
+    return '('+labelled(1,unit=unit,fhs=fhs)+') and on(unit,fhs) ('+known+')'
+
+
+def server_status(observed, unit='$unit', fhs='$fhs'):
+    # Actual observations win. Unknown fixture data is not healthy inventory.
+    expected=expected_host().replace('$unit',unit).replace('$fhs',fhs)
+    return inventory_fallback('('+observed+') or on() ('+visual_status(unit,fhs)+')', '('+expected+') or on() ('+visual_membership(unit,fhs)+')')
+
+
 def parent_inventory_state():
     """Inventory only: no observed parent hardware sensors exist in this contract."""
     known=' or '.join(labelled(1,source=p['id']) for p in inventory()
@@ -103,19 +140,20 @@ def build(g,base):
     names=[f'{r}Unit{n}'+('-switch' if v['name']=='switch' else '') for r,count in [('VCC',24),('FSP',27)] for n in range(1,count+1)]
     v.update(type='custom',query=','.join(names),options=[]);v.pop('definition',None)
  # Rack elevations: explicit full inventory, one compact native Canvas per rack.
- rp=[note('**NINE 42U RACKS · SYNTHETIC PLACEMENT · devices 1U · one empty U between unit blocks** · 24 VCC + 27 FSP. Gray **NOT DEPLOYED** is inventory outside the 4 VCC / 3 FSP lab. **TELEMETRY MISSING** means deployed hardware without readings. Inventory persists when readings are unavailable.')]
+ rp=[note('**NINE 42U RACKS · SYNTHETIC PLACEMENT · devices 1U · one empty U between unit blocks** · 24 VCC + 27 FSP. 116 servers use **visual fixture** status: **not observed**. Switches outside the lab remain **NOT DEPLOYED**. Fixture feed missing/stale means unknown. **TELEMETRY MISSING** means deployed hardware without readings. Inventory persists when readings are unavailable.')]
  items=inventory()
  for rack in range(1,10):
   els=[];targets=[];over=[];occupied=set()
   for u in range(42,0,-1):els.append(element(f'U{u}',0,24+(42-u)*15,25,15,str(u),size=9))
   for p in [i for i in items if i['rack']==rack]:
    u=p['position_u'];height=p['height_u'];occupied.update(range(u,u+height));field=p['id']
-   txt=p['id']+(' · NOT DEPLOYED' if not p['deployed'] else '')
-   el=element(field,29,24+(42-(u+height-1))*15,270,height*15-1,txt,field if p['deployed'] else None,{'field':field,'fixed':GRAY} if p['deployed'] else {'fixed':GRAY},10)
-   if p['deployed']:
-    expr='('+g.health(p['unit'],p['fhs'])+') or on() vector(3)' if p['kind']=='server' else 'vector(3)'
+   active=p['deployed'] or p['kind']=='server'
+   txt=p['id']+(' · visual fixture / not observed' if not p['deployed'] and p['kind']=='server' else (' · NOT DEPLOYED' if not p['deployed'] else ''))
+   el=element(field,29,24+(42-(u+height-1))*15,270,height*15-1,txt,field if active else None,{'field':field,'fixed':GRAY} if active else {'fixed':GRAY},10)
+   if active:
+    expr=(('('+g.health(p['unit'],p['fhs'])+') or on() vector(3)') if p['deployed'] else server_status(g.health(p['unit'],p['fhs']),p['unit'],p['fhs'])) if p['kind']=='server' else 'vector(3)'
     targets.append(target(expr,field,str(len(targets))))
-    over.append(mapping(field,{0:(p['id']+' · HEALTHY','green'),1:(p['id']+' · DEGRADED','orange'),2:(p['id']+' · FAILED','red'),3:(p['id']+(' · TELEMETRY MISSING' if p['kind']=='server' else ' · HW UNKNOWN'),GRAY)}))
+    over.append(mapping(field,{0:(p['id']+(' · HEALTHY' if p['deployed'] else ' · ok · visual fixture / not observed'),'green'),1:(p['id']+' · DEGRADED','orange'),2:(p['id']+' · FAILED','red'),3:(p['id']+(' · TELEMETRY MISSING' if p['kind']=='server' else ' · HW UNKNOWN'),GRAY)}))
    el['links']=[{'title':'Open '+p['id'],'url':g.url('fhs',unit=p['unit'],fhs=p['fhs'],instance='All',node_instance='All') if p['kind']=='server' else g.url('switch',unit=p['unit'],switch=p['id']),'oneClick':True}];el['oneClickMode']='link';els.append(el)
   for u in range(42,0,-1):
    if u not in occupied:els.append(element('Empty'+str(u),29,24+(42-u)*15,270,14,'Empty',bg={'fixed':'#202226'},size=9))
@@ -153,14 +191,14 @@ def build(g,base):
  mp.append(note('[Open selected VCC switch]('+g.url('switch',dynamic={'switch':'VCCUnit${vccu}-switch','unit':'VCCUnit${vccu}'})+') · Selected throughput is observed RX/TX at the vccu endpoint. Capacity and utilization remain unknown without configured/negotiated capacity.',27,2))
  dashboards['mesh']['panels']=mp
  # Compact two-column component rows with status square and grouped readings.
- components=json.loads((ROOT/'components.json').read_text());fp=[note('**FHS $unit / $fhs** · Status at left, observed readings at right. Gray = missing telemetry. Illustrative temperature70/85°C and fan4000/1000RPM limits. Native flag meanings need hardware validation.')]
- overall=g.panel('Overall hardware health',inventory_fallback(g.health('$unit','$fhs'),expected_host()),0,2,8,3,states={0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')});classification(overall);fp.append(overall)
- for i,(title,expr) in enumerate([('Components',str(len(components))),('Deployed FHS','16'),('Not deployed FHS','116')]):
+ components=json.loads((ROOT/'components.json').read_text());fp=[note('**FHS $unit / $fhs** · Status at left, observed readings at right. Nonemulated servers: **visual fixture / not observed** overall status only; component status and unsupported readings remain unknown. Gray = missing telemetry. Illustrative temperature70/85°C and fan4000/1000RPM limits. Native flag meanings need hardware validation.')]
+ overall=g.panel('Overall hardware health',server_status(g.health('$unit','$fhs')),0,2,8,3,states={0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')});classification(overall);fp.append(overall)
+ for i,(title,expr) in enumerate([('Components',str(len(components))),('Deployed FHS','16'),('Visual fixture FHS','116')]):
   count=g.panel(title,'vector('+expr+')',8+i*5,2,5 if i<2 else 6,3);count['options']['colorMode']='value';count['fieldConfig']['defaults']['color']={'mode':'fixed','fixedColor':'#5794F2'};fp.append(count)
  for i,c in enumerate(components):
   x=(i%2)*12;y=5+(i//2)*3
   expr=g.reading_query({'name':'sts_psu'+c['title'][-1]+'_fan'},c['source']) if c['title'].startswith('PSU ') else g.component_health(c)
-  sp=g.panel(c['title'],inventory_fallback(expr,expected_host()),x,y,2,3,states={0:('Healthy','green'),1:('Fault','red')} if c['title'].startswith('PSU ') else {0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')});classification(sp);sp['title']='';sp['options']['textMode']='value';sp['options']['text']={'valueSize':11,'titleSize':10};fp.append(sp)
+  sp=g.panel(c['title'],inventory_fallback(expr,"("+expected_host()+") or on() ("+visual_membership()+")"),x,y,2,3,states={0:('Healthy','green'),1:('Fault','red')} if c['title'].startswith('PSU ') else {0:('Healthy','green'),1:('Degraded','orange'),2:('Failed','red')});classification(sp);sp['title']='';sp['options']['textMode']='value';sp['options']['text']={'valueSize':11,'titleSize':10};fp.append(sp)
   readings=g.panel(c['title']+' · readings','vector(0) == 1',x+2,y,10,3);readings['targets']=[];readings['fieldConfig']['overrides']=[]
   for n,r in enumerate(c['readings']):
    readings['targets'].append(target(g.reading_query(r,c['source']),r['label'],chr(65+n)))

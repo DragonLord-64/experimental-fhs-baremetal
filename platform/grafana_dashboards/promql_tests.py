@@ -46,7 +46,34 @@ def main():
         cases.append(test(expr.replace('$fhs','FHS2'),[]))
         cases.append(test(expr.replace('$unit','FSPUnit1'),[]))
         cases.append(test(expr.replace('$node_job','node-down'),[]))
-    from exact import mesh_rate
+    from exact import mesh_rate, server_status, visual_status, inventory
+    from visual_fixture import render
+    # Parse the actual generated file feed, rather than an independent sample list.
+    fixture_inputs=[series(line.rsplit(' ',1)[0].replace('{','{job="node-emulator",',1),0) for line in render().splitlines() if not line.startswith('#')]
+    # Poison every actual identity, including the four missing FSP1 hosts.
+    fixture_inputs += [series('fhs_visual_status{job="node-emulator",unit="'+h['unit']+'",fhs="'+h['fhs']+'",origin="visual_fixture"}',0)
+                       for h in inventory() if h['kind']=='server' and h['deployed']]
+    fixture_cases=[]
+    for unit,expected in [('FSPUnit4',0),('VCCUnit5',0),('FSPUnit1',3),('FSPUnit2',1),('VCCUnit1',0)]:
+        labels='{}' if expected!=3 else '{unit="FSPUnit1",fhs="FHS1"}'
+        fixture_cases.append(test(server_status(health(unit,'FHS1'),unit,'FHS1'),[(labels,expected)]))
+    for host in inventory():
+        if host['kind']=='server' and host['deployed']:
+            fixture_cases.append(test(visual_status(host['unit'],host['fhs']),[]))
+    fixture_cases.append(test(server_status('vector(2)','FSPUnit4','FHS1'),[('{}',2)]))
+    fixture_cases.append(test(visual_status('FSPUnit28','FHS1'),[]))
+    fixture_cases.append(test(visual_status('VCCUnit5','FHS2'),[]))
+    # Unsupported observations must stay absent even for a green fixture host.
+    fixture_cases.append(test(reading_query({'name':'fan1_rpm'},None).replace('$unit','VCCUnit5'),[]))
+    fixture_test={'interval':'1m','input_series':inputs+fixture_inputs,'promql_expr_test':fixture_cases}
+    missing_expr=server_status(health('FSPUnit4','FHS1'),'FSPUnit4','FHS1')
+    missing_expected=[('{unit="FSPUnit4",fhs="FHS1"}',3)]
+    absent_test={'interval':'1m','input_series':[series('fhs_visual_status{job="node-emulator",unit="FSPUnit4",fhs="FHS1",origin="untrusted"}',0)],'promql_expr_test':[test(missing_expr,missing_expected)]}
+    invalid_tests=[]
+    for samples in ([], [series('fhs_visual_status{job="node-emulator",unit="FSPUnit4",fhs="FHS1",origin="visual_fixture"}',1)], [series('fhs_visual_status{job="other",unit="FSPUnit4",fhs="FHS1",origin="visual_fixture"}',0)]):
+        invalid_tests.append({'interval':'1m','input_series':samples,'promql_expr_test':[test(missing_expr,missing_expected)]})
+    stale_case=test(missing_expr,missing_expected);stale_case['eval_time']='3m'
+    stale_test={'interval':'1m','input_series':[{'series':'fhs_visual_status{job="node-emulator",unit="FSPUnit4",fhs="FHS1",origin="visual_fixture"}','values':'0 _ _ _'}],'promql_expr_test':[stale_case]}
     rate_inputs=[]
     for iface,state in [('eth1/1/1','up'),('eth1/1/3','down')]:
         for direction in ('In','Out'):
@@ -66,6 +93,6 @@ def main():
             expr=mesh_rate(direction).replace('$switch_job','switch').replace('$vccu','1').replace('$fspu',str(fsp))
             rate_cases.append({'expr':expr,'eval_time':'5m','exp_samples':[] if fsp==2 else [{'labels':'{}','value':1016.9491525423729*8/1e9}]})
     rate_test={'interval':'1m','input_series':rate_inputs,'promql_expr_test':rate_cases}
-    print(json.dumps({'rule_files':[],'evaluation_interval':'1m','tests':[{'interval':'1m','input_series':inputs,'promql_expr_test':cases},rate_test]},indent=2))
+    print(json.dumps({'rule_files':[],'evaluation_interval':'1m','tests':[{'interval':'1m','input_series':inputs,'promql_expr_test':cases},rate_test,fixture_test,absent_test,stale_test]+invalid_tests},indent=2))
 
 if __name__=='__main__':main()

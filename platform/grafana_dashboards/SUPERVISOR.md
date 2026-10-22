@@ -81,3 +81,58 @@ is inferred from host speed metadata. Record unsupported optics/fans/VLANs.
 Publication remains gated by actual live acceptance. Trusted publisher uses a
 normal fast-forward to private `development` only; do not create or push main.
 No worker imports, commits or pushes.
+
+## Visual fixture (supervisor only)
+
+Source-only candidate; no live validation claimed. Read-only inspection of
+`~/fhs-emulators-work/ops/emulators/render.py` found ConfigMap
+`fhs-emulators/monitoring-fixtures`, directory-mounted at `/fixtures` in the
+existing `node` container with `--collector.textfile.directory=/fixtures`.
+`integration.py` defines `node-emulator` with a 15s scrape and no metric keep
+filter. Recheck that runtime contract before applying; do not edit that checkout.
+
+After independent review, supervisor explicitly selects disposable context
+`fhs-test` and verifies the running pod uses this ConfigMap as a directory
+(no subPath/items restriction), and the actual scrape has no filter dropping
+`fhs_visual_status`. Capture a private ConfigMap snapshot, then render a patch:
+
+```bash
+kubectl --context=fhs-test -n fhs-emulators get configmap monitoring-fixtures -o json > /tmp/fhs-fixture-before.json
+python3 platform/grafana_dashboards/visual_fixture.py --configmap-snapshot /tmp/fhs-fixture-before.json --output /tmp/fhs-visual-patch.json
+kubectl --context=fhs-test -n fhs-emulators patch configmap monitoring-fixtures --type=json --patch-file=/tmp/fhs-visual-patch.json
+```
+
+Review the patch before the last command. It tests UID/resourceVersion and adds
+only `data["visual-status.prom"]`; `node.prom`, other keys and pod configuration
+are untouched. A conflict requires a fresh snapshot and review. No rollout or
+new workers. Wait for projected volume refresh and two scrapes (bounded to five
+minutes). Read back the ConfigMap and compare all original keys byte-for-byte;
+only the separate visual key may differ. Check collector scrape errors remain
+zero and exactly 116 fixture samples reach Prometheus. Rollback removes only
+that key with a fresh UID/resourceVersion guarded JSON Patch; never restore the
+whole snapshot over intervening edits.
+
+Through a supervisor-verified tunnel to this lab Prometheus:
+
+```bash
+python3 platform/grafana_dashboards/validate_visual_fixture.py --namespace fhs-test --prometheus-url http://127.0.0.1:9090 --job fhs-emulator
+```
+
+This read-only hook checks exact feed identities/count/values and 132 status
+queries plus 16 observed-only comparisons. Only visual hosts require green;
+actual hosts must preserve observed-only status, including unknown from incomplete
+coverage. Missing fspu1 and degraded fspu2-fhs1 remain explicit scenario gates.
+Its namespace argument is an acknowledgement, not URL attestation.
+Retain sanitized results at a recorded evaluation time. Separately verify PSU1
+fault, missing fspu1 readings, unchanged actual sensor samples/`up`, seven switch
+and twelve link scenarios, and absent fixture readings. Execute generated
+Promtool tests before import. Use the existing six-owned-view import/readback
+and navigation procedures; inspect all six screenshots, fixture rack labels,
+fspu4 detail unknown readings, fspu1 unknown, fspu2-fhs1 degraded, unchanged mesh
+ND and native peer role/number navigation. No worker performs these operations.
+
+Trusted publication freezes the reviewed diff, untracked source files and
+SHA256/check evidence before live acceptance. Recheck the frozen content before
+normal fast-forward push to private `development` only. Immutable baseline
+`baselines/grafana-20261022` at `12c2063a532f246611aa55c74595efe069a8b90f`
+must remain unchanged; verify remotely as supervisor. Never publish to main.

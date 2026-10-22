@@ -19,7 +19,8 @@ class Dashboards(unittest.TestCase):
         self.assertEqual(9,sum(p['type']=='canvas' for p in rack))
         elements=[e for p in rack if p['type']=='canvas' for e in p['options']['root']['elements']]
         self.assertEqual(9*42,sum(e['name'].startswith('U') for e in elements))
-        self.assertEqual(160,sum('not deployed' in e['config']['text'].get('fixed','') for e in elements))
+        self.assertEqual(44,sum('not deployed' in e['config']['text'].get('fixed','') for e in elements))
+        self.assertEqual(116,sum('visual fixture / not observed' in e['config']['text'].get('fixed','') for e in elements))
         self.assertIn('SYNTHETIC',rack[0]['options']['content'])
         matrix=next(p for p in dashboards['mesh']['panels'] if p['type']=='canvas')
         cells=[e for e in matrix['options']['root']['elements'] if e['name'].startswith('VCCU') and ' FSPU' in e['name']]
