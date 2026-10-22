@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "provenance": "STATIC DEMO: synthetic mock readings and synthetic peer inventory; not observed hardware",
+  "servers": {
+    "fspu1-fhs1": {
+      "status": "unknown",
+      "provenance": "static replay",
+      "components": {}
+    },
+    "fspu1-fhs2": {
+      "status": "unknown",
+      "provenance": "static replay",
+      "components": {}
+    },
+    "fspu1-fhs3": {
+      "status": "unknown",
+      "provenance": "static replay",
+      "components": {}
+    },
+    "fspu1-fhs4": {
+      "status": "unknown",
+      "provenance": "static replay",
+      "components": {}
+    },
+    "fspu2-fhs1": {
+      "status": "degraded",
+      "provenance": "static replay",
+      "components": {
+        "fpga0": "ok",
+        "fpga1": "ok",
+        "psu1": "fault",
+        "psu2": "ok",
+        "fan1": "ok",
+        "fan2": "ok",
+        "cpu": "ok",
+        "nic": "ok",
+        "networklan": "ok",
+        "motherboard": "ok",
+        "bmctelemetry": "ok",
+        "dimma1": "ok",
+        "dimmb1": "ok",
+        "dimmc1": "ok",
+        "dimme1": "ok",
+        "dimmg1": "ok",
+        "dimmh1": "ok",
+        "dimmi1": "ok",
+        "dimmk1": "ok",
+        "nvme0": "ok",
+        "nvme1": "ok"
+      }
+    }
+  },
+  "links": [
+    {
+      "id": "vccu1-fspu1",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu1-switch",
+          "interface": "eth1/1/1"
+        },
+        {
+          "switch": "fspu1-switch",
+          "interface": "eth1/1/1"
+        }
+      ]
+    },
+    {
+      "id": "vccu1-fspu2",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu1-switch",
+          "interface": "eth1/1/2"
+        },
+        {
+          "switch": "fspu2-switch",
+          "interface": "eth1/1/1"
+        }
+      ]
+    },
+    {
+      "id": "vccu1-fspu3",
+      "status": "fault",
+      "ends": [
+        {
+          "switch": "vccu1-switch",
+          "interface": "eth1/1/3"
+        },
+        {
+          "switch": "fspu3-switch",
+          "interface": "eth1/1/1"
+        }
+      ]
+    },
+    {
+      "id": "vccu2-fspu1",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu2-switch",
+          "interface": "eth1/1/1"
+        },
+        {
+          "switch": "fspu1-switch",
+          "interface": "eth1/1/2"
+        }
+      ]
+    },
+    {
+      "id": "vccu2-fspu2",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu2-switch",
+          "interface": "eth1/1/2"
+        },
+        {
+          "switch": "fspu2-switch",
+          "interface": "eth1/1/2"
+        }
+      ]
+    },
+    {
+      "id": "vccu2-fspu3",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu2-switch",
+          "interface": "eth1/1/3"
+        },
+        {
+          "switch": "fspu3-switch",
+          "interface": "eth1/1/2"
+        }
+      ]
+    },
+    {
+      "id": "vccu3-fspu1",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu3-switch",
+          "interface": "eth1/1/1"
+        },
+        {
+          "switch": "fspu1-switch",
+          "interface": "eth1/1/3"
+        }
+      ]
+    },
+    {
+      "id": "vccu3-fspu2",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu3-switch",
+          "interface": "eth1/1/2"
+        },
+        {
+          "switch": "fspu2-switch",
+          "interface": "eth1/1/3"
+        }
+      ]
+    },
+    {
+      "id": "vccu3-fspu3",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu3-switch",
+          "interface": "eth1/1/3"
+        },
+        {
+          "switch": "fspu3-switch",
+          "interface": "eth1/1/3"
+        }
+      ]
+    },
+    {
+      "id": "vccu4-fspu1",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu4-switch",
+          "interface": "eth1/1/1"
+        },
+        {
+          "switch": "fspu1-switch",
+          "interface": "eth1/1/4"
+        }
+      ]
+    },
+    {
+      "id": "vccu4-fspu2",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu4-switch",
+          "interface": "eth1/1/2"
+        },
+        {
+          "switch": "fspu2-switch",
+          "interface": "eth1/1/4"
+        }
+      ]
+    },
+    {
+      "id": "vccu4-fspu3",
+      "status": "ok",
+      "ends": [
+        {
+          "switch": "vccu4-switch",
+          "interface": "eth1/1/3"
+        },
+        {
+          "switch": "fspu3-switch",
+          "interface": "eth1/1/4"
+        }
+      ]
+    }
+  ],
+  "physical_ports": {},
+  "transceivers": {},
+  "readings": [],
+  "defaults": {
+    "status": "ok",
+    "mock_readings": true,
+    "provenance": "synthetic demo"
+  },
+  "interfaces": {},
+  "switches": {}
+}

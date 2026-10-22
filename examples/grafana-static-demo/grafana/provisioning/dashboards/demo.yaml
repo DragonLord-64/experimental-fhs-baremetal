@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: static-demo
+    orgId: 1
+    folder: fhs-infra-issue2
+    type: file
+    disableDeletion: false
+    editable: false
+    options:
+      path: /var/lib/grafana/dashboards

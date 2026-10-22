@@ -1,0 +1,4955 @@
+{
+  "uid": "fhs-infra-server",
+  "title": "FHS telemetry",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": [
+    "fhs-infrastructure",
+    "explicit-lab-inventory"
+  ],
+  "timezone": "browser",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh": "5s",
+  "editable": true,
+  "templating": {
+    "list": [
+      {
+        "name": "ds",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {
+          "text": "Prometheus",
+          "value": "prometheus"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_rack",
+        "label": "RACK page",
+        "type": "custom",
+        "query": "Infrastructure rack (fhs-infra-rack) : fhs-infra-rack",
+        "current": {
+          "text": "Infrastructure rack (fhs-infra-rack)",
+          "value": "fhs-infra-rack"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_mesh",
+        "label": "MESH page",
+        "type": "custom",
+        "query": "vccu to fspu mesh (fhs-infra-mesh) : fhs-infra-mesh",
+        "current": {
+          "text": "vccu to fspu mesh (fhs-infra-mesh)",
+          "value": "fhs-infra-mesh"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_fhs",
+        "label": "FHS page",
+        "type": "custom",
+        "query": "FHS telemetry (fhs-infra-server) : fhs-infra-server",
+        "current": {
+          "text": "FHS telemetry (fhs-infra-server)",
+          "value": "fhs-infra-server"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_switch",
+        "label": "SWITCH page",
+        "type": "custom",
+        "query": "Switch overview (fhs-infra-switch) : fhs-infra-switch",
+        "current": {
+          "text": "Switch overview (fhs-infra-switch)",
+          "value": "fhs-infra-switch"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_interface",
+        "label": "INTERFACE page",
+        "type": "custom",
+        "query": "Switch interface (fhs-infra-interface) : fhs-infra-interface",
+        "current": {
+          "text": "Switch interface (fhs-infra-interface)",
+          "value": "fhs-infra-interface"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_vlan",
+        "label": "VLAN page",
+        "type": "custom",
+        "query": "VLAN configuration (fhs-infra-vlan) : fhs-infra-vlan",
+        "current": {
+          "text": "VLAN configuration (fhs-infra-vlan)",
+          "value": "fhs-infra-vlan"
+        },
+        "hide": 0
+      },
+      {
+        "name": "job",
+        "label": "FHS job",
+        "type": "constant",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "static-demo",
+        "definition": "label_values(sts_psu1_fan, job)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "hide": 2,
+        "current": {
+          "text": "static-demo",
+          "value": "static-demo"
+        }
+      },
+      {
+        "name": "node_job",
+        "label": "Node job",
+        "type": "constant",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "static-demo",
+        "definition": "label_values(node_network_info, job)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "hide": 2,
+        "current": {
+          "text": "static-demo",
+          "value": "static-demo"
+        }
+      },
+      {
+        "name": "switch_job",
+        "label": "Switch job",
+        "type": "constant",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "static-demo",
+        "definition": "label_values(nexus_interfaces_vdcId, job)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "hide": 2,
+        "current": {
+          "text": "static-demo",
+          "value": "static-demo"
+        }
+      },
+      {
+        "name": "unit",
+        "label": "Unit",
+        "type": "custom",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "vccu1 : VCCUnit1,vccu2 : VCCUnit2,vccu3 : VCCUnit3,vccu4 : VCCUnit4,vccu5 : VCCUnit5,vccu6 : VCCUnit6,vccu7 : VCCUnit7,vccu8 : VCCUnit8,vccu9 : VCCUnit9,vccu10 : VCCUnit10,vccu11 : VCCUnit11,vccu12 : VCCUnit12,vccu13 : VCCUnit13,vccu14 : VCCUnit14,vccu15 : VCCUnit15,vccu16 : VCCUnit16,vccu17 : VCCUnit17,vccu18 : VCCUnit18,vccu19 : VCCUnit19,vccu20 : VCCUnit20,vccu21 : VCCUnit21,vccu22 : VCCUnit22,vccu23 : VCCUnit23,vccu24 : VCCUnit24,fspu1 : FSPUnit1,fspu2 : FSPUnit2,fspu3 : FSPUnit3,fspu4 : FSPUnit4,fspu5 : FSPUnit5,fspu6 : FSPUnit6,fspu7 : FSPUnit7,fspu8 : FSPUnit8,fspu9 : FSPUnit9,fspu10 : FSPUnit10,fspu11 : FSPUnit11,fspu12 : FSPUnit12,fspu13 : FSPUnit13,fspu14 : FSPUnit14,fspu15 : FSPUnit15,fspu16 : FSPUnit16,fspu17 : FSPUnit17,fspu18 : FSPUnit18,fspu19 : FSPUnit19,fspu20 : FSPUnit20,fspu21 : FSPUnit21,fspu22 : FSPUnit22,fspu23 : FSPUnit23,fspu24 : FSPUnit24,fspu25 : FSPUnit25,fspu26 : FSPUnit26,fspu27 : FSPUnit27",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "fspu2",
+          "value": "FSPUnit2"
+        },
+        "hide": 0,
+        "options": []
+      },
+      {
+        "name": "fhs",
+        "label": "FHS member",
+        "type": "custom",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "fhs1 : FHS1,fhs2 : FHS2,fhs3 : FHS3,fhs4 : FHS4",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "fhs1",
+          "value": "FHS1"
+        },
+        "hide": 0,
+        "options": []
+      },
+      {
+        "name": "instance",
+        "label": "FHS instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+          "refId": "instance"
+        },
+        "definition": "label_values(up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_instance",
+        "label": "Node instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+          "refId": "node_instance"
+        },
+        "definition": "label_values(up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2
+      },
+      {
+        "name": "switch",
+        "label": "Switch",
+        "type": "custom",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "vccu1-switch : VCCUnit1-switch,vccu2-switch : VCCUnit2-switch,vccu3-switch : VCCUnit3-switch,vccu4-switch : VCCUnit4-switch,vccu5-switch : VCCUnit5-switch,vccu6-switch : VCCUnit6-switch,vccu7-switch : VCCUnit7-switch,vccu8-switch : VCCUnit8-switch,vccu9-switch : VCCUnit9-switch,vccu10-switch : VCCUnit10-switch,vccu11-switch : VCCUnit11-switch,vccu12-switch : VCCUnit12-switch,vccu13-switch : VCCUnit13-switch,vccu14-switch : VCCUnit14-switch,vccu15-switch : VCCUnit15-switch,vccu16-switch : VCCUnit16-switch,vccu17-switch : VCCUnit17-switch,vccu18-switch : VCCUnit18-switch,vccu19-switch : VCCUnit19-switch,vccu20-switch : VCCUnit20-switch,vccu21-switch : VCCUnit21-switch,vccu22-switch : VCCUnit22-switch,vccu23-switch : VCCUnit23-switch,vccu24-switch : VCCUnit24-switch,fspu1-switch : FSPUnit1-switch,fspu2-switch : FSPUnit2-switch,fspu3-switch : FSPUnit3-switch,fspu4-switch : FSPUnit4-switch,fspu5-switch : FSPUnit5-switch,fspu6-switch : FSPUnit6-switch,fspu7-switch : FSPUnit7-switch,fspu8-switch : FSPUnit8-switch,fspu9-switch : FSPUnit9-switch,fspu10-switch : FSPUnit10-switch,fspu11-switch : FSPUnit11-switch,fspu12-switch : FSPUnit12-switch,fspu13-switch : FSPUnit13-switch,fspu14-switch : FSPUnit14-switch,fspu15-switch : FSPUnit15-switch,fspu16-switch : FSPUnit16-switch,fspu17-switch : FSPUnit17-switch,fspu18-switch : FSPUnit18-switch,fspu19-switch : FSPUnit19-switch,fspu20-switch : FSPUnit20-switch,fspu21-switch : FSPUnit21-switch,fspu22-switch : FSPUnit22-switch,fspu23-switch : FSPUnit23-switch,fspu24-switch : FSPUnit24-switch,fspu25-switch : FSPUnit25-switch,fspu26-switch : FSPUnit26-switch,fspu27-switch : FSPUnit27-switch",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "fspu2-switch",
+          "value": "FSPUnit2-switch"
+        },
+        "hide": 2,
+        "options": []
+      },
+      {
+        "name": "interface",
+        "label": "Interface",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(nexus_interfaces_vdcId{job=\"$switch_job\",source=\"$switch\"}, interface)",
+          "refId": "interface"
+        },
+        "definition": "label_values(nexus_interfaces_vdcId{job=\"$switch_job\",source=\"$switch\"}, interface)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "eth1/1/1",
+          "value": "eth1/1/1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "vccu",
+        "label": "vccu unit",
+        "type": "custom",
+        "query": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24",
+        "current": {
+          "text": "1",
+          "value": "1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "fspu",
+        "label": "fspu unit",
+        "type": "custom",
+        "query": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27",
+        "current": {
+          "text": "1",
+          "value": "1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "port",
+        "label": "Physical port",
+        "type": "custom",
+        "query": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32",
+        "current": {
+          "text": "1",
+          "value": "1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "vlan",
+        "label": "VLAN",
+        "type": "textbox",
+        "query": "55",
+        "current": {
+          "text": "55",
+          "value": "55"
+        },
+        "hide": 2
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "Infrastructure rack",
+      "url": "/d/${target_rack:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "vccu to fspu mesh",
+      "url": "/d/${target_mesh:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "Switch overview",
+      "url": "/d/${target_switch:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "Switch interface",
+      "url": "/d/${target_interface:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "VLAN configuration",
+      "url": "/d/${target_vlan:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "<b>STATIC DEMO</b> \u00b7 synthetic readings and peers, not observed hardware. Edit scenarios.json; refresh after two 5s scrapes. fspu1 telemetry intentionally missing. PSU and logical-link faults are independent of physical port/QSFP hardware."
+      },
+      "id": 1,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      }
+    },
+    {
+      "title": "Overall hardware health",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 8,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_server_status{unit=\"$unit\",fhs=\"$fhs\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 2
+    },
+    {
+      "title": "Components",
+      "type": "stat",
+      "gridPos": {
+        "x": 8,
+        "y": 2,
+        "w": 5,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "vector(21)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 3
+    },
+    {
+      "title": "Configured FHS",
+      "type": "stat",
+      "gridPos": {
+        "x": 13,
+        "y": 2,
+        "w": 5,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(demo_server_status)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 4
+    },
+    {
+      "title": "Missing telemetry",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 2,
+        "w": 6,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(demo_server_status == 3) or vector(0)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 5
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"fpga0\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 6
+    },
+    {
+      "title": "FPGA 0 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 5,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA0\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Core"
+        },
+        {
+          "refId": "B",
+          "expr": "front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA0\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Front"
+        },
+        {
+          "refId": "C",
+          "expr": "fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA0\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fabric"
+        },
+        {
+          "refId": "D",
+          "expr": "fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA0\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "F-tile"
+        },
+        {
+          "refId": "E",
+          "expr": "fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA0\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Card BMC"
+        },
+        {
+          "refId": "F",
+          "expr": "total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA0\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Input power"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Core"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Front"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fabric"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "F-tile"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Card BMC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Input power"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 7
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"fpga1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 8
+    },
+    {
+      "title": "FPGA 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 5,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Core"
+        },
+        {
+          "refId": "B",
+          "expr": "front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Front"
+        },
+        {
+          "refId": "C",
+          "expr": "fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fabric"
+        },
+        {
+          "refId": "D",
+          "expr": "fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "F-tile"
+        },
+        {
+          "refId": "E",
+          "expr": "fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Card BMC"
+        },
+        {
+          "refId": "F",
+          "expr": "total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FPGA1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Input power"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Core"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Front"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fabric"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "F-tile"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Card BMC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Input power"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 9
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"psu1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 10
+    },
+    {
+      "title": "PSU 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 8,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sts_psu1{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"PSU1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Status flag"
+        },
+        {
+          "refId": "B",
+          "expr": "sts_psu1_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"PSU1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fan flag"
+        },
+        {
+          "refId": "C",
+          "expr": "sts_psu1_ac_lost{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"PSU1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "AC lost flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fan flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC lost flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 11
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"psu2\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 12
+    },
+    {
+      "title": "PSU 2 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 8,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sts_psu2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"PSU2\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Status flag"
+        },
+        {
+          "refId": "B",
+          "expr": "sts_psu2_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"PSU2\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fan flag"
+        },
+        {
+          "refId": "C",
+          "expr": "sts_psu2_ac_lost{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"PSU2\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "AC lost flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fan flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC lost flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 13
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"fan1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 14
+    },
+    {
+      "title": "Fan 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 11,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FAN\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Speed"
+        },
+        {
+          "refId": "B",
+          "expr": "fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FAN\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Speed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: RPM"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 15
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"fan2\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 16
+    },
+    {
+      "title": "Fan 2 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 11,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FAN\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Speed"
+        },
+        {
+          "refId": "B",
+          "expr": "fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"FAN\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Speed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: RPM"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 17
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"cpu\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 18
+    },
+    {
+      "title": "CPU \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 14,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"CPU\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        },
+        {
+          "refId": "B",
+          "expr": "prochot_cpu{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"CPU\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "PROCHOT flag"
+        },
+        {
+          "refId": "C",
+          "expr": "cpu1_thermtrip{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"CPU\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Trip flag"
+        },
+        {
+          "refId": "D",
+          "expr": "sts_cpu_mce{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"CPU\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "MCE flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PROCHOT flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trip flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "MCE flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 19
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"nic\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 20
+    },
+    {
+      "title": "NIC \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 14,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"NIC\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 21
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"networklan\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 22
+    },
+    {
+      "title": "Network LAN \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 17,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"LAN\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 23
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 17,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"motherboard\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 24
+    },
+    {
+      "title": "Motherboard \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 17,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Board 1"
+        },
+        {
+          "refId": "B",
+          "expr": "mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Board 2"
+        },
+        {
+          "refId": "C",
+          "expr": "outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Outlet 1"
+        },
+        {
+          "refId": "D",
+          "expr": "outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Outlet 2"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Board 1"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Board 2"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Outlet 1"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Outlet 2"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 25
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"bmctelemetry\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 26
+    },
+    {
+      "title": "BMC telemetry \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 20,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "volt_12v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "12 V rail"
+        },
+        {
+          "refId": "B",
+          "expr": "volt_3v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "3 V rail"
+        },
+        {
+          "refId": "C",
+          "expr": "watchdog2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Watchdog flag"
+        },
+        {
+          "refId": "D",
+          "expr": "chassis_intr{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"x550_bmc\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Chassis flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "12 V rail"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "volt"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3 V rail"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "volt"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Watchdog flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Chassis flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 27
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimma1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 28
+    },
+    {
+      "title": "DIMM A1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 20,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 29
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimmb1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 30
+    },
+    {
+      "title": "DIMM B1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 23,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 31
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 23,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimmc1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 32
+    },
+    {
+      "title": "DIMM C1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 23,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 33
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 26,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimme1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 34
+    },
+    {
+      "title": "DIMM E1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 26,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 35
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 26,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimmg1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 36
+    },
+    {
+      "title": "DIMM G1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 26,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 37
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimmh1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 38
+    },
+    {
+      "title": "DIMM H1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 29,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 39
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 29,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimmi1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 40
+    },
+    {
+      "title": "DIMM I1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 29,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 41
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"dimmk1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 42
+    },
+    {
+      "title": "DIMM K1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 32,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",source=\"DIMM\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 43
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 32,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"nvme0\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 44
+    },
+    {
+      "title": "NVMe 0 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 32,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_hwmon_temp_celsius{unit=\"$unit\",fhs=\"$fhs\",chip=\"nvme_nvme0\",sensor=\"temp1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Composite"
+        },
+        {
+          "refId": "B",
+          "expr": "max(node_hwmon_temp_celsius{unit=\"$unit\",fhs=\"$fhs\",chip=\"nvme_nvme0\"})",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Hottest sensor"
+        },
+        {
+          "refId": "C",
+          "expr": "node_nvme_info{unit=\"$unit\",fhs=\"$fhs\",device=\"nvme0\",state=\"live\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller live"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Composite"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Hottest sensor"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller live"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 45
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(demo_component_status{unit=\"$unit\",fhs=\"$fhs\",component=\"nvme1\"}) or on() vector(3)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ok",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "fault",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                },
+                "4": {
+                  "text": "notdeployed",
+                  "color": "#c8cbd2"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 46
+    },
+    {
+      "title": "NVMe 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 35,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_hwmon_temp_celsius{unit=\"$unit\",fhs=\"$fhs\",chip=\"nvme_nvme1\",sensor=\"temp1\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Composite"
+        },
+        {
+          "refId": "B",
+          "expr": "max(node_hwmon_temp_celsius{unit=\"$unit\",fhs=\"$fhs\",chip=\"nvme_nvme1\"})",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Hottest sensor"
+        },
+        {
+          "refId": "C",
+          "expr": "node_nvme_info{unit=\"$unit\",fhs=\"$fhs\",device=\"nvme1\",state=\"live\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller live"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Composite"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Hottest sensor"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller live"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 47
+    },
+    {
+      "title": "Everything else \u00b7 network / metadata",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_network_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"}",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "unknown",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "unknown",
+                  "color": "#8e8e8e"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^VCCUnit([0-9]+)-FHS([0-9]+)$",
+                "result": {
+                  "text": "vccu$1-fhs$2"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^FSPUnit([0-9]+)-FHS([0-9]+)$",
+                "result": {
+                  "text": "fspu$1-fhs$2"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^VCCUnit([0-9]+)(.*)$",
+                "result": {
+                  "text": "vccu$1$2"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^FSPUnit([0-9]+)(.*)$",
+                "result": {
+                  "text": "fspu$1$2"
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "^FHS([0-9]+)$",
+                "result": {
+                  "text": "fhs$1"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "job": true,
+              "instance": true
+            },
+            "indexByName": {
+              "device": 0,
+              "ifalias": 1,
+              "address": 2,
+              "Value": 3
+            }
+          }
+        }
+      ],
+      "id": 48
+    }
+  ],
+  "description": "STATIC DEMO: fully populated synthetic mock values and peer inventory; not observed hardware or protocol simulation."
+}

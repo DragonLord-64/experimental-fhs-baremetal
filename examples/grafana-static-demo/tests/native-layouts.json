@@ -1,0 +1,374 @@
+{
+  "fhs-infra-server": {
+    "title": "FHS telemetry",
+    "layout_sha256": "81cbc280332b7b637a58813187e8b844f466d0e94e564bfa3c0dd28c0b01bf01",
+    "links": [
+      {
+        "title": "Infrastructure rack",
+        "url": "/d/${target_rack:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "vccu to fspu mesh",
+        "url": "/d/${target_mesh:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch overview",
+        "url": "/d/${target_switch:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch interface",
+        "url": "/d/${target_interface:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "VLAN configuration",
+        "url": "/d/${target_vlan:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      }
+    ],
+    "destinations": {
+      "target_rack": {
+        "text": "Infrastructure rack (fhs-infra-rack)",
+        "value": "fhs-infra-rack"
+      },
+      "target_mesh": {
+        "text": "vccu to fspu mesh (fhs-infra-mesh)",
+        "value": "fhs-infra-mesh"
+      },
+      "target_fhs": {
+        "text": "FHS telemetry (fhs-infra-server)",
+        "value": "fhs-infra-server"
+      },
+      "target_switch": {
+        "text": "Switch overview (fhs-infra-switch)",
+        "value": "fhs-infra-switch"
+      },
+      "target_interface": {
+        "text": "Switch interface (fhs-infra-interface)",
+        "value": "fhs-infra-interface"
+      },
+      "target_vlan": {
+        "text": "VLAN configuration (fhs-infra-vlan)",
+        "value": "fhs-infra-vlan"
+      }
+    }
+  },
+  "fhs-infra-interface": {
+    "title": "Switch interface",
+    "layout_sha256": "1c542cdb0c7870249d90bb238c18d0dbb41f9e7a5892bfae8137ba34d040a568",
+    "links": [
+      {
+        "title": "Infrastructure rack",
+        "url": "/d/${target_rack:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "vccu to fspu mesh",
+        "url": "/d/${target_mesh:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "FHS telemetry",
+        "url": "/d/${target_fhs:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch overview",
+        "url": "/d/${target_switch:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "VLAN configuration",
+        "url": "/d/${target_vlan:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      }
+    ],
+    "destinations": {
+      "target_rack": {
+        "text": "Infrastructure rack (fhs-infra-rack)",
+        "value": "fhs-infra-rack"
+      },
+      "target_mesh": {
+        "text": "vccu to fspu mesh (fhs-infra-mesh)",
+        "value": "fhs-infra-mesh"
+      },
+      "target_fhs": {
+        "text": "FHS telemetry (fhs-infra-server)",
+        "value": "fhs-infra-server"
+      },
+      "target_switch": {
+        "text": "Switch overview (fhs-infra-switch)",
+        "value": "fhs-infra-switch"
+      },
+      "target_interface": {
+        "text": "Switch interface (fhs-infra-interface)",
+        "value": "fhs-infra-interface"
+      },
+      "target_vlan": {
+        "text": "VLAN configuration (fhs-infra-vlan)",
+        "value": "fhs-infra-vlan"
+      }
+    }
+  },
+  "fhs-infra-mesh": {
+    "title": "vccu to fspu mesh",
+    "layout_sha256": "dc0f68a1f0bbee451f7864aa8edec9749264a1f6bb5b56354406fb6cdff6257b",
+    "links": [
+      {
+        "title": "Infrastructure rack",
+        "url": "/d/${target_rack:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "FHS telemetry",
+        "url": "/d/${target_fhs:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch overview",
+        "url": "/d/${target_switch:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch interface",
+        "url": "/d/${target_interface:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "VLAN configuration",
+        "url": "/d/${target_vlan:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      }
+    ],
+    "destinations": {
+      "target_rack": {
+        "text": "Infrastructure rack (fhs-infra-rack)",
+        "value": "fhs-infra-rack"
+      },
+      "target_mesh": {
+        "text": "vccu to fspu mesh (fhs-infra-mesh)",
+        "value": "fhs-infra-mesh"
+      },
+      "target_fhs": {
+        "text": "FHS telemetry (fhs-infra-server)",
+        "value": "fhs-infra-server"
+      },
+      "target_switch": {
+        "text": "Switch overview (fhs-infra-switch)",
+        "value": "fhs-infra-switch"
+      },
+      "target_interface": {
+        "text": "Switch interface (fhs-infra-interface)",
+        "value": "fhs-infra-interface"
+      },
+      "target_vlan": {
+        "text": "VLAN configuration (fhs-infra-vlan)",
+        "value": "fhs-infra-vlan"
+      }
+    }
+  },
+  "fhs-infra-rack": {
+    "title": "Infrastructure rack",
+    "layout_sha256": "32dd7ec3084e057dbd12feec023b3c16ebfe90f3189f96da0905dc60f114fc35",
+    "links": [
+      {
+        "title": "vccu to fspu mesh",
+        "url": "/d/${target_mesh:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "FHS telemetry",
+        "url": "/d/${target_fhs:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch overview",
+        "url": "/d/${target_switch:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch interface",
+        "url": "/d/${target_interface:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "VLAN configuration",
+        "url": "/d/${target_vlan:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      }
+    ],
+    "destinations": {
+      "target_rack": {
+        "text": "Infrastructure rack (fhs-infra-rack)",
+        "value": "fhs-infra-rack"
+      },
+      "target_mesh": {
+        "text": "vccu to fspu mesh (fhs-infra-mesh)",
+        "value": "fhs-infra-mesh"
+      },
+      "target_fhs": {
+        "text": "FHS telemetry (fhs-infra-server)",
+        "value": "fhs-infra-server"
+      },
+      "target_switch": {
+        "text": "Switch overview (fhs-infra-switch)",
+        "value": "fhs-infra-switch"
+      },
+      "target_interface": {
+        "text": "Switch interface (fhs-infra-interface)",
+        "value": "fhs-infra-interface"
+      },
+      "target_vlan": {
+        "text": "VLAN configuration (fhs-infra-vlan)",
+        "value": "fhs-infra-vlan"
+      }
+    }
+  },
+  "fhs-infra-switch": {
+    "title": "Switch overview",
+    "layout_sha256": "3760ca251363e10ca539a89cfd9abb4ede801dbab69f06ada07126b9d3262e01",
+    "links": [
+      {
+        "title": "Infrastructure rack",
+        "url": "/d/${target_rack:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "vccu to fspu mesh",
+        "url": "/d/${target_mesh:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "FHS telemetry",
+        "url": "/d/${target_fhs:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch interface",
+        "url": "/d/${target_interface:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "VLAN configuration",
+        "url": "/d/${target_vlan:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      }
+    ],
+    "destinations": {
+      "target_rack": {
+        "text": "Infrastructure rack (fhs-infra-rack)",
+        "value": "fhs-infra-rack"
+      },
+      "target_mesh": {
+        "text": "vccu to fspu mesh (fhs-infra-mesh)",
+        "value": "fhs-infra-mesh"
+      },
+      "target_fhs": {
+        "text": "FHS telemetry (fhs-infra-server)",
+        "value": "fhs-infra-server"
+      },
+      "target_switch": {
+        "text": "Switch overview (fhs-infra-switch)",
+        "value": "fhs-infra-switch"
+      },
+      "target_interface": {
+        "text": "Switch interface (fhs-infra-interface)",
+        "value": "fhs-infra-interface"
+      },
+      "target_vlan": {
+        "text": "VLAN configuration (fhs-infra-vlan)",
+        "value": "fhs-infra-vlan"
+      }
+    }
+  },
+  "fhs-infra-vlan": {
+    "title": "VLAN configuration",
+    "layout_sha256": "1f8c22f0c72ff4e96612de8ff681b717ae28ce944bf787034e25f99b7ecc9c5a",
+    "links": [
+      {
+        "title": "Infrastructure rack",
+        "url": "/d/${target_rack:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "vccu to fspu mesh",
+        "url": "/d/${target_mesh:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "FHS telemetry",
+        "url": "/d/${target_fhs:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch overview",
+        "url": "/d/${target_switch:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      },
+      {
+        "title": "Switch interface",
+        "url": "/d/${target_interface:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+        "type": "link",
+        "targetBlank": false
+      }
+    ],
+    "destinations": {
+      "target_rack": {
+        "text": "Infrastructure rack (fhs-infra-rack)",
+        "value": "fhs-infra-rack"
+      },
+      "target_mesh": {
+        "text": "vccu to fspu mesh (fhs-infra-mesh)",
+        "value": "fhs-infra-mesh"
+      },
+      "target_fhs": {
+        "text": "FHS telemetry (fhs-infra-server)",
+        "value": "fhs-infra-server"
+      },
+      "target_switch": {
+        "text": "Switch overview (fhs-infra-switch)",
+        "value": "fhs-infra-switch"
+      },
+      "target_interface": {
+        "text": "Switch interface (fhs-infra-interface)",
+        "value": "fhs-infra-interface"
+      },
+      "target_vlan": {
+        "text": "VLAN configuration (fhs-infra-vlan)",
+        "value": "fhs-infra-vlan"
+      }
+    }
+  }
+}

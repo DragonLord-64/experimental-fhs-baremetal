@@ -1,0 +1,8 @@
+{
+  "platform/grafana_dashboards/generated/rack.json": "300f36dc0369bbf6975aa4772f72535328866d3059f20d22eacc143264b5f089",
+  "platform/grafana_dashboards/generated/mesh.json": "e216933023b7f794e91b6ba8dd5dee329d016288d32285ce25b6a11c0be90fcd",
+  "platform/grafana_dashboards/generated/fhs.json": "a2768d6c1b462c7997f99a89647d044012e00952b6970ca850af988b2ce279c7",
+  "platform/grafana_dashboards/generated/switch.json": "e11d4153c13402184d64ee4103aece9be564956d5ab17a84405e8867b65a273a",
+  "platform/grafana_dashboards/generated/interface.json": "e41a2ca840874dde7cfec0889105e9fa8a286f425a83fc73e02a5683af4d7e69",
+  "platform/grafana_dashboards/generated/vlan.json": "f6f4b4cb94580d7f61c45b596671125a227e76f660459fc2156b490c4b122ebf"
+}
