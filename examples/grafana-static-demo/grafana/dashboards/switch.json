@@ -6506,7 +6506,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#444444"
+                  "field": "P1 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -7130,7 +7131,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#444444"
+                  "field": "P2 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -7754,7 +7756,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P3 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -8378,7 +8381,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P4 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -9002,7 +9006,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P5 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -9626,7 +9631,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P6 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -10250,7 +10256,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P7 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -10874,7 +10881,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P8 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -11498,7 +11506,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P9 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -12122,7 +12131,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P10 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -12746,7 +12756,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P11 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -13370,7 +13381,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P12 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -13994,7 +14006,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P13 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -14618,7 +14631,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P14 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -15242,7 +15256,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P15 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -15866,7 +15881,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P16 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -16490,7 +16506,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P17 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -17114,7 +17131,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P18 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -17738,7 +17756,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P19 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -18362,7 +18381,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P20 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -18986,7 +19006,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P21 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -19610,7 +19631,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P22 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -20234,7 +20256,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P23 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -20858,7 +20881,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P24 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -21482,7 +21506,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P25 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -22106,7 +22131,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P26 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -22730,7 +22756,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P27 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -23354,7 +23381,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P28 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -23978,7 +24006,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P29 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -24602,7 +24631,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P30 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -25226,7 +25256,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P31 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {
@@ -25850,7 +25881,8 @@
               },
               "background": {
                 "color": {
-                  "fixed": "#34373d"
+                  "field": "P32 health",
+                  "fixed": "#8e8e8e"
                 }
               },
               "border": {

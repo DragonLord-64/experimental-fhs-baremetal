@@ -64,6 +64,9 @@ finite numeric `value`, and `provenance: "synthetic demo"`. See
 `exporter/components.json` for component keys (compact lowercase titles) and units.
 Links optionally accept `rate_bps` (default 1e9) and `capacity_bps` (default 1e11);
 0 ≤ rate ≤ capacity is required. Both ends emit zero rate at fault/unknown/notdeployed.
+The mesh shows capacity in Gbit/s, not throughput: healthy links use blue capacity
+thresholds, failed links stay red with their capacity visible, and unknown or missing
+data is gray. Selected-link throughput remains a separate panel.
 No CPU/memory workload is simulated. Six native layouts/UIDs/links are copied;
 demo-only adapters provide status/optic/capacity/VLAN values where source queries
 had no data. Source provenance is in `tests/source-provenance.json`.

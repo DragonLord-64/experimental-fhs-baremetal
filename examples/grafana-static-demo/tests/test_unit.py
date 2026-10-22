@@ -255,6 +255,27 @@ class ExporterHTTP(unittest.TestCase):
             self.save(self.data)
             self.assertEqual(503,self.get()[0])
 
+    def test_mesh_capacity_preserved_across_status_and_endpoint_overrides(self):
+        link = self.data['links'][2]
+        link['capacity_bps'] = 60000000000
+        prefix = 'demo_mesh_capacity_bps{fsp="FSPUnit3",vcc="VCCUnit1"}'
+        for status,number in EXPORTER.STATES.items():
+            self.data['interfaces'] = {'fspu3-switch':{'eth1/1/1':status}}
+            self.save(self.data)
+            code,body = self.get()
+            self.assertEqual(200,code)
+            rows = [r for r in body.splitlines() if r.startswith('demo_mesh_capacity_bps{')]
+            self.assertEqual(648,len(rows))
+            self.assertIn(prefix+' 60000000000',body)
+            self.assertIn('demo_mesh_capacity_bps{fsp="FSPUnit1",vcc="VCCUnit1"} 100000000000',body)
+            self.assertIn('demo_mesh_status{fsp="FSPUnit3",vcc="VCCUnit1"} '+str(number),body)
+        self.data['defaults']['mock_readings'] = False
+        self.save(self.data)
+        code,body = self.get()
+        self.assertEqual(200,code)
+        self.assertNotIn('demo_mesh_capacity_bps{',body)
+        self.assertIn('demo_mesh_status{',body)
+
     def test_adapter_queries_consume_status_contract(self):
         dashboards = {p.stem:json.loads(p.read_text()) for p in (ROOT/'grafana/dashboards').glob('*.json')}
         self.assertIn('demo_server_status{unit="$unit",fhs="$fhs"}', dashboards['fhs']['panels'][1]['targets'][0]['expr'])
@@ -264,7 +285,31 @@ class ExporterHTTP(unittest.TestCase):
             self.assertIn('component="'+component+'"', panel['targets'][0]['expr'])
             options = panel['fieldConfig']['defaults']['mappings'][0]['options']
             self.assertEqual({v['text'] for v in options.values()},set(EXPORTER.STATES))
-        self.assertEqual(648,len(dashboards['mesh']['panels'][5]['targets']))
+        matrix = dashboards['mesh']['panels'][5]
+        self.assertEqual(649,len(matrix['targets']))
+        cells = [e for e in matrix['options']['root']['elements']
+                 if e.get('config',{}).get('text',{}).get('mode') == 'field']
+        expected = {f'VCCUnit{v} FSPUnit{f}' for v in range(1,25) for f in range(1,28)}
+        self.assertEqual(648,len(cells))
+        self.assertEqual(expected,{e['config']['text']['field'] for e in cells})
+        capacity = matrix['targets'][:-1]
+        self.assertEqual(expected,{t['legendFormat'] for t in capacity})
+        self.assertEqual(648,len({t['refId'] for t in capacity}))
+        for target in capacity:
+            vcc, fsp = target['legendFormat'].split()
+            self.assertEqual(
+                f'((demo_mesh_capacity_bps{{vcc="{vcc}",fsp="{fsp}"}} / 1e9) '
+                'and on(job,instance) (up{job="static-demo"} == 1)) or on() vector(-1)',
+                target['expr'])
+            self.assertTrue(target['instant'])
+            self.assertFalse(target['range'])
+        self.assertEqual({'text':'?', 'color':'#555963'},
+                         matrix['fieldConfig']['defaults']['mappings'][0]['options']['-1'])
+        self.assertEqual('background',matrix['targets'][-1]['refId'])
+        self.assertIn('up{job="static-demo"} == 1',matrix['targets'][-1]['expr'])
+        self.assertTrue(all(e['background']['color']['fixed'] == '#555963' for e in cells))
+        self.assertEqual({name+' background' for name in expected},
+                         {e['background']['color']['field'] for e in cells})
         for name in ('rack','mesh'):
             for panel in dashboards[name]['panels']:
                 for element in panel.get('options',{}).get('root',{}).get('elements',[]):

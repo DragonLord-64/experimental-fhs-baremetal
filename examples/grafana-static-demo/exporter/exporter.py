@@ -154,6 +154,8 @@ def render(data):
             if edits:
                 value = edits.pop()
             emit('demo_mesh_status',{'vcc':raw_unit(pair[0]),'fsp':raw_unit(pair[1])},value)
+            if mock:
+                emit('demo_mesh_capacity_bps',{'vcc':raw_unit(pair[0]),'fsp':raw_unit(pair[1])},capacity)
             for e,peer in (ends,ends[::-1]):
                 require(e not in seen,'duplicate interface endpoint')
                 seen.add(e)
