@@ -1,0 +1,55 @@
+---
+# roles/bist/vars/main.yml
+# Role vars have HIGH precedence - hard to override
+# Use for internal role logic that should not change
+
+repo_url: "https://gitlab.com/ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-bist"
+repo_version: "main"  # preferably this is a tag version but it can also be a branch name or a commit
+
+bist_user: ubuntu
+bist_group: bittware
+
+app_name: bist
+bist_service: fhs-bist
+
+# these directories should exist on the server
+app_dir: "/opt/{{ app_name }}"
+venv_dir: "{{ app_dir }}/{{ bist_service }}-venv"
+test_inputs_dir: "{{ app_dir }}/test_input"
+log_dir: "/var/log/{{ app_name }}"
+traces_dir: "{{ log_dir }}/traces"
+results_dir: "{{ log_dir }}/results"
+
+# these should exist on the controller
+build_dir: /tmp/{{ app_name }}
+repo_dir: "{{ build_dir }}/repo"
+archive_name: "{{ app_name }}-{{ repo_version }}.tar.gz"
+archive_dir: "{{ build_dir }}/archive"
+archive_path: "{{ archive_dir }}/{{ archive_name }}"
+
+##############################################################################
+## BIST repo template vars for test jsons
+##############################################################################
+
+## static values
+nvme0_device_name: nvme0n1
+nvme1_device_name: nvme1n1
+terabox_lan0_iface: enp2s0f0
+terabox_nic0_iface: enp1s0np0
+nvme0_bdf: "84:00.0"
+nvme1_bdf: "86:00.0"
+
+## NOTE: these values are derived from facts in the configure-bist.yml task file
+# nvme0_serial_number: "{{ ansible_devices[ nvme0_device_name ].serial }}"
+# nvme1_serial_number: "{{ ansible_devices[ nvme1_device_name ].serial }}"
+
+## NOTE: these values are specific to each server, so they are placed in the inventory sys<id>.yml file
+# fpga_card0_sn:
+# fpga_card1_sn:
+
+## NOTE: these values are stored in the roles/bist/defaults/main.yml so that they can be easily overridden for specific servers
+# fpga_card0_bdf_detri:
+# fpga_card1_bdf_detri:
+# fpga_card0_bdf_ark:
+# fpga_card1_bdf_ark:
+# terabox_nic0_bdf:

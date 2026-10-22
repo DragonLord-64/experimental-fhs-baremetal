@@ -1,0 +1,13 @@
+---
+# Users to create. Each entry: {name, password (SHA-512 hash), ssh_keys: [...]}
+fhs_users: []
+fhs_keys_dir: "/provision/files.d/dev-ssh-keys.d"
+# Groups every managed user is added to.
+fhs_user_groups:
+  - sudo
+  - bittware
+
+# Sudoers file to drop (controls passwordless vs. password sudo for the
+# `sudo` group). Mode 0440 enforced by visudo.
+fhs_sudoers_file: /etc/sudoers.d/99-fhs-passwordless
+fhs_sudoers_content: "%sudo ALL=(ALL) NOPASSWD:ALL\n"

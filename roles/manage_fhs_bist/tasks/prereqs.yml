@@ -1,0 +1,48 @@
+---
+# roles/bist/tasks/prereq.yml
+# all tasks here execute on the Ansible controller
+
+- name: Create build directories
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ build_dir }}"
+    - "{{ repo_dir }}"
+    - "{{ archive_dir }}"
+
+- name: Check if specified version of BIST archive already exists
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.stat:
+    path: "{{ archive_path }}"
+  register: bist_archive
+
+- name: Clone and checkout request version of BIST repo if BIST archive does not exist
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"
+    dest: "{{ repo_dir }}"
+    version: "{{ repo_version }}"
+    update: true
+  when: not bist_archive.stat.exists
+
+- name: Create archive if it does not exist
+  delegate_to: localhost
+  run_once: true
+  community.general.archive:
+    path: "{{ repo_dir }}/"
+    dest: "{{ archive_path }}"
+    format: gz
+    mode: "0644"
+  when: not bist_archive.stat.exists
+
+- name: Verify BIST archive exists
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.stat:
+    path: "{{ archive_path }}"

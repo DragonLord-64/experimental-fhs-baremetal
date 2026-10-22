@@ -1,0 +1,8 @@
+- hosts: all
+  become: yes
+  vars:
+    filebeat_credentials_file: "/provision/files.d/credentials/filebeat.yml"
+  tasks:
+    - name: Configure Filebeat
+      import_role:
+        name: filebeat

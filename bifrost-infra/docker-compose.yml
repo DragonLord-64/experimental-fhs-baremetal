@@ -1,0 +1,69 @@
+services:
+  bifrost:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ska-mid-cbf/bifrost-deploy:2026.1-ubuntu-noble
+    pull_policy: never
+    container_name: bifrost_deploy
+    restart: unless-stopped
+    network_mode: host
+    privileged: true
+    cgroup: host
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+    environment:
+      # Instructs Ansible inside the container to look for the decryption key
+      - ANSIBLE_VAULT_PASSWORD_FILE=/root/.vault_pass
+      - BIFROST_INVENTORY_SOURCE=/bifrost/playbooks/inventory/terabox1501b_inventory.yaml
+
+    volumes:
+      # Required system paths for udev, disk partitioning, and networking
+      - /dev:/dev
+      - /run/dbus:/run/dbus
+      - /lib/modules:/lib/modules:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup
+
+      # Persistent storage path on the host for deployment images, ironic master_images
+      # cache, and per-node httpboot directories. We bind the whole /var/lib/ironic
+      # (not just httpboot) so master_images and httpboot share a single filesystem;
+      # ironic hard-links cached images between them, and a cross-fs link triggers
+      # EXDEV during deploy.
+      - /var/lib/ironic:/var/lib/ironic
+
+      # Bind-mount paths default to locations relative to this compose file,
+      # so a fresh clone works without any .env editing. Override any path in
+      # bifrost-infra/.env only if the Docker daemon sees a different filesystem
+      # from your shell (e.g. Docker Desktop on Windows accessing WSL2).
+
+      # Vault password file (at repo root)
+      - ${VAULT_PASS_FILE:-../.vault_pass}:/root/.vault_pass:ro
+
+      # ssh setup
+      - ${BIFROST_DIR:-./}.ssh/:/root/.ssh/
+      # custom image config directory path 
+      - ${BIFROST_DIR:-./}image-config:/bifrost/playbooks/image-config
+      # bifrost inventory
+      - ${BIFROST_DIR:-./}inventory/terabox1501b_inventory.yaml:/bifrost/playbooks/inventory/terabox1501b_inventory.yaml
+      # bifrost group vars for install, enroll, and deploy
+      - ${BIFROST_DIR:-./}inventory/group_vars:/bifrost/playbooks/inventory/group_vars
+      # inventory
+      - ${INVENTORY_DIR:-../inventory}:/provision/inventory
+      # ansible playbooks and roles
+      - ${PLAYBOOKS_DIR:-../playbooks}:/provision/playbooks
+      # resources
+      - ${RESOURCES_DIR:-/shared/midcbf_provision_files.d}:/provision/files.d
+      # helper scripts
+      - ${SCRIPTS_DIR:-../scripts}:/provision/scripts
+      # Makefile
+      - ${SCRIPTS_DIR:-../Makefile}:/provision/Makefile
+      # Ansible lint config
+      - ${SCRIPTS_DIR:-../.ansible-lint}:/provision/.ansible-lint
+      # Roles directory
+      - ${ROLES_DIR:-../roles}:/provision/roles
+      # Ansible configuration
+      - ../ansible.cfg:/provision/ansible.cfg
+      # Ansible requirements
+      - ../requirements.yml:/provision/requirements.yml

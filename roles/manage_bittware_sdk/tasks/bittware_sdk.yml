@@ -1,0 +1,42 @@
+---
+- name: Validate SDK deb path is set
+  ansible.builtin.assert:
+    that:
+      - fpga_bittware_sdk_deb | length > 0
+    fail_msg: "fpga_bittware_sdk_deb must point at a local .deb when fpga_update_bittware_sdk is true."
+
+- name: Read SDK version from local deb
+  ansible.builtin.command:
+    cmd: "dpkg-deb -f {{ fpga_bittware_sdk_deb }} Version"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  register: sdk_deb_version
+
+- name: Gather installed apt packages
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: Compute installed SDK version
+  ansible.builtin.set_fact:
+    fpga_installed_sdk_version: >-
+      {{ ansible_facts.packages[fpga_bittware_sdk_package][0].version
+         if (fpga_bittware_sdk_package in ansible_facts.packages) else '' }}
+
+- name: Copy SDK deb to target
+  ansible.builtin.copy:
+    src: "{{ fpga_bittware_sdk_deb }}"
+    dest: "/var/cache/apt/archives/{{ fpga_bittware_sdk_deb | basename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: fpga_installed_sdk_version != sdk_deb_version.stdout
+
+- name: Install Bittware SDK
+  ansible.builtin.apt:
+    deb: "/var/cache/apt/archives/{{ fpga_bittware_sdk_deb | basename }}"
+    state: present
+    dpkg_options: 'force-confold,force-confdef'
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  when: fpga_installed_sdk_version != sdk_deb_version.stdout

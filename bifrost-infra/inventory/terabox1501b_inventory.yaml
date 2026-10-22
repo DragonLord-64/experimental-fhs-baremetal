@@ -1,0 +1,116 @@
+---
+# Per-node bifrost specs. Cluster-wide defaults (driver, boot_interface,
+# subnet/nameserver, raid, instance_info / image) live in
+# bifrost-infra/inventory/group_vars/baremetal and apply automatically.
+
+sys1353:
+  uuid: "00000000-0000-0000-0000-000000001353"
+  name: sys1353
+  driver_info:
+    redfish_address: "https://192.168.8.30"
+    redfish_username: "admin"
+    redfish_password: "b1ttwar3"
+    redfish_verify_ca: false
+  root_device:
+    size: "> 900"
+  nics:
+    - mac: a8:a1:59:f8:7d:a5
+  ipv4_address: 192.168.8.31
+  properties:
+    cpu_arch: x86_64
+    ram: "516000"
+    disk_size: "931"
+    cpus: "32"
+    capabilities: "boot_mode:uefi"
+    root_device:
+      size: "> 900"
+
+sys1354:
+  uuid: "00000000-0000-0000-0000-000000001354"
+  name: sys1354
+  driver_info:
+    redfish_address: "https://192.168.8.44"
+    redfish_username: "admin"
+    redfish_password: "b1ttwar3"
+    redfish_verify_ca: false
+    deploy_kernel_append_params: "iommu=pt"
+  root_device:
+    size: "> 900"
+  nics:
+    - mac: 94:6D:AE:1F:6A:E8
+  ipv4_address: 192.168.8.45
+  properties:
+    cpu_arch: x86_64
+    ram: "516000"
+    disk_size: "931"
+    cpus: "32"
+    capabilities: "boot_mode:uefi"
+    root_device:
+      size: "> 900"
+
+sys1389:
+  uuid: "00000000-0000-0000-0000-000000001389"
+  name: sys1389
+  driver_info:
+    redfish_address: "https://192.168.8.32"
+    redfish_username: "admin"
+    redfish_password: "b1ttwar3"
+    redfish_verify_ca: false
+  root_device:
+    size: "> 900"
+  nics:
+    - mac: a8:a1:59:fb:a7:1f
+  ipv4_address: 192.168.8.33
+  properties:
+    cpu_arch: x86_64
+    ram: "128000"
+    disk_size: "931"
+    cpus: "32"
+    capabilities: "boot_mode:uefi"
+    root_device:
+      size: "> 900"
+
+sys1392:
+  uuid: "00000000-0000-0000-0000-000000001392"
+  name: sys1392
+  driver_info:
+    redfish_address: "https://192.168.8.40"
+    redfish_username: "admin"
+    redfish_password: "b1ttwar3"
+    redfish_verify_ca: false
+  root_device:
+    size: "> 900"
+  nics:
+    - mac: a8:a1:59:fb:a7:21
+  ipv4_address: 192.168.8.41
+  properties:
+    cpu_arch: x86_64
+    ram: "128000"
+    disk_size: "931"
+    cpus: "32"
+    capabilities: "boot_mode:uefi"
+    root_device:
+      size: "> 900"
+
+sys1390:
+  uuid: "00000000-0000-0000-0000-000000001390"
+  name: rm2skafhsdu03
+  driver_info:
+    redfish_address: "https://192.168.8.34"
+    redfish_username: "admin"
+    redfish_password: "b1ttwar3"
+    redfish_verify_ca: false
+    deploy_kernel_append_params: "iommu=pt"
+  root_device:
+    size: "> 900"
+  nics:
+    - mac: a8:a1:59:fb:a7:b5
+  ipv4_address: 192.168.8.35
+  properties:
+    cpu_arch: x86_64
+    ram: "128000"
+    disk_size: "931"
+    cpus: "32"
+    capabilities: "boot_mode:uefi"
+    root_device:
+      size: "> 900"

@@ -1,0 +1,24 @@
+{
+  "name": "fhs-bifrost-prep",
+  "services": {
+    "bifrost-prep": {
+      "image": "quay.io/openstack.kolla/bifrost-deploy:2026.1-ubuntu-noble@sha256:e6f0e429611d3c4e190633f1b90987f5534768c4f3c9d0eee21f760d86bd22b7",
+      "pull_policy": "never",
+      "entrypoint": ["/bin/sh", "-ec"],
+      "command": ["trap 'exit 0' TERM INT; while :; do sleep 30 & wait $!; done"],
+      "restart": "no",
+      "user": "65534:65534",
+      "read_only": true,
+      "cap_drop": ["ALL"],
+      "security_opt": ["no-new-privileges:true"],
+      "pids_limit": 64,
+      "mem_limit": "256m",
+      "cpus": 0.25,
+      "tmpfs": ["/tmp:rw,noexec,nosuid,size=16m"],
+      "environment": {"BIFROST_INVENTORY_SOURCE": "/lab/nodes.json"},
+      "volumes": [{"type": "bind", "source": "./nodes.json", "target": "/lab/nodes.json", "read_only": true}],
+      "networks": ["provisioning"]
+    }
+  },
+  "networks": {"provisioning": {"driver": "bridge", "internal": true}}
+}

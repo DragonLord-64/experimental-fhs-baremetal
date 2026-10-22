@@ -1,0 +1,29 @@
+# GRUB kernel cmdline (list — flattened with spaces in the template).
+fpga_kernel_cmdline:
+  - iommu=pt
+  - amd_iommu=on
+  - hugepages=8
+  - hugepagesz=1G
+  - default_hugepagesz=1G
+
+# VFIO udev rules.
+fpga_vfio_rules_file: 98-ska_vfio.rules
+fpga_udev_rules_dir: /etc/udev/rules.d
+bittware_sdk_venv: "/opt/venvs/fhs"
+# BMC firmware update.
+fpga_bittware_sdk_root: "/usr/share/bittware-sdk"
+fpga_bmc_firmware_zip: ""
+fpga_bmc_firmware_version: ""
+fpga_bmc_cards: [0, 1]
+# The dedicated unprivileged account that owns the Bittware tooling.
+fpga_bittware_user: "{{ansible_user}}"
+fpga_bittware_group: "bittware"
+# Feature flags — destructive defaults to false. Flip in inventory or via -e.
+fpga_update_grub: false
+fpga_update_bittware_sdk: false
+fpga_update_bmc: false
+users_setup_venvs: true
+
+# Reboot behaviour.
+fpga_reboot_on_change: true
+fpga_reboot_timeout: 600

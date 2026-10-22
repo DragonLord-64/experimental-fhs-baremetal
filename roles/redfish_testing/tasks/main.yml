@@ -1,0 +1,12 @@
+- name: Get CPU inventory
+  community.general.redfish_info:
+    category: Systems
+    command: GetCpuInventory
+    baseuri: "{{ redfish.address }}"
+    username: "{{ redfish.username }}"
+    password: "{{ redfish.password }}"
+  register: result
+
+- name: Print CPU information
+  ansible.builtin.debug:
+    msg: "{{ result.redfish_facts }}"

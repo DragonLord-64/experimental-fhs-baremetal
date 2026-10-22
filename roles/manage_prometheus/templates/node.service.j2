@@ -1,0 +1,13 @@
+[Unit]
+Description=Node Exporter
+
+[Service]
+User={{ manage_prometheus_node_user }}
+Group={{ manage_prometheus_node_user }}
+ExecStart=/usr/local/bin/prometheus/{{ manage_prometheus_node_tar }}/node_exporter  --collector.ethtool --collector.processes
+NoNewPrivileges=true
+ProtectHome=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,89 @@
+# Isolated dragonvm lab; no production targets.
+# Renderer v2 retains the source regex processor nested tag maps.
+tplVersion: 2
+config:
+  agent:
+    interval: 10s
+    round_interval: true
+    metric_batch_size: 1000
+    metric_buffer_limit: 10000
+    flush_interval: 1s
+  inputs:
+  - cisco_telemetry_mdt:
+      transport: grpc
+      service_address: :57000
+      aliases:
+        nexus_interfaces: sys/intf
+        nexus_vlans: sys/bd
+        nexus_ch: sys/ch
+      fielddrop:
+      - clearTs
+      - modTs
+      - subscription
+  - http_listener_v2:
+      service_address: :8080
+      paths:
+      - /pdu
+      methods:
+      - POST
+      - PUT
+      data_source: body
+      data_format: json
+      name_override: pdu
+      tag_keys:
+      - pdu_id
+      read_timeout: 10s
+      write_timeout: 10s
+      max_body_size: 1MB
+  processors:
+  - regex:
+      namepass:
+      - nexus_interfaces_*
+      tags:
+      - key: dn
+        pattern: phys-\[(?P<interface>[^\]]+)\]
+        replacement: ${interface}
+        result_key: interface
+      - key: dn
+        pattern: dbgIf(?P<direction>In|Out)
+        replacement: ${direction}
+        result_key: direction
+  outputs:
+  - prometheus_client:
+      listen: :9273
+      metric_version: 2
+      path: /metrics
+service:
+  enabled: true
+  type: ClusterIP
+  port: 57000
+  additionalPorts:
+  - name: pdu-http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: metrics
+    port: 9273
+    targetPort: 9273
+    protocol: TCP
+containerPorts:
+- name: pdu-http
+  containerPort: 8080
+  protocol: TCP
+- name: nxos
+  containerPort: 57000
+  protocol: TCP
+- name: metrics
+  containerPort: 9273
+  protocol: TCP
+fullnameOverride: switch-telegraf
+image:
+  repo: docker.io/library/telegraf
+  tag: 1.40.1@sha256:e91237482edcb054c81571923c6b7cf64f06ed6087a2f9cf0bd3bc2cd8c0ed61
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi

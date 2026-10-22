@@ -1,0 +1,61 @@
+---
+# roles/fhs_node_setup/tasks/prereqs.yml
+# Configure prerequisites for all FHS nodes
+
+- name: Install required Ceph packages
+  ansible.builtin.apt:
+    name:
+      - librbd1
+      - python3-rbd
+    state: present
+    update_cache: true
+
+- name: Check if swap is enabled
+  ansible.builtin.shell: |
+    set -o pipefail
+    cat /proc/swaps | wc -l
+  args:
+    executable: /bin/bash
+  register: swap_lines
+  changed_when: false
+
+- name: Disable swap
+  ansible.builtin.command: swapoff -a
+  when: swap_lines.stdout | int > 1
+  changed_when: true
+
+- name: Remove swap from fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: ".*swap.*"
+    state: absent
+
+- name: Load required kernel modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+    - rbd
+    - ceph
+
+- name: Persist kernel modules
+  ansible.builtin.copy:
+    content: |
+      overlay
+      br_netfilter
+    dest: /etc/modules-load.d/k8s.conf
+    mode: "0644"
+
+- name: Configure sysctl for Kubernetes networking
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_set: true
+    state: present
+    reload: true
+  loop:
+    - { name: net.bridge.bridge-nf-call-iptables, value: "1" }
+    - { name: net.bridge.bridge-nf-call-ip6tables, value: "1" }
+    - { name: net.ipv4.ip_forward, value: "1" }

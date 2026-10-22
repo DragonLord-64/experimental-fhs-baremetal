@@ -1,0 +1,18 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure an Aptly repository server
+    options:
+      aptly_apt_packages: {type: list, elements: str}
+      aptly_user: {type: str, default: aptly}
+      aptly_group: {type: str, default: aptly}
+      aptly_home: {type: path, default: /var/aptly}
+      aptly_gpg_name: {type: str}
+      aptly_gpg_email: {type: str}
+      aptly_gpg_key_type: {type: str, default: RSA}
+      aptly_gpg_key_length: {type: int, default: 3072}
+      aptly_mirrors: {type: list, elements: dict, default: []}
+      aptly_snapshots: {type: list, elements: dict, default: []}
+      aptly_publishes: {type: list, elements: dict, default: []}
+      aptly_serve_http: {type: bool, default: false}
+      aptly_serve_listen: {type: str, default: ":8082"}

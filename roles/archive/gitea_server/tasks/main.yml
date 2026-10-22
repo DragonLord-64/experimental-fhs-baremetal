@@ -1,0 +1,96 @@
+---
+- name: Install docker prerequisites
+  ansible.builtin.apt:
+    name: "{{ gitea_docker_packages }}"
+    state: present
+    cache_valid_time: 3600
+  tags: [gitea_server, install]
+
+- name: Ensure docker is running
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+  tags: [gitea_server, config]
+
+- name: Ensure compose project directory
+  ansible.builtin.file:
+    path: "{{ gitea_compose_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [gitea_server, config]
+
+- name: Render gitea docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ gitea_compose_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [gitea_server, config]
+
+- name: Bring up gitea stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ gitea_compose_dir }}"
+    state: present
+    pull: missing
+  tags: [gitea_server, install]
+
+- name: Configure mirrors (block)
+  when: gitea_mirrors | length > 0
+  tags: [gitea_server, config]
+  block:
+    - name: Verify admin token is set
+      ansible.builtin.assert:
+        that:
+          - gitea_admin_pat | length > 0
+        fail_msg: "gitea_admin_pat is required when gitea_mirrors is non-empty."
+
+    - name: Wait for Gitea health endpoint
+      ansible.builtin.uri:
+        url: "{{ gitea_root_url }}/api/healthz"
+        method: GET
+        validate_certs: false
+      register: gitea_health
+      retries: "{{ gitea_health_retries }}"
+      delay: "{{ gitea_health_delay }}"
+      until: gitea_health.status in [200, 204]
+
+    - name: Ensure mirrors org exists
+      ansible.builtin.uri:
+        url: "{{ gitea_root_url }}/api/v1/orgs"
+        method: POST
+        headers:
+          Authorization: "token {{ gitea_admin_pat }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          username: "{{ gitea_mirrors_org }}"
+          full_name: "Mirror Repositories"
+          visibility: public
+        status_code: [201, 409]
+        validate_certs: false
+
+    - name: Create or update mirror repos
+      ansible.builtin.uri:
+        url: "{{ gitea_root_url }}/api/v1/repos/migrate"
+        method: POST
+        headers:
+          Authorization: "token {{ gitea_admin_pat }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          clone_addr: "{{ item.upstream }}"
+          repo_name: "{{ item.name | default(item.upstream | basename | regex_replace('\\.git$', '')) }}"
+          repo_owner: "{{ gitea_mirrors_org }}"
+          description: "Pull mirror of {{ item.upstream }}"
+          mirror: true
+          mirror_interval: "{{ gitea_mirror_interval }}"
+          private: false
+        status_code: [201, 409]
+        validate_certs: false
+      loop: "{{ gitea_mirrors }}"
+      loop_control:
+        label: "{{ item.upstream }}"

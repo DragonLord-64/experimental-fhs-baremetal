@@ -1,0 +1,67 @@
+---
+- name: Validate Git proxy URL
+  ansible.builtin.assert:
+    that:
+      - git_proxy_url | length > 0
+    fail_msg: "Set git_proxy_url to the Squid proxy URL."
+  tags: [git_proxy, config]
+
+- name: Read the system Git HTTP proxy
+  ansible.builtin.command:
+    argv:
+      - git
+      - config
+      - --system
+      - --get
+      - http.proxy
+  register: existing_git_http_proxy
+  check_mode: false
+  changed_when: false
+  failed_when: existing_git_http_proxy.rc not in [0, 1]
+  tags: [git_proxy, config]
+
+- name: Configure the system Git HTTP proxy
+  ansible.builtin.command:
+    argv:
+      - git
+      - config
+      - --system
+      - --replace-all
+      - http.proxy
+      - "{{ git_proxy_url }}"
+  when: existing_git_http_proxy.stdout != git_proxy_url
+  changed_when: true
+  tags: [git_proxy, config]
+
+- name: Read configured system Git URL rewrites
+  ansible.builtin.command:
+    argv:
+      - git
+      - config
+      - --system
+      - --get-all
+      - "url.{{ item.target }}.insteadOf"
+  loop: "{{ git_url_rewrites }}"
+  loop_control:
+    label: "{{ item.instead_of }} -> {{ item.target }}"
+  register: existing_git_url_rewrites
+  check_mode: false
+  changed_when: false
+  failed_when: existing_git_url_rewrites.rc not in [0, 1]
+  tags: [git_proxy, config]
+
+- name: Configure system Git URL rewrites
+  ansible.builtin.command:
+    argv:
+      - git
+      - config
+      - --system
+      - --add
+      - "url.{{ item.item.target }}.insteadOf"
+      - "{{ item.item.instead_of }}"
+  loop: "{{ existing_git_url_rewrites.results }}"
+  loop_control:
+    label: "{{ item.item.instead_of }} -> {{ item.item.target }}"
+  when: item.item.instead_of not in item.stdout_lines
+  changed_when: true
+  tags: [git_proxy, config]

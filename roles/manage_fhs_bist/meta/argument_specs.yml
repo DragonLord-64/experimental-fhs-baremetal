@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure FHS BIST
+    options:
+      fpga_card0_bdf_detri: {type: str, default: "01:00.1"}
+      fpga_card1_bdf_detri: {type: str, default: "81:00.1"}
+      fpga_card0_bdf_ark: {type: str, default: "01:00.0"}
+      fpga_card1_bdf_ark: {type: str, default: "81:00.0"}
+      terabox_nic0_bdf: {type: str, default: "c1:00.0"}

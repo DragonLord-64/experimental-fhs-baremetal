@@ -1,0 +1,10 @@
+---
+- name: Deploy FPGA Bitstream from Controller
+  hosts: all
+  gather_facts: true
+  vars:
+
+  tasks:
+    - name: Configure Filebeat
+      import_role:
+        name: load_bw_card_test

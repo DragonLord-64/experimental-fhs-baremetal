@@ -1,0 +1,235 @@
+---
+# Post-POAP takeover. POAP owns mgmt0/IP; this playbook owns identity and telemetry.
+- name: Configure Nexus switches from NetBox
+  hosts: '{{ switch_group | default("device_roles_nexus-switch") }}'
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+  vars:
+    ansible_network_os: cisco.nxos.nxos
+    # Controller-local directory. Never commit real hashes or credentials.
+    nexus_credentials_dir: "/provision/files.d/dev-switch-keys.d"
+    nexus_role: network-admin
+    nexus_telemetry_key: nxos_telemetry_commands
+  tasks:
+    # Probe the inventory user with its SSH key first. Never use inventory passwords.
+    - name: Authenticate using inventory SSH user and key, or POAP fallback
+      tags: always
+      block:
+        - name: Try inventory SSH key
+          cisco.nxos.nxos_command:
+            commands: [show clock]
+          vars:
+            ansible_password: ""
+            ansible_ssh_pass: ""
+
+        - name: Keep password authentication disabled after key login
+          ansible.builtin.set_fact:
+            ansible_password: ""
+            ansible_ssh_pass: ""
+          no_log: true
+      rescue:
+        - name: Reset failed SSH connection
+          ansible.builtin.meta: reset_connection
+
+        - name: Fall back to POAP admin credentials
+          ansible.builtin.set_fact:
+            ansible_user: admin
+            ansible_password: admin
+          no_log: true
+
+        - name: Verify POAP admin login
+          cisco.nxos.nxos_command:
+            commands: [show clock]
+
+    - name: Provision hostname, users and telemetry
+      tags:
+        - never
+        - provision
+      block:
+        - name: Validate hostname and credentials directory
+          ansible.builtin.assert:
+            that:
+              - inventory_hostname is match('^[A-Za-z0-9][A-Za-z0-9_.-]*$')
+              - lookup('ansible.builtin.fileglob', nexus_credentials_dir ~ '/*.hash', wantlist=True) | length > 0
+              - lookup('ansible.builtin.fileglob', nexus_credentials_dir ~ '/admin.hash', wantlist=True) | length == 1
+            fail_msg: 'Provide a valid NetBox hostname and credentials/admin.hash on the controller.'
+    
+        - name: Discover credential files on the controller
+          ansible.builtin.set_fact:
+            nexus_hash_files: "{{ lookup('ansible.builtin.fileglob', nexus_credentials_dir ~ '/*.hash', wantlist=True) | sort }}"
+            nexus_key_files: "{{ lookup('ansible.builtin.fileglob', nexus_credentials_dir ~ '/*.pub', wantlist=True) | sort }}"
+    
+        - name: Validate credential filenames
+          ansible.builtin.assert:
+            that:
+              - (item | basename | regex_replace('\\.(hash|pub)$', '')) is match('^[A-Za-z][A-Za-z0-9_-]*$')
+            fail_msg: 'Credential filenames must be username.hash or username.pub.'
+          loop: '{{ nexus_hash_files + nexus_key_files }}'
+          loop_control:
+            label: '{{ item | basename }}'
+    
+        - name: Validate Cisco type-5 password hashes
+          ansible.builtin.assert:
+            that:
+              - lookup('ansible.builtin.file', item) | trim is match('^\\$1\\$[^$\\s]+\\$[^\\s]+$')
+            fail_msg: 'Each .hash file must contain one NX-OS-compatible type-5 MD5-crypt hash ($1$...).'
+          loop: '{{ nexus_hash_files }}'
+          loop_control:
+            label: '{{ item | basename }}'
+          no_log: true
+    
+        - name: Validate SSH public keys
+          ansible.builtin.assert:
+            that:
+              - (lookup('ansible.builtin.file', item).splitlines() | map('trim') | reject('equalto', '') | list | first | default('')) is match('^(ssh-rsa|ssh-ed25519) [A-Za-z0-9+/]+={0,3}( .*)?$')
+            fail_msg: 'The first non-empty line must be an OpenSSH RSA or Ed25519 public key.'
+          loop: '{{ nexus_key_files }}'
+          loop_control:
+            label: '{{ item | basename }}'
+    
+        - name: Set hostname from NetBox
+          cisco.nxos.nxos_config:
+            lines:
+              - 'hostname {{ inventory_hostname }}'
+    
+        - name: Create or update password-managed users except admin
+          cisco.nxos.nxos_config:
+            lines:
+              - "username {{ item | basename | regex_replace('\\.hash$', '') }} password 5 {{ lookup('ansible.builtin.file', item) | trim }} role {{ nexus_role }}"
+          loop: "{{ nexus_hash_files | reject('search', '/admin\\.hash$') | list }}"
+          loop_control:
+            label: '{{ item | basename }}'
+          no_log: true
+    
+        - name: Create or update SSH-key users with full privileges
+          cisco.nxos.nxos_config:
+            lines:
+              - "username {{ item | basename | regex_replace('\\.pub$', '') }} role {{ nexus_role }}"
+              - "username {{ item | basename | regex_replace('\\.pub$', '') }} sshkey {{ (lookup('ansible.builtin.file', item).splitlines() | map('trim') | reject('equalto', '') | list | first).split()[0:2] | join(' ') }}"
+          loop: '{{ nexus_key_files }}'
+          loop_control:
+            label: '{{ item | basename }}'
+    
+        - name: Apply raw telemetry commands from resolved NetBox config context
+          cisco.nxos.nxos_config:
+            lines: '{{ nexus_telemetry_lines }}'
+          vars:
+            nexus_context: "{{ config_context if config_context | default({}) is mapping else (config_context | default([{}], true) | first) }}"
+            nexus_telemetry_lines: "{{ hostvars[inventory_hostname].get(nexus_telemetry_key, nexus_context.get(nexus_telemetry_key, [])) }}"
+          when: nexus_telemetry_lines | length > 0
+    
+        - name: Update existing admin password last (never delete admin)
+          cisco.nxos.nxos_config:
+            lines:
+              - "username admin password 5 {{ lookup('ansible.builtin.file', nexus_credentials_dir ~ '/admin.hash') | trim }} role {{ nexus_role }}"
+          no_log: true
+    
+        - name: Save configuration
+          cisco.nxos.nxos_config:
+            save_when: modified
+
+
+    # Explicit, destructive breakout operation. Native 400G is the default.
+    # The breakout commands and hardware support must be validated on the switch.
+    - name: Apply requested physical breakout mappings
+      tags:
+        - never
+        - breakout
+      vars:
+        nexus_port_config_file: "{{ playbook_dir }}/nexus_ports.yml"
+      block:
+        - name: Load breakout declarations
+          ansible.builtin.include_vars:
+            file: "{{ nexus_port_config_file }}"
+            name: nexus_ports
+
+        - name: Validate breakout declaration values
+          ansible.builtin.assert:
+            that:
+              - item.key is match('^Ethernet1/[0-9]+$')
+              - item.value in ['400g', '4x100g']
+          loop: "{{ nexus_ports.breakout | dict2items }}"
+
+        - name: Reset requested physical interfaces
+          cisco.nxos.nxos_config:
+            lines:
+              - "default interface {{ item.key }}"
+          loop: "{{ nexus_ports.breakout | dict2items }}"
+
+        - name: Remove prior breakout mapping for requested ports
+          cisco.nxos.nxos_config:
+            lines:
+              - "no interface breakout module 1 port {{ item.key.split('/')[-1] }}"
+          loop: "{{ nexus_ports.breakout | dict2items }}"
+
+        - name: Apply requested 4x100G mappings
+          cisco.nxos.nxos_config:
+            lines:
+              - "interface breakout module 1 port {{ item.key.split('/')[-1] }} map 100g-4x"
+          loop: "{{ nexus_ports.breakout | dict2items | selectattr('value', 'equalto', '4x100g') | list }}"
+
+        - name: Save breakout configuration
+          cisco.nxos.nxos_config:
+            save_when: modified
+            
+    # Port configuration is opt-in; run with --tags ports.
+    # Breakout mapping is intentionally separate from logical interface settings.
+    - name: Configure ports from declarative YAML
+      tags:
+        - never
+        - ports
+      vars:
+        nexus_port_config_file: "{{ playbook_dir }}/nexus_ports.yml"
+      block:
+        - name: Load shared port configuration
+          ansible.builtin.include_vars:
+            file: "{{ nexus_port_config_file }}"
+            name: nexus_ports
+
+        - name: Validate port configuration
+          ansible.builtin.assert:
+            that:
+              - nexus_ports.defaults is mapping
+              - nexus_ports.breakout is mapping
+              - nexus_ports.interfaces is mapping
+              - nexus_ports.defaults.mode in ['trunk', 'access']
+              - nexus_ports.defaults.enabled is boolean
+              - (nexus_ports.defaults.native_vlan | int) >= 1
+              - (nexus_ports.defaults.native_vlan | int) <= 4094
+
+        - name: Gather actual Ethernet interfaces
+          cisco.nxos.nxos_facts:
+            gather_subset: [interfaces]
+
+        - name: Select physical Ethernet interfaces
+          ansible.builtin.set_fact:
+            nexus_detected_interfaces: "{{ ansible_net_interfaces.keys() | select('match', '^Ethernet[0-9]+/[0-9]+(/[0-9]+)?$') | list | sort }}"
+
+        - name: Verify interface overrides exist
+          ansible.builtin.assert:
+            that:
+              - item in nexus_detected_interfaces
+          loop: "{{ nexus_ports.interfaces.keys() | list }}"
+
+        - name: Configure Ethernet interface defaults and overrides
+          cisco.nxos.nxos_config:
+            parents: "interface {{ item }}"
+            lines: "{{ nexus_interface_lines }}"
+          vars:
+            nexus_interface: "{{ nexus_ports.defaults | combine(nexus_ports.interfaces.get(item, {})) }}"
+            nexus_interface_lines: >-
+              {{
+                (['description ' ~ nexus_interface.description] if nexus_interface.description is defined else [])
+                + ['switchport', 'switchport mode ' ~ nexus_interface.mode]
+                + (['switchport trunk native vlan ' ~ (nexus_interface.native_vlan | string),
+                    'switchport trunk allowed vlan ' ~ (nexus_interface.allowed_vlans | string)]
+                   if nexus_interface.mode == 'trunk' else
+                   ['switchport access vlan ' ~ (nexus_interface.access_vlan | default(1) | string)])
+                + (['no shutdown'] if nexus_interface.enabled else ['shutdown'])
+              }}
+          loop: "{{ nexus_detected_interfaces }}"
+
+        - name: Save port configuration
+          cisco.nxos.nxos_config:
+            save_when: modified
+

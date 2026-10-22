@@ -1,0 +1,82 @@
+---
+- name: Install apt prerequisites
+  ansible.builtin.apt:
+    name: "{{ devpi_apt_packages }}"
+    state: present
+    cache_valid_time: 3600
+  tags: [devpi_server, install]
+
+- name: Ensure devpi group
+  ansible.builtin.group:
+    name: "{{ devpi_group }}"
+    state: present
+  tags: [devpi_server, config]
+
+- name: Ensure devpi user
+  ansible.builtin.user:
+    name: "{{ devpi_user }}"
+    group: "{{ devpi_group }}"
+    home: "{{ devpi_data_dir }}"
+    shell: /usr/sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  tags: [devpi_server, config]
+
+- name: Ensure devpi venv parent directory
+  ansible.builtin.file:
+    path: "{{ devpi_venv | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [devpi_server, config]
+
+- name: Create devpi venv
+  ansible.builtin.command:
+    cmd: "{{ devpi_python }} -m venv {{ devpi_venv }}"
+    creates: "{{ devpi_venv }}/bin/python"
+  tags: [devpi_server, install]
+
+- name: Install devpi packages into venv
+  ansible.builtin.pip:
+    name: "{{ devpi_packages }}"
+    virtualenv: "{{ devpi_venv }}"
+    state: present
+  notify: fhs devpi changed
+  tags: [devpi_server, install]
+
+- name: Ensure devpi data dir
+  ansible.builtin.file:
+    path: "{{ devpi_data_dir }}"
+    state: directory
+    owner: "{{ devpi_user }}"
+    group: "{{ devpi_group }}"
+    mode: "0750"
+  tags: [devpi_server, config]
+
+- name: Initialise devpi server data dir
+  ansible.builtin.command:
+    cmd: "{{ devpi_venv }}/bin/devpi-init --serverdir {{ devpi_data_dir }}"
+    creates: "{{ devpi_data_dir }}/.nodeinfo"
+  become: true
+  become_user: "{{ devpi_user }}"
+  tags: [devpi_server, install]
+
+- name: Install devpi systemd unit
+  ansible.builtin.template:
+    src: devpi.service.j2
+    dest: /etc/systemd/system/devpi.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: fhs devpi changed
+  tags: [devpi_server, install]
+
+- name: Enable + start devpi
+  ansible.builtin.systemd:
+    name: devpi.service
+    enabled: true
+    state: started
+    daemon_reload: true
+  tags: [devpi_server, config]

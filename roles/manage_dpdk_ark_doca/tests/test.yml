@@ -1,0 +1,71 @@
+- name: Run DPDK testing and verification suite
+  hosts: all
+  vars:
+    bittware_testing_notebooks_dir: "/home/ubuntu/bittware_testing_notebooks"
+    ska_test_dir: "{{ bittware_testing_notebooks_dir }}/dependencies/terabox-bsp/terabox/app/ska_test"
+  roles:
+    - install_dpdk
+  tasks:
+    - name: Ensure target parent home directory exists
+      ansible.builtin.file:
+        path: "/home/ubuntu"
+        state: directory
+        mode: "0755"
+
+    - name: Copy and extract archive on the remote host
+      ansible.builtin.unarchive:
+        src: /provision/files.d/bittware_testing_notebooks.tar.gz
+        dest: "/home/ubuntu/"
+        mode: "0755"
+
+    - name: Ensure build directory exists
+      ansible.builtin.file:
+        path: "{{ ska_test_dir }}/build"
+        state: directory
+        mode: "0755"
+
+    - name: Copy build script template
+      ansible.builtin.template:
+        src: "greenpath_install.sh.j2"
+        dest: "{{ ska_test_dir }}/greenpath_install.sh"
+        mode: "0755"
+
+    - name: Run build script
+      ansible.builtin.command:
+        cmd: ./greenpath_install.sh
+        chdir: "{{ ska_test_dir }}"
+        creates: "{{ ska_test_dir }}/build/ska_test_greenpath-static"
+
+    - name: Find Mellanox PCIe address
+      ansible.builtin.shell: |
+        set -o pipefail
+        lspci -D | grep -i mellanox | head -n 1 | awk '{print $1}'
+      args:
+        executable: /bin/bash
+      register: lspci_output
+      changed_when: false
+
+    - name: Set Mellanox PCIe fact
+      ansible.builtin.set_fact:
+        nic_pcie_address: "{{ lspci_output.stdout | trim }}"
+
+    - name: Copy and template test script
+      ansible.builtin.template:
+        src: "run_ska_test.sh.j2"
+        dest: "{{ ska_test_dir }}/run_ska_test.sh"
+        mode: "0755"
+
+    - name: Run the DPDK test script
+      ansible.builtin.command:
+        cmd: ./run_ska_test.sh
+        chdir: "{{ ska_test_dir }}"
+      become: true
+      register: test_execution_output
+      failed_when:
+        - test_execution_output.rc != 0
+        - test_execution_output.rc != 255
+      changed_when: true
+
+    - name: Output test results to console
+      ansible.builtin.debug:
+        var: test_execution_output.stdout_lines

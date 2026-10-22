@@ -1,0 +1,25 @@
+---
+- name: Verify — gitea_server compose render
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Compose file exists
+      ansible.builtin.stat:
+        path: /etc/docker/compose/gitea/docker-compose.yml
+      register: compose
+    - name: Assert
+      ansible.builtin.assert:
+        that:
+          - compose.stat.exists
+          - compose.stat.mode == "0644"
+    - name: Read compose
+      ansible.builtin.slurp:
+        src: /etc/docker/compose/gitea/docker-compose.yml
+      register: compose_content
+    - name: Assert content is gitea-shaped
+      ansible.builtin.assert:
+        that:
+          - "'image: gitea/gitea:latest' in (compose_content.content | b64decode)"
+          - "'GITEA__server__HTTP_PORT' in (compose_content.content | b64decode)"
+          - "'gitea-data:/data' in (compose_content.content | b64decode)"

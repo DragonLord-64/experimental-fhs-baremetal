@@ -1,0 +1,4 @@
+---
+# roles/fhs_node_setup/vars/main.yml
+# Role vars have HIGH precedence - hard to override
+# Use for internal role logic that should not changZ

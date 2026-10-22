@@ -1,0 +1,19 @@
+---
+- name: Regenerate grub config
+  listen: fpga grub changed
+  ansible.builtin.command:
+    cmd: grub-mkconfig -o /boot/grub/grub.cfg
+  changed_when: true
+
+- name: Reload udev rules
+  listen: fpga udev changed
+  ansible.builtin.command:
+    cmd: udevadm control --reload-rules
+  register: udev_reload
+  changed_when: udev_reload.rc == 0
+  failed_when: false
+
+- name: Mark reboot required
+  listen: fpga reboot required
+  ansible.builtin.set_fact:
+    fpga_reboot_pending: true

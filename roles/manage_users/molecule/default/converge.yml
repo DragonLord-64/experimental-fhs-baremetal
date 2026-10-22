@@ -1,0 +1,19 @@
+---
+- name: Converge — users role
+  hosts: all
+  become: true
+  vars:
+    # SHA-512 of "test123" — fixture only.
+    _test_pw: "$6$rounds=656000$saltysalt$5IbeoxKbjI7g/8oIZjAdULp1WJ4hVTBNRGsTcSlYTOj4nKMfx1l8jH/zsfqHj6zE85cMzNxnEnGqkxbnSpwj/."
+    fhs_users:
+      - name: alice
+        password: "{{ _test_pw }}"
+        ssh_keys:
+          - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH/r3rA1qZ8/B8nGRpZGm0XwH/c+jbi+9LWzXJ4z4Cz5 alice@test"
+      - name: bob
+        password: "{{ _test_pw }}"
+        ssh_keys: []
+  tasks:
+    - name: Apply users role
+      ansible.builtin.import_role:
+        name: users

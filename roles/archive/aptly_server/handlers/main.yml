@@ -1,0 +1,7 @@
+---
+- name: Restart aptly api
+  listen: fhs aptly api changed
+  ansible.builtin.systemd:
+    name: aptly-api.service
+    state: restarted
+    daemon_reload: true

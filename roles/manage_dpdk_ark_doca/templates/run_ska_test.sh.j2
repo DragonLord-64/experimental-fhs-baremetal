@@ -1,0 +1,9 @@
+#!/bin/bash
+./build/ska_test_greenpath-static \
+    -l 1-4 \
+    -n 4 \
+    -a {{ nic_pcie_address }} \
+    -- \
+    --portmask 1 \
+    --burst 32 \
+    --nPkts 100000000

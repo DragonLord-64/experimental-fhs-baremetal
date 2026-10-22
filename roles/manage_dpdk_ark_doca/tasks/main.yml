@@ -1,0 +1,20 @@
+---
+- name: Install system dependencies and prep environment
+  ansible.builtin.include_tasks: prerequisites.yml
+  tags: [install, prereqs]
+
+- name: Setup NVIDIA DOCA framework from local artifact
+  ansible.builtin.include_tasks: doca.yml
+  tags: [install, doca]
+
+- name: Extract Atomic Rules Arkville driver trees
+  ansible.builtin.include_tasks: arkville.yml
+  tags: [install, arkville]
+
+- name: Build and install DPDK framework with Arkville extensions
+  ansible.builtin.include_tasks: dpdk.yml
+  tags: [install, dpdk]
+
+- name: Compile final Arkville high-performance application suite
+  ansible.builtin.include_tasks: arkville_apps.yml
+  tags: [install, arkville_apps]

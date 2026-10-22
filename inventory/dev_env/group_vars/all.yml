@@ -1,0 +1,13 @@
+---
+# Connection defaults for the dev environment.
+# Override per-host in host_vars/ when a node deviates.
+
+ansible_user: ubuntu
+ansible_ssh_private_key_file: /root/.ssh/id_rsa
+ansible_python_interpreter: /usr/bin/python3
+
+fhs_keys_dir: "/provision/files.d/dev-ssh-keys.d"
+
+# Vault value is the final SHA-512 password hash (for example, from mkpasswd -m sha-512).
+vault_user_password_terabox1501b: $6$x4PIu.HBKA9vxLrY$sVMoJccW40YNOFtqyMaLN3f1trukBIMF0/frReSL/cVQWW9FXgH/zoJt60XoH7WUXCpB.JTLKqJMccLlkONUp1
+

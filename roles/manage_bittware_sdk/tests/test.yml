@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: BSD-3-Clause
+---
+- name: Test bittware SDK
+  hosts: localhost
+  remote_user: root
+  roles:
+    - bittware_sdk

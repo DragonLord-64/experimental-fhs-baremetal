@@ -1,0 +1,19 @@
+---
+# - name: Verify OS matches approved version
+#   ansible.builtin.assert:
+#     that:
+#       - (fpga_approved_os | length == 0) or
+#         (ansible_facts['distribution'] ~ ' ' ~ ansible_facts['distribution_version']) == fpga_approved_os
+#     fail_msg: "Host OS ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) does not match approved ({{ fpga_approved_os }})"
+
+- name: Install FPGA host apt prerequisites
+  ansible.builtin.apt:
+    name: "{{ fpga_apt_packages }}"
+    state: present
+    cache_valid_time: 3600
+
+- name: Ensure bittware group exists
+  ansible.builtin.group:
+    name: "{{ fpga_bittware_group }}"
+    gid: "{{ fpga_bittware_group_gid }}"
+    state: present

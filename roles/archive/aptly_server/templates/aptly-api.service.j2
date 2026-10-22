@@ -1,0 +1,15 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Aptly API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ aptly_user }}
+Group={{ aptly_group }}
+ExecStart=/usr/bin/aptly api serve -listen {{ aptly_serve_listen }}
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

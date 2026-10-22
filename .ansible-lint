@@ -1,0 +1,35 @@
+---
+# .ansible-lint
+skip_list:
+    - yaml[line-length]
+    - var-naming[no-role-prefix]
+    - var-naming[pattern]
+warn_list:
+    - experimental
+    - jinja[spacing]
+    - fqcn[deep]
+    - risky-shell-pipe
+    - risky-file-permissions
+    - no-changed-when
+    - ignore-errors
+    - var-naming[no-reserved]
+
+exclude_paths:
+    - ./roles/*/files/*
+
+mock_roles:
+    - apt_repo_access
+    - aptly_server
+    - bittware_sdk
+    - devpi_server
+    - fhs_node_setup
+    - fpga_host
+    - gitea_server
+    - install_dpdk
+    - manage_exporter
+    - manage_prometheus
+    - network_setup
+    - pip_index
+    - tag_test
+    - users
+    - venvs

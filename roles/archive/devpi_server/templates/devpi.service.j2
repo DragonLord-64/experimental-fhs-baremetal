@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=devpi-server (PyPI mirror)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ devpi_user }}
+Group={{ devpi_group }}
+ExecStart={{ devpi_venv }}/bin/devpi-server --serverdir={{ devpi_data_dir }} --host={{ devpi_host }} --port={{ devpi_http_port }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

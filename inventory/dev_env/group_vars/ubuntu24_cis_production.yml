@@ -1,0 +1,313 @@
+# Software related defaults that are common to all FHS terabox compute nodes.
+# Hardware related defaults should go in the teraboxes.yml inventory file instead.
+
+##############################################################################
+# OVERRIDES for UBUNTU24 CIS
+# NOTE: the variables listed here are ones that might be toggled to override the defaults, or are ones that are listed as "(MAYBE)" in Ref #2 below. They are not extensive.
+# Ref #1: https://github.com/ansible-lockdown/UBUNTU24-CIS/blob/devel/defaults/main.yml for the entire list of defaults.
+# Ref #2: https://confluence.skatelescope.org/display/SE/UBUNTU22-CIS+Ansible+Role for System Team's recommended Ubuntu22 CIS settings
+
+## Switching on/off specific baseline sections
+# These variables govern whether the tasks of a particular section are to be executed when running the role.
+# E.g: If you want to execute the tasks of Section 1 you should set the "_section1" variable
+# to "true". If you do not want the tasks from that section to get executed you simply set the variable to "false".
+ubtu24cis_section1: true
+ubtu24cis_section2: true
+ubtu24cis_section3: true
+ubtu24cis_section4: true
+ubtu24cis_section5: true
+ubtu24cis_section6: true
+ubtu24cis_section7: true
+
+## Reboot system before audit
+# System will reboot if false, can give better audit results
+skip_reboot: true
+
+# Used for audit
+ubtu24cis_level_1: true
+ubtu24cis_level_2: false
+
+# Create managed not custom local_facts files
+create_benchmark_facts: true
+ansible_facts_path: /etc/ansible/facts.d
+
+## Benchmark name used by auditing control role
+# The audit variable found at the base
+benchmark: UBUNTU24-CIS
+## metadata for Audit benchmark
+benchmark_version: v1.0.0
+
+# We've defined disruption-high to indicate items that are likely to cause
+# disruption in a normal workflow.  These items can be remediated automatically
+# but are disabled by default to avoid disruption.
+# Value of true runs disruptive tasks, value of false will skip disruptive tasks
+ubtu24cis_disruption_high: false
+
+## Unrestricted boot
+# Setting this variable to false enables the system to
+# boot *without* querying for the bootloader password.
+ubtu24cis_ask_passwd_to_boot: false # pragma: allowlist secret
+
+# skip tests that fail in CI/test environments
+ubtu24cis_skip_for_test: false
+
+## Root user used
+# Root by default is not used unless setup by user
+# The role will only run certain commands if set to true
+# This allows the ability to skip tasks that may cause an issue
+ubtu24cis_uses_root: false # TEMP: for testing environment only. Override to true for production.
+
+###
+### Settings for associated Audit role using Goss
+###
+
+###########################################
+### Goss is required on the remote host ###
+### vars/auditd.yml for other settings ###
+
+# Allow audit to setup the requirements including installing git (if option chosen and downloading and adding goss binary to system)
+setup_audit: true
+
+# enable audits to run - this runs the audit and get the latest content
+run_audit: true
+# Run heavy tests - some tests can have more impact on a system enabling these can have greater impact on a system
+audit_run_heavy_tests: false
+# Ability to limit the number of concurrent processes used by goss (default 50)
+audit_max_concurrent: 50
+
+## Only run Audit do not remediate
+audit_only: true
+
+#############################
+
+# How to retrieve audit binary
+# Options are copy or download - detailed settings at the bottom of this file
+# you will need access to either github or the file already downloaded
+get_audit_binary_method: copy
+
+## if get_audit_binary_method - copy the following needs to be updated for your environment
+## it is expected that it will be copied from somewhere accessible to the control node
+## e.g copy from ansible control node to remote host
+audit_bin_copy_location: "{{ playbook_dir }}/artifacts/goss/goss-v0.4.8"
+
+# how to get audit files onto host options
+# options are git/copy/archive/get_url other e.g. if you wish to run from already downloaded conf
+audit_content: archive
+
+# If using either archive, copy, get_url:
+## Note will work with .tar files - zip will require extra configuration
+### If using get_url this is expecting github url in tar.gz format e.g.
+### https://github.com/ansible-lockdown/UBUNTU24-CIS-Audit/archive/refs/heads/benchmark-v1.0.0.tar.gz
+audit_conf_source: "{{ playbook_dir }}/artifacts/ubuntu24-cis-audit/ubuntu24-cis-audit-benchmark-v1.0.0.tar.gz"
+
+# Destination for the audit content to be placed on managed node
+# note may not need full path e.g. /opt with the directory being the {{ benchmark }}-Audit directory
+audit_conf_dest: "/opt"
+
+# Where the audit logs are stored
+audit_log_dir: "/opt"
+
+## Ability to collect and take audit files moving to a centralized location
+# This enables the collection of the files from the host
+fetch_audit_output: true
+
+# Method of getting,uploading the summary files
+## Ensure access and permissions are available for these to occur.
+## options are
+# fetch - fetches from server and moves to location on the ansible controller (could be a mount point available to controller)
+# copy - copies file to a location available to the managed node
+audit_output_collection_method: fetch
+
+# Location to put the audit files
+audit_output_destination: "/var/log/ubuntu24_cis_audit_summaries/"
+
+### Goss Settings ##
+####### END ########
+
+##############################################################################
+## Section 1 Fixes
+## Section 1 is Initial setup (FileSystem Configuration, Configure Software Updates, Filesystem Integrity Checking, Secure Boot Settings,
+## Additional Process Hardening, Mandatory Access Control, Command Line Warning Banners, and GNOME Display Manager)
+# 1.1 Filesystems
+# /tmp partition
+ubtu24cis_rule_1_1_2_1_4: false # Ensure noexec option set
+# /var partition
+ubtu24cis_rule_1_1_2_4_2: false # Ensure nodev option set
+ubtu24cis_rule_1_1_2_4_3: false # Ensure nosuid option set
+# 1.2 Package mgmt
+# 1.2.2 Configure Package updates
+ubtu24cis_rule_1_2_2_1: false # TBD Ensure updates, patches, and additional security software are installed
+# 1.4 Configure Bootloader
+ubtu24cis_rule_1_4_1: false # Ensure bootloader password is set
+
+##############################################################################
+## Section 2 Fixes
+## Section 2 is Services (Special Purpose Services, and service clients)
+# 2.1 Configure Server Services
+ubtu24cis_rule_2_1_5: true # Ensure dnsmasq services are not in use; Set to false for gateway nodes, true otherwise
+ubtu24cis_rule_2_1_22: false # (MAYBE) Ensure only approved services are listening on a network interface. We may have other services listening that might interfere
+# 2.2 Configure client services
+ubtu24cis_rule_2_2_4: true # (MAYBE) Ensure telnet client is not installed
+ubtu24cis_rule_2_2_5: true # (MAYBE) Ensure ldap client is not installed. Unsure if needed by our Ceph nodes. --> I think we want to keep this as true
+# 2.3.1 Ensure time synchronization is in use
+ubtu24cis_rule_2_3_1_1: false # TBD Ensure a single time synchronization daemon is in use
+# 2.3.2 Configure systemd-timesyncd
+ubtu24cis_rule_2_3_2_1: false # TBD Ensure systemd-timesyncd configured with authorized timeserver
+ubtu24cis_rule_2_3_2_2: false # TBD Ensure systemd-timesyncd is enabled and running
+# 2.3.3 Configure Chrony (FAILS if not false because chrony is not installed)
+ubtu24cis_rule_2_3_3_1: false # TBD Ensure chrony is configured with authorized timeserver
+ubtu24cis_rule_2_3_3_2: false # TBD Ensure chrony is running as user _chrony
+ubtu24cis_rule_2_3_3_3: false # TBD Ensure chrony is enabled and running
+
+##############################################################################
+## Section 3 Fixes
+## Section 3 is Network Configuration (Configure network devices, Configure network kernel modules,
+## Configure network kernel parameters)
+# 3.3 Configure Network Kernel Parameters (Host and Router)
+ubtu24cis_rule_3_3_1: false # Ensure IP forwarding is disabled. Setting to true might interfere with hypervisor nodes and K8S
+ubtu24cis_rule_3_3_2: true # (MAYBE) Ensure packet redirect sending is disabled
+ubtu24cis_rule_3_3_3: true # (MAYBE) Ensure bogus ICMP responses are ignored
+ubtu24cis_rule_3_3_4: true # (MAYBE) Ensure broadcast ICMP requests are ignored
+ubtu24cis_rule_3_3_5: true # (MAYBE) Ensure ICMP redirects are not accepted
+ubtu24cis_rule_3_3_6: true # (MAYBE) Ensure secure ICMP redirects are not accepted
+ubtu24cis_rule_3_3_7: true # (MAYBE) Ensure reverse path filtering is enabled
+ubtu24cis_rule_3_3_8: true # (MAYBE) Ensure source routed packets are not accepted
+ubtu24cis_rule_3_3_9: true # (MAYBE) Ensure suspicious packets are logged
+ubtu24cis_rule_3_3_10: true # (MAYBE) Ensure TCP syn cookies is enabled
+ubtu24cis_rule_3_3_11: true # (MAYBE) Ensure IPv6 router advertisements are not accepted
+
+##############################################################################
+## Section 4 Fixes
+# Section 4 is Firewall configuration (Configure single firewall utility, Configure Uncomplicated Firewall,
+# Configure nftables and Configure iptables)
+# 4.1 Single firewall
+ubtu24cis_rule_4_1_1: false # (TBD NEW) Ensure a single firewall configuration is used
+# 4.2 Configure UncomplicatedFirewall
+ubtu24cis_rule_4_2_1: false # (MAYBE) Ensure ufw is installed
+ubtu24cis_rule_4_2_2: false # (MAYBE) Ensure iptables-persistent is not installed with ufw
+ubtu24cis_rule_4_2_3: false # (MAYBE) Ensure ufw service is enabled
+ubtu24cis_rule_4_2_4: false # (MAYBE) Ensure ufw loopback traffic is configured
+ubtu24cis_rule_4_2_5: false # (MAYBE) Ensure ufw outbound connections are configured
+ubtu24cis_rule_4_2_6: false # (MAYBE) Ensure ufw firewall rules exist for all open ports
+ubtu24cis_rule_4_2_7: false # (MAYBE) Ensure ufw default deny firewall policy
+# 4.3 Configure nftables
+ubtu24cis_rule_4_3_1: false # Ensure nftables is installed
+ubtu24cis_rule_4_3_2: false # Ensure ufw is uninstalled or disabled with nftables
+ubtu24cis_rule_4_3_3: false # Ensure iptables are flushed with nftables
+ubtu24cis_rule_4_3_4: false # Ensure a nftables table exists
+ubtu24cis_rule_4_3_5: false # Ensure nftables base chains exist
+ubtu24cis_rule_4_3_6: false # Ensure nftables loopback traffic is configured
+ubtu24cis_rule_4_3_7: false # Ensure nftables outbound and established connections are configured
+ubtu24cis_rule_4_3_8: false # Ensure nftables default deny firewall policy
+ubtu24cis_rule_4_3_9: false # Ensure nftables service is enabled
+ubtu24cis_rule_4_3_10: false # Ensure nftables rules are permanent
+# 4.4.1 Configure iptables software
+ubtu24cis_rule_4_4_1_1: false # Ensure iptables packages are installed
+ubtu24cis_rule_4_4_1_2: false # Ensure nftables is not installed with iptables
+ubtu24cis_rule_4_4_1_3: false # Ensure ufw is uninstalled or disabled with iptables
+# 4.4.2 Configure IPv4 iptables
+ubtu24cis_rule_4_4_2_1: false # Ensure iptables default deny firewall policy
+ubtu24cis_rule_4_4_2_2: false # Ensure iptables loopback traffic is configured
+ubtu24cis_rule_4_4_2_3: false # Ensure iptables outbound and established connections are configured
+ubtu24cis_rule_4_4_2_4: false # Ensure iptables firewall rules exist for all open ports
+# 4.4.3 Configure IPv6 iptables
+ubtu24cis_rule_4_4_3_1: false # Ensure ip6tables default deny firewall policy
+ubtu24cis_rule_4_4_3_2: false # Ensure ip6tables loopback traffic is configured
+ubtu24cis_rule_4_4_3_3: false # Ensure ip6tables outbound and established connections are configured
+ubtu24cis_rule_4_4_3_4:
+  false # Ensure ip6tables firewall rules exist for all open ports
+
+
+  ##############################################################################
+## Section 5 Fixes
+# Section 5 is Access Control (Configure SSH Server, Configure PAM
+# and User Accounts and Environment)
+# 5.1 Configure SSH Server
+ubtu24cis_rule_5_1_4: false # Ensure sshd access is configured. Not needed since we use `ubuntu` user.
+ubtu24cis_rule_5_1_7: false # Ensure sshd ClientAliveInterval and ClientAliveCountMax are configured
+ubtu24cis_rule_5_1_8: false # Ensure sshd DisableForwarding is enabled
+ubtu24cis_rule_5_1_17: true # (MAYBE) Ensure sshd MaxSessions is configured. May affect the DLM if not properly configured.
+ubtu24cis_rule_5_1_18: true # (MAYBE) Ensure sshd MaxStartups is configured. May affect the DLM if not properly configured.
+ubtu24cis_rule_5_1_21: true # (MAYBE) Ensure sshd PermitUserEnvironment is disabled. Unsure if this will affect infra.
+ubtu24cis_rule_5_1_22: true # (MAYBE) Ensure sshd UsePAM is enabled. Unsure what issues this may cause, if any.
+# 5.2 Configure privilege escalation
+ubtu24cis_rule_5_2_2: true # (MAYBE) Ensure sudo commands use pty. Unsure what this implies.
+ubtu24cis_rule_5_2_4: false # Ensure users must provide password for privilege escalation. Will likely break ansible and custom sudo NOPASSWD configs.
+ubtu24cis_rule_5_2_7: true # (MAYBE) Ensure access to the su command is restricted
+# 5.3.1 Configure PAM software packages
+ubtu24cis_rule_5_3_1_3: false # (FAILS if not false) Ensure libpam-pwquality is installed
+# 5.3.3.2 Configure pam_quality module
+ubtu24cis_rule_5_3_3_2_1: false # (FAILS if not false) Ensure password number of changed characters is configured
+ubtu24cis_rule_5_3_3_2_2: false # (FAILS if not false) Ensure minimum password length is configured
+ubtu24cis_rule_5_3_3_2_3: false # (FAILS if not false) Ensure password complexity is configured
+ubtu24cis_rule_5_3_3_2_4: false # (FAILS if not false) Ensure password same consecutive characters is configured
+ubtu24cis_rule_5_3_3_2_5: false # (FAILS if not false) Ensure password maximum sequential characters is configured
+ubtu24cis_rule_5_3_3_2_6: false # (FAILS if not false) Ensure password dictionary check is enabled
+ubtu24cis_rule_5_3_3_2_7: false # (FAILS if not false) Ensure password quality checking is enforced
+ubtu24cis_rule_5_3_3_2_8: false # (error with /etc/security/pwquality.conf.d does not exist)  Ensure password quality is enforced for the root user
+ubtu24cis_rule_5_4_3_2: false # disable shell timeout during development
+
+##############################################################################
+## Section 6 Fixes
+# Section 6 is Logging and Auditing (System Logging, System Auditing, Configure Integrity Checking)
+# 6.1.2.1 Configure systemd-journal-remote
+# NOTE: Filebeat should handle log upload
+ubtu24cis_rule_6_1_2_1_1: false # Ensure systemd-journal-remote is installed
+ubtu24cis_rule_6_1_2_1_2: false # Ensure systemd-journal-upload authentication is configured
+ubtu24cis_rule_6_1_2_1_3: false # Ensure systemd-journal-upload is enabled and active
+ubtu24cis_rule_6_1_2_1_4: false # Ensure systemd-journal-remote service is not in use
+# 6.1.3 Configure rsyslog (MAYBE - NEW SECTION)
+ubtu24cis_rule_6_1_3_1: true # Ensure rsyslog is installed
+ubtu24cis_rule_6_1_3_2: true # Ensure rsyslog service is enabled and active
+ubtu24cis_rule_6_1_3_3: true # Ensure journald is configured to send logs to rsyslog
+ubtu24cis_rule_6_1_3_4: true # Ensure rsyslog log file creation mode is configured
+ubtu24cis_rule_6_1_3_5: true # Ensure rsyslog logging is configured
+ubtu24cis_rule_6_1_3_6: true # Ensure rsyslog is configured to send logs to a remote log host
+ubtu24cis_rule_6_1_3_7: true # Ensure rsyslog is not configured to receive logs from a remote client
+# 6.1.3.8 logrotate
+ubtu24cis_rule_6_1_3_8: true # Ensure logrotate is configured (MAYBE - NEW)
+# 6.2.2 Configure auditd data retention
+ubtu24cis_rule_6_2_2_3: false # Ensure system is disabled when audit logs are full. Not a good idea to disable the entire system. Check other actions instead of disabling. !!! TODO
+# 6.3 Configure Filesystem Integrity Checking
+ubtu24cis_rule_6_3_1: false # (FAILS if not false because it can't update apt cache) Ensure AIDE is installed
+ubtu24cis_rule_6_3_2: false # (FAILS if not false because service dailyaidecheck.service doesn't exist) Ensure filesystem integrity is regularly checked
+ubtu24cis_rule_6_3_3: false # (FAILS if not false because /etc/aide/aide.conf doesn't exist)  Ensure cryptographic mechanisms are used to protect the integrity of audit tools
+
+##############################################################################
+## Section 7 Fixes
+# Section 7 is System Maintenance (System File Permissions and User and Group Settings)
+# NOTE: no overrides
+
+## System functionality configuration variables
+##
+## There are certain functionalities of a system
+## that may require either to skip certain CIS rules
+## or install certain packages.
+## Set the respective variable to `true` in order to
+## enable a certain functionality on the system
+
+## IPv4 requirement toggle
+# This variable governs whether ipv4 is enabled or disabled.
+ubtu24cis_ipv4_required: true
+
+## IPv6 requirement toggle
+# This variable governs whether ipv6 is enabled or disabled.
+ubtu24cis_ipv6_required: false
+
+## Desktop requirement toggle
+# This variable governs, whether CIS rules regarding GDM
+# and X-Windows are carried out.
+ubtu24cis_desktop_required: false
+
+## Purge apt packages
+# This will allow the purging of any packages that are marked to be removed
+# This will also purge any packages not removed via this playbook
+ubtu24cis_purge_apt: true
+
+## Apt/dpkg lock timeout (seconds)
+# Used for apt-backed package tasks to wait for dpkg/apt locks.
+ubtu24cis_apt_lock_timeout: 180
+
+## Ignore change_when for apt update task
+# This variable modifies behavior of 'changed_when' for 'apt update' task in prelim that always changes.
+ubtu24cis_ignore_apt_update_changed_when: true

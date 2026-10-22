@@ -1,0 +1,21 @@
+---
+argument_specs:
+  main:
+    short_description: Configure a Bittware FPGA host
+    options:
+      fpga_kernel_cmdline: {type: list, elements: str}
+      fpga_vfio_rules_file: {type: str, default: 98-ska_vfio.rules}
+      fpga_udev_rules_dir: {type: path, default: /etc/udev/rules.d}
+      fpga_bmc_firmware_zip: {type: path, default: ""}
+      fpga_bmc_firmware_version: {type: str, default: ""}
+      fpga_bmc_cards: {type: list, elements: int, default: [0, 1]}
+      fpga_bittware_user: {type: str, default: ""}
+      fpga_bittware_group: {type: str, default: bittware}
+      fpga_bittware_sdk_root: {type: path, default: /usr/share/bittware-sdk}
+      fpga_user_venv_dir: {type: path}
+      fpga_update_grub: {type: bool, default: false}
+      fpga_update_bittware_sdk: {type: bool, default: false}
+      fpga_update_bmc: {type: bool, default: false}
+      users_setup_venvs: {type: bool, default: true}
+      fpga_reboot_on_change: {type: bool, default: true}
+      fpga_reboot_timeout: {type: int, default: 600}

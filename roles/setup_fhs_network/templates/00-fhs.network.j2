@@ -1,0 +1,20 @@
+{{ ansible_managed | comment }}
+# Primary FHS interface for {{ inventory_hostname }}
+[Match]
+MACAddress={{ sys_mac_address }}
+
+[Network]
+Address={{ ansible_host }}/{{ network_interface_prefix }}
+DHCP=no
+{% for d in network_dns %}
+DNS={{ d }}
+{% endfor %}
+Domains=dev-mirror.svc.cluster.local
+{% for n in network_ntp %}
+NTP={{ n }}
+{% endfor %}
+
+
+[Link]
+RequiredForOnline=yes
+
