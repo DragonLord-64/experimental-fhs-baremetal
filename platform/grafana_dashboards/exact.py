@@ -25,10 +25,11 @@ def inventory():
  for rack in range(1,10):
   units=([f'VCCUnit{(rack-1)*4+i}' for i in range(1,5)] if rack<=6 else [])+[f'FSPUnit{(rack-1)*3+i}' for i in range(1,4)]
   slot=1
-  for unit in units:
+  for index,unit in enumerate(units):
+   if index:slot+=1
    out.append({'rack':rack,'unit':unit,'id':unit+'-switch','kind':'switch','position_u':slot,'height_u':1,'face':'front','deployed':deployed(unit)});slot+=1
    for member in range(1,(1 if unit.startswith('VCC') else 4)+1):
-    out.append({'rack':rack,'unit':unit,'id':unit+f'-FHS{member}','fhs':f'FHS{member}','kind':'server','position_u':slot,'height_u':2,'face':'front','deployed':deployed(unit)});slot+=2
+    out.append({'rack':rack,'unit':unit,'id':unit+f'-FHS{member}','fhs':f'FHS{member}','kind':'server','position_u':slot,'height_u':1,'face':'front','deployed':deployed(unit)});slot+=1
  return out
 
 def labelled(value, **labels):
@@ -41,6 +42,14 @@ def expected_host():
     """Explicit deployed membership, independent of exporter availability."""
     known=' or '.join(labelled(1,unit=p['unit'],fhs=p['fhs']) for p in inventory() if p['deployed'] and p['kind']=='server')
     return '('+labelled(1,unit='$unit',fhs='$fhs')+') and on(unit,fhs) ('+known+')'
+
+
+def parent_inventory_state():
+    """Inventory only: no observed parent hardware sensors exist in this contract."""
+    known=' or '.join(labelled(1,source=p['id']) for p in inventory()
+                      if p['kind']=='switch' and p['deployed'])
+    selected='('+labelled(1,source='$switch')+') and on(source) ('+known+')'
+    return '(3 * ('+selected+')) or on() vector(4)'
 
 
 def expected_interface():
@@ -67,6 +76,13 @@ def classification(panel):
     value['options'].update({'3':{'text':'TELEMETRY MISSING','color':GRAY},'4':{'text':'NOT DEPLOYED','color':GRAY}})
 
 
+def mesh_rate(direction):
+    """Selected vccu endpoint only: separate RX/TX, never count peer twice."""
+    counters='max by(source,interface) (rate(nexus_interfaces_octets{job="$switch_job",source="VCCUnit$vccu-switch",dn=~".*/dbgIfHC'+direction+'"}[5m]))'
+    peer='max by(source,interface) (nexus_lldp_id{job="$switch_job",source="VCCUnit$vccu-switch",sysName="FSPUnit$fspu-switch"})'
+    return 'sum(('+counters+') and on(source,interface) ('+peer+')) * 8 / 1e9'
+
+
 def build(g,base):
  ds=g.DS
  dashboards=base
@@ -87,7 +103,7 @@ def build(g,base):
     names=[f'{r}Unit{n}'+('-switch' if v['name']=='switch' else '') for r,count in [('VCC',24),('FSP',27)] for n in range(1,count+1)]
     v.update(type='custom',query=','.join(names),options=[]);v.pop('definition',None)
  # Rack elevations: explicit full inventory, one compact native Canvas per rack.
- rp=[note('**NINE 42U RACKS · SYNTHETIC PLACEMENT / ILLUSTRATIVE HEIGHTS** · 24 VCC + 27 FSP. Gray **NOT DEPLOYED** is inventory outside the 4 VCC / 3 FSP lab. **TELEMETRY MISSING** means deployed hardware without readings. Inventory persists when readings are unavailable.')]
+ rp=[note('**NINE 42U RACKS · SYNTHETIC PLACEMENT · devices 1U · one empty U between unit blocks** · 24 VCC + 27 FSP. Gray **NOT DEPLOYED** is inventory outside the 4 VCC / 3 FSP lab. **TELEMETRY MISSING** means deployed hardware without readings. Inventory persists when readings are unavailable.')]
  items=inventory()
  for rack in range(1,10):
   els=[];targets=[];over=[];occupied=set()
@@ -116,17 +132,25 @@ def build(g,base):
   else:
    expr='('+g.mesh_query()+f' and on(vcc,fsp) label_replace(label_replace(vector(1),"vcc","VCCUnit{v}","",""),"fsp","FSPUnit{f}","","")) or on() vector(3)'
    matrix['targets'].append(target(expr,name,str(len(matrix['targets']))))
-   matrix['fieldConfig']['overrides'].append(mapping(name,{0:('×','#F2495C'),1:('UP','#245F9B'),3:('?',GRAY)}))
+   matrix['fieldConfig']['overrides'].append(mapping(name,{0:('fault','#F2495C'),1:('ok','#245F9B'),3:('?',GRAY)}))
   e['links']=[{'title':f'Inspect VCC{v} / FSP{f}','url':g.url('mesh',vccu=v,fspu=f),'oneClick':True}];e['oneClickMode']='link'
  matrix['title']='24 VCC × 27 FSP · 648 fixed links';matrix['fieldConfig']['defaults'].update(noValue='?',mappings=[])
- mp[0]=note('**VCC → FSP · 648 POTENTIAL LINKS** · ND = **NOT DEPLOYED** · ? = **TELEMETRY MISSING** · × = observed **DOWN** · UP = observed link, rate unavailable. No traffic intensity is invented. Endpoint selectors affect details only.',h=3)
+ mp[0]=note('**VCC → FSP · 648 POTENTIAL LINKS** · ND = **NOT DEPLOYED** · ? = **TELEMETRY MISSING** · fault = observed link down · UP = observed link. Selected RX/TX rates are shown below. No traffic intensity is invented. Endpoint selectors affect details only.',h=3)
  counts=[('UP','count(('+g.mesh_query()+') == 1)'),('DOWN','count(('+g.mesh_query()+') == 0)'),('TELEMETRY MISSING','12 - count('+g.mesh_query()+')'),('NOT DEPLOYED','vector(636)')]
  for p,(title,expr) in zip(mp[1:5],counts):p['title']=title;p['targets']=[target(expr)]
  mp=mp[:6]
  selected=g.mesh_query()+' and on(vcc,fsp) label_replace(label_replace(vector(1),"vcc","VCCUnit$vccu","",""),"fsp","FSPUnit$fspu","","")'
  status=g.panel('VCC $vccu ↔ FSP $fspu · observed status',inventory_fallback(selected,expected_mesh()),0,24,8,3,states={0:('DOWN','red'),1:('UP','green')});classification(status);mp.append(status)
- for x,title in [(8,'Rate · unavailable'),(16,'Capacity · unavailable')]:mp.append(g.panel(title,'vector(0) == 1',x,24,8,3))
- mp.append(note('[Open selected VCC switch]('+g.url('switch',dynamic={'switch':'VCCUnit${vccu}-switch','unit':'VCCUnit${vccu}'})+') · Rates/history unavailable in this telemetry contract; ND units are not emulated.',27,2))
+ rate_panel=g.panel('Observed throughput · RX / TX Gbit/s',mesh_rate('In'),8,24,8,3)
+ rate_panel['targets']=[target(mesh_rate('In'),'RX'),target(mesh_rate('Out'),'TX','B')]
+ rate_panel['fieldConfig']['defaults'].update(unit='suffix: Gbit/s',decimals=9)
+ rate_panel['options'].update(textMode='value_and_name',colorMode='value')
+ rate_panel['fieldConfig']['defaults']['color']={'mode':'fixed','fixedColor':'text'}
+ rate_panel['description']='5m counter rates at selected vccu endpoint: RX received, TX transmitted. Peer endpoint is not counted again. Missing samples stay unknown, including on down links.'
+ mp.append(rate_panel)
+ capacity=g.panel('Link capacity · Gbit/s','vector(0) == 1',16,24,8,3)
+ capacity['fieldConfig']['defaults']['unit']='suffix: Gbit/s';mp.append(capacity)
+ mp.append(note('[Open selected VCC switch]('+g.url('switch',dynamic={'switch':'VCCUnit${vccu}-switch','unit':'VCCUnit${vccu}'})+') · Selected throughput is observed RX/TX at the vccu endpoint. Capacity and utilization remain unknown without configured/negotiated capacity.',27,2))
  dashboards['mesh']['panels']=mp
  # Compact two-column component rows with status square and grouped readings.
  components=json.loads((ROOT/'components.json').read_text());fp=[note('**FHS $unit / $fhs** · Status at left, observed readings at right. Gray = missing telemetry. Illustrative temperature70/85°C and fan4000/1000RPM limits. Native flag meanings need hardware validation.')]
@@ -145,8 +169,8 @@ def build(g,base):
  y=5+((len(components)+1)//2)*3
  other=g.panel('Everything else · network / metadata','node_network_info{job="$node_job",unit="$unit",fhs="$fhs",instance=~"$node_instance"}',0,y,24,7,kind='table');other['transformations']=[{'id':'organize','options':{'excludeByName':{'Time':True,'__name__':True,'job':True,'instance':True},'indexByName':{'device':0,'ifalias':1,'address':2,'Value':3}}}];fp.append(other);dashboards['fhs']['panels']=fp
  # Exact 32-port/128-lane prototype Canvas, replacing mock measurements.
- sw=reference('switch')['panels'];sw[0]=note('**SWITCH $switch · 32 PHYSICAL PORTS / 128 SLOTS** · Link status comes from observations. Parent hardware and optic health remain Unknown without sensors. ND = slot not in explicit deployed interface inventory. Select port for optics below; click a lane for interface details.')
- board=sw[1];board['targets']=[];board['fieldConfig']['overrides']=[]
+ sw=reference('switch')['panels'];sw[0]=note('**SWITCH $switch · 32 PHYSICAL PORTS / 128 SLOTS** · Link status comes from observations; fault reason: link down. Parent hardware and optic health remain Unknown without sensors. ND = **not deployed** (absent interface inventory); ? = **unknown** (missing telemetry). L1–L4 identify breakout lanes; full status is in interface details. Select port for optics below; click a lane for interface details.')
+ board=sw[1];board['targets']=[target(parent_inventory_state(),'Parent inventory state')];board['fieldConfig']['overrides']=[mapping('Parent inventory state',{3:('unknown',GRAY),4:('not deployed',GRAY)})]
  inv=json.loads((ROOT/'deployed-interfaces.json').read_text())
  # Explicit inventory defaults distinguish missing observations from absent slots.
  for e in board['options']['root']['elements']:
@@ -163,11 +187,15 @@ def build(g,base):
      gate='label_replace(vector(1),"source","$switch","","")'
      expr='('+expr+') or on() (('+ ' or '.join(expected)+') and on(source) '+gate+') or on() vector(2)'
     else:expr='('+expr+') or on() vector(2)'
-    board['targets'].append(target(expr,field,str(len(board['targets']))));board['fieldConfig']['overrides'].append(mapping(field,{0:(f'{lane} Down','red'),1:(f'{lane} Up','green'),2:(f'{lane} ND',GRAY),3:(f'{lane} ?',GRAY)}))
-   elif e['name'].endswith('quality'):e['config']['text']={'mode':'fixed','fixed':'—','field':''}
+    board['targets'].append(target(expr,field,str(len(board['targets']))));board['fieldConfig']['overrides'].append(mapping(field,{0:('fault','red'),1:('ok','green'),2:('ND','#c8cbd2'),3:('?','#c8cbd2')}))
+   elif e['name'].endswith('quality'):e['config']['text']={'mode':'fixed','fixed':f'L{lane}','field':''}
    e['links']=[{'title':'Open '+iface,'url':g.url('interface',interface=iface,port=p),'oneClick':True}]
   else:
-   if e['name'].endswith('health'):e['config']['text']={'mode':'fixed','fixed':'HW ?','field':''}
+   if e['name'].endswith('health'):
+    e['config']['text']={'mode':'field','fixed':'','field':'Parent inventory state'}
+    e['placement']['left']-=36;e['placement']['width']+=36
+    e['config']['color']={'fixed':'#ffffff'}
+    e['config']['align']='center'
    if e['name'].endswith('link'):e['config']['text']={'mode':'fixed','fixed':'','field':''}
    if 'background' in e:e['background']={'color':{'fixed':'#444444' if p<=2 else '#34373d'}}
    e['links']=[{'title':f'Inspect port {p}','url':g.url('switch',port=p),'oneClick':True}]
@@ -210,4 +238,86 @@ def build(g,base):
  vp[-1]=g.panel('Explicit directed translation routes · unavailable','vector(0) == 1',0,25,24,7,kind='table')
  for d in dashboards.values():
   for i,p in enumerate(d['panels'],1):p['id']=i;p['datasource']=ds
- return dashboards
+ return canonical_presentation(dashboards)
+
+
+def canonical_name(text):
+    import re
+    text=re.sub(r'(VCC|FSP)Unit(\d+)',lambda m:m[1].lower()+'u'+m[2],text)
+    text=re.sub(r'FHS(\d+)',lambda m:'fhs'+m[1],text)
+    text=text.replace('VCCU','vccu').replace('FSPU','fspu')
+    return text.replace('VCC','vccu').replace('FSP','fspu')
+
+
+def canonical_presentation(dashboards):
+    import re
+    """Translate presentation only; raw metric selectors and URL values stay native."""
+    states={'Healthy':'ok','HEALTHY':'ok','Failed':'fault','FAILED':'fault',
+            'Fault':'fault','Degraded':'degraded','DEGRADED':'degraded',
+            'Up':'ok','UP':'ok','Down':'fault','DOWN':'fault',
+            'TELEMETRY MISSING':'unknown','NOT DEPLOYED':'not deployed',
+            'Unknown / No data':'unknown','Unknown / configuration unavailable':'unknown',
+            'Unknown':'unknown','HW UNKNOWN':'unknown','HW ?':'unknown','ND':'ND','?':'?'}
+    def visible(text):
+        for old in sorted(states,key=len,reverse=True):
+            text=text.replace(old,states[old])
+        text=canonical_name(text)
+        for name in ('unit','fhs','switch'):
+            text=re.sub(r'\$'+name+r'\b', '${'+name+':text}', text)
+        return text
+    def markdown(text):
+        # Markdown destinations carry native selector values and Grafana syntax.
+        parts=re.split(r'(\]\([^\n]*?\))',text)
+        return ''.join(part if part.startswith('](') else visible(part) for part in parts)
+    def walk(obj):
+        if isinstance(obj,list):
+            for value in obj:walk(value)
+        elif isinstance(obj,dict):
+            for key,value in obj.items():
+                if key in ('expr','url','query','definition','field','name','legendFormat'):
+                    continue
+                if isinstance(value,str) and key in ('title','label','text','fixed','content','noValue','displayName'):
+                    obj[key]=markdown(value) if key=='content' else ('unknown' if key=='noValue' and value=='?' else visible(value))
+                else:walk(value)
+    for dashboard in dashboards.values():
+        walk(dashboard)
+        for variable in dashboard['templating']['list']:
+            if variable['name'].startswith('target_'):
+                uid=variable['current']['value']
+                title=canonical_name(variable['current']['text'])+' ('+uid+')'
+                variable['current']['text']=title
+                variable['query']=title+' : '+uid
+            if variable['name'] in ('unit','switch'):
+                raw=variable['query'].split(',')
+                variable['query']=','.join(canonical_name(v)+' : '+v for v in raw)
+                variable['current']['text']=canonical_name(variable['current']['value'])
+            elif variable['name']=='fhs':
+                variable.update(type='custom',query=','.join('fhs'+str(i)+' : FHS'+str(i) for i in range(1,5)),options=[])
+                variable.pop('definition',None)
+                variable['current']['text']=canonical_name(variable['current']['value'])
+        for panel in dashboard['panels']:
+            if panel['type']=='table':
+                # Display native identity labels canonically; links retain raw field values.
+                defaults=panel['fieldConfig']['defaults']
+                defaults.setdefault('mappings',[]).extend([
+                    {'type':'regex','options':{'pattern':pattern,'result':{'text':text}}}
+                    for pattern,text in [
+                        ('^VCCUnit([0-9]+)-FHS([0-9]+)$','vccu$1-fhs$2'),
+                        ('^FSPUnit([0-9]+)-FHS([0-9]+)$','fspu$1-fhs$2'),
+                        ('^VCCUnit([0-9]+)(.*)$','vccu$1$2'),
+                        ('^FSPUnit([0-9]+)(.*)$','fspu$1$2'),
+                        ('^FHS([0-9]+)$','fhs$1')]])
+        # Table label values are presentation metadata, not metric identities.
+        if dashboard['uid']=='fhs-infra-vlan':
+            for panel in dashboard['panels']:
+                for target in panel.get('targets',[]):
+                    import re
+                    target['expr']=re.sub(r'"(VCC|FSP) (\d+)"',lambda m:'"'+m[1].lower()+'u'+str(int(m[2]))+'"',target['expr'])
+                    target['expr']=target['expr'].replace('"NOT DEPLOYED"','"not deployed"').replace('"Unknown"','"unknown"').replace('"DEPLOYED"','"deployed"')
+    # Compact symbols retain fixed prototype cells; the visible key explains them.
+    mesh=dashboards['mesh']
+    mesh['panels'][0]['options']['content']=('**vccu → fspu · 648 potential links** · '
+        'ND = **not deployed** (absent inventory) · ? = **unknown** (missing telemetry) · '
+        'ok = observed link · fault = observed link down. Selected RX/TX throughput below uses observed 5m counter rates. '
+        'Endpoint selectors affect details only.')
+    return dashboards

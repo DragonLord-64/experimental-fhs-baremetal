@@ -111,3 +111,31 @@ class VisualOnlySafety(TestCase):
                 acceptance.assert_not_called()
         api.query.assert_not_called()
         self.assertEqual(6,sum(c.args[0]=='/api/dashboards/db' for c in api.call.call_args_list))
+
+
+class NavigationOnlySafety(TestCase):
+    def test_navigation_only_never_imports_or_claims_scenario_acceptance(self):
+        import tempfile
+        import json
+        from pathlib import Path
+        from unittest.mock import patch
+        import live_validate as validator
+        from generate import build
+        api=Mock()
+        api.query.side_effect=[[{'metric':{'job':job}}] for job in ('fhs','node','switch')]
+        def call(path,data=None):
+            self.assertIsNone(data)
+            if path=='/api/health':return {'version':'13.2.3'}
+            if path=='/api/datasources/uid/prometheus':return {'type':'prometheus'}
+            if path.startswith('/api/search?'):
+                return [{'uid':d['uid'],'folderUid':FOLDER} for d in build().values()]
+            self.fail('Unexpected endpoint '+path)
+        api.call.side_effect=call
+        with tempfile.TemporaryDirectory() as output:
+            with patch.object(validator,'API',return_value=api),patch.object(validator,'browser_check') as browser,patch.object(sys,'argv',['live_validate','--navigation-only','--output',output]):
+                validator.main()
+                browser.assert_called_once()
+            report=json.loads((Path(output)/'evidence.json').read_text())
+            self.assertIn('scenario/query/visual acceptance remains separate',report['status'])
+            self.assertEqual([],report['queries'])
+        self.assertEqual(3,api.query.call_count)

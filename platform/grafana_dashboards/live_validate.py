@@ -73,8 +73,9 @@ def scalar(api,expr,expected):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--visual-only',action='store_true',help='Import/capture without query or navigation assertions');parser.add_argument('--import-owned',action='store_true');parser.add_argument('--browser',action='store_true');parser.add_argument('--diagnose-api',action='store_true');parser.add_argument('--capture-existing',action='store_true',help='Read-only rack screenshot attempt before API/query acceptance');parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--navigation-only',action='store_true',help='Read-only native navigation/capture on already imported owned dashboards; no scenario acceptance');parser.add_argument('--visual-only',action='store_true',help='Import/capture without query or navigation assertions');parser.add_argument('--import-owned',action='store_true');parser.add_argument('--browser',action='store_true');parser.add_argument('--diagnose-api',action='store_true');parser.add_argument('--capture-existing',action='store_true',help='Read-only rack screenshot attempt before API/query acceptance');parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
     if (args.capture_existing or args.diagnose_api) and (args.visual_only or args.import_owned or args.browser or (args.capture_existing and args.diagnose_api)):parser.error('Capture and diagnosis are separate read-only operations')
+    if args.navigation_only and (args.visual_only or args.import_owned or args.browser or args.capture_existing or args.diagnose_api):parser.error('Navigation-only is a separate read-only operation')
     args.output.mkdir(parents=True,exist_ok=True);os.chmod(args.output,0o700)
     report={'host':socket.gethostname(),'timestamp':time.time(),'queries':[],'browser':[],'limitations':['Hardware behavior is emulated. No traffic generation or historical replay claimed. Physical rack positions are not discovered.']}
     api=API();dashboards=build()
@@ -95,6 +96,12 @@ def main():
                 if len(observed)!=1:raise RuntimeError('Select an unambiguous lab '+variable+' before validation')
                 jobs[variable]=observed[0]
         report['jobs']=jobs
+        if args.navigation_only:
+            owned=owned_inventory(api,{d['uid'] for d in dashboards.values()})
+            if set(owned)!={d['uid'] for d in dashboards.values()}:raise RuntimeError('Navigation requires all six owned dashboards already imported')
+            browser_check(api,args.output,jobs,report)
+            report['status']='navigation passed; scenario/query/visual acceptance remains separate'
+            save();return
         if args.import_owned:
             try:folder=api.call('/api/folders/'+FOLDER)
             except RuntimeError as error:
@@ -260,7 +267,8 @@ def capture_existing(api, output, report):
 
 
 def browser_check(api,output,jobs,report):
-    """Native Canvas click checks; title rename requires separate explicit execution."""
+    """Real native clicks; fail closed when destination/context is not preserved."""
+    import re
     from playwright.sync_api import sync_playwright
     common={'var-ds':'prometheus','var-instance':'All','var-node_instance':'All',**{'var-'+k:v for k,v in jobs.items()},'var-unit':'FSPUnit2','var-fhs':'FHS1','var-switch':'VCCUnit1-switch','var-interface':'eth1/1/3','var-vccu':'1','var-fspu':'3','from':'now-15m','to':'now'}
     with sync_playwright() as pw:
@@ -269,16 +277,61 @@ def browser_check(api,output,jobs,report):
             context=browser.new_context(viewport={'width':1440,'height':1000},service_workers='block')
             context.route('**/*',lambda route:guarded_route(route,urlsplit(api.base)))
             cookie_login(context,api);page=context.new_page()
-            page.goto(api.base+'/d/'+DEST['switch'][1]+'?'+urlencode(common),wait_until='domcontentloaded');page.wait_for_timeout(3000)
-            page.get_by_text('3 Down',exact=True).first.click(timeout=8000);page.wait_for_timeout(1500)
-            actual=parse_qs(urlsplit(page.url).query)
-            assert '/d/'+DEST['interface'][1] in page.url
-            for k,v in [('var-interface','eth1/1/3'),('var-switch','VCCUnit1-switch'),('var-ds','prometheus')]:assert actual.get(k)==[v]
-            assert actual.get('from')==['now-15m'] and actual.get('to')==['now']
-            page.screenshot(path=str(output/'switch-to-interface.png'))
-            report['browser'].append({'path':'native switch lane3 -> interface','passed':True})
+
+            def check(view, selected=None):
+                def destination(url):
+                    params=parse_qs(urlsplit(url).query)
+                    return '/d/'+DEST[view][1] in url and all(params.get(k)==[v] for k,v in (selected or {}).items())
+                page.wait_for_url(destination,timeout=10000)
+                actual=parse_qs(urlsplit(page.url).query)
+                for key,value in {'var-ds':'prometheus','from':'now-15m','to':'now',**{'var-'+k:v for k,v in jobs.items()},**(selected or {})}.items():
+                    assert actual.get(key)==[value], 'Navigation context mismatch: '+key
+                page.wait_for_timeout(2000)
+
+            def open_view(view, **selected):
+                page.goto(api.base+'/d/'+DEST[view][1]+'?'+urlencode({**common,**selected}),wait_until='domcontentloaded')
+                check(view,selected)
+
+            def click(locator,view,selected,label,menu=None):
+                locator.click(timeout=8000)
+                if menu:
+                    try:
+                        page.wait_for_url(lambda url: '/d/'+DEST[view][1] in url and all(parse_qs(urlsplit(url).query).get(k)==[v] for k,v in selected.items()),timeout=1500)
+                    except Exception:
+                        page.get_by_text(menu,exact=True).last.click(timeout=8000)
+                check(view,selected)
+                page.screenshot(path=str(output/(label+'.png')))
+                report['browser'].append({'path':label,'passed':True})
+
+            def back(view,selected,label):
+                page.go_back(wait_until='domcontentloaded');check(view,selected)
+                report['browser'].append({'path':label,'passed':True})
+
+            open_view('rack')
+            click(page.get_by_text(re.compile(r'^fspu2-fhs1 · ')).first,'fhs',{'var-unit':'FSPUnit2','var-fhs':'FHS1'},'rack-to-fhs')
+            back('rack',{},'fhs-return-rack')
+            click(page.get_by_text(re.compile(r'^vccu1-switch · ')).first,'switch',{'var-switch':'VCCUnit1-switch'},'rack-to-switch')
+            back('rack',{},'switch-return-rack')
+
+            open_view('mesh')
+            click(page.get_by_role('link',name='Open selected vccu switch',exact=True),'switch',{'var-switch':'VCCUnit1-switch','var-unit':'VCCUnit1'},'mesh-destination')
+            back('mesh',{},'switch-return-mesh')
+
+            open_view('switch')
+            # Separate visible lane identity survives compact status mappings.
+            click(page.get_by_text('L3',exact=True).first,'interface',{'var-interface':'eth1/1/3','var-switch':'VCCUnit1-switch'},'switch-to-interface')
+            click(page.locator('a[data-testid="data-testid Data link"]').filter(has_text=re.compile(r'^fspu3-switch$')).first,'interface',{'var-switch':'FSPUnit3-switch','var-interface':'eth1/1/1','var-unit':'FSPUnit3'},'peer-opposite-endpoint',menu='Open Last-known peer')
+            back('interface',{'var-switch':'VCCUnit1-switch','var-interface':'eth1/1/3'},'peer-return-interface')
+            back('switch',{'var-switch':'VCCUnit1-switch'},'interface-return-switch')
+
+            captures=[(view,{},view) for view in DEST]
+            captures += [('switch',{'var-switch':'FSPUnit3-switch'},'switch-fspu3-fault'),('switch',{'var-switch':'VCCUnit1-switch'},'switch-vccu1-fault'),('fhs',{'var-unit':'FSPUnit1','var-fhs':'FHS1'},'fspu1-missing'),('fhs',{'var-unit':'FSPUnit2','var-fhs':'FHS1'},'fspu2-degraded')]
+            for view,selected,name in captures:
+                open_view(view,**selected)
+                page.screenshot(path=str(output/(name+'.png')),full_page=True)
+                report['browser'].append({'path':'capture '+name,'passed':True})
         finally:browser.close()
-    report['limitations'].append('Rack and mesh click paths, opposite-peer click and title rename need independent browser acceptance.')
+
 
 if __name__=='__main__':
     def deadline(signum, frame):

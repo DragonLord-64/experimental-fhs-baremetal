@@ -19,7 +19,7 @@ class Dashboards(unittest.TestCase):
         self.assertEqual(9,sum(p['type']=='canvas' for p in rack))
         elements=[e for p in rack if p['type']=='canvas' for e in p['options']['root']['elements']]
         self.assertEqual(9*42,sum(e['name'].startswith('U') for e in elements))
-        self.assertEqual(160,sum('NOT DEPLOYED' in e['config']['text'].get('fixed','') for e in elements))
+        self.assertEqual(160,sum('not deployed' in e['config']['text'].get('fixed','') for e in elements))
         self.assertIn('SYNTHETIC',rack[0]['options']['content'])
         matrix=next(p for p in dashboards['mesh']['panels'] if p['type']=='canvas')
         cells=[e for e in matrix['options']['root']['elements'] if e['name'].startswith('VCCU') and ' FSPU' in e['name']]
@@ -46,7 +46,7 @@ class Dashboards(unittest.TestCase):
             with self.assertRaises(ValueError):g.validate_placement([{**base,**change}])
         panels=g.build()['rack']['panels']
         boxes=[p for p in panels if p.get('targets')]
-        self.assertTrue(any(e['placement']['height']==29 for p in panels if p['type']=='canvas' for e in p['options']['root']['elements']))
+        self.assertTrue(any(e['placement']['height']==14 for p in panels if p['type']=='canvas' for e in p['options']['root']['elements']))
         # Native geometry may not overlap, including empty U and slot labels.
         occupied=set()
         for p in panels:
@@ -111,10 +111,11 @@ class Dashboards(unittest.TestCase):
     def test_opposite_endpoint_navigation(self):
         detail=g.build(1,3)['interface']
         peer=next(p for p in detail['panels'] if p['title']=='Last-known peer')
-        self.assertIn('"peer_unit","$1","sysName","(.*)-switch"',peer['targets'][0]['expr'])
+        self.assertIn('"peer_role","$1","sysName","(VCC|FSP)Unit([0-9]+)-switch"',peer['targets'][0]['expr'])
         link=peer['fieldConfig']['defaults']['links'][0]['url']
-        for variable,field in [('unit','peer_unit'),('switch','sysName'),('interface','portIdV')]:
-            self.assertIn('var-'+variable+'=${__data.fields.'+field+':percentencode}',link)
+        unit='${__data.fields.peer_role:percentencode}Unit${__data.fields.peer_number:percentencode}'
+        for variable,value in [('unit',unit),('switch',unit+'-switch'),('interface','${__data.fields.portIdV:percentencode}')]:
+            self.assertIn('var-'+variable+'='+value,link)
             self.assertEqual(1,link.count('var-'+variable+'='))
 
     def test_numeric_readings_and_peer_identity_are_visible(self):
@@ -151,7 +152,8 @@ class PrototypeContracts(unittest.TestCase):
     def test_no_mock_telemetry_or_config_and_switch_geometry(self):
         d=g.build();sw=next(p for p in d['switch']['panels'] if p['type']=='canvas')
         self.assertEqual(128,sum(e['name'].endswith(' link') and ' L' in e['name'] for e in sw['options']['root']['elements']))
-        self.assertEqual(128,len(sw['targets']))
+        self.assertEqual(128,len([t for t in sw['targets'] if t['legendFormat'].endswith(' state') and t['legendFormat'] != 'Parent inventory state']))
+        self.assertEqual(1,len([t for t in sw['targets'] if t['legendFormat'] == 'Parent inventory state']))
         all_queries=[t['expr'] for v in d.values() for p in v['panels'] for t in p.get('targets',[])]
         for query in all_queries:
             self.assertNotIn('cisco_lane_snapshot',query);self.assertNotIn('server_component_',query);self.assertNotIn('vlan_catalog_info',query)
@@ -167,7 +169,7 @@ class DrilldownClassification(unittest.TestCase):
         status=[next(p for p in d['fhs']['panels'] if p['title']=='Overall hardware health'),next(p for p in d['interface']['panels'] if p['title']=='Interface operational state'),next(p for p in d['mesh']['panels'] if 'observed status' in p['title'])]
         for p in status:
             values=next(m['options'] for m in p['fieldConfig']['defaults']['mappings'] if m['type']=='value')
-            self.assertEqual('TELEMETRY MISSING',values['3']['text']);self.assertEqual('NOT DEPLOYED',values['4']['text'])
+            self.assertEqual('unknown',values['3']['text']);self.assertEqual('not deployed',values['4']['text'])
             self.assertIn('or on() vector(4)',p['targets'][0]['expr'])
             self.assertIn('3 * (',p['targets'][0]['expr'])
     def test_display_fallback_is_never_used_for_numeric_readings(self):

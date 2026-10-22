@@ -32,6 +32,13 @@ def main():
     cases.append(test(health('FSPUnit4'),[]))
     cases += [test(health('FSPUnit1',f'FHS{h}'),[]) for h in range(1,5)]
     cases.append(test(mesh_query(),[('{vcc="VCCUnit1",fsp="FSPUnit1"}',1),('{vcc="VCCUnit1",fsp="FSPUnit3"}',0)]))
+    # Exercise actual parent expression with a down lane, an up lane and absent inventory.
+    from generate import build
+    board=next(p for p in build()['switch']['panels'] if p['type']=='canvas')
+    parent=next(t['expr'] for t in board['targets'] if t['legendFormat']=='Parent inventory state')
+    for switch,state in [('VCCUnit1-switch',3),('FSPUnit1-switch',3),('FSPUnit4-switch',4)]:
+        labels='{source="'+switch+'"}' if state==3 else '{}'
+        cases.append(test(parent.replace('$switch',switch),[(labels,state)]))
     # Review note: execute actual generated freshness joins; missing logical hosts and failed shared target stay absent.
     for reading in [r for c in catalog if c['title']=='NVMe 0' for r in c['readings'] if r.get('label') in ('Composite','Controller live')]:
         expr='max('+reading_query(reading,None)+')'
@@ -39,6 +46,26 @@ def main():
         cases.append(test(expr.replace('$fhs','FHS2'),[]))
         cases.append(test(expr.replace('$unit','FSPUnit1'),[]))
         cases.append(test(expr.replace('$node_job','node-down'),[]))
-    print(json.dumps({'rule_files':[],'evaluation_interval':'1m','tests':[{'interval':'1m','input_series':inputs,'promql_expr_test':cases}]},indent=2))
+    from exact import mesh_rate
+    rate_inputs=[]
+    for iface,state in [('eth1/1/1','up'),('eth1/1/3','down')]:
+        for direction in ('In','Out'):
+            rate_inputs.append({'series':f'nexus_interfaces_octets{{job="switch",source="VCCUnit1-switch",interface="{iface}",dn="sys/intf/phys-[{iface}]/dbgIfHC{direction}"}}','values':'0+61016.94915254237x5'})
+        rate_inputs.append({'series':f'nexus_lldp_id{{job="switch",source="VCCUnit1-switch",interface="{iface}",sysName="FSPUnit{1 if state=="up" else 3}-switch"}}','values':'1+0x5'})
+        rate_inputs.append({'series':f'nexus_interfaces_vdcId{{job="switch",source="VCCUnit1-switch",interface="{iface}",operSt="{state}"}}','values':'1+0x5'})
+    # Missing counters on an explicitly down, known link must not become zero.
+    rate_inputs += [
+        {'series':'nexus_lldp_id{job="switch",source="VCCUnit1-switch",interface="eth1/1/2",sysName="FSPUnit2-switch"}','values':'1+0x5'},
+        {'series':'nexus_interfaces_vdcId{job="switch",source="VCCUnit1-switch",interface="eth1/1/2",operSt="down"}','values':'1+0x5'},
+        # Peer counters are deliberately different; counting both ends is wrong.
+        {'series':'nexus_interfaces_octets{job="switch",source="FSPUnit1-switch",interface="eth1/1/1",dn="sys/intf/phys-[eth1/1/1]/dbgIfHCIn"}','values':'0+60000000000x5'},
+    ]
+    rate_cases=[]
+    for direction in ('In','Out'):
+        for fsp in (1,3,2):
+            expr=mesh_rate(direction).replace('$switch_job','switch').replace('$vccu','1').replace('$fspu',str(fsp))
+            rate_cases.append({'expr':expr,'eval_time':'5m','exp_samples':[] if fsp==2 else [{'labels':'{}','value':1016.9491525423729*8/1e9}]})
+    rate_test={'interval':'1m','input_series':rate_inputs,'promql_expr_test':rate_cases}
+    print(json.dumps({'rule_files':[],'evaluation_interval':'1m','tests':[{'interval':'1m','input_series':inputs,'promql_expr_test':cases},rate_test]},indent=2))
 
 if __name__=='__main__':main()

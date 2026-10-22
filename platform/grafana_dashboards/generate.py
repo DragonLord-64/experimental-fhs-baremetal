@@ -180,13 +180,21 @@ def legacy_build(vcc=DEFAULT_VCC, fsp=DEFAULT_FSP):
     switches.append(panel('Last-known LLDP neighbors','nexus_lldp_id{job="$switch_job",source="$switch"}',0,18,24,12,kind='table',link=url('interface',dynamic={'interface':'${__data.fields.interface:percentencode}'})))
     details=dashboards['interface']['panels']
     details.append(panel('Interface operational state',interface_state('$switch',True),0,0,8,5,states={0:('Down','red'),1:('Up','green')}))
-    details.append(panel('Last-known peer','label_replace(nexus_lldp_id{job="$switch_job",source="$switch",interface="$interface",sysName=~".*-switch"},"peer_unit","$1","sysName","(.*)-switch")',0,5,24,8,kind='table',link=url('interface',dynamic={'unit':'${__data.fields.peer_unit:percentencode}','switch':'${__data.fields.sysName:percentencode}','interface':'${__data.fields.portIdV:percentencode}'})))
+    details.append(panel('Last-known peer','label_replace(label_replace(nexus_lldp_id{job="$switch_job",source="$switch",interface="$interface",sysName=~".*-switch"},"peer_role","$1","sysName","(VCC|FSP)Unit([0-9]+)-switch"),"peer_number","$2","sysName","(VCC|FSP)Unit([0-9]+)-switch")',0,5,24,8,kind='table',link=url('interface',dynamic={'unit':'${__data.fields.peer_role:percentencode}Unit${__data.fields.peer_number:percentencode}','switch':'${__data.fields.peer_role:percentencode}Unit${__data.fields.peer_number:percentencode}-switch','interface':'${__data.fields.portIdV:percentencode}'})))
     peer=details[-1]
     peer['transformations']=[{'id':'organize','options':{
-        'excludeByName':{'Time':True,'__name__':True,'Value':True,'capability':True,'chassisIdV':True,'chassisIdT':True,'dn':True,'job':True,'instance':True,'source':True,'peer_unit':True,'portIdT':True},
+        'excludeByName':{'Time':True,'__name__':True,'Value':True,'capability':True,'chassisIdV':True,'chassisIdT':True,'dn':True,'job':True,'instance':True,'source':True,'portIdT':True},
         'indexByName':{'sysName':0,'portIdV':1,'interface':2,'mgmtIp':3},
         'renameByName':{'interface':'Local interface'}}}]
     peer['fieldConfig']['defaults']['custom']={'minWidth':180,'width':260}
+    # Table-only hiding retains raw frame context for Grafana data-link macros.
+    # Split native names so even inherited entity mappings cannot rewrite URL context.
+    for field in ('peer_role','peer_number','portIdV'):
+        properties=[{'id':'mappings','value':[]}]
+        if field in ('peer_role','peer_number'):
+            properties.append({'id':'custom.hidden','value':True})
+        peer['fieldConfig']['overrides'].append({
+            'matcher':{'id':'byName','options':field},'properties':properties})
     details.append(panel('Raw interface metadata','nexus_interfaces_vdcId{job="$switch_job",source="$switch",interface="$interface"}',0,13,24,8,kind='table'))
     for ix,(metric,title) in enumerate([('nexus_interfaces_octets','Interface traffic (bytes/s)'),('nexus_interfaces_cRCAlignErrors','CRC / alignment errors (per second)'),('nexus_interfaces_dropEvents','Drop events (per second)')]):
         expr='rate('+metric+'{job="$switch_job",source="$switch",interface="$interface"}[$__rate_interval])'

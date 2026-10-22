@@ -24,6 +24,60 @@ optic readings and VLAN allowance remain Unknown where no observations exist.
 
 The full query scenario gate retains earlier strict sensor-coverage assertions;
 current native scrape filtering prevents claiming all healthy FHS components.
-Run meaningful selected queries independently for the visual milestone. Native
-switch-to-interface click validation is implemented; complete rack/mesh/peer
-click and title-rename acceptance require independent browser review.
+Run meaningful selected queries independently for the visual milestone. `live_validate.py --browser` implements rack/FHS, rack/switch, mesh/switch,
+lane/interface and peer/opposite-endpoint clicks, return paths and context
+assertions. It captures all six views, both faulted switches and fspu1/fspu2.
+After source gates, supervised import/readback and scenario/query acceptance,
+run navigation separately against the already imported owned dashboards:
+
+```bash
+/home/dragon-lord/fhs-docs-tools/bin/python platform/grafana_dashboards/live_validate.py \
+  --navigation-only --output /tmp/fhs-grafana-navigation
+```
+
+This mode performs no imports and does not claim scenario/query acceptance.
+Inspect the captures; implementation is not live
+acceptance evidence. Title-rename acceptance remains separate.
+
+
+## Refinement acceptance (pending)
+
+After independent source review and configured checks, generate query inputs:
+
+```bash
+python3 platform/grafana_dashboards/promql_tests.py > /tmp/fhs-promql.test.json
+promtool test rules /tmp/fhs-promql.test.json
+python3 platform/grafana_dashboards/evidence_plan.py > /tmp/fhs-components.json
+```
+
+Resolve `$job`, `$node_job`, `$instance`, `$node_instance` from actual datasource
+selections. Execute every `status_query` and `reading_queries` through the
+Prometheus instant-query API at one recorded evaluation time. Retain sanitized
+results as supervisor artifacts. Report all 336 selections by state and missing
+primary readings; do not replace missing readings with healthy values. Confirm
+84 fspu1 selections are unknown, and distinguish unsupported coverage from the
+PSU1 fault / overall degraded scenario on fspu2-fhs1. The catalog is 21 per
+host; 168 is not the full 16-host scope.
+
+Use the guarded import command above only after those source gates. Read back
+all six owned UIDs. Click rack → FHS, rack → switch, mesh selection → switch,
+switch lane → interface and LLDP peer → opposite interface; check datasource,
+time and selection values. Inspect all six fresh screenshots, lower rack rows,
+compact component rows and port slots. Mesh cells retain `ND` / `?`; verify
+the visible key explains `not deployed` / `unknown` and those symbols fit.
+Confirm dynamic headers show canonical selector display text, compound table
+identities show e.g. `fspu1-fhs1`, and mesh → switch links preserve native
+query values, datasource and time after actual browser interpolation. Verify one down lane leaves shared
+optics independent and deployed parent unknown without hardware telemetry. Select
+`fspu4-switch` and confirm all parent ports show `not deployed`; select
+`vccu1-switch` and confirm parent ports remain `unknown` despite the down lane. Throughput
+is separate RX/TX at the selected vccu endpoint, converted from observed
+5m octet rates to Gbit/s. Confirm about 0.000008136 Gbit/s per direction on
+vccu1/fspu1 where the supplied probe measured 1016.9491525423729 bytes/s;
+current values may differ. Confirm available rates survive down-link state,
+and missing rates stay unknown. Capacity/utilization remain unknown; no capacity
+is inferred from host speed metadata. Record unsupported optics/fans/VLANs.
+
+Publication remains gated by actual live acceptance. Trusted publisher uses a
+normal fast-forward to private `development` only; do not create or push main.
+No worker imports, commits or pushes.
