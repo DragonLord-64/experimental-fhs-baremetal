@@ -1,4 +1,4 @@
-# manage_fhs_network
+# setup_fhs_network
 
 systemd-networkd config for FHS hosts. Disables cloud-init networking and
 removes legacy netplan files.
@@ -15,3 +15,11 @@ removes legacy netplan files.
 | `network_managed_files` | `[00-fhs.network, 99-ignore-others.network]` | Files in `network_dir` this role owns; anything else is removed |
 
 Tags: `network`, `config`, `hardware`.
+
+## Command
+
+```bash
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_fhs_network
+```
+
+Run from `/provision`. This changes network configuration and removes unowned network files; validate inventory and retain console access before an authorized run. `network_disable_cloud_init` and `network_remove_legacy_netplan` default to `true`; `network_dir` defaults to `/etc/systemd/network`.

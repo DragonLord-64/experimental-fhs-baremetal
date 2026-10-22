@@ -1,0 +1,5 @@
+# Verified together on dragonvm with Python 3.14; separate from Poetry's app/lint environment.
+ansible-core==2.20.1
+ansible-compat==25.12.0
+molecule==25.4.0
+docker==7.1.0

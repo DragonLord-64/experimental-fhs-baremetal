@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-22",
+  "base_commit": "455023d91b086f8863292ed756c40c1d560457af",
+  "scope": [
+    "accepted documentation migration",
+    "accepted manage_users isolated Molecule scenario",
+    "accepted one-server logging fixture"
+  ],
+  "accepted_artifacts": [
+    {
+      "file": "fhs-docs-accepted.patch",
+      "sha256": "6a778a54d36889ef69f48553771d4bf1cb9c6ad66250e8e6a36ec2a38d8599a4"
+    },
+    {
+      "file": "fhs-docs-accepted-untracked.tgz",
+      "sha256": "a5ab8b6160fce983574abf67d25edf58eb316efe591973f899952ce818122486"
+    },
+    {
+      "file": "fhs-docs-accepted-state.json",
+      "sha256": "07a09371d64f799bef17045f17e1abb1fa507540cdd5d77a54a2fdc93dac82eb"
+    },
+    {
+      "file": "fhs-molecule-accepted.patch",
+      "sha256": "cce4cc63d0c73f6a549f0a5d9148abd5d39f1bd907069db0e478e0cbee8669bf"
+    },
+    {
+      "file": "fhs-molecule-accepted-untracked.tgz",
+      "sha256": "31122aecb4c37f64ea2c0f0c992b5064dd876f630625a6c7bad39164fbb4b3df"
+    },
+    {
+      "file": "fhs-molecule-accepted-state.json",
+      "sha256": "63ec2ab8194761643214bc4de0a5ed455a5f0d7c2251711847077b5e1f21732a"
+    },
+    {
+      "file": "fhs-logging-accepted.patch",
+      "sha256": "1381d457eccc7c266a41af8b638181072c9d59ad693ae43d7f9f4d345df93a3a"
+    },
+    {
+      "file": "fhs-logging-accepted-untracked.tgz",
+      "sha256": "a71573a17d6339fc51ceac7703d1cfaaa78fa64c322c9cb868529ed097a00589"
+    },
+    {
+      "file": "fhs-logging-accepted-state.json",
+      "sha256": "f3f1529ea9b971bd87dbe82a967f741fd48874444961c5ef3d1d60ef14d5b79e"
+    }
+  ],
+  "integration_adjustments": [
+    "Preserved root AGENTS wake protocol and migrated old HANDOFF wake note with explicit 60-second wait.",
+    "Merged shared wiki links and preserved dated log entries.",
+    "Reconciled documentation statements affected by integrating previously concurrent work.",
+    "Added requested temporary review comments to changed Molecule logical blocks; no production role tasks/defaults changed."
+  ],
+  "checks": {
+    "logging_unittests": "6 passed",
+    "python_ast": "all logging scripts and Molecule verifier parsed",
+    "molecule_yaml": "all scenario playbooks/config and collection requirements parsed",
+    "shell_syntax": "Molecule runners and existing platform deploy/monitoring scripts passed",
+    "whitespace": "git diff --check passed",
+    "docs_strict_sphinx": "Passed with Sphinx 7.4.7: -E -a -b html -n -W --keep-going; zero warnings. Temporary initial archive lacked two unchanged linked image-config files; supplied them and reran successfully without source or warning suppression changes."
+  },
+  "prior_live_evidence": {
+    "docs": "Accepted independent review; strict Sphinx, rendered Mermaid and representative pages previously inspected.",
+    "manage_users": "Accepted independent review; fresh state, unchanged rerun changed=0, changed sudo policy, observed container drift and repair, isolation and cleanup passed.",
+    "logging": "Accepted independent review; two finite six-event Filebeat runs, clean registry restart, unauthorized publishing rejection, reapply, Discover inspection and owned cleanup passed."
+  },
+  "limits": [
+    "Prior live Molecule/logging cycles were not repeated during integration.",
+    "No production role behavior, cluster workloads or host accounts changed.",
+    "Logging remains intentionally paused; no startup/deployment commands ran.",
+    "Filestream fallback does not validate journald or Ansible role; clean restart does not prove crash safety or exactly-once delivery.",
+    "Uncached image download, guest provisioning and physical hardware remain unverified.",
+    "No raw logs, credentials, private inventory or user photos included."
+  ],
+  "independent_integration_review": {
+    "reviewer": "assess_platform_footprint",
+    "result": "No blocking findings; corrected stale backlog/current-status wording before integration."
+  }
+}

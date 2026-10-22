@@ -1,42 +1,69 @@
 # Using NetBox For Ansible Inventory
 
-Inventory files are the main method of defining the hosts that will be used by Ansible to run playbooks against. Currently, the inventory consists of a main inventory file that defines facts such as the endpoint and hardware configuration, as well as host and group variables that define the configuration for a specific host and the groups it can belong to, respectively.
+NetBox owns device, interface, address and selected configuration facts. Protected controller files own authentication. The dynamic Ansible inventory and Bifrost export are separate consumers.
 
-Currently, there are two main ways to define the hardware configuration and host variables, local `.yml` files, and the [NetBox service](https://netboxlabs.com/docs/netbox/). 
+## Polling NetBox for Inventory
 
-## Polling Netbox for Inventory
-To poll NetBox from Ansible, the [Netbox plugin](https://docs.ansible.com/projects/ansible/latest/collections/netbox/netbox/nb_inventory_inventory.html#ansible-collections-netbox-netbox-nb-inventory-inventory) is used to poll the inventory stored there. This is done by creating a `.yml` file that defines access to the netbox, and how the format the data returned from it. At minimum, this file should consist of: 
+`inventory/dev_env/netbox-inv.yml` uses `netbox.netbox.nb_inventory`. It enables interfaces, IP addresses, config context, flattened custom fields and extra variables. It selects active devices with primary IPs, groups by device role and adds `teraboxes` for role slug `fpga-host-server`.
+
+A minimal private configuration is:
+
 ```yaml
-plugin: netbox.netbox.nb_inventory       # Defines plugin to use
-api_endpoint: https://<ENDPOINT>/netbox/ # Defines the endpoint where NetBox is set up
-validate_certs: false                    # As we use internal hosting for Netbox, do not need to validate the certificate of the endpoint for now
-token:
-  type: Bearer                           # Define a bearer token is being used for access
-  value: <VAULT ENCODED TOKEN>           # A generated token for a user with access to the NetBox service
-```
-Access can be confirmed by Sending a GET request to `https://<ENDPOINT>/netbox/api/dcim/devices` with the token, and ensuring it returns the expected list of devices.
-
-For the token, ensure that it is encrypted via the [Vault Utility](https://docs.ansible.com/projects/ansible/latest/cli/ansible-vault.html#encrypt-string), and that a Vault password file is available for decryption.
-
-When running with notebooks consider adding the following the the file as well:
-```yaml
-query_filters:
-  - status: "active" # Make sure only active devices are retrieved.
-use_extra_vars: true # Pull in the extra variables, such as those from the group variable files
+plugin: netbox.netbox.nb_inventory
+api_endpoint: https://<NETBOX_HOST>/netbox/
+token: <TOKEN_FROM_PROTECTED_CONFIGURATION>
+validate_certs: true
+interfaces: true
+config_context: true
 ```
 
-### Validating NetBox Inventories
-Once the file is set up, it can be checked by running:
-```shell
-ansible-inventory -i "<PATH TO NETBOX .YML FILE>" --list -y --output "inventory/netbox-output.yml" 
-```
-This will check that the NetBox is available and parseable by Ansible, and allows for manual verification of the inventory. The `--host <HOST_ID>` can also be set to check a specific target host.
+The tracked development configuration uses a Vault-encrypted bearer token and disables certificate validation. Supply its Vault password privately; do not copy tokens into commands or published inventory output. Use trusted certificates where available. Install the collection from `requirements.yml` and its Python dependencies before polling.
 
-*Automatic validation methods to come later.*
+## Workflow
 
-## Using NetBox In Playbooks
-Using the Netbox inventory is straightforward, as once validated, the NetBox `.yml` file can be used in place of a regular inventory `.yml` file. For example:
-```shell
-ansible-playbook -i "<PATH TO NETBOX .YML FILE>" "<PATH TO PLAYBOOK FILE>" --tags "<TAGS TO RUN>"
+1. Confirm the endpoint, device role groups and selected host scope.
+2. Resolve the inventory privately. These commands contact NetBox but do not provision hosts:
+
+   ```bash
+   ansible-inventory -i inventory/dev_env/netbox-inv.yml --ask-vault-pass --graph
+   umask 077
+   ansible-inventory -i inventory/dev_env/netbox-inv.yml --ask-vault-pass --list --output <PRIVATE_OUTPUT_PATH>
+   ```
+
+3. Inspect host/group membership privately, then select an exact role and host:
+
+   ```bash
+   ansible-playbook -i inventory/dev_env/netbox-inv.yml --ask-vault-pass playbooks/provision.yml --limit <HOST> --tags manage_users
+   ```
+
+Inventory output can contain secrets. Keep it outside Git and build artifacts. Config context does not override every Ansible variable source; confirm resolved precedence. The inventory does not create `fhs_nodes` automatically.
+
+## Inventory consumers
+
+```{mermaid}
+flowchart TD
+    N[NetBox records] -->|inventory plugin| A[Ansible inventory]
+    A -->|selected hosts and roles| C[Installed OS configuration]
+    N -->|device and interface facts| X[Bifrost export playbook]
+    R[Protected Redfish credentials] -->|authentication| X
+    X -->|mode 0600| Y[Private Bifrost YAML]
 ```
-Note that if not running in the same directory with a subdirectory of `group_vars` these will need to be specified using the extra variables flag (`-e <LINK TO GROUP VARS FILE>` ) for each group that playbook needs.
+
+The two outputs have different consumers. Writing YAML does not enroll or image a server.
+
+## Provisioning export ownership
+
+`playbooks/development/netbox/bifrost_export.yml` reads NetBox and writes Bifrost-compatible YAML. It selects a device type (default `TeraBox1501b`) and interfaces tagged `provisioning-interface`, reads native out-of-band and primary IPv4 addresses, and combines approved custom fields with protected Redfish credentials. Simulated devices are rejected. It validates MAC uniqueness and required fields before writing mode `0600` output; a newly created output directory is mode `0700`.
+
+```bash
+ansible-playbook playbooks/development/netbox/bifrost_export.yml --ask-vault-pass \
+  -e netbox_credentials_file=<PRIVATE_NETBOX_VARS> \
+  -e redfish_credentials_file=<PRIVATE_REDFISH_VARS> \
+  -e bifrost_output=<PRIVATE_OUTPUT_PATH>
+```
+
+The protected files supply `netbox_url`, `netbox_token` and `redfish_credentials` (`defaults` and optional per-device entries). The default output is `playbooks/development/netbox/output/baremetal.yml`; always choose a protected destination. Export does not enroll, deploy or modify NetBox. Enrollment and imaging remain separate Bifrost operations. No implemented post-provisioning role-to-IP deployment export is established by this playbook.
+
+See [development playbooks](../playbooks/development.md) for discovery/import and switch POAP, and [provisioning design](../design/provisioning-interface.md) for the intended physical sequence.
+
+[Inventory configuration](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/inventory/dev_env/netbox-inv.yml) and [export implementation](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/playbooks/development/netbox/bifrost_export.yml).

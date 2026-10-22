@@ -1,6 +1,8 @@
 **Monitoring PSI MDA SKA Hardware**  
 ===================================================  
 
+Imported configuration from official development `87dc794`; these commands target the original cluster, not the private VM lab. Review values, storage, endpoints and credentials before use. For observed dragonvm behavior and separate VM overrides, see [lab deployment](../ops/platform/README.md) and [validation](../ops/platform/VALIDATION.md). NetBox is included in `platform/netbox.yaml`; its lab chart/version selection is documented there.
+
 **Objective**  
 Deploy a complete monitoring stack (Prometheus, Telegraf, Elasticsearch‑Kibana, Filebeat) on a Kubernetes cluster.
 
@@ -9,7 +11,7 @@ Deploy a complete monitoring stack (Prometheus, Telegraf, Elasticsearch‑Kibana
 ### 1. Create the Namespace  
 
 ```bash
-kubectl create namespace mid-cbf-monitoring   # safe to execute even if the namespace already exists
+kubectl create namespace mid-cbf-monitoring
 ```
 
 ---
@@ -49,8 +51,7 @@ If the secret `elastic-credentials` already exists, add any missing keys rather 
 
 Use the following command with the correct target parameter to access the kubernetes secret
 
-```bash
-#### 8.1 Retrieve the `filebeat_writer` Password  
+#### Retrieve service credentials
 
 ```bash
 # example for filebeat
@@ -60,7 +61,6 @@ kubectl -n mid-cbf-monitoring get secret elastic-credentials \
 # example for kibana
 kubectl -n mid-cbf-monitoring get secret elastic-credentials \
   -o jsonpath="{.data.kibana-password}" | base64 --decode
-```
 ```
 
 ---
@@ -86,7 +86,7 @@ helm upgrade --install monitoring-prometheus \
   prometheus-community/prometheus \
   --version 29.35.0 \
   -n mid-cbf-monitoring \
-  -f monitoring/prometheus.yaml
+  -f platform/prometheus.yaml
 ```
 
 #### Telegraf (switch metrics and PDU listener)  
@@ -96,16 +96,16 @@ helm upgrade --install switch-telegraf \
   influxdata/telegraf \
   --version 1.8.77 \
   -n mid-cbf-monitoring \
-  -f monitoring/telegraf.yaml
+  -f platform/telegraf.yaml
 ```
 
 #### Elasticsearch + Kibana (local chart)  
 
 ```bash
-helm upgrade --install logging ./monitoring/charts/elasticsearch-kibana \
+helm upgrade --install logging ./platform/charts/elasticsearch-kibana \
   -n mid-cbf-monitoring \
-  -f monitoring/elasticsearch.yaml \
-  -f monitoring/kibana.yaml \
+  -f platform/elasticsearch.yaml \
+  -f platform/kibana.yaml \
   --wait --wait-for-jobs --timeout 10m
 ```
 
@@ -128,7 +128,7 @@ Open a browser at `http://localhost:5601/mid-cbf-kibana` and log in with:
 
 #### 5.2 External Access via Ingress (optional)  
 
-Edit `monitoring/kibana.yaml` before the Helm installation, replacing the placeholders:
+Edit `platform/kibana.yaml` before the Helm installation, replacing the placeholders:
 
 ```yaml
 kibana:
@@ -192,13 +192,20 @@ See [filebeat role](../roles/filebeat/README.md)
 
 | Verification Item                     | Command / UI                                                                                     |
 |--------------------------------------|---------------------------------------------------------------------------------------------------|
-| Elasticsearch cluster health          | `kubectl -n mid-cbf-monitoring exec -ti svc/logging-elastic -c elasticsearch -- curl -s http://localhost:9200/_cluster/health?pretty` |
-| Prometheus targets                    | `kubectl -n mid-cbf-monitoring port-forward svc/monitoring-prometheus 9090:9090 && curl http://localhost:9090/targets` |
+| Elasticsearch cluster health          | Use the authenticated command below. |
+| Prometheus targets                    | `kubectl -n mid-cbf-monitoring port-forward svc/monitoring-prometheus-server 9090:80` then open `http://localhost:9090/targets` |
 | Telegraf PDU metric                   | `curl http://<TELEGRAF_IP>:9273/metrics | grep pdu_power_watts` |
 | Filebeat logs in Kibana               | Open Kibana → **Discover** → create a Data View `filebeat-*` and select it                     |
 | Kibana Ingress accessibility          | `curl -s -o /dev/null -w "%{http_code}" https://<KIBANA_HOSTNAME>/mid-cbf-kibana/` → Expected `200` |
 
 ---
+
+Elasticsearch security is enabled. Use the container's secret-backed password, as in the [chart readiness probe](charts/elasticsearch-kibana/templates/elasticsearch.yaml); do not print it or enable shell tracing:
+
+```bash
+kubectl -n mid-cbf-monitoring exec svc/logging-elastic -c elasticsearch -- \
+  /bin/bash -ec 'curl --fail --silent --max-time 3 --user "elastic:${ELASTIC_PASSWORD}" "http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=1s&pretty"'
+```
 
 ### 9. Rotating Passwords  
 
@@ -211,10 +218,10 @@ kubectl -n mid-cbf-monitoring delete secret elastic-credentials   # or `kubectl 
 # Re‑create the secret with the new values (repeat step 2)
 
 # Upgrade the Helm release
-helm upgrade logging ./monitoring/charts/elasticsearch-kibana \
+helm upgrade logging ./platform/charts/elasticsearch-kibana \
   -n mid-cbf-monitoring \
-  -f monitoring/elasticsearch.yaml \
-  -f monitoring/kibana.yaml \
+  -f platform/elasticsearch.yaml \
+  -f platform/kibana.yaml \
   --wait --wait-for-jobs --timeout 10m
 ```
 
@@ -222,5 +229,5 @@ The chart reconciles the new passwords within Elasticsearch. Ensure that the Fil
 
 ---
 
-**Result**  
-A fully operational monitoring stack is now deployed: Prometheus scrapes Telegraf, Telegraf receives PDU JSON pushes, Filebeat forwards logs to Elasticsearch, and Kibana provides a user interface for log analysis. If any component fails, consult the Helm release status and examine pod logs in the `mid-cbf-monitoring` namespace.
+**Expected flow**
+After a successful deployment: Prometheus scrapes Telegraf, Telegraf receives PDU JSON pushes, Filebeat forwards logs to Elasticsearch, and Kibana provides a user interface for log analysis. If any component fails, consult the Helm release status and examine pod logs in the `mid-cbf-monitoring` namespace.

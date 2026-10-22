@@ -1,8 +1,9 @@
-Guide
+Guides
 =========================================
 
-.. include:: ansible_best_practices.md
-   :parser: myst_parser.sphinx_
+.. toctree::
+   :maxdepth: 2
 
-.. include:: using_netbox_inventory.md
-   :parser: myst_parser.sphinx_
+   using_netbox_inventory
+   platform
+   ansible_best_practices

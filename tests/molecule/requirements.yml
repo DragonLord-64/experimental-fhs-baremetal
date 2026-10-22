@@ -1,0 +1,9 @@
+---
+# Review note: pin only the collections required by the isolated manage_users controller.
+collections:
+  - name: ansible.posix
+    version: 2.1.0
+  - name: community.docker
+    version: 4.8.1
+  - name: community.library_inventory_filtering_v1
+    version: 1.1.5

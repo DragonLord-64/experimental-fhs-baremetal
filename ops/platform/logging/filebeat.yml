@@ -1,0 +1,42 @@
+# Explicit file-input simulation; does not exercise the Ansible journald role.
+# Private environment values are supplied by the reviewed supervisor only.
+filebeat.inputs:
+  - type: filestream
+    id: fhs-one-server-simulation
+    paths: ['${FHS_LOG_SOURCE}']
+    prospector.scanner.fingerprint.length: 64
+    parsers:
+      - ndjson:
+          target: ''
+          overwrite_keys: true
+          add_error_key: true
+processors:
+  - script:
+      lang: javascript
+      id: journal_priority_level
+      source: |
+        function process(event) {
+          var priority = event.Get("log.syslog.priority");
+          if (typeof priority !== "number" && typeof priority !== "string") return;
+          var key = String(priority);
+          if (!/^[0-7]$/.test(key)) return;
+          var levels = ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"];
+          event.Put("log.level", levels[Number(key)]);
+        }
+# Scoped simulation template must be bootstrapped separately before publishing.
+setup.template.enabled: false
+setup.ilm.enabled: false
+output.elasticsearch:
+  hosts: ['${FHS_ELASTICSEARCH_URL}']
+  username: filebeat_writer
+  password: '${FHS_FILEBEAT_PASSWORD}'
+  index: filebeat-fhs-one-9.5.5
+  worker: 1
+  bulk_max_size: 16
+queue.mem:
+  events: 32
+  flush.min_events: 1
+  flush.timeout: 1s
+logging.level: warning
+logging.to_files: false
+logging.to_stderr: true

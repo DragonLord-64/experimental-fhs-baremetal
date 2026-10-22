@@ -18,7 +18,7 @@ Commit a package manifest containing versions, filenames, and checksums to Git. 
 
 ## NetBox direction
 
-The user reports an existing Helm-based NetBox deployment; installed version and chart have not been verified.
+The imported source did not identify its NetBox chart version. The private lab selected and verified chart `8.3.67`, image `v4.7.0`; see [platform provenance and overrides](../ops/platform/README.md). This does not identify the user's production chart version.
 
 - Use native NetBox objects for devices, sites, roles, platforms, IP addresses, interfaces, MAC addresses, and cabling where supported by the installed version.
 - Config contexts can hold non-secret site/role/device configuration. Use explicit custom fields for additional structured properties where appropriate.
@@ -40,3 +40,5 @@ groups:
 ```
 
 Ansible then loads `inventory/dev_env/group_vars/ubuntu24_cis_production.yml` for that group when using the adjacent NetBox inventory. NetBox selects membership; Git retains the CIS policy. Verify the installed plugin's tag representation and resolved group membership with `ansible-inventory --graph` before deployment.
+
+Keep `group_vars/all.yml` small: genuinely global settings only. Standard profiles and reusable defaults remain in Git; NetBox supplies membership and selected overrides, with resolved precedence checked before use.

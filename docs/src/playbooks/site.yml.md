@@ -1,78 +1,31 @@
 # site.yml
 
-Ansible repository for provisioning SKA Mid.CBF FHS baremetal nodes.
+Applies configuration to installed FHS servers. [provision.yml](provision.yml.md) wraps this playbook with inventory assertions and a summary.
 
-For information on Ansible see: [ansible-docs](https://docs.ansible.com/)
+## Roles and tags
 
-## Quick start
+Each role include has its exact role name as a tag. Most plays target `all`; `setup_fhs_node`, `manage_fhs_bist` and external `ubuntu24_cis` target `fhs_nodes`. Confirm that group exists in the resolved inventory; the current NetBox file creates `teraboxes` and device-role groups, not `fhs_nodes`.
 
-```bash
-# One-time after clone: Python tooling (needs network)
-python3 -m venv .venv
-.venv/bin/pip install -r requirements-dev.txt   # or: poetry install --with test
-source .venv/bin/activate
+| Play tag | Role tags |
+|---|---|
+| `foundation` | `manage_users`, `setup_fhs_network` |
+| `distribution` | `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
+| `environment` | `manage_venvs`, `manage_bittware_sdk`, `manage_gitlab-runner` |
+| `dpdk_arkville` | `manage_dpdk_ark_doca` |
+| `fhs_node` | `setup_fhs_node`, `manage_fhs_bist`, `ubuntu24_cis` |
+| No play tag | `manage_poetry`, `manage_fhs_grpc`, `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
 
-# Validate playbook structure and syntax configurations
-ansible-playbook playbooks/syntax_check.yml --syntax-check
+The `local_dev` play sets a local account password from protected variables; it is included by an unrestricted run. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. `--skip-tags hardware` does not establish container safety.
 
-# Apply the full post-provisioning pipeline against target systems
-ansible-playbook -i inventory/dev_env playbooks/site.yml
+## Commands
 
-# Useful subsets
-ansible-playbook -i inventory/dev_env playbooks/site.yml --tags users
-ansible-playbook -i inventory/dev_env playbooks/site.yml --limit sys1353 --tags fpga,config
-ansible-playbook -i inventory/dev_env playbooks/site.yml --skip-tags hardware,destructive
-```
-
-See `playbooks/README.md` for role-level documentation, testing guidelines, and tag conventions.
-
-## Roles
-
-Roles are defined under the top level `/roles` directory, which is referenced by the `roles_path` argument in the `ansible.cfg` file.
-
-| Role | Applies to | Purpose |
-|---|---|---|
-| `apt_repo_access` | `distribution_access` | Configure apt to use an apt proxy |
-| `bist` | `fhs_nodes` | Install and startup BIST (built-in self test) |
-| `bittware_sdk` | `user_environments` | Installs the BittWare SDK |
-| `fpga_host` | `fpga` | Bittware FPGA packages, GRUB, udev, SDK, BMC firmware |
-| `fhs_node_setup` | `fhs_nodes` | Set up the FHS servers as Kubernetes nodes (without joining cluster) |
-| `install_dpdk` | `dpdk_enabled` | Installs and configures DPDK, Arkville, and NVIDIA DOCA |
-| `network_setup` | all | systemd-networkd interface + disable cloud-init |
-| `pip_index` | `distribution_access` | Configure pip to use the internal devpi mirror |
-| `ubuntu24_cis` | `fhs_nodes` | Hardens systems against the Ubuntu 24.04 CIS benchmark |
-| `users` | all | Create accounts, sudo groups, SSH keys |
-| `venvs` | `user_environments` | Create shared Python venvs |
-
-## Getting Started
-
-Before running any playbooks, ensure off-the-shelf vendor collections and roles are installed locally:
+From the repository root, install the declared collections and external roles into the configured paths:
 
 ```bash
-ansible-galaxy collection install -r requirements.yml -p <path to collections folder>
-ansible-galaxy role install -r requirements.yml -p <path to roles folder>
+ansible-galaxy collection install -r requirements.yml -p <COLLECTIONS_PATH>
+ansible-galaxy role install -r requirements.yml -p <ROLES_PATH>
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_prometheus
 ```
 
-## Usage
-
-Run all playbooks from the root directory of this repository so that the local `ansible.cfg` path mappings are applied correctly:
-
-```bash
-ansible-playbook -i inventory/dev_env playbooks/site.yml
-```
-
-## Tag conventions
-
-Three orthogonal axes — every task carries at most one of each:
-
-- **Component**: `apt_repo`, `aptly_server`, `bist`, `bittware`, `devpi_server`, `dpdk`, `fpga`, `fhs_node_setup`, `gitea_server`, `network`, `pip_index`, `users`, `venvs`
-- **Phase**: `install`, `config`, `firmware`
-- **Risk**: `hardware` (can't run in containers), `destructive`, `insecure`, `never` (opt-in only)
-
-```bash
-# Safe-in-container subset:
-ansible-playbook playbooks/site.yml --skip-tags hardware
-
-# Update Bittware BMC firmware on one host (opt-in via `never`):
-ansible-playbook playbooks/site.yml --tags fpga,firmware,bmc_firmware --limit sys1353
-```
+The final command changes the host. See the role pages for defaults and internal tags. Dynamic includes mean `--list-tasks` and `--list-tags` do not enumerate all internal tasks. Development `config.yml` and `syntax_check.yml` retain stale imports; they are not verified validation entry points.

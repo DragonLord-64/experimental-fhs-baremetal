@@ -1,23 +1,20 @@
 # manage_fhs_exporter
 
-Deploy the Prometheus Exporter
+Installs the FHS Prometheus exporter archive into the FHS virtual environment and configures its service.
 
 ## Variables
 
-|     Variable Name    |                                                           Use                                                          |                       Example                      |
-|:--------------------:|:----------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------:|
-| **file_directory**   | File directory that contains the exporter tarball and service file.                                                    | "files"                                            |
-| **exporter_file**    | Defines the tarball to install the Prometheus Exporter from.                                                           | "ska_mid_cbf_fhs_prometheus_exporter-0.0.2.tar.gz" |
-| **exporter_service** | The service definition file that will be used by the hosts to spin up the Prometheus Exporter as a background service. | "prometheus-exporter.service"                      |
-| **mft_version**      | The hosted version of MFT to install.                                                                                  | "4.20.0"                                           |
+| Variable | Default | Purpose |
+|---|---|---|
+| `manage_exporters_exporter_file` | `/provision/files.d/external_archives/ska-mid-cbf-fhs-prometheus-exporter-main.tar.gz` | Controller-local archive |
+| `fhs_exporter_port` | `9110` | Listener port |
+| `fhs_exporter_log_level` | `DEBUG` | Log level |
+| `fhs_exporter_venv_path` | `/opt/venvs/fhs` | Installation environment |
 
-## Tags/Usage
+## Command and tags
 
-### exporter_install
-Installs the required libraries and tools for the exporter, then installs the exporter itself in the fhs venv. After this, installs the service file and uses it to run the exporter within the venv as a background service.
+```bash
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_fhs_exporter
+```
 
-### exporter_restart
-Restarts the exporter service.
-
-### exporter_stop
-Stops t he exporter service.
+The site wrapper supplies `manage_fhs_exporter`; `tasks/main.yml` has no internal phase tags. The archive, virtual environment and hardware dependencies must already be available. Installation forces pip reinstallation; an unchanged run is not proven to avoid service changes. Physical exporter behavior was not validated by the synthetic platform check.

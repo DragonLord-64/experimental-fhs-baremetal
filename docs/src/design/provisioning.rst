@@ -1,12 +1,7 @@
 Provisioning
 =========================================
 
-.. include:: provisioning-interface.md
-   :parser: myst_parser.sphinx_
+.. toctree::
+   :maxdepth: 2
 
-
-
-Provisioning - Sequence Diagram
---------------------------------
-
-.. uml:: provisioning-sequence.puml
+   provisioning-interface

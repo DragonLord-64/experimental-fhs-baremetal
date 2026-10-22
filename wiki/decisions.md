@@ -17,7 +17,11 @@
 
 ## Open questions
 
-- Linux guest version, VM allocation, and nested virtualization support.
+- Guest boot/provisioning after the successful KVM capability check; see [provisioning limits](../ops/provisioning/README.md).
 - CI provider configuration and runner access.
 - Representative telemetry capture format and coverage.
 - Which roles require real hardware, system VMs, or simulated device interfaces.
+
+## Observed implementation
+
+The Hyper-V guest, persistent platform and restricted Bifrost fixture are implemented within the limits recorded in [VM operations](../ops/kubernetes/README.md), [platform validation](../ops/platform/VALIDATION.md) and [provisioning checks](../ops/provisioning/README.md). The [controller](../ops/agent-pipeline/README.md) owns fresh stage transitions; its [validation](../ops/agent-pipeline/VALIDATION.md) records executable selection and bounded real-run evidence. Fake-agent tests alone do not prove a real task completes.

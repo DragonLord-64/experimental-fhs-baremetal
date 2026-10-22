@@ -31,8 +31,28 @@ minikube -p fhs-test kubectl -- --context=fhs-test get nodes
 minikube -p fhs-test kubectl -- --context=fhs-test get pods -A
 ```
 
-The modular platform is managed by [ops/platform](../platform/README.md). Separate isolated Bifrost checks are in [ops/provisioning](../provisioning/README.md). `scripts/deploy-bifrost-container.sh` expects `bifrost-infra`, tracked in the original checkout; its production launcher is not used by the isolated lab. Adapt its privileged containers, host networking, real inventory and DHCP settings before disposable VM use. Future Bifrost tests need an isolated provisioning network: do not expose DHCP/PXE to the real LAN. Kubernetes smoke checks do not validate provisioning or physical hardware.
+The modular platform is managed by [ops/platform](../platform/README.md). Separate isolated Bifrost checks are in [ops/provisioning](../provisioning/README.md). `scripts/deploy-bifrost-container.sh` expects the imported `bifrost-infra` source; its production launcher is not used by the isolated lab. Adapt its privileged containers, host networking, real inventory and DHCP settings before disposable VM use. Future Bifrost tests need an isolated provisioning network: do not expose DHCP/PXE to the real LAN. Kubernetes smoke checks do not validate provisioning or physical hardware.
 
 See [test environment plan](../../docs/test-environment-plan.md) for status and follow-up scope.
 
 2026-10-21: with the full platform installed, a disposable NetBox API object survived full `down`/`up` and was deleted afterward. The retained static storage and actual results are documented in [platform validation](../platform/VALIDATION.md).
+
+## VM access and wake troubleshooting
+
+From the LOCAL orchestration server, use the explicit user SSH configuration:
+
+```sh
+ssh -F ~/.ssh/config dragonvm
+```
+
+If the VM environment is asleep, the user reports that the existing local wake script can wake it:
+
+```sh
+bash /home/dragonlord/wol.sh
+# Wait at least 60 seconds, then retry SSH with a bounded timeout.
+ssh -F ~/.ssh/config -o ConnectTimeout=5 dragonvm
+```
+
+Run the script on the LOCAL orchestration server, not inside dragonvm. It uses Bash/Python 3 and a locally configured MAC; keep that machine identifier out of Git. The default destination is broadcast `255.255.255.255`, UDP port `9`. Despite its header, the first argument is ignored; the second and third override broadcast and port. Wake behavior and packet receipt were not tested during documentation validation. Do not add automatic wake retries.
+
+The current [agent recovery protocol](../../AGENTS.md#dragonvm-wake-protocol) requires the 60-second wait and bounded SSH retries. A sent packet alone does not prove recovery; inspect preserved services and pipeline state after reconnecting.

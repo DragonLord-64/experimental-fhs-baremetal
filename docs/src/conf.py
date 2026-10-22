@@ -58,7 +58,6 @@ sys.path.insert(0, os.path.abspath("."))
 def setup(app):
     app.add_css_file("css/custom.css")
     app.add_js_file("js/github.js")
-    app.add_js_file("js/mermaid.js")
 
 
 # -- Project information -----------------------------------------------------
@@ -94,7 +93,6 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "myst_parser",
     "sphinxcontrib.mermaid",
-    "sphinxcontrib.plantuml",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -268,3 +266,6 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
 }
+
+# Qualify section labels so role variable headings remain unambiguous.
+autosectionlabel_prefix_document = True

@@ -60,12 +60,12 @@ General playbook formatting can be checked by running the linter against the fil
 
 ## Roles
 
-### Naming
+### Role naming
 Roles should follow the naming scheme of `<action>_<item>` (for example, `install_prometheus`).
 
 ## Variables
 
-### Naming
+### Variable naming
 In general, variables that are used by a role should be given the prefix of the task they will be used for (e.g variable `pip_install_version` would be used for task `pip_install`)
 
 ### Precedence
@@ -109,7 +109,7 @@ Tags limit the selection of certain tasks, making them an important way of preve
 ### Usage
 Use tags on the playbook level only, to tag roles as noted above. When Ansible compiles/runs, it applies tags downwards, such that any task called from a tagged role will also be given that tag.
 
-### Naming
+### Tag naming
 It is important to note that when running, Ansible uses **or** comparison logic when multiple tags are requested. For example, if `--tags foo,bar` is called, any job with **either** foo or bar will be called. 
 Therefore, avoid common language tags such as `install` while testing/developing, as attempting to call with this tag may trigger other tasks. Instead, use the base format of `<action>_<item>` (for example, `install_prometheus`).
 

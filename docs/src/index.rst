@@ -29,6 +29,7 @@ FHS Baremetal Documentation
    playbooks/usage.md
    playbooks/provision.yml.md
    playbooks/site.yml.md
+   playbooks/development.md
 
 .. ROLES =============================================================
 .. toctree::
@@ -37,6 +38,7 @@ FHS Baremetal Documentation
    :glob:
 
    roles/*
+   roles/archive/*
    
 .. BIFROST QUICKSTART =============================================================
 .. toctree::
@@ -55,5 +57,6 @@ FHS Baremetal Documentation
    bifrost-infra/operations.md
    bifrost-infra/recovery.md
    bifrost-infra/diskimage-builder.md
+   bifrost-infra/testing.md
 
    

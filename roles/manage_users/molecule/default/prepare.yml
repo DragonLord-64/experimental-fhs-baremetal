@@ -1,0 +1,12 @@
+---
+# Review note: prove fresh account absence, then install only the container's Ansible prerequisite.
+- name: Prepare disposable Ubuntu userland
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Prove the synthetic account does not exist before convergence
+      ansible.builtin.raw: "! getent passwd moleculeuser"
+      changed_when: false
+    - name: Install Python for Ansible (sudo is installed by the actual role)
+      ansible.builtin.raw: apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3
+      changed_when: true

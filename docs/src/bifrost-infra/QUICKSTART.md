@@ -1,5 +1,8 @@
 
 
+The following is the source deployment procedure, not a completed dragonvm provisioning test. The tracked `bifrost-infra/` container definition uses host networking and privilege; do not use it as a disposable lab fixture. Bifrost playbooks come from the image under `/opt/bifrost/playbooks`, not this repository. The separate [restricted lab smoke](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/ops/provisioning/README.md) passed only the empty Ironic API and KVM capability checks; full guest provisioning and physical hardware behavior remain untested.
+
+
 # Quickstart Guide
 
 Follow these steps to get a containerized Bifrost environment running and perform your first deployment.
@@ -80,7 +83,7 @@ vi /bifrost/playbooks/inventory/terabox1501b_inventory.yaml
 
 ## 5. Enroll and Deploy
 Enroll and clean the nodes
-```warning
+```text
 this will wipe the harddrives of the nodes
 ```
 ```bash
@@ -101,6 +104,6 @@ baremetal node list
 ```
 
 ## Details
-See **[Operations Guide](./docs/operations.md)** for more information on these processes.
+See **[Operations Guide](operations.md)** for more information on these processes.
 
 

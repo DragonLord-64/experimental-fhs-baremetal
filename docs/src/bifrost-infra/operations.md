@@ -1,5 +1,8 @@
 # Operations Guide
 
+The following is the source deployment procedure, not a completed dragonvm provisioning test. The tracked `bifrost-infra/` container definition uses host networking and privilege; do not use it as a disposable lab fixture. Bifrost playbooks come from the image under `/opt/bifrost/playbooks`, not this repository. The separate [restricted lab smoke](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/ops/provisioning/README.md) passed only the empty Ironic API and KVM capability checks; full guest provisioning and physical hardware behavior remain untested.
+
+
 *Complete [setup](setup.md) before starting the processes defined in this section.*
 
 This guide covers the operation of the `bifrost-infra` environment, including inventory configuration, node provisioning, and deployment.
@@ -21,7 +24,7 @@ Bifrost uses Ansible `group_vars` to manage global settings.
 | **`baremetal`** | **Primary Config.** Sets defaults for all nodes. | `driver` (redfish/ipmi), `boot_interface`, `instance_info.image_source` (OS URL), `instance_info.image_checksum`. |
 | **`target`** | Controls deployment-time behavior. | `cleaning` (Wipe disks), `enable_oci_registry_upload`. |
 
-**Note**: When in doubt, change/add the variable in all 3 files.
+Set variables in the group that consumes them; inspect the imported Bifrost role defaults before overriding.
 
 ### Defining the deployment image
 
@@ -33,7 +36,7 @@ deploy_image: "{{http_boot_folder}}/{{deploy_image_filename}}"
 ```
 The image filename must match the name of the .qcow file which must reside within the httpboot folder (default location is `/var/lib/ironic/httpboot`).
 
-See [Building an OS image](#optional-building-an-os-image) in this section for instruction on creating a custom OS image.
+See [Building an OS image](diskimage-builder.md) in this section for instruction on creating a custom OS image.
 
 ### Per-Node Configuration
 
@@ -54,8 +57,8 @@ sysXXXX:
   name: <INSERT HOST NAME>
   driver_info:
     redfish_address: "https://<INSERT IP ADDRESS OF BMC>"
-    redfish_username: "admin"
-    redfish_password: "<INSERT PASSWORD>"
+    redfish_username: "<PROTECTED_VALUE>"
+    redfish_password: "<PROTECTED_VALUE>"
     redfish_verify_ca: false
     deploy_kernel_append_params: "iommu=pt"
   root_device:
@@ -210,16 +213,16 @@ cat /var/lib/misc/dnsmasq.leases
 ```
 Find the latest/active ip address.
 ssh into the server using
-**username**: username
-**password**: password
+**username**: `<PROVISIONED_USER>`
+**password**: `<PROTECTED_PASSWORD>`
 
 ```bash
 ssh username@<ip address>
 ```
 
 *The username and password variables are set by the ansible variables*
-  `DIB_DEV_USER_USERNAME`: "username"
-  `DIB_DEV_USER_PASSWORD`: "password"
+  `DIB_DEV_USER_USERNAME`: "<PROVISIONED_USER>"
+  `DIB_DEV_USER_PASSWORD`: "<PROTECTED_PASSWORD>"
 in the `/bifrost/playbooks/inventory/group_vars/target` file. These values are baked into the ramdisk image which is built at bifrost install time (the `install.yaml` playbook).
 
 The ramdisk image is a light weight linux environment which can be used to view and edit logs, harddrives, raid, and other server states.

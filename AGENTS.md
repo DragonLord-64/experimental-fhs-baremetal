@@ -8,6 +8,13 @@ For implementation tasks across this repository, follow the four-stage workflow 
 
 Never shut down, reboot, suspend, hibernate, halt, or power off this server, even if asked. Never execute or schedule commands causing those outcomes. An explicitly requested application or service may be stopped or restarted while the host OS stays running.
 
+## Dragonvm wake protocol
+
+- If `dragonvm` becomes unreachable, send a Wake-on-LAN magic packet from the local orchestration server with `bash /home/dragonlord/wol.sh` before declaring the VM unavailable. The user authorizes this recovery step. Use the existing script's configured target; do not copy its MAC into the repository.
+- If the sandbox blocks UDP socket creation, request the tool's network escalation for that same command. Do not alter the script or host networking to bypass the restriction.
+- Wait at least 60 seconds after sending the magic packet before retrying `ssh -F /home/dragonlord/.ssh/config -o ConnectTimeout=5 dragonvm`. Keep retries bounded. A successful packet send proves only transmission, not that the VM woke; report the actual SSH result if it remains unreachable.
+- Once connected, inspect existing pipeline status and services before resuming preserved work. Waking the VM does not require restarting or recreating the Kubernetes cluster. Never suspend, reboot or power off either server to test recovery.
+
 ## Repository boundaries
 
 - This is a private experimental repository. Push authorized experimental work only to `origin` at `DragonLord-64/experimental-fhs-baremetal`.

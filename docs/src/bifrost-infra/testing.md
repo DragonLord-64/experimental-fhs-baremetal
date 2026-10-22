@@ -1,6 +1,9 @@
 # Testing Guide
 
-This document describes how to use the built-in Bifrost test suite to validate the provisioning cycle using **libvirt virtual machines** instead of physical hardware.
+The following is the source deployment procedure, not a completed dragonvm provisioning test. The tracked `bifrost-infra/` container definition uses host networking and privilege; do not use it as a disposable lab fixture. Bifrost playbooks come from the image under `/opt/bifrost/playbooks`, not this repository. The separate [restricted lab smoke](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/ops/provisioning/README.md) passed only the empty Ironic API and KVM capability checks; full guest provisioning and physical hardware behavior remain untested.
+
+
+This is an unverified reference procedure for the image-provided Bifrost libvirt tests. It has not completed in the private lab; review isolation and image dependencies before any run.
 
 > [!WARNING]
 > **ENVIRONMENT LIMITATION:** This test suite is intended for local development. It is **not** fully functional for all hardware types or complex network topologies. Use with caution.
@@ -22,7 +25,7 @@ To run these tests, the Docker container must have access to the host's virtuali
 
 1.  **Host KVM:** `/dev/kvm` must be present and accessible on the host machine.
 2.  **Container Dependencies:** The `Dockerfile` must include `libvirt-daemon-system`, `libvirt-clients`, `python3-libvirt`, and `virtinst`.
-3.  **Network:** The test suite automatically switches the Bifrost network from the physical `eno2` to the virtual `virbr0` to avoid interfering with your real network.
+3.  **Network (unverified here):** The image test suite is intended to switch the Bifrost network from the physical `eno2` to the virtual `virbr0` to avoid interfering with your real network.
 
 ---
 
