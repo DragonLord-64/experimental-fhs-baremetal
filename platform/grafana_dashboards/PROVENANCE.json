@@ -1,0 +1,337 @@
+{
+  "input_root": "/home/dragon-lord/fhs-pipeline-inputs/dashboard-reference",
+  "note": "Immutable copied working-tree input. HEAD in MANIFEST is provenance, not a claim that dirty input was committed. Original captures remain separate from generated output. Source licensing is retained in the immutable reference storage; generated code follows repository licensing.",
+  "files": [
+    {
+      "path": "MANIFEST.json",
+      "sha256": "3b541c0a76268e61854feeb9fb7ebd209846db0d59281b7e09ea8161fe550cbb"
+    },
+    {
+      "path": "official/FHS server-1792604810325.json",
+      "sha256": "4e18604f4db97256747f73a53ce61897bb029729183201127ab84fd92943b5e5"
+    },
+    {
+      "path": "official/Nexus-Switch-Port-Details-1792604819886.json",
+      "sha256": "45049a1ac999fea347e84c50d826b27d8f1e943c9d15ffa0d3031ce6533f921d"
+    },
+    {
+      "path": "official/Nexus-Switch-Port-Details-1792604838620.json",
+      "sha256": "45049a1ac999fea347e84c50d826b27d8f1e943c9d15ffa0d3031ce6533f921d"
+    },
+    {
+      "path": "prototype/AGENTS.md",
+      "sha256": "778903e374d937ff854c7d8415ae20eea414fd0d73866d1b8a292d3bd0749421"
+    },
+    {
+      "path": "prototype/monitoring/README.md",
+      "sha256": "ab456f077f1af9b5863d93083075cf8a0d94c1077dca512bd83bc20c0a7e1dc0"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/README.md",
+      "sha256": "23877914a14a7e8e9003fe15ea49bb9561bf6544ef78aa00d4f08c7b70621f93"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/cisco-switch/exporter.py",
+      "sha256": "c7239d6d1a2707f0a40f1f9dc39e3b3b0c23c8697f9fae6d9d2f7f1c37eb0366"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/cisco-switch/generate_dashboard.py",
+      "sha256": "9d4f0a82189a1b4753005ba372a52fbdf20c82a0731665ce6062ff69df0df2ec"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/cisco-switch/grafana/dashboards/cisco-switch-detail.json",
+      "sha256": "f48f93831074159dc2dd018a2e2910f5af60f1b9ecd04e917021a9209e116495"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/cisco-switch/grafana/dashboards/cisco-switch.json",
+      "sha256": "c1220023920a23cf8b22f41cfee785bedf0fcf01dacf204adee791b625a5a442"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/cisco-switch/make_mock.py",
+      "sha256": "9bd2e538d49e5e6bc4408eccc33a9e23a58c03de732dedde6475bb6b11dca2c1"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/cisco-switch/mock-switch.json",
+      "sha256": "713d7267d2dc472be8f1adb6651bfed9400765731eee226ecf9e3c9a25544a68"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/cisco-switch/screenshots/compact-overview.jpg",
+      "sha256": "6f7a29b80daf9f72d00f6ea93a9ec5de25f049a05304afe3ca96a1e9fdc4b19a"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/README.md",
+      "sha256": "586f22860ed22c0ebe6971c494fa6e56139c19fb602590850028a6f39186a8c5"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/exporter.py",
+      "sha256": "d93b6263cf39b812fdd27b9e5d183bd7f2dd2859d550000361635ecf85cdde90"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/generate_dashboard.py",
+      "sha256": "bcc368f086e6d5356bc113324ec88f8a4ea49af18b230edb372dc985f0497c2f"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/grafana/dashboards/rack-view.json",
+      "sha256": "77a0fe997f0908e90013da206ce6c18feb7f5d347cd410990f9cfe852b20a61a"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a01.prom",
+      "sha256": "59f0d74e0a916c8c9723ebf2a296045cc7aea6fa727e73c57f1670097e3fa003"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a02.prom",
+      "sha256": "929cc5a3753177f249f4ed6bfa8ac02ef70d9df844aae9f438b598b5f39e99b5"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a03.prom",
+      "sha256": "86520d3c82e46e5a531aaa9cb0c5d9a657282ee454e1af22d2609527a6acfd46"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a04.prom",
+      "sha256": "e79c3210caf3dc5cd330b658c0993914ce0176b3644844d584d67247d3f7309c"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a05.prom",
+      "sha256": "cf003d4d92e03ffcb87915934cddaea2ebb4d4072529de11fb81c9167c922011"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a06.prom",
+      "sha256": "41ba140d0b8d6cd378e1c3095a3746c500456a4f11fe020de9574bb41621cc67"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a07.prom",
+      "sha256": "d54eeb19c5ae1cfdee9fae93a98e67b539ae2735ad9b7ce7306d6a0d0da297b1"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-a08.prom",
+      "sha256": "f4063267b7aa628b58564a8d52c9fe43a344a1085ba756ded214851ead6e49f1"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b01.prom",
+      "sha256": "6690ccbbf4ba5d8e505fcf9abff14bbaf22e5d54fa71a329a79cf22de284d972"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b02.prom",
+      "sha256": "47cc6b42daeb0916d8ebb229997d24c592935d21c179407785cd77365e765c16"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b03.prom",
+      "sha256": "ec2d5e443795a84a264fb6d815a7c38e9614177e2864daa83353df61d3ffbcfd"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b04.prom",
+      "sha256": "48640717d18a1621ff26ab2cc9878dec41c05d559f1674dbaf55fc42837b0f26"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b05.prom",
+      "sha256": "f1c8e514ae3bebc5ec73556a90eee0435523620ddc0ea8d57b8273fba1d6931e"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b06.prom",
+      "sha256": "a4680b92e9a0ba3044289cb13d4fdf6839cecd1c6b4809bebb0b62799ffd3b2c"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b07.prom",
+      "sha256": "24b0a27a40b8fc61fd27a0e3c35285078c3f5b62f237f745b3741ae84c1c43d2"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/inventory/server-b08.prom",
+      "sha256": "42d94ba64d3b69f9a02383f7a1e83e0eae4fa0891fb6b8ee9aec7c98201d9f03"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/make_sample.py",
+      "sha256": "88f8e0ad74bc68afd241b0118c7a16380064cd77da52a48cd5100c7a305799d2"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/mock-health.json",
+      "sha256": "f7accf6f5ac6bc4d034872ba2c3e5a9e17b4ba33adaab0c9f6167df686afdf43"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/screenshots/overview.jpg",
+      "sha256": "407201e669c8bf89e9f45670b691b88dcbd9971ba16c2f91d817ec21e2f588a7"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/rack-view/test_rack_view.py",
+      "sha256": "4ed8b150b6d1f93482b0ce79ff9ffd8f5408eecfb39e5b34aec629ce4e12aa41"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/EXPORTER.md",
+      "sha256": "3ec0fc39eb7c04767747f4f4587be7724943a966336c3837ee384b5ecacd2661"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/exporter.py",
+      "sha256": "c2e00ed0b34cd58644f096adeccf5588895f927630755dff84f25d835a82bd08"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/generate_dashboard.py",
+      "sha256": "1dda0aae10178e6de6d3bf54b205ca49eeb3ccb1b3790e2dfee098c24e600d24"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/grafana/dashboards/server-health.json",
+      "sha256": "28fa256f2773a9e6218afe2f3dfd5d5779a967bc21f1ce6a41867f65e3a5d4b3"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/mock-health.json",
+      "sha256": "e9160ea3a68eefdbc5527101c119f0f066e1a0c33d05622574ef0e3af26823b2"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/screenshots/everything-else.jpg",
+      "sha256": "7be37d9dd670171c23ae539b02d10e3da3a51015b1adcc1e2d67d4c553b2933d"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/screenshots/updated-components.jpg",
+      "sha256": "acbc2673c4ef28d997e4ed48b90da9a09155944e2ca77e0b3f4fc14cc42a1f18"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/server-health/screenshots/updated-overview.jpg",
+      "sha256": "da19c146684beacd8eedb2a4c6855f20128c92b04d04dfa3d6953842f16463d4"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/vccu-fspu/exporter.py",
+      "sha256": "2f39f62b06844b7584e857411c97089f430f9c4eefe8fff197c4cfae7be8287e"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/vccu-fspu/generate_dashboard.py",
+      "sha256": "4f10878bd816f770ca971d0cf71e6283ec5946270c84e7f35f41aa042a324f33"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/vccu-fspu/grafana/dashboards/vccu-fspu.json",
+      "sha256": "cbf1e2d50ba2ad697be5dba9a71062379296175359747472ccecab712ad8c403"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/vccu-fspu/mock-links.json",
+      "sha256": "d22e619e31c34868ef876a3c84b795a00996b8dbe2093651a9cae666b3ca7053"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/vccu-fspu/screenshots/matrix.jpg",
+      "sha256": "1ad5bf18d0427535d535ba50f7e72bc3c10735c2cbc43f1be43ff00467b422d3"
+    },
+    {
+      "path": "prototype/monitoring/dashboard-prototypes/vccu-fspu/screenshots/selected-link.jpg",
+      "sha256": "09846da57b680f3d7162846dc348f37c16a85661bc9dfb45c1bb26eed13ea7c7"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/README.md",
+      "sha256": "828967f0c4c33a8e58a765f58773278b31c5b4485eedf21dca60ed98019da2fc"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/VALIDATION.md",
+      "sha256": "aab24d029328d195c89f7b4e4c469c7214bf80bf2ac6cce0f5417956cef19043"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/fhs/README.md",
+      "sha256": "17e0425ea15ada3ee753f556e2b9726b2e35e2a68948068b166cafd4606e15ef"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/fhs/generate_dashboard.py",
+      "sha256": "93087db3b8966c43284aed151aee59f69ac81dea8370d34436469780d8cb569d"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/fhs/grafana/dashboards/fhs-export-backed.json",
+      "sha256": "21c6dabcac1db81ea05070eb0490fdcd5fd8bb0a36895c2cf4fd7e95132df99a"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/README.md",
+      "sha256": "96b3e12adfb08d85904eee129958f130977a069d1490b6944223a032e091903a"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/fhs-export-backed.json",
+      "sha256": "5895934321431af02aeda88a2e95d4e755cef5248085053b6f5fa5d92762029c"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/screenshots/fhs-components.jpg",
+      "sha256": "070683acdb05c7a46e021a8e37c660bbace89575bbe0856148970bd543a4d2aa"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/screenshots/fhs-top.jpg",
+      "sha256": "9eeb392bb3b97eb7eca12d389a5ec9661010fb07c535729d84ea1dde7b1e271e"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/screenshots/switch-detail.jpg",
+      "sha256": "8e01d6bcb679d4e16fe0cb13ed0d443df1781875a54cb452f8e9e456aa41d6dd"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/screenshots/switch-overview.jpg",
+      "sha256": "b0623f355f87bb819c82222096aece1dfb735824a5cc7024a18554a030a2a0f2"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/switch-export-backed.json",
+      "sha256": "50ac4871563ea13e2932af2b90b1569e6434a62b6e560f0521b3c99f5fee56ed"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/live-import/switch-export-detail.json",
+      "sha256": "27c681af07a34fb6f6776806eabefcc4e871fa3d5a0def25df091a4acc402324"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/sources/README.md",
+      "sha256": "fee7fd897e58817086fcb19e4838014750406141b0e3e9bea783ca588866e558"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/sources/fixtures/fhs.json",
+      "sha256": "c6991030e0d4da249f096b1f7308b08cdc1a908bdbb2050e98ce0be6242ecfbd"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/sources/fixtures/manifest.json",
+      "sha256": "6bc7d1bc9accd9cbce7ea4caa11189b651beaba4a3411c16c51c9416c4dc215b"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/sources/fixtures/node.json",
+      "sha256": "80e4ffb382354f0d3ab2514ee17a920a526fd7daadcb9ffd51715acde1e0826a"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/sources/fixtures/switch.json",
+      "sha256": "0a8b0ffda1e7009b323f705958038303898b3c15e7b5195b172cd523cb22bbda"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/switch/README.md",
+      "sha256": "5f68b090ba0fe96a24cf79a43a7012450484d0c5ad5aae2bb66b0983a556dddc"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/switch/generate_dashboard.py",
+      "sha256": "a1aa0697a3503f6f7f72bd947e8a103022da351ad54b081fc7c24d90e2b1bf74"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/switch/grafana/dashboards/switch-export-backed.json",
+      "sha256": "2ca1df58dbb93ad4357b8fed54345fd81bc1982c3b0799e02a913ca163d23f29"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/switch/grafana/dashboards/switch-export-detail.json",
+      "sha256": "3dca5afe3f294c818207e72928d2a7676eac406a445e329fa9decc76bd6a1bfb"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/switch/topology.json",
+      "sha256": "4fb01e8c7b81755bb484091d8140458ad3d0b394d06358e3b453f99462ae49b7"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/tests/test_fhs_dashboard.py",
+      "sha256": "24a5b081084c6bbccd5149b87b497b85dd5e9930158c848b21b6fc30a168eb8c"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/tests/test_live.py",
+      "sha256": "5d0f7e15a2cc7a4895250b150efca5cb30a3f04ad4aa5070dc92688525a5ead1"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/tests/test_sources.py",
+      "sha256": "eac04a4a52f925826101fcdf81a685e36062c2136af4e719a321be0ba1bacb71"
+    },
+    {
+      "path": "prototype/monitoring/export-backed-dashboards/tests/test_switch_dashboard.py",
+      "sha256": "2600519a196f61a809a952a2f9339d4d8a10740132e89091dc604cf32b3f881a"
+    }
+  ],
+  "official_unique_sources": [
+    {
+      "sha256": "4e18604f4db97256747f73a53ce61897bb029729183201127ab84fd92943b5e5",
+      "paths": [
+        "official/FHS server-1792604810325.json"
+      ]
+    },
+    {
+      "sha256": "45049a1ac999fea347e84c50d826b27d8f1e943c9d15ffa0d3031ce6533f921d",
+      "paths": [
+        "official/Nexus-Switch-Port-Details-1792604819886.json",
+        "official/Nexus-Switch-Port-Details-1792604838620.json"
+      ]
+    }
+  ]
+}

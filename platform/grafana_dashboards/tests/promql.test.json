@@ -1,0 +1,1298 @@
+{
+  "rule_files": [],
+  "evaluation_interval": "1m",
+  "tests": [
+    {
+      "interval": "1m",
+      "input_series": [
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS4\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS1\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS2\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "total_input_power_watts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "fan1_rpm{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "fan2_rpm{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "8000 8000"
+        },
+        {
+          "series": "cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "prochot_cpu{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "volt_12v_volts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "volt_3v_volts{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "watchdog2{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "chassis_intr{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "0 0"
+        },
+        {
+          "series": "ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\",fhs=\"FHS3\"}",
+          "values": "40 40"
+        },
+        {
+          "series": "nexus_interfaces_vdcId{job=\"switch\",source=\"VCCUnit1-switch\",interface=\"eth1/1/3\",operSt=\"down\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "nexus_lldp_id{job=\"switch\",source=\"VCCUnit1-switch\",interface=\"eth1/1/3\",sysName=\"FSPUnit3-switch\",portIdV=\"eth1/1/1\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "nexus_interfaces_vdcId{job=\"switch\",source=\"FSPUnit3-switch\",interface=\"eth1/1/1\",operSt=\"down\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "nexus_lldp_id{job=\"switch\",source=\"FSPUnit3-switch\",interface=\"eth1/1/1\",sysName=\"VCCUnit1-switch\",portIdV=\"eth1/1/3\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "nexus_interfaces_vdcId{job=\"switch\",source=\"VCCUnit1-switch\",interface=\"eth1/1/1\",operSt=\"up\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "nexus_lldp_id{job=\"switch\",source=\"VCCUnit1-switch\",interface=\"eth1/1/1\",sysName=\"FSPUnit1-switch\",portIdV=\"eth1/1/1\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "nexus_interfaces_vdcId{job=\"switch\",source=\"FSPUnit1-switch\",interface=\"eth1/1/1\",operSt=\"up\"}",
+          "values": "1 1"
+        },
+        {
+          "series": "nexus_lldp_id{job=\"switch\",source=\"FSPUnit1-switch\",interface=\"eth1/1/1\",sysName=\"VCCUnit1-switch\",portIdV=\"eth1/1/1\"}",
+          "values": "1 1"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit2\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit2\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit2\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit2\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"FSPUnit2\"})) == 4) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"FSPUnit2\"})) == 4)))",
+          "eval_time": "1m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"FSPUnit2\",fhs=\"FHS2\"})) == 1)))",
+          "eval_time": "1m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"VCCUnit1\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"VCCUnit1\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"VCCUnit1\"} or sts_psu2_fan{job=\"fhs\",unit=\"VCCUnit1\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"VCCUnit1\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"VCCUnit1\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"VCCUnit1\"} or sts_psu2_fan{job=\"fhs\",unit=\"VCCUnit1\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"VCCUnit1\"})) == 1) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"VCCUnit1\"})) == 1)))",
+          "eval_time": "1m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit4\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit4\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit4\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit4\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit4\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit4\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit4\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit4\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"FSPUnit4\"})) == 4) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"FSPUnit4\"})) == 4)))",
+          "eval_time": "1m",
+          "exp_samples": []
+        },
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS1\"})) == 1)))",
+          "eval_time": "1m",
+          "exp_samples": []
+        },
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS2\"})) == 1)))",
+          "eval_time": "1m",
+          "exp_samples": []
+        },
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS3\"})) == 1)))",
+          "eval_time": "1m",
+          "exp_samples": []
+        },
+        {
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"} or sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (fan1_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (fan2_rpm{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (front_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (prochot_cpu{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (sts_cpu_mce{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (sts_psu1{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (sts_psu1_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (sts_psu2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (sts_psu2_fan{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (total_input_power_watts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (volt_12v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (volt_3v_volts{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1) and on() (count(count by(fhs) (watchdog2{job=\"fhs\",unit=\"FSPUnit1\",fhs=\"FHS4\"})) == 1)))",
+          "eval_time": "1m",
+          "exp_samples": []
+        },
+        {
+          "expr": "min by(vcc,fsp) (label_replace(label_replace(((max by (source,interface) (nexus_interfaces_vdcId{job=\"switch\",operSt=\"up\"}) or (0 * max by (source,interface) (nexus_interfaces_vdcId{job=\"switch\"}))) * on(source,interface) group_left(sysName) max by(source,interface,sysName) (nexus_lldp_id{job=\"switch\",source=~\"VCCUnit.*\",sysName=~\"FSPUnit.*-switch\"})),\"vcc\",\"$1\",\"source\",\"(VCCUnit[0-9]+)-switch\"),\"fsp\",\"$1\",\"sysName\",\"(FSPUnit[0-9]+)-switch\") or label_replace(label_replace(((max by (source,interface) (nexus_interfaces_vdcId{job=\"switch\",operSt=\"up\"}) or (0 * max by (source,interface) (nexus_interfaces_vdcId{job=\"switch\"}))) * on(source,interface) group_left(sysName) max by(source,interface,sysName) (nexus_lldp_id{job=\"switch\",source=~\"FSPUnit.*\",sysName=~\"VCCUnit.*-switch\"})),\"vcc\",\"$1\",\"sysName\",\"(VCCUnit[0-9]+)-switch\"),\"fsp\",\"$1\",\"source\",\"(FSPUnit[0-9]+)-switch\"))",
+          "eval_time": "1m",
+          "exp_samples": [
+            {
+              "labels": "{vcc=\"VCCUnit1\",fsp=\"FSPUnit1\"}",
+              "value": 1
+            },
+            {
+              "labels": "{vcc=\"VCCUnit1\",fsp=\"FSPUnit3\"}",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
