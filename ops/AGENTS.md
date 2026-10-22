@@ -1,6 +1,8 @@
 # Task workflow
 
-One primary agent coordinates the task and may spawn sub-agents. Use four stages and three workers: the first screens and establishes tests, the second implements, and the third independently reviews the result.
+Use four stages and three workers: the first screens and establishes tests, the second implements, and the third independently reviews the result.
+
+For automated runs, [agent-pipeline](agent-pipeline/README.md) controls transitions, retries and monitoring. Each worker returns a structured result; it does not launch the next worker. No manager agent is required. Human or authorized agent corrections go through the controller. For interactive work, a primary agent may coordinate sub-agents using the same boundaries.
 
 ## 1. Screen
 
@@ -27,6 +29,6 @@ The second worker reads the handoff and relevant source, implements the change, 
 
 A fresh third worker receives the original task, acceptance criteria, concise source context, final diff, and test evidence. Independently check whether the user's goal and meaning are met. Look for missing behavior, misleading passes, unjustified scope, regressions, and contradictions between code and docs. Inspect source and run focused checks when needed. Report findings with locations and severity, or state that no issues were found and identify unverified areas.
 
-The primary agent resolves findings through the relevant worker, obtains renewed review for material fixes, and reports the outcome with evidence. Do not declare success solely because tests pass. Preserve user changes and obey root safety and repository boundaries throughout.
+The controller returns findings to a fresh implementation worker, then obtains fresh review. Interactive work follows the same loop. Report the outcome with evidence. Do not declare success solely because tests pass. Preserve user changes and obey root safety and repository boundaries throughout.
 
-This is the agent work process. CI runner provisioning and automatic issue dispatch are separate work and are not implemented by this document.
+The local controller is implemented in `agent-pipeline/`. CI runner provisioning and automatic issue dispatch remain separate work.

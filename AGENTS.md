@@ -2,7 +2,7 @@
 
 Start at [INDEX.md](INDEX.md). Keep notes short, linked, and grounded in source evidence. Follow the nearest applicable AGENTS.md.
 
-For implementation tasks across this repository, follow the four-stage workflow in [ops/AGENTS.md](ops/AGENTS.md). The primary agent is authorized to coordinate sub-agents for screening/tests, implementation, and independent intent review.
+For implementation tasks across this repository, follow the four-stage workflow in [ops/AGENTS.md](ops/AGENTS.md). For automated runs, [ops/agent-pipeline](ops/agent-pipeline/README.md) owns transitions and starts fresh stage processes; no manager agent is needed. Interactive work may delegate the same stages to sub-agents.
 
 ## Server safety
 
