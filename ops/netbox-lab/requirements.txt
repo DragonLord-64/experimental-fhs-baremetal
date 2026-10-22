@@ -1,0 +1,5 @@
+# Separate lab runtime; actual installed CLI/plugin versions are checked before use.
+ansible-core==2.20.1
+requests==2.32.5
+packaging==26.0
+pytz==2025.2

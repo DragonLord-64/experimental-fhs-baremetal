@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-22",
+  "purpose": "Private source preservation checkpoint; not integration acceptance or authorization to deploy.",
+  "source_base_commit": "fcc53c912fcac2ae6f59224a7f977ac04a29988e",
+  "source_pipeline": {
+    "task": "netbox-reduced-prune-plan",
+    "status": "paused",
+    "stage": "implement",
+    "attempt": 3
+  },
+  "files": [
+    {
+      "path": "ops/netbox-lab/README.md",
+      "sha256": "df5022bc0389eed8665f0a9ccb0597e159fd688cba48eccd9e968d03092049c0"
+    },
+    {
+      "path": "ops/netbox-lab/bifrost-check.py",
+      "sha256": "a853669339e44f4d486ec1075b6171c9e81c58a725e43775b26703f0a7f0a0bb"
+    },
+    {
+      "path": "ops/netbox-lab/bifrost-runtime.sh",
+      "sha256": "6c9e268a74884004ec9cb2d2074a85351b371838b8b898870d63d66d482aabb6"
+    },
+    {
+      "path": "ops/netbox-lab/consumers.py",
+      "sha256": "5ee3b21045131eee9bb45d821ca3bf557b8dae2f6a65a43f2130764518da52fc"
+    },
+    {
+      "path": "ops/netbox-lab/exercise.py",
+      "sha256": "1808fbf02bdc2096604bc588837315647992874f08a5f6880b814c0a44f49c32"
+    },
+    {
+      "path": "ops/netbox-lab/fixture.json",
+      "sha256": "d640cbc9601629316bb749e87a7fb347fac698ed690d0852870bc69d9d27089f"
+    },
+    {
+      "path": "ops/netbox-lab/inspect-bifrost.py",
+      "sha256": "120f02127c57fb0b0fa6efe657a50b632a4b616a12b63bdc66e09644b3f1b91b"
+    },
+    {
+      "path": "ops/netbox-lab/inventory.py",
+      "sha256": "c257f9b3af96f1efc699ba4908b0f52aaf391c29c5c9c0bb41c68deae69db5ff"
+    },
+    {
+      "path": "ops/netbox-lab/lab.netbox.yml",
+      "sha256": "3a8ca4279b6faf8dda0652cb594cef622b07ae6186e0d01a3b85e251b0ae4dd2"
+    },
+    {
+      "path": "ops/netbox-lab/live.py",
+      "sha256": "d5a2507314782ad7df8f600818bb7065b7fbab3fadf0edac17161dc9c18efc6b"
+    },
+    {
+      "path": "ops/netbox-lab/prune.py",
+      "sha256": "48156889b5fae82094438805239ab7fa3d115145426ce0a7ac41a53e5c48675b"
+    },
+    {
+      "path": "ops/netbox-lab/requirements.txt",
+      "sha256": "a0d97ea8e02f52998e4521922fece4e4387348b9a09624f0a6f81585ab71b5a2"
+    },
+    {
+      "path": "ops/netbox-lab/requirements.yml",
+      "sha256": "c86e8913d9b39b264db7ebdf8d9bd9ded9d8baea0bb85063983bc351a1e4f3c6"
+    },
+    {
+      "path": "ops/netbox-lab/runtime-inspect.py",
+      "sha256": "476f021d4b3fc2c30c96915c74e57ac2f7a72ce774bb68447df2bb17f1c11e6a"
+    },
+    {
+      "path": "ops/netbox-lab/tests/test_consumers.py",
+      "sha256": "d7460833e8a953bb70d80ceba6e54e0c9c78e2cfd3248d733b4eb3607713523a"
+    },
+    {
+      "path": "ops/netbox-lab/tests/test_inventory.py",
+      "sha256": "6d92eaf97b9f4ff36993a04903d087736959ecbba3a2342755c7fca8c601da40"
+    },
+    {
+      "path": "ops/netbox-lab/tests/test_prune.py",
+      "sha256": "96409ef238824c21a4db15c093fc0c2d223b0ba91fc9b7eb04f65b92b4171a64"
+    },
+    {
+      "path": "ops/netbox-lab/tests/test_prune_population.py",
+      "sha256": "f5001d2e7b7092543c8df4c94b97be29fd8a2c1608698c028320f1ede3bd8701"
+    },
+    {
+      "path": "wiki/INDEX.md",
+      "sha256": "bd1158c58c89c4b013100ac957b56c2be5c363861d6cb0e3ce474b58f4958976"
+    },
+    {
+      "path": "wiki/LOG.md",
+      "sha256": "08d1a49b726bc5701c32e4e18e53a409bd3e940d1a943ba7704ce57c7b127ba7"
+    },
+    {
+      "path": "wiki/netbox-lab.md",
+      "sha256": "2d4b13e6dda6b143244a7acb443fdb3133051fdd1ba8a2d1995cddbff5b042f4"
+    }
+  ],
+  "offline_checks": {
+    "netbox_lab_unittests": "33 passed; newer source now passes the two regressions reported failing in the earlier handoff"
+  },
+  "observed_prior_live_state": {
+    "population": "186 NetBox devices at handoff: 183 logical and 3 provisioning fixtures; reduction not applied",
+    "consumers": "Native plugin acceptance incomplete; Bifrost paused; no deletion approved or executed"
+  },
+  "limits": [
+    "No worker/controller resumed; no deployments or host/service changes.",
+    "Raw logs, captures, private inventory, credentials, runtime directories and compiled binaries excluded.",
+    "Checkpoint retains original source behavior and older dated validation notes; this snapshot states current preservation status.",
+    "Physical hardware and complete guest provisioning remain unverified.",
+    "Prune implementation is WIP pending fresh independent review, bounded execution/collector evidence and exact-plan approval; unit passes do not authorize deletion."
+  ]
+}

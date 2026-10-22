@@ -1,0 +1,32 @@
+# Only use through live.py: it validates the loopback lab endpoint and token.
+plugin: netbox.netbox.nb_inventory
+cache: false
+validate_certs: true
+follow_redirects: none
+plurals: false
+fetch_all: false
+# Bound limit=0 related-object batches in the pinned plugin on the small VM.
+max_uri_length: 512
+interfaces: true
+services: false
+config_context: false
+flatten_custom_fields: false
+strict: true
+timeout: 30
+compose:
+  # Use the native IPv4 fact explicitly; do not depend on legacy primary_ip.
+  ansible_host: primary_ip4.address.split('/')[0]
+query_filters:
+  - tag: fhs-netbox-lab
+  - site: lab-nb-dragonvm
+  - status: active
+vm_query_filters:
+  - id: 0
+group_by:
+  - site
+  - role
+  - tag
+groups:
+  lab_logical: "'lab-logical' in tags"
+  lab_provisioning: "'lab-provisioning' in tags"
+  lab_reachable: "'lab-reachable' in tags"

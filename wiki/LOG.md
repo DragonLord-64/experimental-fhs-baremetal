@@ -27,3 +27,19 @@ Append completed events here; keep proposed work in the plan.
 - Final optional all-components command `deploy.sh deploy --with-bifrost` passed after full cluster resume, including the corrected transient database-restart cleanup handling. All service pods were Ready; disposable API sites, forwarding processes and Bifrost resources were cleaned up. Default context remained `monitoring`.
 
 - Recorded the user-confirmed VCC/FSP unit composition and full VCC-to-FSP connectivity, with links to the SKA MCS architecture and interface documentation; see [unit topology](unit-topology.md).
+
+- 2026-10-22: Added the scoped [NetBox lab bootstrap and consumer path](netbox-lab.md). Private archive inspected structurally without printing values; canonical logical identities retained. Eleven offline contracts and two existing provisioning isolation checks pass. Initial supervisor API/UI readiness probe passed; persistent seed and actual Ansible/Bifrost integration remain pending.
+
+- 2026-10-22 continuation: Prior supervisor evidence confirms 186 synthetic NetBox devices and an unchanged seed rerun with zero creations. Actual plugin invocation now succeeds but field validation remains failed; fixed sanitized diagnostics and connection-failure stale export invalidation. Twenty offline contracts pass. Further live integration and independent review remain pending; see [NetBox lab](netbox-lab.md).
+
+- 2026-10-22: Reproduced the installed ansible-core inventory encoder’s unsafe string marker using synthetic input. Added exact marker decoding for validation and an actual-encoder regression test; 21 offline contracts pass. Supervised actual-plugin retry remains pending.
+
+- 2026-10-22: Supervised inventory retry v9 passed authenticated readiness and plugin invocation, then failed a native-fact API GET. Added numeric HTTP-status diagnostics with a privacy regression test; 22 offline contracts pass. Read-only retry v10 queued; no further live fact mutations, target access or enrollment performed.
+
+- 2026-10-22: Replaced per-device native interface reads with one scoped paginated query, preserving exact comparisons. All 23 lab contracts and two provisioning isolation tests pass; Compose validation passes. Added a read-only serving/resource probe and requested supervised measurements and one actual-plugin retry after the saved NetBox OOM event. No reseed or serving/resource changes made; live acceptance remains pending.
+
+- 2026-10-22: Inspected actual pinned NetBox plugin batching and reduced its related-object URI budget to 512. Added exact assigned-interface IP comparisons and regressions for missing/stale/moved assignments; 25 lab tests and two provisioning isolation tests pass. Requested a supervised read-only retry after capacity review; live consumer acceptance remains pending. See [NetBox lab](netbox-lab.md).
+
+- 2026-10-22: Supervisor returned matching v12 capacity hold on live consumer load and test containers. Preserved persistent inventory and candidate; actual plugin acceptance, reachable target, source-of-truth exercise and Bifrost loader/API checks remain blocked pending release.
+
+- 2026-10-22: Reduced-population source now has stable full-order BMC/OOB offsets and an offline exact prune plan/apply library with ownership, dependency, stale-state and resume checks. Thirty lab tests and two provisioning isolation tests pass. Added [prune usage and holds](../ops/netbox-lab/README.md); bridge requests frozen reduced topology and exact supervisor dependency evidence only. No live deletion, plugin run, worker change or Bifrost operation performed. Independent review and exact parent-approved deletion plan remain pending; source acceptance is blocked on frozen evidence.

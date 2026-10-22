@@ -1,0 +1,14 @@
+{
+  "synthetic": true,
+  "canonical_source": "dashboard-contract/topology.py configured() (read-only supervisor snapshot)",
+  "canonical_counts": {"vcc_units": 24, "fsp_units": 27, "fhs": 132, "switches": 51, "mesh_links": 648},
+  "site": "lab-nb-dragonvm",
+  "owner_tag": "fhs-netbox-lab",
+  "name_prefix": "lab-nb-",
+  "logical_primary_network": "192.0.2.0/24",
+  "provisioning_primary_network": "198.51.100.0/24",
+  "oob_network": "203.0.113.0/24",
+  "provisioning_count": 3,
+  "reachable_count": 0,
+  "note": "No endpoint in this fixture is reachable. Reachable target registration requires separate supervisor scope."
+}
