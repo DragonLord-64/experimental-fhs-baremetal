@@ -29,3 +29,14 @@ The user reports an existing Helm-based NetBox deployment; installed version and
 - Tests should use recorded, sanitized inventory fixtures rather than depend on a live NetBox service. Record NetBox inventory snapshots or revisions with deployment evidence when feasible.
 
 References: [NetBox config contexts](https://netbox.readthedocs.io/en/stable/models/extras/configcontext/), [Ansible inventory plugin](https://docs.ansible.com/projects/ansible/latest/collections/netbox/netbox/nb_inventory_inventory.html).
+
+### Small profile mapping example
+
+Proposed example; not applied to the inventory. Give a device the NetBox tag slug `ubuntu24-cis-production`. Add this entry under the existing inventory plugin's `groups` mapping (preserving its other entries):
+
+```yaml
+groups:
+  ubuntu24_cis_production: "'ubuntu24-cis-production' in (tags | map(attribute='slug') | list)"
+```
+
+Ansible then loads `inventory/dev_env/group_vars/ubuntu24_cis_production.yml` for that group when using the adjacent NetBox inventory. NetBox selects membership; Git retains the CIS policy. Verify the installed plugin's tag representation and resolved group membership with `ansible-inventory --graph` before deployment.
