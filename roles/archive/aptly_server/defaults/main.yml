@@ -1,0 +1,29 @@
+---
+# Install + configure aptly from Ubuntu's apt package.
+aptly_apt_packages:
+  - aptly
+  - gnupg
+
+# Run as a dedicated unprivileged user.
+aptly_user: aptly
+aptly_group: aptly
+aptly_home: /var/aptly
+
+# GPG signing key for published repos. Generated on first run if missing.
+aptly_gpg_name: "FHS Aptly Signing Key"
+aptly_gpg_email: "fhs-aptly@local.invalid"
+aptly_gpg_key_type: RSA
+aptly_gpg_key_length: 3072
+
+# Mirrors: list of {name, url, distribution, components, architectures, keyring (optional)}
+aptly_mirrors: []
+
+# Snapshots: list of {name, from_mirror}
+aptly_snapshots: []
+
+# Publish endpoints: list of {prefix, distribution, snapshot, architectures, components}
+aptly_publishes: []
+
+# Serve over HTTP via `aptly api serve` (lightweight) or rely on an external nginx.
+aptly_serve_http: false
+aptly_serve_listen: ":8082"

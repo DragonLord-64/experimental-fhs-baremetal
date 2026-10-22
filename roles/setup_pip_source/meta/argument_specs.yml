@@ -1,0 +1,8 @@
+---
+argument_specs:
+  main:
+    short_description: Configure pip to use the internal package index
+    options:
+      pip_index_url: {type: str, required: true}
+      pip_trusted_hosts: {type: list, elements: str, default: []}
+      pip_config_file: {type: path, default: /etc/pip.conf}

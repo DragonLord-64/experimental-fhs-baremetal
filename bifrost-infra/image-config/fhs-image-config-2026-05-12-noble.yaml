@@ -1,0 +1,10 @@
+---
+- imagename: fhs_image_2026-05-12_noble.qcow2
+  elements: [ base, ubuntu, vm, growroot, block-device-efi-lvm, cloud-init-datasources]
+  image-size: 925
+  environment:
+    DISTRO_NAME: ubuntu
+    DIB_RELEASE: noble
+    DIB_CLOUD_INIT_DATASOURCES: "Ec2, ConfigDrive, OpenStack"
+    DIB_BLOCK_DEVICE_CONFIG: "file:///bifrost/playbooks/fhs-block-device-2026-05-12-noble.yaml"
+

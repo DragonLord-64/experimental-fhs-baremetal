@@ -1,0 +1,6 @@
+    local_archive_path: "/provision/files.d/external_archives/ia860m_cardtest01_bbrev4_v1.7.zip" # or .zip
+
+    # --- Remote Target Variables ---
+    workspace_dir: "/opt/bitstreams"
+    bitstream_dir: "{{ workspace_dir }}/bittware_ia860m/"
+    venv_path: "/opt/venvs/fhs"

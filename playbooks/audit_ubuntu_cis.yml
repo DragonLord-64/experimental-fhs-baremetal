@@ -1,0 +1,55 @@
+---
+- name: Prepare the controller for Ubuntu 24 CIS audit results
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: false
+  vars:
+    audit_output_destination: /var/log/ubuntu24_cis_audit_summaries
+  tasks:
+    - name: Ensure audit summary directory exists
+      ansible.builtin.file:
+        path: "{{ audit_output_destination }}"
+        state: directory
+        mode: "0750"
+
+- name: Audit all servers against Ubuntu 24 CIS Level 1
+  hosts: ubuntu24_cis_audit
+  become: true
+  gather_facts: true
+  vars:
+    # Keep the complete audit configuration at play scope. Hosts may also be
+    # members of a remediation-policy group, and play vars take precedence.
+    ubtu24cis_section1: true
+    ubtu24cis_section2: true
+    ubtu24cis_section3: true
+    ubtu24cis_section4: true
+    ubtu24cis_section5: true
+    ubtu24cis_section6: true
+    ubtu24cis_section7: true
+    ubtu24cis_level_1: true
+    ubtu24cis_level_2: false
+    ubtu24cis_disruption_high: false
+    skip_reboot: true
+
+    setup_audit: true
+    run_audit: true
+    audit_only: true
+    audit_run_heavy_tests: false
+    audit_max_concurrent: 50
+
+    benchmark: UBUNTU24-CIS
+    benchmark_version: v1.0.0
+    get_audit_binary_method: copy
+    audit_bin_copy_location: "{{ playbook_dir }}/artifacts/goss/goss-v0.4.8"
+    audit_content: archive
+    audit_conf_source: >-
+      {{ playbook_dir }}/artifacts/ubuntu24-cis-audit/ubuntu24-cis-audit-benchmark-v1.0.0.tar.gz
+    audit_conf_dest: /opt
+    audit_log_dir: /opt
+    fetch_audit_output: true
+    audit_output_collection_method: fetch
+    audit_output_destination: /var/log/ubuntu24_cis_audit_summaries
+
+  roles:
+    - ubuntu24_cis

@@ -1,0 +1,26 @@
+---
+# gitea_server can't bring up a docker daemon inside a docker container
+# without docker-in-docker which is more setup than this smoke test needs.
+# We test the install + compose render path and stop before docker_compose_v2.
+role_name_check: 0
+dependency:
+  name: galaxy
+  enabled: false
+driver:
+  name: docker
+platforms:
+  - name: midcbf-gitea-srv
+    image: geerlingguy/docker-ubuntu2404-ansible:latest
+    pre_build_image: true
+    privileged: true
+    cgroupns_mode: host
+    command: /lib/systemd/systemd
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+provisioner:
+  name: ansible
+verifier:
+  name: ansible

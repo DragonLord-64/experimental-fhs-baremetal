@@ -1,0 +1,26 @@
+---
+- name: Converge — network_setup
+  hosts: all
+  become: true
+  vars:
+    sys_mac_address: aa:bb:cc:dd:ee:ff
+    ansible_host: 10.42.0.10
+    network_disable_cloud_init: false      # cloud-init not in container
+    network_remove_legacy_netplan: false   # nothing to remove
+  pre_tasks:
+    - name: Ensure /etc/systemd/network exists (test fixture)
+      ansible.builtin.file:
+        path: /etc/systemd/network
+        state: directory
+        mode: "0755"
+  tasks:
+    - name: Apply network_setup role (skip hardware-tagged steps)
+      ansible.builtin.import_role:
+        name: network_setup
+  handlers:
+    # Override the role's handler: the container has no systemd-networkd
+    # to restart, so we no-op it for the test only.
+    - name: Restart systemd-networkd
+      listen: fhs network changed
+      ansible.builtin.debug:
+        msg: "skipping systemd-networkd restart in container"

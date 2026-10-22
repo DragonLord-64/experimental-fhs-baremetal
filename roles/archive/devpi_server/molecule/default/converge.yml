@@ -1,0 +1,8 @@
+---
+- name: Converge — devpi_server
+  hosts: all
+  become: true
+  tasks:
+    - name: Apply devpi_server
+      ansible.builtin.import_role:
+        name: devpi_server

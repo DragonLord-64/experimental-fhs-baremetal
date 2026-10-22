@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+Types: deb
+URIs: {{ apt_repo_url }}
+Suites: {{ apt_repo_suites | join(' ')}}
+Components: {{ apt_repo_components | join(' ')}}
+Signed-By: {{ apt_repo_keyring }}

@@ -1,0 +1,16 @@
+---
+- name: Manage Poetry
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Install Poetry
+      ansible.builtin.import_role:
+        name: manage_poetry
+
+- name: Provision gRPC
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Install Prometheus-exporters
+      ansible.builtin.import_role:
+        name: manage_fhs_grpc

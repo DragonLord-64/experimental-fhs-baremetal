@@ -1,0 +1,23 @@
+- name: BMC update
+  delegate_to: localhost
+  community.general.redfish_command:
+    category: Update
+    command: MultipartHTTPPushUpdate
+    baseuri: "{{ redfish.address }}"
+    username: "{{ redfish.username }}"
+    password: "{{ redfish.password }}"
+    timeout: 600
+    update_image_file: files/{{ redfish_update_bmc_image }}
+    update_targets:
+      - /redfish/v1/UpdateService/FirmwareInventory/BMC
+    update_custom_oem_header: OemParameters
+    update_custom_oem_mime_type: "application/json"
+    update_custom_oem_params:
+      ImageType: BMC
+  register: update_notes
+  become: true
+
+- name: Print details of last update
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: "{{ update_notes.msg }}"

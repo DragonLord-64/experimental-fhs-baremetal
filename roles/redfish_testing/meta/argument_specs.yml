@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Query system inventory through Redfish
+    options:
+      redfish:
+        type: dict
+        required: true
+        options:
+          address: {type: str, required: true}
+          username: {type: str, required: true}
+          password: {type: str, required: true, no_log: true}

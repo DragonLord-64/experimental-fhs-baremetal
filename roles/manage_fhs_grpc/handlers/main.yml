@@ -1,0 +1,16 @@
+---
+- name: Restart VCC gRPC
+  ansible.builtin.service:
+    name: vcc-grpc
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  become: true
+
+- name: Restart FSP gRPC
+  ansible.builtin.service:
+    name: fsp-grpc
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  become: true

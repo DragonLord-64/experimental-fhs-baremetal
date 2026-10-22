@@ -1,0 +1,9 @@
+---
+- name: Run All-In-One Arkville Automated Installation Suite
+  ansible.builtin.command:
+    cmd: ./scripts/install_arkville.sh
+    chdir: "/opt/arkville/arkville_{{ arkville_release }}"
+  environment:
+    ARK_HOME: "/opt/arkville/arkville_{{ arkville_release }}"
+  become: true # Required because the script mounts hugepages and writes to system lib folders
+  changed_when: true

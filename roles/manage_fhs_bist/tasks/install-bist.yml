@@ -1,0 +1,60 @@
+---
+# roles/bist/tasks/install-bist.yml
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ app_dir }}"
+    state: directory
+    mode: "0775"
+
+- name: Copy BIST archive
+  ansible.builtin.copy:
+    src: "{{ archive_path }}"
+    dest: "/tmp/{{ archive_name }}"
+    owner: "{{ bist_user }}"
+    group: "{{ bist_group }}"
+    mode: "0644"
+
+- name: Extract BIST archive
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ archive_name }}"
+    dest: "{{ app_dir }}"
+    remote_src: true
+
+- name: Set ownership of BIST
+  ansible.builtin.file:
+    path: "{{ app_dir }}"
+    owner: "{{ bist_user }}"
+    group: "{{ bist_group }}"
+    recurse: true
+
+- name: Create virtual environment
+  become: true
+  become_user: "{{ bist_user }}"
+  ansible.builtin.command:
+    cmd: "python3 -m venv {{ venv_dir }}"
+    creates: "{{ venv_dir }}/bin/activate"
+
+- name: Set virtual environment group ownership
+  become: true
+  ansible.builtin.file:
+    path: "{{ venv_dir }}"
+    group: "{{ bist_group }}"
+    recurse: true
+
+- name: Install pip-tools
+  become: true
+  become_user: "{{ bist_user }}"
+  ansible.builtin.pip:
+    name: pip-tools
+    executable: "{{ venv_dir }}/bin/pip"
+
+- name: Install requirements
+  become: true
+  become_user: "{{ bist_user }}"
+  ansible.builtin.shell: |
+    {{ venv_dir }}/bin/pip-compile requirements.in
+    {{ venv_dir }}/bin/pip install -r requirements.txt
+  args:
+    chdir: "{{ app_dir }}"
+  changed_when: true

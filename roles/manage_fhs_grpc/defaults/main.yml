@@ -1,0 +1,15 @@
+---
+# Version management
+manage_grpc_fsp_controller: "ska-mid-cbf-fhs-fsp-grpc-controller-0.0.3"
+manage_grpc_vcc_controller: "ska-mid-cbf-fhs-vcc-grpc-controller-0.0.3"
+manage_grpc_vcc_bitstream: "ska-mid-cbf-bitstreams-1.2.0"
+manage_grpc_fsp_bitstream: "ska-mid-cbf-fsp-corr-bitstreams-0.1.0"
+manage_grpc_grpcurl_version: "grpcurl_1.9.3_linux_amd64"
+manage_grpc_protos_version: "ska-mid-cbf-fhs-grpc-protos-0.0.1"
+
+# gRPC service configuration
+manage_grpc_port: "50051"
+manage_grpc_emulation_mode: "true"
+manage_grpc_card: "t1413c1"
+manage_grpc_device_address: "0000:81:00.1"
+manage_grpc_device_region: "0"

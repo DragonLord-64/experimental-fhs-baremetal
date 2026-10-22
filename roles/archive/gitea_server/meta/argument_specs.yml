@@ -1,0 +1,27 @@
+---
+argument_specs:
+  main:
+    short_description: Install a Gitea server and optional pull mirrors
+    options:
+      gitea_docker_packages: {type: list, elements: str}
+      gitea_compose_dir: {type: path, default: /etc/docker/compose/gitea}
+      gitea_container_name: {type: str, default: gitea}
+      gitea_image: {type: str, default: gitea/gitea:latest}
+      gitea_uid: {type: int, default: 1000}
+      gitea_gid: {type: int, default: 1000}
+      gitea_domain: {type: str, default: localhost}
+      gitea_http_port: {type: int, default: 3000}
+      gitea_ssh_port: {type: int, default: 2222}
+      gitea_root_url: {type: str}
+      gitea_admin_pat: {type: str, no_log: true}
+      gitea_mirrors_org: {type: str, default: mirrors}
+      gitea_mirror_interval: {type: str, default: 1h}
+      gitea_mirrors:
+        type: list
+        elements: dict
+        default: []
+        options:
+          upstream: {type: str, required: true}
+          name: {type: str}
+      gitea_health_retries: {type: int, default: 30}
+      gitea_health_delay: {type: int, default: 3}

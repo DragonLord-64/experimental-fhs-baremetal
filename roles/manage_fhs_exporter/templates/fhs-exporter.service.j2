@@ -1,0 +1,13 @@
+[Unit]
+Description=FHS Prometheus Exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={{ fhs_exporter_venv_path }}/bin/python {{ fhs_exporter_venv_path }}/bin/fhs-prometheus-exporter --port {{ fhs_exporter_port }} --log-level {{ fhs_exporter_log_level | default('INFO') }}
+Environment="PATH={{ fhs_exporter_venv_path }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

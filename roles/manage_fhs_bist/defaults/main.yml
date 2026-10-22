@@ -1,0 +1,12 @@
+---
+# roles/bist/defaults/main.yml
+# Defaults have LOW precedence - easily overridable by users
+# Use for values that users commonly customize
+
+# these values are stored here so that they can be easily overridden for specific servers
+# as there are two sets of configurations for fpga cards
+fpga_card0_bdf_detri: "01:00.1"
+fpga_card1_bdf_detri: "81:00.1"
+fpga_card0_bdf_ark: "01:00.0"
+fpga_card1_bdf_ark: "81:00.0"
+terabox_nic0_bdf: "c1:00.0"

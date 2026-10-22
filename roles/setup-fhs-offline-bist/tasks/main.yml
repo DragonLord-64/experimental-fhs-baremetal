@@ -1,0 +1,128 @@
+---
+- name: Setup Bittware testing environment (using existing venv)
+  hosts: all
+  become: true
+  vars:
+    repo_root: "/home/ubuntu/repos"
+    venv_path: "/opt/venvs/fhs"
+    registerdef_path: "{{ repo_root }}/../tools/registerDef"
+    bittware_repo: "{{ repo_root }}/bittware_testing_notebooks"
+    terabox_repo: "{{ repo_root }}/terabox-bsp"
+    pcap_root: "{{ ansible_env.HOME }}/pcap_files"
+    bitstream_root: "{{ bittware_repo }}/bitstream_packages"
+    # map of repo name → local tar.gz file that contains the repo source
+    repo_archives:
+      bittware_testing_notebooks: "{{ manage_bittware_tar }}"
+      terabox_bsp: "{{ manage_terabox_tar }}"
+      registerDef: "{{ manage_registerdef_tar }}"
+  tasks:
+    - name: Install required OS packages
+      apt:
+        name:
+          - python3-pip
+          - build-essential
+        state: present
+        update_cache: true
+
+    - name: Copy repo tarballs to remote temporary location
+      copy:
+        src: "{{ item.value }}"
+        dest: "/tmp/{{ item.value | basename }}"
+        mode: "0644"
+      loop: "{{ repo_archives|dict2items }}"
+
+    - name: Unarchive Bittware testing notebooks
+      unarchive:
+        src: "/tmp/{{ manage_bittware_tar | basename }}"
+        dest: "{{ repo_root }}"
+        remote_src: yes
+        creates: "{{ bittware_repo }}/README.md"
+
+    - name: Unarchive terabox‑bsp
+      unarchive:
+        src: "/tmp/{{ manage_terabox_tar | basename }}"
+        dest: "{{ repo_root }}"
+        remote_src: yes
+        creates: "{{ terabox_repo }}/README.md"
+
+    - name: Unarchive registerDef
+      unarchive:
+        src: "/tmp/{{ manage_registerdef_tar | basename }}"
+        dest: "{{ repo_root }}/../tools"
+        remote_src: yes
+        creates: "{{ registerdef_path }}/README.md"
+
+    - name: Add registerDef to PYTHONPATH in .bashrc
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        regexp: '^export PYTHONPATH=.*registerDef'
+        line: "export PYTHONPATH={{ registerdef_path }}:$PYTHONPATH"
+        create: yes
+        owner: ubuntu
+        mode: "0644"
+      become_user: ubuntu
+
+    - name: Install registerDef Python requirements using existing venv
+      pip:
+        requirements: "{{ registerdef_path }}/requirements.txt"
+        virtualenv: "{{ venv_path }}"
+        virtualenv_python: python3
+
+    - name: Install notebook Python requirements using existing venv
+      pip:
+        requirements: "{{ bittware_repo }}/requirements.txt"
+        virtualenv: "{{ venv_path }}"
+        virtualenv_python: python3
+
+    - name: Create PCAP sub‑folders
+      file:
+        path: "{{ pcap_root }}/{{ item }}"
+        state: directory
+        owner: ubuntu
+        mode: "0755"
+      loop:
+        - DSH
+        - FS
+
+    - name: Create bitstream_packages placeholder directory
+      file:
+        path: "{{ bitstream_root }}"
+        state: directory
+        owner: ubuntu
+        mode: "0755"
+
+    - name: Find firmware driver directories
+      find:
+        paths: "{{ bittware_repo }}/bitstream_packages"
+        patterns: "drivers"
+        file_type: directory
+        recurse: yes
+      register: driver_dirs
+
+    - name: Compile firmware drivers
+      shell: |
+        source {{ venv_path }}/bin/activate && \
+        make clean all
+      args:
+        chdir: "{{ item.path }}"
+        executable: /bin/bash
+      loop: "{{ driver_dirs.files }}"
+      ignore_errors: true
+
+    - name: Compile DSH packet‑decode driver
+      shell: |
+        source {{ venv_path }}/bin/activate && \
+        make clean all
+      args:
+        chdir: "{{ bittware_repo }}/testing_notebooks/packet_decode/dsh_packet_decode_pybind/driver"
+        executable: /bin/bash
+      ignore_errors: true
+
+    - name: Summary
+      debug:
+        msg: |
+          Environment ready.
+          venv: {{ venv_path }}
+          PYTHONPATH includes: {{ registerdef_path }}
+          Bitstream dir: {{ bitstream_root }}
+          PCAP dirs: {{ pcap_root }}/DSH {{ pcap_root }}/FS

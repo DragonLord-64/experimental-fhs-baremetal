@@ -1,0 +1,22 @@
+---
+# Triggered ONLY if fhs-exporter.service.j2 changes
+- name: Reload Systemd Daemon
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  become: true
+
+# Triggered if the service file OR thresholds configuration change
+- name: Restart Exporter
+  ansible.builtin.service:
+    name: fhs-exporter
+    state: restarted
+    enabled: true
+  become: true
+
+# Triggered ONLY if the main prometheus.yml changes
+- name: Restart Prometheus
+  ansible.builtin.service:
+    name: prometheus
+    state: restarted
+    enabled: true
+  become: true

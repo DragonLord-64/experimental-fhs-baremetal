@@ -1,0 +1,35 @@
+---
+- name: Initialise reboot tracker
+  ansible.builtin.set_fact:
+    fpga_reboot_pending: false
+  tags: [fpga, always]
+
+- name: VFIO udev rules
+  ansible.builtin.import_tasks: udev.yml
+  tags: [fpga, config, hardware]
+
+- name: GRUB kernel cmdline
+  ansible.builtin.import_tasks: grub.yml
+  when: fpga_update_grub | bool
+  tags: [fpga, config, hardware, destructive]
+
+
+- name: BMC firmware
+  ansible.builtin.import_tasks: bmc_firmware.yml
+  when: fpga_update_bmc | bool
+  tags: [fpga, firmware, hardware, destructive, never]
+
+
+- name: Flush handlers before any reboot
+  ansible.builtin.meta: flush_handlers
+  tags: [fpga, always]
+
+- name: Reboot if any change requires it
+  ansible.builtin.reboot:
+    msg: "Rebooting after GRUB / BMC / SDK change."
+    reboot_timeout: "{{ fpga_reboot_timeout }}"
+    test_command: whoami
+  when:
+    - fpga_reboot_on_change | bool
+    - fpga_reboot_pending | bool
+  tags: [fpga, hardware, destructive]

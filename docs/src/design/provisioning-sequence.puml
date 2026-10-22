@@ -1,0 +1,61 @@
+@startuml
+autonumber
+
+title Mid-CBF Provisioning Process
+
+actor "Maintainer" as M
+participant "Netbox\n(Source of Truth)" as NB
+participant "Bifrost / Ansible\n(Orchestrator)" as BIF
+participant "DiskimageBuilder" as DIB
+participant "HTTP Server" as HTTP
+participant "Ironic Services\n(DHCP/PXE)" as PXE
+participant "Target FHS Server" as FHS
+
+== 1. Inventory Creation ==
+note right of M: **INPUT** HW BOM.
+M -> NB: Update hardware/config data
+M -> BIF: Manually trigger inventory sync
+BIF -> NB: Fetch data
+BIF -> BIF: Generate mid-cbf-inventory.yml
+
+== 2. Building an Image ==
+M -> DIB: Manually initiate build command
+note right of DIB: Uses YAML & Block Device configs
+DIB -> DIB: Build tb_jammy_...qcow2
+M -> DIB: Access built image
+M -> HTTP: Move/Upload .qcow2 to web root
+note right of HTTP: Image available at\nhttp://<IP>:8080/
+
+== 3. Enrolling the Server ==
+M -> BIF: Run enroll-dynamic.yaml
+BIF -> PXE: Register node details (Redfish/MAC)
+
+== 4. Image Deployment ==
+M -> BIF: Run deploy-dynamic.yaml
+BIF -> PXE: Signal deployment start
+PXE -> FHS: Instruction via Redfish (Reboot to PXE)
+FHS -> PXE: PXE Boot (DHCP + Ramdisk)
+activate FHS
+FHS -> FHS: Clean hard drives
+FHS -> HTTP: Download .qcow2 image
+FHS -> FHS: Write image to disk & Reboot
+FHS -> FHS: cloud-init starts\n(Setup IP & User access)
+deactivate FHS
+
+== 5. FHS Configuration (Ansible) ==
+BIF -> FHS: Execute Ansible Roles
+activate FHS
+BIF -> FHS: Configure Network, Drivers, packages
+BIF -> FHS: Install Monitoring (Prometheus)
+BIF -> FHS: Install BIST
+BIF -> FHS: InstallK8s
+== 6. Joining K8s Cluster ==
+BIF -> FHS: Cluster Join
+FHS -> FHS: Node Ready
+deactivate FHS
+BIF --> M: Provisioning Successful
+== OUTPUT: Deployment Inventory File ==
+M -> NB: Export inventory
+M <- NB: Roles + IP.
+note right of M: **OUTPUT** List of roles and IP ready for deployment.
+@enduml

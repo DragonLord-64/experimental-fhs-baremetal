@@ -1,0 +1,8 @@
+---
+ansible_host: 192.168.8.41
+sys_mac_address: a8:a1:59:fb:a7:21
+
+redfish:
+  address: "192.168.8.40"
+
+k8s_taints: []

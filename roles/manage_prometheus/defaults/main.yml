@@ -1,0 +1,24 @@
+# Versioning:
+# Match your real /provision directory structure
+manage_prometheus_file_directory: "/provision/files.d/external_archives"
+manage_prometheus_apt_version: "2.45.3+ds-2ubuntu0.3"
+
+# Match the exact tar filenames found in your ls output
+manage_prometheus_prometheus_tar: "prometheus-3.12.0.linux-amd64"
+manage_prometheus_node_tar: "node_exporter-1.11.1.linux-amd64"
+
+manage_prometheus_user: prometheus
+manage_prometheus_node_user: node_exporter
+manage_prometheus_data_dir: /var/lib/prometheus
+
+
+# Authentication Settings:
+manage_prometheus_enable_auth: false
+manage_prometheus_user_cred: "$2b$12$nk3YaT9.oGhFHSFA084eWeai85B0TjTujC7fZSD9ktAOheOxfiWTO"
+
+# Basic Settings:
+manage_prometheus_prometheus_port: 9090
+manage_prometheus_retention_size: 15GB
+manage_prometheus_retention_time: 14d
+manage_prometheus_scrape_interval: 15s
+manage_prometheus_evaluation_interval: 15s

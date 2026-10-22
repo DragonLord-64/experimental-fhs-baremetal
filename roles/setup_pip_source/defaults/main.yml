@@ -1,0 +1,9 @@
+---
+# URL of the in-cluster devpi caching proxy; required.
+pip_index_url: ""
+
+# Hosts to mark as 'trusted' (no TLS verification — internal-only).
+pip_trusted_hosts: []
+
+# Where to write the system-wide pip config.
+pip_config_file: /etc/pip.conf

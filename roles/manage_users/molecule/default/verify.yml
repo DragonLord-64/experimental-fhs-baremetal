@@ -1,0 +1,44 @@
+---
+- name: Verify — users role
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Look up alice
+      ansible.builtin.getent:
+        database: passwd
+        key: alice
+    - name: Look up bob
+      ansible.builtin.getent:
+        database: passwd
+        key: bob
+    - name: Look up bittware group
+      ansible.builtin.getent:
+        database: group
+        key: bittware
+    - name: Check alice membership
+      ansible.builtin.command: id -nG alice
+      register: alice_groups
+      changed_when: false
+    - name: Assert alice in sudo + bittware
+      ansible.builtin.assert:
+        that:
+          - "'sudo' in alice_groups.stdout.split()"
+          - "'bittware' in alice_groups.stdout.split()"
+    - name: Stat sudoers drop-in
+      ansible.builtin.stat:
+        path: /etc/sudoers.d/10-sudo-group
+      register: sudoers_stat
+    - name: Assert sudoers file exists with mode 0440
+      ansible.builtin.assert:
+        that:
+          - sudoers_stat.stat.exists
+          - sudoers_stat.stat.mode == "0440"
+    - name: Read alice authorized_keys
+      ansible.builtin.slurp:
+        src: /home/alice/.ssh/authorized_keys
+      register: alice_keys
+    - name: Assert seeded key is present
+      ansible.builtin.assert:
+        that:
+          - "'alice@test' in (alice_keys.content | b64decode)"

@@ -1,0 +1,85 @@
+---
+# roles/fhs_node_setup/tasks/install-k8s-packages.yml
+# Install Kubernetes packages
+
+- name: Create local temporary directory for GPG key
+  ansible.builtin.file:
+    path: /tmp/k8s_gpg
+    state: directory
+    mode: "0755"
+  delegate_to: localhost
+  run_once: true
+
+- name: Download raw Kubernetes GPG key text to management host
+  ansible.builtin.get_url:
+    url: "https://pkgs.k8s.io/core:/stable:/{{ k8s_repo_version }}/deb/Release.key"
+    dest: "/tmp/k8s_gpg/kubernetes-{{ k8s_repo_version }}-apt-keyring.asc"
+    mode: "0644"
+  delegate_to: localhost
+  run_once: true
+
+- name: Dearmor the GPG key to a binary payload on management host
+  ansible.builtin.command:
+    cmd: "gpg --dearmor -o /tmp/k8s_gpg/kubernetes-{{ k8s_repo_version }}-apt-keyring.gpg /tmp/k8s_gpg/kubernetes-{{ k8s_repo_version }}-apt-keyring.asc"
+    creates: "/tmp/k8s_gpg/kubernetes-{{ k8s_repo_version }}-apt-keyring.gpg"
+  delegate_to: localhost
+  run_once: true
+
+- name: Ensure target keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy GPG key from host to target servers
+  ansible.builtin.copy:
+    src: "/tmp/k8s_gpg/kubernetes-{{ k8s_repo_version }}-apt-keyring.gpg"
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    owner: root
+    group: root
+    mode: "0644"
+    force: true
+
+- name: Add Kubernetes repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_repo_version }}/deb/ /"
+    filename: kubernetes
+    state: present
+    update_cache: false
+
+- name: Temporarily lift version holds to allow the downgrade/update
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: install
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  ignore_errors: true
+
+- name: Install Kubernetes packages
+  ansible.builtin.apt:
+    name:
+      - "kubelet={{ k8s_pkg_version }}-*"
+      - "kubeadm={{ k8s_pkg_version }}-*"
+      - "kubectl={{ k8s_pkg_version }}-*"
+    state: present
+    update_cache: true
+    allow_downgrades: true
+
+- name: Hold Kubernetes packages at current version
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  ignore_errors: true
+
+- name: Ensure kubelet is enabled
+  ansible.builtin.service:
+    name: kubelet
+    enabled: true

@@ -1,0 +1,20 @@
+---
+# ==============================================================================
+# Patched DPDK Infrastructure Variables
+# ==============================================================================
+# Local directory on your localhost engine containing the compressed source bundle
+dpdk_local_path: "/provision/files.d/"
+# The filename tracking your custom patched source tree
+dpdk_tarball_filename: "dpdk.tar.gz"
+
+# ==============================================================================
+# Arkville Installation Variables
+# ==============================================================================
+arkville_release: "25.11"
+arkville_local_path: "/provision/files.d/arkville/archive"
+
+# ==============================================================================
+# NVIDIA DOCA Installation Variables
+# ==============================================================================
+doca_local_path: "/provision/files.d/"
+doca_deb_filename: "doca-host_3.3.0-088000-26.01-ubuntu2404_amd64.deb"

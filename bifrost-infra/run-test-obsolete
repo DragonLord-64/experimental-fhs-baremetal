@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Run the bifrost VM-based test cycle inside the bifrost_deploy container.
+# Idempotent: cleans any libvirt VM / ironic node state from a previous run
+# before starting. Assumes the container is already running:
+#
+#   sudo docker compose -f bifrost-infra/docker-compose.yml up -d --build
+#
+# See TESTING.md for the step-by-step explanation of what this script does.
+set -euo pipefail
+
+CONTAINER=bifrost_deploy
+LOG=/tmp/test-bifrost.log
+
+if ! sudo docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
+  echo "ERROR: container '$CONTAINER' is not running." >&2
+  echo "Start it with:" >&2
+  echo "  sudo docker compose -f bifrost-infra/docker-compose.yml up -d --build" >&2
+  exit 1
+fi
+
+echo "==> Cleaning prior test state..."
+sudo docker exec "$CONTAINER" bash -c '
+  virsh destroy testvm1 2>/dev/null || true
+  virsh undefine --nvram testvm1 2>/dev/null || true
+  rm -f /var/lib/libvirt/qemu/nvram/testvm1_VARS.fd /var/lib/libvirt/nvram-testvm1.fd
+  for n in $(baremetal node list -f value -c UUID 2>/dev/null); do
+    baremetal node delete "$n" >/dev/null 2>&1 || true
+  done
+'
+
+echo "==> Creating test VM (KVM, Redfish driver)..."
+sudo docker exec "$CONTAINER" bash -c '
+  cd /bifrost/playbooks
+  env -u ANSIBLE_VAULT_PASSWORD_FILE \
+    ansible-playbook -i inventory/localhost test-bifrost-create-vm.yaml \
+      -e test_vm_domain_type=kvm \
+      -e test_vm_node_driver=redfish
+' | tail -3
+
+echo "==> Patching baremetal.json for sushy-emulator basic auth..."
+sudo docker exec "$CONTAINER" python3 -c '
+import json
+p = "/tmp/baremetal.json"
+d = json.load(open(p))
+for v in d.values():
+    v["driver_info"]["redfish_auth_type"] = "basic"
+json.dump(d, open(p, "w"), indent=2)
+'
+
+echo "==> Running deploy cycle (5-15 minutes; output streamed to $LOG inside container)..."
+set +e
+sudo docker exec "$CONTAINER" bash -c "
+  cd /bifrost/playbooks
+  export BIFROST_INVENTORY_SOURCE=/tmp/baremetal.json
+  env -u ANSIBLE_VAULT_PASSWORD_FILE \
+    ansible-playbook -i inventory/bifrost_inventory.py -i inventory/target test-bifrost.yaml \
+      -e download_custom_deploy_image=true \
+      -e testing_user=cirros \
+      -e download_ipa=true \
+      -e create_ipa_image=false \
+      -e ipv4_nameserver=8.8.8.8 \
+      > $LOG 2>&1
+"
+set -e
+
+echo
+echo "==> PLAY RECAP:"
+sudo docker exec "$CONTAINER" grep -A 3 "PLAY RECAP" "$LOG" | tail -6
+
+echo
+echo "==> Ironic node state:"
+sudo docker exec "$CONTAINER" baremetal node list 2>&1 \
+  | grep -E "uuid|---|testvm1|name" || true
+
+# Pass criteria:
+#   - controller play (127.0.0.1) ended with failed=0
+#   - the node reached provision_state=active
+# The trailing testvm1 ssh-keygen -R cleanup task fails harmlessly when there's
+# no stale known_hosts entry; that is NOT a real failure.
+CONTROLLER_OK=$(sudo docker exec "$CONTAINER" grep "^127.0.0.1" "$LOG" \
+  | tail -1 | grep -c "failed=0" || true)
+NODE_ACTIVE=$(sudo docker exec "$CONTAINER" baremetal node list \
+  -f value -c provision_state 2>/dev/null \
+  | grep -c "^active$" || true)
+
+echo
+if [[ "$CONTROLLER_OK" -ge 1 && "$NODE_ACTIVE" -ge 1 ]]; then
+  echo "==> PASS: deploy cycle completed (controller failed=0, node active+power-on)"
+  exit 0
+else
+  echo "==> FAIL"
+  echo "    controller_failed_eq_0=$CONTROLLER_OK  node_active_count=$NODE_ACTIVE"
+  echo "    Inspect the full log with:"
+  echo "      sudo docker exec $CONTAINER cat $LOG"
+  exit 1
+fi

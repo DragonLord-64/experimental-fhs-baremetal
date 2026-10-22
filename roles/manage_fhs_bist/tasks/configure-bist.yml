@@ -1,0 +1,65 @@
+---
+# roles/bist/tasks/configure-bist.yml
+
+- name: Create BIST directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ bist_user }}"
+    group: "{{ bist_group }}"
+    mode: "0755"
+  loop:
+    - "{{ log_dir }}"
+    - "{{ traces_dir }}"
+    - "{{ results_dir }}"
+    - "{{ test_inputs_dir }}"
+
+- name: Find test templates
+  delegate_to: localhost
+  ansible.builtin.find:
+    paths: "{{ repo_dir }}/templates"
+    patterns: "*.json.j2"
+    recurse: false
+  register: test_template
+
+- name: Generate hw test input file
+  ansible.builtin.template:
+    src: "{{ item.path }}"
+    dest: "{{ test_inputs_dir }}/{{ item.path | basename | regex_replace('\\.j2$', '') }}"
+    owner: "{{ bist_user }}"
+    group: "{{ bist_group }}"
+    mode: "0644"
+  loop: "{{ test_template.files }}"
+
+- name: Create systemd service for BIST
+  ansible.builtin.template:
+    src: "{{ bist_service }}.service.j2"
+    dest: "/etc/systemd/system/{{ bist_service }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable BIST service
+  ansible.builtin.systemd:
+    name: "{{ bist_service }}"
+    enabled: true
+
+- name: Start BIST service
+  ansible.builtin.systemd:
+    name: "{{ bist_service }}"
+    state: started
+
+- name: Check log files
+  ansible.builtin.find:
+    paths: "{{ traces_dir }}"
+    file_type: file
+  register: log_files
+
+- name: Fail if no log files exist
+  ansible.builtin.fail:
+    msg: "ERROR: No log files found in {{ traces_dir }}"
+  when: log_files.matched == 0

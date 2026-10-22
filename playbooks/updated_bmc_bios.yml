@@ -1,0 +1,39 @@
+- name: Restart via redfish
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Restart
+      ansible.builtin.import_role:
+        name: redfish_restart
+      tags: [rf_restart, never]
+
+- name: Get Uptime
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Uptime
+      ansible.builtin.import_role:
+        name: redfish_uptime
+      tags: [rf_up]
+
+- name: Install BMC Update
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Update BMC
+      ansible.builtin.import_role:
+        name: redfish_update_bmc
+      tags: [rf_update_bmc, never]
+
+- name: Install BIOS Update
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Update BIOS
+      ansible.builtin.import_role:
+        name: redfish_update_bios
+      tags: [rf_update_bios, never]

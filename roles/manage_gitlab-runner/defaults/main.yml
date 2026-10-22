@@ -1,0 +1,8 @@
+---
+# User settings
+gitlab_runner_user: "gitlab-runner"
+gitlab_runner_group: "gitlab-runner"
+
+# Path settings
+gitlab_runner_venv_path: "/home/{{ gitlab_runner_user }}/.bw_venv"
+bwsdk_root_path: "/usr/share/bittware-sdk"

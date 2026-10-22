@@ -1,0 +1,19 @@
+---
+- name: Converge — gitea_server (install + render only)
+  hosts: all
+  become: true
+  vars:
+    # Skip the up-stack step — docker-in-docker requires extra setup.
+    gitea_skip_compose_up: true
+    gitea_mirrors: []
+  pre_tasks:
+    # Block the docker package install — the test image already lacks the
+    # docker daemon; we only need to verify compose rendering.
+    - name: Stub out 'docker is running' assumption
+      ansible.builtin.set_fact:
+        gitea_docker_packages: []
+  tasks:
+    - name: Run install + render tasks only
+      ansible.builtin.import_role:
+        name: gitea_server
+        tasks_from: render_only.yml

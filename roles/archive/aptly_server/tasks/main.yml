@@ -1,0 +1,108 @@
+---
+- name: Install aptly + gnupg
+  ansible.builtin.apt:
+    name: "{{ aptly_apt_packages }}"
+    state: present
+    cache_valid_time: 3600
+  tags: [aptly_server, install]
+
+- name: Ensure aptly group exists
+  ansible.builtin.group:
+    name: "{{ aptly_group }}"
+    state: present
+  tags: [aptly_server, config]
+
+- name: Ensure aptly user exists
+  ansible.builtin.user:
+    name: "{{ aptly_user }}"
+    group: "{{ aptly_group }}"
+    home: "{{ aptly_home }}"
+    shell: /usr/sbin/nologin
+    create_home: true
+    system: true
+    state: present
+  tags: [aptly_server, config]
+
+- name: Ensure aptly data dir
+  ansible.builtin.file:
+    path: "{{ aptly_home }}"
+    state: directory
+    owner: "{{ aptly_user }}"
+    group: "{{ aptly_group }}"
+    mode: "0755"
+  tags: [aptly_server, config]
+
+- name: Write aptly.conf
+  ansible.builtin.template:
+    src: aptly.conf.j2
+    dest: "{{ aptly_home }}/.aptly.conf"
+    owner: "{{ aptly_user }}"
+    group: "{{ aptly_group }}"
+    mode: "0644"
+  tags: [aptly_server, config]
+
+- name: Check for existing GPG key
+  ansible.builtin.command:
+    cmd: gpg --list-secret-keys --batch --with-colons "{{ aptly_gpg_email }}"
+  become: true
+  become_user: "{{ aptly_user }}"
+  register: aptly_gpg_check
+  failed_when: false
+  changed_when: false
+  tags: [aptly_server, config]
+
+- name: Generate aptly GPG signing key
+  ansible.builtin.command:
+    cmd: >-
+      gpg --batch --gen-key
+    stdin: |
+      %no-protection
+      Key-Type: {{ aptly_gpg_key_type }}
+      Key-Length: {{ aptly_gpg_key_length }}
+      Name-Real: {{ aptly_gpg_name }}
+      Name-Email: {{ aptly_gpg_email }}
+      Expire-Date: 0
+      %commit
+  become: true
+  become_user: "{{ aptly_user }}"
+  when: aptly_gpg_email not in aptly_gpg_check.stdout
+  changed_when: true
+  tags: [aptly_server, config]
+
+- name: Create mirrors
+  ansible.builtin.command:
+    cmd: >-
+      aptly mirror create
+      {% if item.architectures is defined %}-architectures={{ item.architectures | join(',') }}{% endif %}
+      {{ item.name }} {{ item.url }} {{ item.distribution }} {{ item.components | default(['main']) | join(' ') }}
+  become: true
+  become_user: "{{ aptly_user }}"
+  register: mirror_create
+  failed_when:
+    - mirror_create.rc != 0
+    - "'already exists' not in mirror_create.stderr"
+  changed_when: mirror_create.rc == 0
+  loop: "{{ aptly_mirrors }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: [aptly_server, config]
+
+- name: Install aptly API systemd unit
+  ansible.builtin.template:
+    src: aptly-api.service.j2
+    dest: /etc/systemd/system/aptly-api.service
+    owner: root
+    group: root
+    mode: "0644"
+  when: aptly_serve_http | bool
+  notify: fhs aptly api changed
+  tags: [aptly_server, install]
+
+- name: Enable aptly API service
+  ansible.builtin.systemd:
+    name: aptly-api.service
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: aptly_serve_http | bool
+  tags: [aptly_server, config]

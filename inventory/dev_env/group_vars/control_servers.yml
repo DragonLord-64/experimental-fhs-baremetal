@@ -1,0 +1,13 @@
+---
+# Defaults for control servers running the in-cluster services
+# (aptly repo server, devpi PyPI mirror, gitea git mirror).
+# Populate when a control server is added to the inventory.
+
+aptly_data_dir: /var/aptly
+aptly_publish_http_port: 80
+
+devpi_data_dir: /opt/devpi
+devpi_http_port: 3141
+
+gitea_compose_dir: /etc/docker/compose/gitea
+gitea_data_dir: /var/lib/gitea

@@ -1,0 +1,40 @@
+---
+
+
+- name: Set persistent Arkville Environment variable in /etc/environment
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    line: 'ARK_HOME="/opt/arkville/arkville_{{ arkville_release }}"'
+    regexp: '^ARK_HOME='
+    create: false  # /etc/environment always exists on Ubuntu
+  become: true
+
+- name: Purge target install directory safely
+  ansible.builtin.file:
+    path: "/opt/arkville/arkville_{{ arkville_release }}"
+    state: absent
+  become: true
+
+- name: Recreate target install directory
+  ansible.builtin.file:
+    path: "/opt/arkville/arkville_{{ arkville_release }}"
+    state: directory
+    mode: "0775"
+  become: true
+
+- name: Copy and Unpack Arkville Tarball from Localhost directly onto target host
+  ansible.builtin.unarchive:
+    src: "{{ arkville_local_path }}/arkville_{{ arkville_release }}.tar.gz"
+    dest: "/opt/arkville/arkville_{{ arkville_release }}/"
+    remote_src: false   # Setting to false forces Ansible to read the asset from localhost
+    extra_opts:
+      - --strip-components=1
+  become: true
+
+- name: Grant user ownership over the Arkville directory for compilation
+  ansible.builtin.file:
+    path: /opt/arkville/arkville_{{ arkville_release }}
+    owner: "{{ ansible_user }}" # Or specify a hardcoded user like "ubuntu"
+    group: "users" # Or specify a hardcoded group like "ubuntu"
+    recurse: true                  # Applies ownership to all subfolders and files
+  become: true

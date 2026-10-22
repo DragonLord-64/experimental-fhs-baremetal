@@ -1,0 +1,9 @@
+---
+# Ansible managed: Dynamic File Service Discovery Target
+- targets:
+    - "localhost:{{ fhs_exporter_port | default(9110) }}"
+  labels:
+    app: "fhs"
+    job: "fhs"
+    __scrape_interval__: "30s"
+    __scrape_timeout__: "25s"

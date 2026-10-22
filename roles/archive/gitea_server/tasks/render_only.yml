@@ -1,0 +1,20 @@
+---
+# Subset of main.yml — render path only, no docker daemon required.
+# Used by the molecule smoke test.
+- name: Ensure compose project directory
+  ansible.builtin.file:
+    path: "{{ gitea_compose_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [gitea_server, config]
+
+- name: Render gitea docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ gitea_compose_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [gitea_server, config]

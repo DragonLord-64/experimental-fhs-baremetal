@@ -1,0 +1,75 @@
+---
+- name: Check if previous DPDK build exists
+  ansible.builtin.stat:
+    path: /opt/arkville/dpdk/build
+  register: dpdk_build_dir
+
+- name: Cleanly uninstall previous DPDK binary tree
+  ansible.builtin.command:
+    cmd: ninja uninstall
+    chdir: /opt/arkville/dpdk/build
+  become: true
+  when: dpdk_build_dir.stat.exists
+  failed_when: false
+  changed_when: false
+
+- name: Force purge target DPDK directory before layout refresh
+  ansible.builtin.file:
+    path: /opt/arkville/dpdk
+    state: absent
+  become: true
+
+- name: Recreate clean target DPDK folder hierarchy
+  ansible.builtin.file:
+    path: /opt/arkville/dpdk
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Copy and Unpack Patched DPDK source archive from Localhost to Target Host
+  ansible.builtin.unarchive:
+    src: "{{ dpdk_local_path }}/{{ dpdk_tarball_filename }}"
+    dest: /opt/arkville/dpdk/
+    remote_src: false # Setting to false pulls the tarball right off your localhost controller
+    extra_opts:
+      - --strip-components=1
+  become: true
+
+- name: Grant user ownership over the DPDK directory for compilation
+  ansible.builtin.file:
+    path: /opt/arkville/dpdk
+    owner: "{{ ansible_user }}" # Or specify a hardcoded user like "ubuntu"
+    group: "users" # FLAG might need to be specific group
+    recurse: true # Applies ownership to all subfolders and files
+  become: true # Required to change root-owned file permissions
+
+- name: Configure DPDK with Meson, passing Arkville context maps and setting static build
+  ansible.builtin.command:
+    cmd: meson setup build -Ddefault_library=static
+    chdir: /opt/arkville/dpdk
+    creates: /opt/arkville/dpdk/build/build.ninja
+  environment:
+    ARK_HOME: "/opt/arkville/arkville_{{ arkville_release }}"
+
+- name: Compile DPDK framework (Restricted to 1 thread to prevent memory crashes)
+  ansible.builtin.command:
+    cmd: ninja
+    chdir: /opt/arkville/dpdk/build
+  environment:
+    ARK_HOME: "/opt/arkville/arkville_{{ arkville_release }}"
+  become: false # CRUCIAL: Keeps all compiled files owned by 'ubuntu'
+  changed_when: true
+
+- name: Compile and Install DPDK framework via Ninja
+  ansible.builtin.command:
+    cmd: ninja install
+    chdir: /opt/arkville/dpdk/build
+  environment:
+    ARK_HOME: "/opt/arkville/arkville_{{ arkville_release }}"
+  become: true
+  changed_when: true
+- name: Refresh dynamic linker library runtime cache maps
+  ansible.builtin.command:
+    cmd: ldconfig
+  become: true
+  changed_when: false

@@ -1,0 +1,26 @@
+- name: Apply the minimal Ubuntu 24 CIS prototype baseline
+  hosts: ubuntu24_cis_prototype
+  become: true
+  gather_facts: true
+  vars:
+    audit_only: false
+    run_audit: false
+    setup_audit: false
+    create_benchmark_facts: false
+  pre_tasks:
+    - name: Disable every CIS remediation rule by default
+      ansible.builtin.set_fact:
+        "{{ item }}": false
+      loop: "{{ query('ansible.builtin.varnames', '^ubtu24cis_rule_') }}"
+      loop_control:
+        label: "{{ item }}"
+
+    - name: Enable the reviewed prototype remediation rules
+      ansible.builtin.set_fact:
+        "{{ item }}": true
+      loop: >-
+        {{ ubuntu24_cis_prototype_rules + ubuntu24_cis_additional_rules }}
+      loop_control:
+        label: "{{ item }}"
+  roles:
+    - ubuntu24_cis

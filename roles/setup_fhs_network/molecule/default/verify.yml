@@ -1,0 +1,26 @@
+---
+- name: Verify — network_setup
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Stat 99-ignore-others.network
+      ansible.builtin.stat:
+        path: /etc/systemd/network/99-ignore-others.network
+      register: ignore_others
+    - name: Assert 99 file written with mode 0644
+      ansible.builtin.assert:
+        that:
+          - ignore_others.stat.exists
+          - ignore_others.stat.mode == "0644"
+    - name: Read primary NIC config
+      ansible.builtin.slurp:
+        src: /etc/systemd/network/00-fhs.network
+      register: primary
+    - name: Assert primary NIC content
+      ansible.builtin.assert:
+        that:
+          - "'MACAddress=aa:bb:cc:dd:ee:ff' in (primary.content | b64decode)"
+          - "'Address=10.42.0.10/16' in (primary.content | b64decode)"
+          - "'DNS=172.17.0.95' in (primary.content | b64decode)"
+          - "'NTP=192.168.1.6' in (primary.content | b64decode)"

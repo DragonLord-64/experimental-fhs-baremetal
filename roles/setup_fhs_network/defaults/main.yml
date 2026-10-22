@@ -1,0 +1,23 @@
+---
+# systemd-networkd config directory.
+network_dir: /etc/systemd/network
+
+# Primary FHS NIC (matched by MAC address from inventory).
+# sys_mac_address and ansible_host are expected from host_vars.
+network_interface_prefix: "16"
+network_dns:
+  - 172.17.0.95
+  - 192.168.128.13
+network_ntp:
+  - 192.168.1.6
+  - 192.168.1.7
+
+# Files this role manages — anything else under network_dir is removed.
+network_managed_files:
+  - 00-fhs.network
+  - 99-ignore-others.network
+
+# Disable cloud-init's network management.
+network_disable_cloud_init: true
+network_remove_legacy_netplan: true
+network_legacy_netplan_file: /etc/netplan/50-cloud-init.yaml

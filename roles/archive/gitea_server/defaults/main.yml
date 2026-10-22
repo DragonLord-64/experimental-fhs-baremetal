@@ -1,0 +1,33 @@
+---
+# Docker prerequisites.
+gitea_docker_packages:
+  - docker.io
+  - docker-compose-v2
+
+# Where the compose project lives on the host.
+gitea_compose_dir: /etc/docker/compose/gitea
+
+# Container identity.
+gitea_container_name: gitea
+gitea_image: gitea/gitea:latest
+gitea_uid: 1000
+gitea_gid: 1000
+
+# Network exposure.
+gitea_domain: localhost
+gitea_http_port: 3000
+gitea_ssh_port: 2222
+gitea_root_url: "http://{{ gitea_domain }}:{{ gitea_http_port }}"
+
+# Admin API token for mirror management. Required if gitea_mirrors is non-empty.
+gitea_admin_pat: ""
+
+# Mirror org and mirror entries.
+gitea_mirrors_org: mirrors
+gitea_mirror_interval: 1h
+# Each mirror: {upstream: <git url>, name: <optional repo name>}
+gitea_mirrors: []
+
+# Wait-for-healthy controls.
+gitea_health_retries: 30
+gitea_health_delay: 3

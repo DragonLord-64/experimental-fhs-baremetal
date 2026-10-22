@@ -1,0 +1,24 @@
+---
+- name: Validate provisioning inputs
+  hosts: all
+  become: false
+  gather_facts: true
+  tasks:
+    - name: Assert required inventory facts
+      ansible.builtin.assert:
+        that:
+          - inventory_hostname is defined
+          - ansible_host is defined
+          - sys_mac_address is defined
+        fail_msg: "ansible_host and sys_mac_address must be set in host_vars/{{ inventory_hostname }}.yml"
+
+- name: Provision FHS nodes
+  hosts: fhs_nodes
+  become: true
+  gather_facts: false
+  tags: [config_node]
+  tasks:
+    - name: Apply fhs_node_setup role
+      ansible.builtin.import_role:
+        name: setup_fhs_node
+      tags: [fhs_node_setup]

@@ -1,0 +1,72 @@
+---
+- name: Validate BMC firmware inputs
+  ansible.builtin.assert:
+    that:
+      - fpga_bmc_firmware_zip | length > 0
+      - fpga_bmc_firmware_version | length > 0
+      - fpga_bittware_user | length > 0
+    fail_msg: "fpga_bmc_firmware_zip, fpga_bmc_firmware_version, and fpga_bittware_user must all be set."
+
+- name: Copy BMC firmware zip to bittware user home
+  ansible.builtin.copy:
+    src: "{{ fpga_bmc_firmware_zip }}"
+    dest: "/home/{{ fpga_bittware_user }}/{{ fpga_bmc_firmware_zip | basename }}"
+    owner: "{{ fpga_bittware_user }}"
+    group: "{{ fpga_bittware_group }}"
+    mode: "0644"
+
+- name: Check installed BMC firmware version per card
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail;
+      {{ bittware_sdk_venv }}/bin/bw_bmc_upgrade -c {{ item }} display | 
+      awk '/Version:/ {gsub(/[ +]/, "", $2); print $2; exit}'
+    executable: /bin/bash
+  become: true
+  become_user: "{{ fpga_bittware_user }}"
+  register: bmc_installed
+  changed_when: false
+  loop: "{{ fpga_bmc_cards }}"
+  loop_control:
+    label: "card {{ item }}"
+
+- name: Program BMC firmware where needed
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail;
+      BWSDK_ROOT={{ fpga_bittware_sdk_root }}
+      yes 'yes' |
+      {{ bittware_sdk_venv }}/bin/bw_bmc_upgrade
+      -c {{ item.item }} program -fm
+      -s /home/{{ fpga_bittware_user }}/{{ fpga_bmc_firmware_zip | basename }}
+    executable: /bin/bash
+  become: true
+  become_user: "{{ fpga_bittware_user }}"
+  changed_when: true
+  register: bmc_programmed
+  # Only fail if "100.0% Complete" didn't happen in stdout or stderr
+  failed_when: 
+    - "'100.0% Complete' not in bmc_programmed.stdout"
+    - "'100.0% Complete' not in bmc_programmed.stderr | default('')"
+  loop: "{{ bmc_installed.results }}"
+  loop_control:
+    label: "card {{ item.item }} (installed: {{ item.stdout | default('?') }})"
+  when: item.stdout | default('') != fpga_bmc_firmware_version
+
+- name: Program BMC firmware where needed
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail;
+      BWSDK_ROOT={{ fpga_bittware_sdk_root }}
+      yes 'yes' |
+      {{ bittware_sdk_venv }}/bin/bw_bmc_upgrade
+      -c {{ item.item }} reboot
+    executable: /bin/bash
+  become: true
+  become_user: "{{ fpga_bittware_user }}"
+  changed_when: true
+  loop: "{{ bmc_installed.results }}"
+  loop_control:
+    label: "card {{ item.item }} (installed: {{ item.stdout | default('?') }})"
+  when: item.stdout | default('') != fpga_bmc_firmware_version
+  notify: fpga reboot required

@@ -1,0 +1,405 @@
+---
+- name: Prepare - Create fixture and stage in target
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create fixture tar.gz
+      ansible.builtin.shell: |
+        mkdir -p /tmp/raw_artefact_fixture
+        cd /tmp/raw_artefact_fixture
+        echo "test config content" > config.txt
+        tar czf fixture.tar.gz config.txt
+      changed_when: false
+
+    - name: Copy fixture to target container
+      ansible.builtin.copy:
+        src: /tmp/raw_artefact_fixture/fixture.tar.gz
+        dest: /tmp/fixture.tar.gz
+      delegate_to: target
+      changed_when: false
+
+- name: Prepare - Push fixture from target to registry
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Wait for registry to be ready
+      ansible.builtin.shell: |
+        sleep 5
+        for i in {1..30}; do
+          python3 -c \
+            "import urllib.request; " \
+            "urllib.request.urlopen" \
+            "('http://registry:5000/v2/', timeout=2)" \
+            2>/dev/null && exit 0
+          sleep 1
+        done
+        exit 1
+      changed_when: false
+
+    - name: Push fixture via OCI protocol to registry
+      ansible.builtin.shell: |
+        python3 << 'PYTHON_SCRIPT'
+        import json, hashlib, urllib.request, urllib.error, sys, os
+
+        def push_blob(host, repo, blob_path):
+            with open(blob_path, 'rb') as f:
+                blob_data = f.read()
+            digest = f'sha256:{hashlib.sha256(blob_data).hexdigest()}'
+
+            upload_url = f'http://{host}/v2/{repo}/blobs/uploads/'
+            print(f'DEBUG: POST to {upload_url}', file=sys.stderr)
+            req = urllib.request.Request(
+                upload_url,
+                method='POST',
+                headers={'Content-Type': 'application/octet-stream'}
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    print(f'DEBUG: POST response {resp.status}',
+                          file=sys.stderr)
+                    location = resp.headers.get('Location')
+                    print(f'DEBUG: Location header: {repr(location)}',
+                          file=sys.stderr)
+            except urllib.error.HTTPError as e:
+                print(f'ERROR: POST failed with {e.code}', file=sys.stderr)
+                raise
+
+            if not location:
+                raise ValueError('No Location header in upload response')
+
+            if location.startswith('http'):
+                sep = '&' if '?' in location else '?'
+                complete_url = f'{location}{sep}digest={digest}'
+            else:
+                complete_url = f'http://{host}{location}'
+                sep = '&' if '?' in location else '?'
+                complete_url = f'{complete_url}{sep}digest={digest}'
+            print(f'DEBUG: PUT to {complete_url}', file=sys.stderr)
+            headers = {
+                'Content-Type': 'application/octet-stream',
+                'Content-Length': str(len(blob_data))
+            }
+            req = urllib.request.Request(
+                complete_url,
+                data=blob_data,
+                method='PUT',
+                headers=headers
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    print(f'DEBUG: PUT response {resp.status}',
+                          file=sys.stderr)
+            except urllib.error.HTTPError as e:
+                print(f'ERROR: PUT failed with {e.code}',
+                      file=sys.stderr)
+                raise
+            return digest
+
+        def push_manifest(host, repo, ref, layer_digest, layer_size):
+            config_data = b'{}'
+            config_hash = hashlib.sha256(config_data).hexdigest()
+            config_digest = f'sha256:{config_hash}'
+            config_size = len(config_data)
+
+            manifest = {
+                "schemaVersion": 2,
+                "mediaType": "application/vnd.oci.image.manifest.v1+json",
+                "config": {
+                    "mediaType": "application/vnd.oci.image.config.v1+json",
+                    "size": config_size,
+                    "digest": config_digest
+                },
+                "layers": [{
+                    "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+                    "size": layer_size,
+                    "digest": layer_digest,
+                    "annotations": {
+                        "org.opencontainers.image.title": "fixture.tar.gz"
+                    }
+                }]
+            }
+            manifest_json = json.dumps(manifest).encode('utf-8')
+            manifest_url = f'http://{host}/v2/{repo}/manifests/{ref}'
+            print(f'DEBUG: Manifest URL: {manifest_url}',
+                  file=sys.stderr)
+            print(f'DEBUG: Manifest JSON: {manifest_json}',
+                  file=sys.stderr)
+            h = {'Content-Type':
+                 'application/vnd.oci.image.manifest.v1+json'}
+            req = urllib.request.Request(
+                manifest_url,
+                data=manifest_json,
+                method='PUT',
+                headers=h
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    print(f'DEBUG: Manifest response {r.status}',
+                          file=sys.stderr)
+            except urllib.error.HTTPError as e:
+                print(f'ERROR: Manifest push failed with {e.code}',
+                      file=sys.stderr)
+                print(f'Response body: {e.read().decode()}',
+                      file=sys.stderr)
+                raise
+
+        config_data = b'{}'
+        config_file = '/tmp/config.json'
+        with open(config_file, 'wb') as f:
+            f.write(config_data)
+        push_blob('registry:5000', 'test/fixture', config_file)
+
+        blob_path = '/tmp/fixture.tar.gz'
+        blob_size = os.path.getsize(blob_path)
+        blob_digest = push_blob('registry:5000', 'test/fixture',
+                                blob_path)
+        push_manifest('registry:5000', 'test/fixture', 'v1.0.0',
+                      blob_digest, blob_size)
+        msg = f'Pushed test/fixture:v1.0.0 with layer {blob_digest}'
+        print(msg)
+        PYTHON_SCRIPT
+      changed_when: false
+
+- name: Prepare - Create multi-layer fixture and push
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Create plain text layer file
+      ansible.builtin.shell: |
+        echo "plain text content for multi-layer test" \
+          > /tmp/readme.txt
+      changed_when: false
+
+    - name: Push multi-layer artefact to registry
+      ansible.builtin.shell: |
+        python3 << 'MULTILAYER_SCRIPT'
+        import json, hashlib, urllib.request, sys, os
+
+        def push_blob_ml(host, repo, blob_path):
+            with open(blob_path, 'rb') as f:
+                blob_data = f.read()
+            digest = f'sha256:{hashlib.sha256(blob_data).hexdigest()}'
+            upload_url = f'http://{host}/v2/{repo}/blobs/uploads/'
+            req = urllib.request.Request(
+                upload_url, method='POST',
+                headers={'Content-Type': 'application/octet-stream'}
+            )
+            try:
+              with urllib.request.urlopen(req, timeout=10) as resp:
+                location = resp.headers.get('Location')
+            except urllib.error.HTTPError as e:
+              print(f'ERROR: blob POST failed {e.code}', file=sys.stderr)
+              raise
+            sep = '&' if '?' in location else '?'
+            url = f'{location}{sep}digest={digest}'
+            headers = {
+                'Content-Type': 'application/octet-stream',
+                'Content-Length': str(len(blob_data))
+            }
+            req = urllib.request.Request(
+                url, data=blob_data, method='PUT', headers=headers
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+              pass
+            return digest, len(blob_data)
+
+        def push_manifest_ml(host, repo, ref, layers):
+            config_data = b'{}'
+            config_hash = hashlib.sha256(config_data).hexdigest()
+            config_digest = f'sha256:{config_hash}'
+            manifest = {
+                "schemaVersion": 2,
+                "mediaType": "application/vnd.oci.image.manifest.v1+json",
+                "config": {
+                    "mediaType": "application/vnd.oci.image.config.v1+json",
+                    "size": len(config_data),
+                    "digest": config_digest
+                },
+                "layers": layers
+            }
+            manifest_json = json.dumps(manifest).encode('utf-8')
+            manifest_url = f'http://{host}/v2/{repo}/manifests/{ref}'
+            req = urllib.request.Request(
+                manifest_url, data=manifest_json, method='PUT',
+                headers={
+                    'Content-Type':
+                    'application/vnd.oci.image.manifest.v1+json'
+                }
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
+              pass
+
+        config_data = b'{}'
+        config_file = '/tmp/config_ml.json'
+        with open(config_file, 'wb') as f:
+            f.write(config_data)
+        config_digest, config_size = push_blob_ml('registry:5000',
+                                                  'test/multilayer',
+                                                  config_file)
+
+        tar_digest, tar_size = push_blob_ml('registry:5000',
+                                            'test/multilayer',
+                                            '/tmp/fixture.tar.gz')
+        txt_digest, txt_size = push_blob_ml('registry:5000',
+                                            'test/multilayer',
+                                            '/tmp/readme.txt')
+        layers = [
+            {
+                "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+                "size": tar_size,
+                "digest": tar_digest,
+                "annotations": {
+                    "org.opencontainers.image.title": "fixture.tar.gz"
+                }
+            },
+            {
+                "mediaType": "application/octet-stream",
+                "size": txt_size,
+                "digest": txt_digest,
+                "annotations": {
+                    "org.opencontainers.image.title": "readme.txt"
+                }
+            }
+        ]
+        push_manifest_ml('registry:5000', 'test/multilayer', 'v2.0.0',
+                         layers)
+        print('Pushed test/multilayer:v2.0.0 with 2 layers')
+        MULTILAYER_SCRIPT
+      changed_when: false
+
+- name: Prepare - Generate and copy htpasswd to registry_auth container
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Generate htpasswd content
+      ansible.builtin.shell: |
+        docker run --rm httpd:2.4-alpine \
+          htpasswd -Bbn testuser testpass
+      register: htpasswd_output
+      changed_when: false
+
+    - name: Write htpasswd to temp file
+      ansible.builtin.copy:
+        content: "{{ htpasswd_output.stdout }}"
+        dest: /tmp/htpasswd_temp
+      changed_when: false
+
+    - name: Copy htpasswd into registry_auth container
+      ansible.builtin.shell: |
+        docker cp /tmp/htpasswd_temp registry_auth:/auth/htpasswd
+      changed_when: false
+
+    - name: Clean up temp htpasswd file
+      ansible.builtin.file:
+        path: /tmp/htpasswd_temp
+        state: absent
+      changed_when: false
+
+- name: Prepare - Push fixture to authenticated registry
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Wait for registry_auth to be ready
+      ansible.builtin.shell: |
+        sleep 5
+        for i in {1..30}; do
+          python3 -c \
+            "import urllib.request; " \
+            "urllib.request.urlopen" \
+            "('http://registry_auth:5000/v2/', timeout=2)" \
+            2>/dev/null && exit 0
+          sleep 1
+        done
+        exit 1
+      changed_when: false
+
+    - name: Push fixture to registry_auth with Basic auth
+      ansible.builtin.shell: |
+        python3 << 'AUTH_SCRIPT'
+        import json, hashlib, base64, urllib.request, urllib.error
+        import sys, os
+
+        def push_blob_auth(host, repo, blob_path, user, password):
+            with open(blob_path, 'rb') as f:
+                blob_data = f.read()
+            digest = f'sha256:{hashlib.sha256(blob_data).hexdigest()}'
+            upload_url = f'http://{host}/v2/{repo}/blobs/uploads/'
+            auth = base64.b64encode(f'{user}:{password}'.encode()).decode()
+            headers = {'Authorization': f'Basic {auth}'}
+            req = urllib.request.Request(
+                upload_url, method='POST', headers=headers
+            )
+            try:
+              with urllib.request.urlopen(req, timeout=10) as resp:
+                location = resp.headers.get('Location')
+            except urllib.error.HTTPError as e:
+              print(f'ERROR: POST auth failed {e.code}', file=sys.stderr)
+              raise
+            sep = '&' if '?' in location else '?'
+            complete_url = f'{location}{sep}digest={digest}'
+            put_headers = {
+                'Authorization': f'Basic {auth}',
+                'Content-Type': 'application/octet-stream',
+                'Content-Length': str(len(blob_data))
+            }
+            req = urllib.request.Request(
+                complete_url, data=blob_data, method='PUT',
+                headers=put_headers
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+              pass
+            return digest
+
+        def push_manifest_auth(host, repo, ref, layer_digest, layer_size,
+                               user, password):
+            config_data = b'{}'
+            config_hash = hashlib.sha256(config_data).hexdigest()
+            config_digest = f'sha256:{config_hash}'
+
+            config_file = '/tmp/config_auth.json'
+            with open(config_file, 'wb') as f:
+                f.write(config_data)
+            push_blob_auth(host, repo, config_file, user, password)
+
+            manifest = {
+                "schemaVersion": 2,
+                "mediaType": "application/vnd.oci.image.manifest.v1+json",
+                "config": {
+                    "mediaType": "application/vnd.oci.image.config.v1+json",
+                    "size": len(config_data),
+                    "digest": config_digest
+                },
+                "layers": [{
+                    "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+                    "size": layer_size,
+                    "digest": layer_digest,
+                    "annotations": {
+                        "org.opencontainers.image.title": "fixture.tar.gz"
+                    }
+                }]
+            }
+            manifest_json = json.dumps(manifest).encode('utf-8')
+            manifest_url = f'http://{host}/v2/{repo}/manifests/{ref}'
+            auth = base64.b64encode(f'{user}:{password}'.encode()).decode()
+            headers = {
+                'Content-Type': 'application/vnd.oci.image.manifest.v1+json',
+                'Authorization': f'Basic {auth}'
+            }
+            req = urllib.request.Request(
+                manifest_url, data=manifest_json, method='PUT',
+                headers=headers
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
+              pass
+
+        blob_path = '/tmp/fixture.tar.gz'
+        blob_size = os.path.getsize(blob_path)
+        blob_digest = push_blob_auth('registry_auth:5000',
+                                     'private/fixture', blob_path,
+                                     'testuser', 'testpass')
+        push_manifest_auth('registry_auth:5000', 'private/fixture',
+                           'v1.0.0', blob_digest, blob_size,
+                           'testuser', 'testpass')
+        print('Pushed private/fixture to registry_auth')
+        AUTH_SCRIPT
+      changed_when: false

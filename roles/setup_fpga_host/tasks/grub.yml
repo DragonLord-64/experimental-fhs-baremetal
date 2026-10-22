@@ -1,0 +1,13 @@
+---
+- name: Template /etc/default/grub
+  ansible.builtin.template:
+    src: grub.j2
+    dest: /etc/default/grub
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+  register: grub_change
+  notify:
+    - fpga grub changed
+    - fpga reboot required

@@ -1,0 +1,28 @@
+---
+- name: Create gitlab-runner group
+  ansible.builtin.group:
+    name: "{{ gitlab_runner_group }}"
+    state: present
+
+- name: Create gitlab-runner system user
+  ansible.builtin.user:
+    name: "{{ gitlab_runner_user }}"
+    group: "{{ gitlab_runner_group }}"
+    system: yes
+    create_home: yes
+    shell: /bin/bash
+
+- name: Create virtual environment and execute bittware pip installer
+  ansible.builtin.shell: |
+    python3 -m venv {{ gitlab_runner_venv_path }}
+    source {{ gitlab_runner_venv_path }}/bin/activate
+    
+    {{ bwsdk_root_path }}/bin/bw_pip install
+  args:
+    executable: /bin/bash
+    chdir: "/home/{{ gitlab_runner_user }}"
+    creates: "{{ gitlab_runner_venv_path }}/lib/python3.12/site-packages/pydantic" # Safeguards against running it again if packages exist
+  environment:
+    BWSDK_ROOT: "{{ bwsdk_root_path }}"
+  become: True
+  become_user: "{{ gitlab_runner_user }}"

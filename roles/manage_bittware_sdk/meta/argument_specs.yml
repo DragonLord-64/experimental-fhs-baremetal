@@ -1,0 +1,15 @@
+---
+argument_specs:
+  main:
+    short_description: Install the Bittware SDK and supporting packages
+    options:
+      fpga_bittware_sdk_deb: {type: str, default: ""}
+      fpga_bittware_sdk_package: {type: str, default: bittware-sdk}
+      fpga_bittware_sdk_root: {type: path, default: /usr/share/bittware-sdk}
+      fpga_bittware_group: {type: str, default: bittware}
+      fpga_bittware_group_gid: {type: int, default: 666}
+      fpga_apt_packages: {type: list, elements: str}
+      fpga_approved_os: {type: str, default: "Ubuntu 24.04"}
+      fpga_update_bittware_sdk: {type: bool, default: false}
+      users_setup_venvs: {type: bool, default: true}
+      venvs: {type: list, elements: dict, default: []}

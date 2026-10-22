@@ -1,0 +1,25 @@
+---
+# Aggregate syntax-check play — not for execution. Loads every role so
+# `ansible-playbook --syntax-check` catches missing files, bad task names,
+# undefined required args, etc.
+- name: Syntax check
+  hosts: localhost
+  gather_facts: false
+  vars:
+    sys_mac_address: aa:bb:cc:dd:ee:ff
+    ansible_host: 10.0.0.10
+    apt_repo_url: http://example.invalid/ubuntu
+    pip_index_url: http://example.invalid/simple/
+    pip_trusted_hosts: [example.invalid]
+    venvs: []
+    fhs_users: []
+  roles:
+    - users
+    - network_setup
+    - apt_repo_access
+    - pip_index
+    - venvs
+    - aptly_server
+    - devpi_server
+    - gitea_server
+    - fpga_host

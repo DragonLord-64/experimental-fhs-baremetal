@@ -1,0 +1,200 @@
+---
+- name: Verify - Check unpacked artefact
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Check fixture file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_test/config.txt
+      register: fixture_file
+      failed_when: not fixture_file.stat.exists
+
+    - name: Check fixture file content
+      ansible.builtin.slurp:
+        src: /tmp/raw_artefact_pull_test/config.txt
+      register: fixture_content
+      failed_when: >-
+        'test config content' not in
+        (fixture_content.content | b64decode)
+
+    - name: Check marker file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_test/.raw_artefact_state.json
+      register: marker_file
+      failed_when: not marker_file.stat.exists
+
+    - name: Read marker file
+      ansible.builtin.slurp:
+        src: /tmp/raw_artefact_pull_test/.raw_artefact_state.json
+      register: marker_content
+
+    - name: Verify marker contains expected fields
+      ansible.builtin.assert:
+        that:
+          - '"composite_digest" in marker_json'
+          - '"reference" in marker_json'
+          - 'marker_json["reference"] == "v1.0.0"'
+      vars:
+        marker_json: >-
+          {{
+            marker_content.content | b64decode | from_json
+          }}
+
+- name: Verify - Check mirror-substituted artefact
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Check mirror fixture file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_test_mirror/config.txt
+      register: mirror_fixture_file
+      failed_when: not mirror_fixture_file.stat.exists
+
+    - name: Check mirror fixture file content
+      ansible.builtin.slurp:
+        src: /tmp/raw_artefact_pull_test_mirror/config.txt
+      register: mirror_fixture_content
+      failed_when: >-
+        'test config content' not in
+        (mirror_fixture_content.content | b64decode)
+
+    - name: Check mirror marker file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_test_mirror/.raw_artefact_state.json
+      register: mirror_marker_file
+      failed_when: not mirror_marker_file.stat.exists
+
+    - name: Verify mirror pull succeeded despite broken registry
+      ansible.builtin.debug:
+        msg: >-
+          Mirror substitution successful: pulled from registry:5000
+          despite registry being set to nonexistent.invalid:9999
+
+- name: Verify - Check per-artefact override artefact
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Check per-artefact override fixture file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_test_override/config.txt
+      register: override_fixture_file
+      failed_when: not override_fixture_file.stat.exists
+
+    - name: Check per-artefact override fixture file content
+      ansible.builtin.slurp:
+        src: /tmp/raw_artefact_pull_test_override/config.txt
+      register: override_fixture_content
+      failed_when: >-
+        'test config content' not in
+        (override_fixture_content.content | b64decode)
+
+    - name: Check per-artefact override marker file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_test_override/.raw_artefact_state.json
+      register: override_marker_file
+      failed_when: not override_marker_file.stat.exists
+
+    - name: >-
+        Verify per-artefact override wins over role default
+      ansible.builtin.debug:
+        msg: >-
+          Per-artefact override successful: pulled via per-artefact
+          registry_mirror (registry:5000) despite role default being
+          set to nonexistent-role-default.invalid:9999
+
+- name: Verify - Check multi-layer artefact
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Check multi-layer fixture tar.gz extracted
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_multilayer/config.txt
+      register: ml_tar_file
+      failed_when: not ml_tar_file.stat.exists
+
+    - name: Check multi-layer readme.txt file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_multilayer/readme.txt
+      register: ml_txt_file
+      failed_when: not ml_txt_file.stat.exists
+
+    - name: Check multi-layer readme.txt content
+      ansible.builtin.slurp:
+        src: /tmp/raw_artefact_pull_multilayer/readme.txt
+      register: ml_txt_content
+      failed_when: >-
+        'plain text content for multi-layer test' not in
+        (ml_txt_content.content | b64decode)
+
+    - name: Verify multi-layer artefact succeeded
+      ansible.builtin.debug:
+        msg: >-
+          Multi-layer artefact successful: both .tar.gz layer
+          (extracted to config.txt) and plain text layer
+          (readme.txt) present in dest_path
+
+- name: Verify - Check create:false failure behavior
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Read create:false result from file
+      ansible.builtin.slurp:
+        src: /tmp/create_false_result.json
+      register: create_false_file
+
+    - name: Parse create:false result
+      ansible.builtin.set_fact:
+        create_false_data: >-
+          {{ create_false_file.content | b64decode | from_json }}
+
+    - name: Verify create:false scenario failed
+      ansible.builtin.assert:
+        that:
+          - create_false_data['failed']
+          - '"dest_path" in create_false_data["msg"]'
+          - '"does not exist" in create_false_data["msg"]'
+        fail_msg: >-
+          Expected create:false to fail with dest_path error,
+          but got: {{ create_false_data["msg"] }}
+
+    - name: Verify dest_path was not created
+      ansible.builtin.stat:
+        path: /tmp/nonexistent_path_for_create_false_test
+      register: create_false_path
+      failed_when: create_false_path.stat.exists
+
+    - name: Verify create:false documented error
+      ansible.builtin.debug:
+        msg: >-
+          Create:false failure verified: correctly rejected missing
+          dest_path with documented error message
+
+- name: Verify - Check credentialed auth pull
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Check credentialed fixture file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_auth/config.txt
+      register: auth_fixture_file
+      failed_when: not auth_fixture_file.stat.exists
+
+    - name: Check credentialed fixture file content
+      ansible.builtin.slurp:
+        src: /tmp/raw_artefact_pull_auth/config.txt
+      register: auth_fixture_content
+      failed_when: >-
+        'test config content' not in
+        (auth_fixture_content.content | b64decode)
+
+    - name: Check credentialed marker file exists
+      ansible.builtin.stat:
+        path: /tmp/raw_artefact_pull_auth/.raw_artefact_state.json
+      register: auth_marker_file
+      failed_when: not auth_marker_file.stat.exists
+
+    - name: Verify credentialed pull succeeded
+      ansible.builtin.debug:
+        msg: >-
+          Credentialed pull successful: authenticated to
+          registry_auth:5000 with testuser/testpass

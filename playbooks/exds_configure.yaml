@@ -1,0 +1,71 @@
+---
+- name: Configure Network, Hosts, and Install Puppet
+  hosts: all
+  become: true
+  vars:
+    # Path to your Netplan file. Update filename if necessary.
+    netplan_config_file: /etc/netplan/00-exds-config.yaml
+    # Update this path to the location of your tar file on the Ansible control node
+    puppet_tar_source: /provision/files.d/puppet_backup_sys1390.tar.gz
+
+  tasks:
+    - name: Configure Netplan settings
+      ansible.builtin.copy:
+        dest: "{{ netplan_config_file }}"
+        content: |
+          network:
+            version: 2
+            ethernets:
+              enp2s0f1:
+                addresses:
+                  - 142.73.32.94/28
+                routes:
+                  - to: default
+                    via: 142.73.32.81
+                nameservers:
+                  addresses:
+                    - 142.73.40.40
+                    - 142.73.43.229
+                  search:
+                    - mda.ca
+                    - exds.mda.ca
+        owner: root
+        group: root
+        mode: '0600'
+      notify: Apply netplan
+
+    - name: Ensure Netplan changes are applied immediately if changed
+      ansible.builtin.meta: flush_handlers
+
+    - name: Update the /etc/hosts file
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^142\.73\.152\.22'
+        line: '142.73.152.22   puppet puppet.mda.ca foremanrmd01 foremanrmd01.mda.ca'
+        state: present
+
+    - name: Extract Puppet settings tar file to root
+      ansible.builtin.unarchive:
+        src: "{{ puppet_tar_source }}"
+        dest: /
+        remote_src: false  # Set to true if the tar file is already on the target machine
+
+    - name: Install Puppet agent package
+      ansible.builtin.apt:
+        name: puppet-agent
+        state: present
+        update_cache: true
+
+
+    - name: Run Puppet agent test
+      ansible.builtin.command: puppet agent -t
+      register: puppet_run
+      # Puppet agent returns 0 (no changes), 2 (changes applied), or 6 (changes & restarts).
+      # This mapping prevents Ansible from falsely reporting a failure on successful runs.
+      failed_when: puppet_run.rc not in [0, 2, 6]
+      changed_when: puppet_run.rc in [2, 6]
+      ignore_errors: true
+
+  handlers:
+    - name: Apply netplan
+      ansible.builtin.command: netplan apply

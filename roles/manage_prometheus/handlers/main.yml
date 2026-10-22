@@ -1,0 +1,14 @@
+---
+- name: Restart Prometheus service
+  ansible.builtin.service:
+    name: prometheus
+    state: restarted
+    daemon_reload: true
+  become: true
+
+- name: Restart Node Exporter service
+  ansible.builtin.service:
+    name: node
+    state: restarted
+    daemon_reload: true
+  become: true

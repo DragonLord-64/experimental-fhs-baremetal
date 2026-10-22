@@ -1,0 +1,18 @@
+[Unit]
+Description=Prometheus
+After=network.target
+
+[Service]
+Type=simple
+User={{ manage_prometheus_user }}
+Group={{ manage_prometheus_user }}
+ExecStart=/usr/local/bin/prometheus/{{ manage_prometheus_prometheus_tar }}/prometheus \
+  --config.file="/etc/prometheus/prometheus.yml" \
+  --web.config.file="/etc/prometheus/site.yml" \
+  --storage.tsdb.path={{ manage_prometheus_data_dir }} \
+  --storage.tsdb.retention.time={{ manage_prometheus_retention_time | default('14d') }} \
+  --storage.tsdb.retention.size={{ manage_prometheus_retention_size | default('15G') }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
