@@ -1,6 +1,6 @@
 # Platform deployment and access
 
-`platform/` contains imported configuration from official development `87dc794`, following the upstream `monitoring/` rename. The retained `monitoring/` snapshot is historical. Imported values contain original storage, endpoints and scrape targets; they are not validated dragonvm overrides.
+`platform/` contains imported configuration from official development `87dc794`, following the upstream `monitoring/` rename. The duplicate top-level `monitoring/` directory was removed; `platform/` is the canonical cluster configuration directory. Imported values contain original storage, endpoints and scrape targets; they are not validated dragonvm overrides.
 
 ## Monitoring flow
 
