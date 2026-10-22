@@ -1,0 +1,5270 @@
+{
+  "uid": "fhs-infra-server",
+  "title": "FHS telemetry",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": [
+    "fhs-infrastructure",
+    "explicit-lab-inventory"
+  ],
+  "timezone": "browser",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "editable": true,
+  "templating": {
+    "list": [
+      {
+        "name": "ds",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {
+          "text": "Prometheus",
+          "value": "prometheus"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_rack",
+        "label": "RACK page",
+        "type": "custom",
+        "query": "Infrastructure rack : fhs-infra-rack",
+        "current": {
+          "text": "Infrastructure rack",
+          "value": "fhs-infra-rack"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_mesh",
+        "label": "MESH page",
+        "type": "custom",
+        "query": "VCC to FSP mesh : fhs-infra-mesh",
+        "current": {
+          "text": "VCC to FSP mesh",
+          "value": "fhs-infra-mesh"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_fhs",
+        "label": "FHS page",
+        "type": "custom",
+        "query": "FHS telemetry : fhs-infra-server",
+        "current": {
+          "text": "FHS telemetry",
+          "value": "fhs-infra-server"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_switch",
+        "label": "SWITCH page",
+        "type": "custom",
+        "query": "Switch overview : fhs-infra-switch",
+        "current": {
+          "text": "Switch overview",
+          "value": "fhs-infra-switch"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_interface",
+        "label": "INTERFACE page",
+        "type": "custom",
+        "query": "Switch interface : fhs-infra-interface",
+        "current": {
+          "text": "Switch interface",
+          "value": "fhs-infra-interface"
+        },
+        "hide": 0
+      },
+      {
+        "name": "target_vlan",
+        "label": "VLAN page",
+        "type": "custom",
+        "query": "VLAN configuration : fhs-infra-vlan",
+        "current": {
+          "text": "VLAN configuration",
+          "value": "fhs-infra-vlan"
+        },
+        "hide": 0
+      },
+      {
+        "name": "job",
+        "label": "FHS job",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(sts_psu1_fan, job)",
+          "refId": "job"
+        },
+        "definition": "label_values(sts_psu1_fan, job)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0
+      },
+      {
+        "name": "node_job",
+        "label": "Node job",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(node_network_info, job)",
+          "refId": "node_job"
+        },
+        "definition": "label_values(node_network_info, job)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0
+      },
+      {
+        "name": "switch_job",
+        "label": "Switch job",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(nexus_interfaces_vdcId, job)",
+          "refId": "switch_job"
+        },
+        "definition": "label_values(nexus_interfaces_vdcId, job)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "hide": 2
+      },
+      {
+        "name": "unit",
+        "label": "Unit",
+        "type": "custom",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "VCCUnit1,VCCUnit2,VCCUnit3,VCCUnit4,VCCUnit5,VCCUnit6,VCCUnit7,VCCUnit8,VCCUnit9,VCCUnit10,VCCUnit11,VCCUnit12,VCCUnit13,VCCUnit14,VCCUnit15,VCCUnit16,VCCUnit17,VCCUnit18,VCCUnit19,VCCUnit20,VCCUnit21,VCCUnit22,VCCUnit23,VCCUnit24,FSPUnit1,FSPUnit2,FSPUnit3,FSPUnit4,FSPUnit5,FSPUnit6,FSPUnit7,FSPUnit8,FSPUnit9,FSPUnit10,FSPUnit11,FSPUnit12,FSPUnit13,FSPUnit14,FSPUnit15,FSPUnit16,FSPUnit17,FSPUnit18,FSPUnit19,FSPUnit20,FSPUnit21,FSPUnit22,FSPUnit23,FSPUnit24,FSPUnit25,FSPUnit26,FSPUnit27",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "FSPUnit2",
+          "value": "FSPUnit2"
+        },
+        "hide": 0,
+        "options": []
+      },
+      {
+        "name": "fhs",
+        "label": "FHS member",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(up{unit=\"$unit\",fhs_name!=\"\"}, fhs)",
+          "refId": "fhs"
+        },
+        "definition": "label_values(up{unit=\"$unit\",fhs_name!=\"\"}, fhs)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "FHS1",
+          "value": "FHS1"
+        },
+        "hide": 0
+      },
+      {
+        "name": "instance",
+        "label": "FHS instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+          "refId": "instance"
+        },
+        "definition": "label_values(up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_instance",
+        "label": "Node instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+          "refId": "node_instance"
+        },
+        "definition": "label_values(up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\"}, instance)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2
+      },
+      {
+        "name": "switch",
+        "label": "Switch",
+        "type": "custom",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": "VCCUnit1-switch,VCCUnit2-switch,VCCUnit3-switch,VCCUnit4-switch,VCCUnit5-switch,VCCUnit6-switch,VCCUnit7-switch,VCCUnit8-switch,VCCUnit9-switch,VCCUnit10-switch,VCCUnit11-switch,VCCUnit12-switch,VCCUnit13-switch,VCCUnit14-switch,VCCUnit15-switch,VCCUnit16-switch,VCCUnit17-switch,VCCUnit18-switch,VCCUnit19-switch,VCCUnit20-switch,VCCUnit21-switch,VCCUnit22-switch,VCCUnit23-switch,VCCUnit24-switch,FSPUnit1-switch,FSPUnit2-switch,FSPUnit3-switch,FSPUnit4-switch,FSPUnit5-switch,FSPUnit6-switch,FSPUnit7-switch,FSPUnit8-switch,FSPUnit9-switch,FSPUnit10-switch,FSPUnit11-switch,FSPUnit12-switch,FSPUnit13-switch,FSPUnit14-switch,FSPUnit15-switch,FSPUnit16-switch,FSPUnit17-switch,FSPUnit18-switch,FSPUnit19-switch,FSPUnit20-switch,FSPUnit21-switch,FSPUnit22-switch,FSPUnit23-switch,FSPUnit24-switch,FSPUnit25-switch,FSPUnit26-switch,FSPUnit27-switch",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "FSPUnit2-switch",
+          "value": "FSPUnit2-switch"
+        },
+        "hide": 2,
+        "options": []
+      },
+      {
+        "name": "interface",
+        "label": "Interface",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${ds}"
+        },
+        "query": {
+          "query": "label_values(nexus_interfaces_vdcId{job=\"$switch_job\",source=\"$switch\"}, interface)",
+          "refId": "interface"
+        },
+        "definition": "label_values(nexus_interfaces_vdcId{job=\"$switch_job\",source=\"$switch\"}, interface)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "eth1/1/1",
+          "value": "eth1/1/1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "vccu",
+        "label": "VCC unit",
+        "type": "custom",
+        "query": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24",
+        "current": {
+          "text": "1",
+          "value": "1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "fspu",
+        "label": "FSP unit",
+        "type": "custom",
+        "query": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27",
+        "current": {
+          "text": "1",
+          "value": "1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "port",
+        "label": "Physical port",
+        "type": "custom",
+        "query": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32",
+        "current": {
+          "text": "1",
+          "value": "1"
+        },
+        "hide": 2
+      },
+      {
+        "name": "vlan",
+        "label": "VLAN",
+        "type": "textbox",
+        "query": "55",
+        "current": {
+          "text": "55",
+          "value": "55"
+        },
+        "hide": 2
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "Infrastructure rack",
+      "url": "/d/${target_rack:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "VCC to FSP mesh",
+      "url": "/d/${target_mesh:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "Switch overview",
+      "url": "/d/${target_switch:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "Switch interface",
+      "url": "/d/${target_interface:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    },
+    {
+      "title": "VLAN configuration",
+      "url": "/d/${target_vlan:percentencode}?var-ds=${ds:percentencode}&var-job=${job:percentencode}&var-node_job=${node_job:percentencode}&var-switch_job=${switch_job:percentencode}&var-unit=${unit:percentencode}&var-fhs=${fhs:percentencode}&var-instance=${instance:percentencode}&var-node_instance=${node_instance:percentencode}&var-switch=${switch:percentencode}&var-interface=${interface:percentencode}&var-vccu=${vccu:percentencode}&var-fspu=${fspu:percentencode}&var-port=${port:percentencode}&var-vlan=${vlan:percentencode}&var-target_rack=${target_rack:percentencode}&var-target_mesh=${target_mesh:percentencode}&var-target_fhs=${target_fhs:percentencode}&var-target_switch=${target_switch:percentencode}&var-target_interface=${target_interface:percentencode}&var-target_vlan=${target_vlan:percentencode}&${__url_time_range}",
+      "type": "link",
+      "targetBlank": false
+    }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**FHS $unit / $fhs** \u00b7 Status at left, observed readings at right. Gray = missing telemetry. Illustrative temperature70/85\u00b0C and fan4000/1000RPM limits. Native flag meanings need hardware validation."
+      },
+      "id": 1,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      }
+    },
+    {
+      "title": "Overall hardware health",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 8,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}) >= 85) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}) < 1000))) or on() (vector(1) and on() ((max(sts_psu1_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"} or sts_psu2_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}) > 0) or on() (max({__name__=~\"cpu_temperature_celcius|ddr5_a1_temperature_celcius|ddr5_b1_temperature_celcius|ddr5_c1_temperature_celcius|ddr5_e1_temperature_celcius|ddr5_g1_temperature_celcius|ddr5_h1_temperature_celcius|ddr5_i1_temperature_celcius|ddr5_k1_temperature_celcius|fpga_bmc_temperature_celcius|fpga_fabric_temperature_celcius|fpga_ftile_temperature_celcius|fpga_temperature_celcius|front_temperature_celcius|fsc_temperature_celcius|lan_temperature_celcius|mb1_temperature_celcius|mb2_temperature_celcius|nic_temperature_celcius|outlet1_temperature_celcius|outlet2_temperature_celcius\",job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}) >= 70) or on() (min({__name__=~\"fan1_rpm|fan2_rpm\",job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}) < 4000))) or on() ((max(sts_psu1_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"} or sts_psu2_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"}) * 0) and on() ((count(count by(fhs) (chassis_intr{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (cpu1_thermtrip{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (prochot_cpu{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (sts_cpu_mce{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (sts_psu1{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (sts_psu1_ac_lost{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (sts_psu1_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (sts_psu2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (sts_psu2_ac_lost{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (sts_psu2_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (volt_12v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (volt_3v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1) and on() (count(count by(fhs) (watchdog2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\"})) == 1)))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 2
+    },
+    {
+      "title": "Components",
+      "type": "stat",
+      "gridPos": {
+        "x": 8,
+        "y": 2,
+        "w": 5,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "vector(21)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 3
+    },
+    {
+      "title": "Deployed FHS",
+      "type": "stat",
+      "gridPos": {
+        "x": 13,
+        "y": 2,
+        "w": 5,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "vector(16)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 4
+    },
+    {
+      "title": "Not deployed FHS",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 2,
+        "w": 6,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "vector(116)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "auto",
+        "graphMode": "none"
+      },
+      "id": 5
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 6
+    },
+    {
+      "title": "FPGA 0 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 5,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Core"
+        },
+        {
+          "refId": "B",
+          "expr": "front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Front"
+        },
+        {
+          "refId": "C",
+          "expr": "fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fabric"
+        },
+        {
+          "refId": "D",
+          "expr": "fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "F-tile"
+        },
+        {
+          "refId": "E",
+          "expr": "fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Card BMC"
+        },
+        {
+          "refId": "F",
+          "expr": "total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA0\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Input power"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Core"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Front"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fabric"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "F-tile"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Card BMC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Input power"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 7
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 8
+    },
+    {
+      "title": "FPGA 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 5,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fpga_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Core"
+        },
+        {
+          "refId": "B",
+          "expr": "front_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Front"
+        },
+        {
+          "refId": "C",
+          "expr": "fpga_fabric_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fabric"
+        },
+        {
+          "refId": "D",
+          "expr": "fpga_ftile_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "F-tile"
+        },
+        {
+          "refId": "E",
+          "expr": "fpga_bmc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Card BMC"
+        },
+        {
+          "refId": "F",
+          "expr": "total_input_power_watts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FPGA1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Input power"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Core"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Front"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fabric"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "F-tile"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Card BMC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Input power"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 9
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sts_psu1_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Fault",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 10
+    },
+    {
+      "title": "PSU 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 8,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sts_psu1{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Status flag"
+        },
+        {
+          "refId": "B",
+          "expr": "sts_psu1_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fan flag"
+        },
+        {
+          "refId": "C",
+          "expr": "sts_psu1_ac_lost{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU1\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "AC lost flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fan flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC lost flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 11
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sts_psu2_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU2\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Fault",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 12
+    },
+    {
+      "title": "PSU 2 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 8,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sts_psu2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU2\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Status flag"
+        },
+        {
+          "refId": "B",
+          "expr": "sts_psu2_fan{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU2\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Fan flag"
+        },
+        {
+          "refId": "C",
+          "expr": "sts_psu2_ac_lost{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"PSU2\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "AC lost flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fan flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC lost flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 13
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) < 1000) or on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) < 4000) or on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 14
+    },
+    {
+      "title": "Fan 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 11,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fan1_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Speed"
+        },
+        {
+          "refId": "B",
+          "expr": "fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Speed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: RPM"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 15
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) < 1000) or on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) < 4000) or on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 16
+    },
+    {
+      "title": "Fan 2 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 11,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "fan2_rpm{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Speed"
+        },
+        {
+          "refId": "B",
+          "expr": "fsc_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"FAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Speed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: RPM"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 17
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(prochot_cpu{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(prochot_cpu{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(cpu1_thermtrip{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(cpu1_thermtrip{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(sts_cpu_mce{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(sts_cpu_mce{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(prochot_cpu{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(prochot_cpu{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(cpu1_thermtrip{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(cpu1_thermtrip{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(sts_cpu_mce{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(sts_cpu_mce{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 18
+    },
+    {
+      "title": "CPU \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 14,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "cpu_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        },
+        {
+          "refId": "B",
+          "expr": "prochot_cpu{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "PROCHOT flag"
+        },
+        {
+          "refId": "C",
+          "expr": "cpu1_thermtrip{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Trip flag"
+        },
+        {
+          "refId": "D",
+          "expr": "sts_cpu_mce{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"CPU\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "MCE flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PROCHOT flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trip flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "MCE flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 19
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"NIC\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"NIC\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"NIC\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"NIC\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"NIC\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"NIC\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 20
+    },
+    {
+      "title": "NIC \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 14,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "nic_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"NIC\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 21
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"LAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"LAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"LAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"LAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"LAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"LAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 22
+    },
+    {
+      "title": "Network LAN \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 17,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "lan_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"LAN\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 23
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 17,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85) or on() (max(outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70) or on() (max(outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 24
+    },
+    {
+      "title": "Motherboard \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 17,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mb1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Board 1"
+        },
+        {
+          "refId": "B",
+          "expr": "mb2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Board 2"
+        },
+        {
+          "refId": "C",
+          "expr": "outlet1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Outlet 1"
+        },
+        {
+          "refId": "D",
+          "expr": "outlet2_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Outlet 2"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Board 1"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Board 2"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Outlet 1"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Outlet 2"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 25
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(0) and on() ((max(volt_12v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(volt_12v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(volt_3v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(volt_3v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(watchdog2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(watchdog2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))) and on() (max(chassis_intr{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(chassis_intr{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 26
+    },
+    {
+      "title": "BMC telemetry \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 20,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "volt_12v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "12 V rail"
+        },
+        {
+          "refId": "B",
+          "expr": "volt_3v_volts{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "3 V rail"
+        },
+        {
+          "refId": "C",
+          "expr": "watchdog2{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Watchdog flag"
+        },
+        {
+          "refId": "D",
+          "expr": "chassis_intr{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"x550_bmc\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Chassis flag"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "12 V rail"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "volt"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3 V rail"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "volt"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Watchdog flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Chassis flag"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 27
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 28
+    },
+    {
+      "title": "DIMM A1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 20,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_a1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 29
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 30
+    },
+    {
+      "title": "DIMM B1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 23,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_b1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 31
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 23,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 32
+    },
+    {
+      "title": "DIMM C1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 23,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_c1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 33
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 26,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 34
+    },
+    {
+      "title": "DIMM E1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 26,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_e1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 35
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 26,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 36
+    },
+    {
+      "title": "DIMM G1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 26,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_g1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 37
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 38
+    },
+    {
+      "title": "DIMM H1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 29,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_h1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 39
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 29,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 40
+    },
+    {
+      "title": "DIMM I1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 29,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_i1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 41
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) >= 70)) and on() ((max(ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1))))) or on() (vector(0) and on() ((max(ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)) == max(ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 42
+    },
+    {
+      "title": "DIMM K1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 32,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ddr5_k1_temperature_celcius{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\",source=\"DIMM\"} and on(job,instance) (up{job=\"$job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Temperature"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 43
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 32,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 85) or on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 70) or on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 70)) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))))) or on() (vector(0) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 44
+    },
+    {
+      "title": "NVMe 0 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 14,
+        "y": 32,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Composite"
+        },
+        {
+          "refId": "B",
+          "expr": "node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Hottest sensor"
+        },
+        {
+          "refId": "C",
+          "expr": "node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme0\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller live"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Composite"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Hottest sensor"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller live"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 45
+    },
+    {
+      "title": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 2,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(vector(2) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 85) or on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 85))) or on() (vector(1) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 70) or on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) >= 70)) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))))) or on() (vector(0) and on() ((max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1))) and on() (max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)) == max(node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)))))",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Healthy",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "Degraded",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "Failed",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "background",
+        "textMode": "value",
+        "graphMode": "none",
+        "text": {
+          "valueSize": 11,
+          "titleSize": 10
+        }
+      },
+      "id": 46
+    },
+    {
+      "title": "NVMe 1 \u00b7 readings",
+      "type": "stat",
+      "gridPos": {
+        "x": 2,
+        "y": 35,
+        "w": 10,
+        "h": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\",sensor=\"temp1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Composite"
+        },
+        {
+          "refId": "B",
+          "expr": "node_hwmon_temp_celsius{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",chip=\"nvme_nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Hottest sensor"
+        },
+        {
+          "refId": "C",
+          "expr": "node_nvme_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\",device=\"nvme1\"} and on(job,instance) (up{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"} == 1)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Controller live"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Composite"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Hottest sensor"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Controller live"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value",
+        "textMode": "value_and_name",
+        "graphMode": "none",
+        "orientation": "vertical",
+        "text": {
+          "valueSize": 17,
+          "titleSize": 10
+        },
+        "wideLayout": false
+      },
+      "id": 47
+    },
+    {
+      "title": "Everything else \u00b7 network / metadata",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_network_info{job=\"$node_job\",unit=\"$unit\",fhs=\"$fhs\",instance=~\"$node_instance\"}",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown / No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Unknown / No data",
+                  "color": "#8e8e8e"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "job": true,
+              "instance": true
+            },
+            "indexByName": {
+              "device": 0,
+              "ifalias": 1,
+              "address": 2,
+              "Value": 3
+            }
+          }
+        }
+      ],
+      "id": 48
+    }
+  ]
+}

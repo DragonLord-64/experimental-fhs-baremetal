@@ -1,0 +1,228 @@
+{
+  "label": "SYNTHETIC illustrative placement and heights; not discovered; no verified TeraBox dimensions",
+  "placements": [
+    {
+      "id": "VCCUnit1-FHS1",
+      "kind": "server",
+      "unit": "VCCUnit1",
+      "fhs": "FHS1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 1,
+      "height_u": 2
+    },
+    {
+      "id": "VCCUnit1-switch",
+      "kind": "switch",
+      "unit": "VCCUnit1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 3,
+      "height_u": 1
+    },
+    {
+      "id": "VCCUnit2-FHS1",
+      "kind": "server",
+      "unit": "VCCUnit2",
+      "fhs": "FHS1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 4,
+      "height_u": 2
+    },
+    {
+      "id": "VCCUnit2-switch",
+      "kind": "switch",
+      "unit": "VCCUnit2",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 6,
+      "height_u": 1
+    },
+    {
+      "id": "VCCUnit3-FHS1",
+      "kind": "server",
+      "unit": "VCCUnit3",
+      "fhs": "FHS1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 7,
+      "height_u": 2
+    },
+    {
+      "id": "VCCUnit3-switch",
+      "kind": "switch",
+      "unit": "VCCUnit3",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 9,
+      "height_u": 1
+    },
+    {
+      "id": "VCCUnit4-FHS1",
+      "kind": "server",
+      "unit": "VCCUnit4",
+      "fhs": "FHS1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 10,
+      "height_u": 2
+    },
+    {
+      "id": "VCCUnit4-switch",
+      "kind": "switch",
+      "unit": "VCCUnit4",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 12,
+      "height_u": 1
+    },
+    {
+      "id": "FSPUnit1-FHS1",
+      "kind": "server",
+      "unit": "FSPUnit1",
+      "fhs": "FHS1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 13,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit1-FHS2",
+      "kind": "server",
+      "unit": "FSPUnit1",
+      "fhs": "FHS2",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 15,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit1-FHS3",
+      "kind": "server",
+      "unit": "FSPUnit1",
+      "fhs": "FHS3",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 17,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit1-FHS4",
+      "kind": "server",
+      "unit": "FSPUnit1",
+      "fhs": "FHS4",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 19,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit1-switch",
+      "kind": "switch",
+      "unit": "FSPUnit1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 21,
+      "height_u": 1
+    },
+    {
+      "id": "FSPUnit2-FHS1",
+      "kind": "server",
+      "unit": "FSPUnit2",
+      "fhs": "FHS1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 22,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit2-FHS2",
+      "kind": "server",
+      "unit": "FSPUnit2",
+      "fhs": "FHS2",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 24,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit2-FHS3",
+      "kind": "server",
+      "unit": "FSPUnit2",
+      "fhs": "FHS3",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 26,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit2-FHS4",
+      "kind": "server",
+      "unit": "FSPUnit2",
+      "fhs": "FHS4",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 28,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit2-switch",
+      "kind": "switch",
+      "unit": "FSPUnit2",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 30,
+      "height_u": 1
+    },
+    {
+      "id": "FSPUnit3-FHS1",
+      "kind": "server",
+      "unit": "FSPUnit3",
+      "fhs": "FHS1",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 31,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit3-FHS2",
+      "kind": "server",
+      "unit": "FSPUnit3",
+      "fhs": "FHS2",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 33,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit3-FHS3",
+      "kind": "server",
+      "unit": "FSPUnit3",
+      "fhs": "FHS3",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 35,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit3-FHS4",
+      "kind": "server",
+      "unit": "FSPUnit3",
+      "fhs": "FHS4",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 37,
+      "height_u": 2
+    },
+    {
+      "id": "FSPUnit3-switch",
+      "kind": "switch",
+      "unit": "FSPUnit3",
+      "rack": "SYNTHETIC-A",
+      "face": "front",
+      "position_u": 39,
+      "height_u": 1
+    }
+  ]
+}
