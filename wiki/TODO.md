@@ -2,6 +2,8 @@
 
 Documentation backlog captured 2026-10-21; implementation is pending.
 
+Style requirement: match the user's existing documentation voice. Keep descriptions short and practical, with tags and normal usage; use existing docs as writing references.
+
 - [ ] Consolidate each role's documentation into one brief `README.md` inside its role directory: purpose, behavior, tags, usual invocation, and essential prerequisites or cautions. Reference/include that same README from the Sphinx docs for Read the Docs; avoid duplicate prose. Preserve the existing documentation structure and diagrams where useful.
 - [ ] Document NetBox setup and usage: inventory, profile/group mapping, overrides, and importing devices and related data.
 - [ ] Document the current monitoring architecture and deployment, including how telemetry reaches its consumers.

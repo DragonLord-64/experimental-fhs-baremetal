@@ -17,6 +17,8 @@ Never shut down, reboot, suspend, hibernate, halt, or power off this server, eve
 
 ## Knowledge wiki
 
+- Write documentation in the user's existing repository voice and style. Read nearby existing docs before drafting. Keep it brief and practical: short descriptions, actual tags, commands, and the usual way to run things. Avoid lengthy tutorials and generic background. Each role has one concise README in its own folder, referenced/included by Read the Docs.
+
 - Use [wiki/INDEX.md](wiki/INDEX.md) as the knowledge entry point. Keep source evidence, plans, decisions, and dated events distinct.
 - Link notes to repository files or other evidence. Label proposals and unverified assumptions explicitly; do not claim a test passed without results.
 - Preserve raw telemetry captures, record provenance, and document sanitization. Keep generated test reports and screenshots as CI artifacts where practical.
