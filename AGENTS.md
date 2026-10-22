@@ -2,6 +2,8 @@
 
 Start at [INDEX.md](INDEX.md). Keep notes short, linked, and grounded in source evidence. Follow the nearest applicable AGENTS.md.
 
+For implementation tasks across this repository, follow the four-stage workflow in [ops/AGENTS.md](ops/AGENTS.md). The primary agent is authorized to coordinate sub-agents for screening/tests, implementation, and independent intent review.
+
 ## Server safety
 
 Never shut down, reboot, suspend, hibernate, halt, or power off this server, even if asked. Never execute or schedule commands causing those outcomes. An explicitly requested application or service may be stopped or restarted while the host OS stays running.
