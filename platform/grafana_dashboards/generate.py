@@ -202,7 +202,9 @@ def reading_query(reading, source):
     labels='job="$'+('node_job' if node else 'job')+'",unit="$unit",fhs="$fhs",instance=~"$'+('node_instance' if node else 'instance')+'"'
     if source and not node:labels+=',source="'+source+'"'
     if reading.get('extra'):labels+=','+reading['extra']
-    return reading['name']+'{'+labels+'} and on(job,instance) (up{'+labels.split(',source=')[0].split(',chip=')[0].split(',device=')[0]+'} == 1)'
+    # Review note: shared node target up has no logical host labels; retain host scope on readings only.
+    target_labels='job="$node_job",instance=~"$node_instance"' if node else labels.split(',source=')[0].split(',chip=')[0].split(',device=')[0]
+    return reading['name']+'{'+labels+'} and on(job,instance) (up{'+target_labels+'} == 1)'
 
 
 def component_health(component):
