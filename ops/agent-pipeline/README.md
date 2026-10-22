@@ -58,4 +58,4 @@ Treat run files as sensitive: agent output may contain environment details. Do n
 python3 -m unittest discover -s ops/agent-pipeline/tests -v
 ```
 
-Tests use a fake Codex executable, with no model calls. CLI flags were checked against installed `codex exec --help` and [official noninteractive documentation](https://developers.openai.com/codex/noninteractive). A real authenticated task remains an operator smoke test.
+Tests use a fake Codex executable, with no model calls. CLI flags were checked against installed `codex exec --help` and [official noninteractive documentation](https://developers.openai.com/codex/noninteractive). See [validation](VALIDATION.md) for dragonvm results and the account/model blocker in the real smoke test.
