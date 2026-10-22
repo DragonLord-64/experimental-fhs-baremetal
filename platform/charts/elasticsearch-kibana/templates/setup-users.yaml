@@ -1,4 +1,4 @@
-{{- if or .Values.kibana.enabled .Values.filebeat.enabled }}
+{{- if and (gt (int .Values.elasticsearch.replicas) 0) (or .Values.kibana.enabled .Values.filebeat.enabled) }}
 # A normal bounded Job, not a post-install hook (which would deadlock --wait).
 apiVersion: batch/v1
 kind: Job

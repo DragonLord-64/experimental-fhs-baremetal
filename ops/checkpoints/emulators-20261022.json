@@ -1,0 +1,168 @@
+{
+  "date": "2026-10-22",
+  "purpose": "Private source preservation checkpoint; not integration acceptance or authorization to deploy.",
+  "source_base_commit": "0ecbcd9a3b6b316afc6341c3ab1adbdd4c1c976f",
+  "source_pipeline": {
+    "task": "emulators-resize-4vcc-3fsp",
+    "status": "done",
+    "stage": "review",
+    "attempt": 4
+  },
+  "files": [
+    {
+      "path": "ops/emulators/.gitignore",
+      "sha256": "3171b2ab05d9b2ac0bb206bbe0358285d6963ba4a21184d18b675450505025d8"
+    },
+    {
+      "path": "ops/emulators/README.md",
+      "sha256": "ae3eebf2322f235bb0dc1dd2e55a334d1131a692569f55319c1a92f011729918"
+    },
+    {
+      "path": "ops/emulators/VALIDATION.md",
+      "sha256": "08f6b7f081e1200b8df6a4a17ed098959be546baa861e909c64fad5eefe3dab8"
+    },
+    {
+      "path": "ops/emulators/apply.py",
+      "sha256": "e712c86bce25dbd6c78e8fe3672b71529e8523d137b1bcbe7407e132ae216996"
+    },
+    {
+      "path": "ops/emulators/build-cache.sh",
+      "sha256": "6accc083d7ca74e399164198f4396fcd1a88c8a7c8b7acd09896134838cd4f4e"
+    },
+    {
+      "path": "ops/emulators/build.sh",
+      "sha256": "98afac64dc701956736d6bdf7377e31f3223156c3e694456268625ea669a8220"
+    },
+    {
+      "path": "ops/emulators/cisco/cache/Runtime.Dockerfile",
+      "sha256": "faf5fe45739795e0fa2b183f4548047d6beba8625417d1ae9b882ff076d9d6bc"
+    },
+    {
+      "path": "ops/emulators/cisco/cache/main.go",
+      "sha256": "afa4294fc01678a7322e7c7a88e17b4403949f5eb6f98c63cd334867bc346854"
+    },
+    {
+      "path": "ops/emulators/cisco/cache/main_test.go",
+      "sha256": "f3fb6a8117095a8de86fc7fa3d2550bf1c193787c8172673967ce1374629cf02"
+    },
+    {
+      "path": "ops/emulators/config-full.json",
+      "sha256": "54dbff35de7ed82118a01feca9349bfe36a42820789360e569c511494b35b257"
+    },
+    {
+      "path": "ops/emulators/config.json",
+      "sha256": "913cd65519e337c44c96158c9514f1c6168b7ec414179942deaa6ba1304f821f"
+    },
+    {
+      "path": "ops/emulators/deploy.sh",
+      "sha256": "53b67ca11335f989f0733e5bff41ac41b49280b4641c1f1fbdab8d86efbc4bce"
+    },
+    {
+      "path": "ops/emulators/images.json",
+      "sha256": "d179269e422dab186b3f21e811b00b965a2a72bc683db12a0f9b00e0ca8419ea"
+    },
+    {
+      "path": "ops/emulators/integration.py",
+      "sha256": "2d7ec24c7636287bf4b29ef901db61f432337fc1f2b99a2142067a7521c00dd2"
+    },
+    {
+      "path": "ops/emulators/lifecycle-check.py",
+      "sha256": "0b446cd85242695b2e4a8a6985fb635aa05498959d59b2b65a4b28e64a452db4"
+    },
+    {
+      "path": "ops/emulators/platform-check.py",
+      "sha256": "520cff7e66b02f117831c6e40ca9b515778342e58962034bc31d9a3aeac88010"
+    },
+    {
+      "path": "ops/emulators/protocol-test.sh",
+      "sha256": "18f183a269fce5ad9454028982b98877156ea683c18cbc3721ef9e54d30aa31a"
+    },
+    {
+      "path": "ops/emulators/reload.py",
+      "sha256": "b3a8b3f3ef63df49e6942d55c86ea4a1f2befe798f319e45bf99c647830ee25f"
+    },
+    {
+      "path": "ops/emulators/render.py",
+      "sha256": "fee9c4dbf00704331e2801396d96df2c8508a4d1204b0904b7fc0be15413947d"
+    },
+    {
+      "path": "ops/emulators/tests/canonical_topology_reference.py",
+      "sha256": "08c8cf4c62b4bcf2abc8434e0aa72b06af362fcc3c4a22d200f7fc335eee884d"
+    },
+    {
+      "path": "ops/emulators/tests/test_contract.py",
+      "sha256": "d0bc882607fba511e9af33e407f841cd10683e915fcb727c1c6dc4e917b327ce"
+    },
+    {
+      "path": "ops/emulators/tests/test_reduced.py",
+      "sha256": "86a213569b7622c02cb3cf5b8db7bb4ebe7dd231a40bace5fba12263f25bd39e"
+    },
+    {
+      "path": "ops/emulators/tests/test_reload.py",
+      "sha256": "08b149dc7b297a49e41f6bf9d06af461b78c8d2ebf350aba38508d5c47869bd6"
+    },
+    {
+      "path": "ops/emulators/topology.py",
+      "sha256": "cc09b1a510c1dd43b7d768205abf408d2845ff2dc2f2431b47c8f85f6db2f94a"
+    },
+    {
+      "path": "ops/emulators/verify.py",
+      "sha256": "728d450eaa24271a5a06705cd0e5bb96c4e5812e231cb46a1e9ebf3f606520b9"
+    },
+    {
+      "path": "ops/platform/README.md",
+      "sha256": "8a4c87b538ab9cd237781b518b5282f97adf3ff0d0af574ea493470e19962799"
+    },
+    {
+      "path": "ops/platform/monitoring-test.sh",
+      "sha256": "7bcecaeca957f907dd03ee84734a1d843c4d74128b3f31968741a8947fb7fc0e"
+    },
+    {
+      "path": "ops/platform/monitoring-values/elasticsearch.yaml",
+      "sha256": "0d89ef7171b3f9bac8e6e69b3c27e34001eaaac178dad0ee1243075bc5dd5af4"
+    },
+    {
+      "path": "ops/platform/tests/test_elk_profile.py",
+      "sha256": "2b5ae2cebf81557fa25a85d16c2451c1ef50a3f9430ba8a693b7159cff6d7312"
+    },
+    {
+      "path": "platform/charts/elasticsearch-kibana/templates/elasticsearch.yaml",
+      "sha256": "a865e6d99e1fa1e38976ceb3b8d2f29f45c0e831ddfbe189ad51b8e969332059"
+    },
+    {
+      "path": "platform/charts/elasticsearch-kibana/templates/kibana.yaml",
+      "sha256": "3058bb677fbc6804300a9f9dd4aae6e78c870b6528c20c9c6aa6e8295ec36ad8"
+    },
+    {
+      "path": "platform/charts/elasticsearch-kibana/templates/setup-users.yaml",
+      "sha256": "d98287a8eab5ccda690e2341d63e7e257d57f27860fec7821d2031aec1443353"
+    },
+    {
+      "path": "platform/charts/elasticsearch-kibana/values.schema.json",
+      "sha256": "040bcd16179b51b1f31c20c47c78e23be504223e8ab026dc882c22a0850718ed"
+    },
+    {
+      "path": "platform/charts/elasticsearch-kibana/values.yaml",
+      "sha256": "a7da3aade0819693a18153672143f062155a640c47c6d676339a9a6f33023e37"
+    },
+    {
+      "path": "wiki/LOG.md",
+      "sha256": "b1e08590f4a3df127e1be8e12a490f924c341435773c8aa27345688039c17d47"
+    }
+  ],
+  "offline_checks": {
+    "emulator_unittests": "18 passed",
+    "platform_unittests": "2 passed with existing user-local Helm added to PATH; chart pause/resume rendered offline"
+  },
+  "observed_prior_live_state": {
+    "population": "4 VCC, 3 FSP; 16 FHS, 7 switches, 12 mesh links, 56 LLDP records",
+    "injected_faults": "FSP1 four missing FHS; FSP2/FHS1 PSU1 fault; VCC1/FSP3 bidirectional link down",
+    "logging": "Intentionally paused; no workloads resumed"
+  },
+  "limits": [
+    "No worker/controller resumed; no deployments or host/service changes.",
+    "Raw logs, captures, private inventory, credentials, runtime directories and compiled binaries excluded.",
+    "Checkpoint retains original source behavior and older dated validation notes; this snapshot states current preservation status.",
+    "Physical hardware and complete guest provisioning remain unverified."
+  ]
+}

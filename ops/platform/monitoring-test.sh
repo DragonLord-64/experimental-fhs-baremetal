@@ -2,17 +2,36 @@
 # Synthetic telemetry and authenticated service checks; run on dragonvm.
 set -euo pipefail
 k() { minikube -p fhs-test kubectl -- --context=fhs-test --request-timeout=30s -n fhs-platform "$@"; }
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+# Match the source profile used by monitoring-deploy.sh; never silently accept a running ELK.
+ELK_PAUSED=$(python3 - "$ROOT/ops/platform/monitoring-values/elasticsearch.yaml" <<'PROFILE'
+import sys,yaml
+v=yaml.safe_load(open(sys.argv[1]))
+r=[v[n]['replicas'] for n in ('elasticsearch','kibana')]
+if r not in ([0,0],[1,1]): raise SystemExit('ELK profile must be both paused or both running')
+print('true' if r == [0,0] else 'false')
+PROFILE
+)
+export ELK_PAUSED
 pids=()
 forward_dir=$(mktemp -d)
 cleanup() { for pid in "${pids[@]}"; do kill -- "-$pid" 2>/dev/null || true; wait "$pid" 2>/dev/null || true; done; rm -rf "$forward_dir"; }
 trap cleanup EXIT
 k rollout status deployment/monitoring-prometheus --timeout=600s
-k rollout status statefulset/elastic-elastic --timeout=600s
-k rollout status deployment/elastic-elastic-kibana --timeout=600s
+if [[ $ELK_PAUSED == true ]]; then
+  for workload in statefulset/elastic-elastic deployment/elastic-elastic-kibana; do
+    k get "$workload" -o json | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d["spec"]["replicas"] == 0 and d.get("status",{}).get("replicas",0) == 0, "ELK pause has not converged"'
+  done
+  echo 'PASS ELK intentionally paused; health checks skipped'
+else
+  k rollout status statefulset/elastic-elastic --timeout=600s
+  k rollout status deployment/elastic-elastic-kibana --timeout=600s
+fi
 k rollout status deployment/switch-telegraf --timeout=180s
 k rollout status deployment/monitoring-grafana --timeout=180s
 for item in 'monitoring-prometheus PROM_PORT 9090' 'switch-telegraf PDU_PORT 8080' 'switch-telegraf METRICS_PORT 9273' 'monitoring-grafana GRAFANA_PORT 80' 'elastic-elastic ELASTIC_PORT 9200' 'elastic-elastic-kibana KIBANA_PORT 5601'; do
   read -r svc portvar remoteport <<< "$item"
+  if [[ $ELK_PAUSED == true && $svc == elastic-* ]]; then continue; fi
   logfile="$forward_dir/$portvar"
   # kubectl chooses an available loopback port; require its explicit readiness line.
   setsid minikube -p fhs-test kubectl -- --context=fhs-test --request-timeout=30s -n fhs-platform port-forward --address 127.0.0.1 "service/$svc" ":$remoteport" >"$logfile" 2>&1 &
@@ -29,10 +48,12 @@ for item in 'monitoring-prometheus PROM_PORT 9090' 'switch-telegraf PDU_PORT 808
 done
 export GRAFANA_USER=$(k get secret monitoring-grafana-admin -o jsonpath='{.data.admin-user}' | base64 -d)
 export GRAFANA_PASSWORD=$(k get secret monitoring-grafana-admin -o jsonpath='{.data.admin-password}' | base64 -d)
-export ELASTIC_PASSWORD=$(k get secret elastic-credentials -o jsonpath='{.data.elastic-password}' | base64 -d)
+if [[ $ELK_PAUSED != true ]]; then
+  export ELASTIC_PASSWORD=$(k get secret elastic-credentials -o jsonpath='{.data.elastic-password}' | base64 -d)
+fi
 python3 - <<'PY'
 import base64,json,os,time,urllib.request,urllib.parse,urllib.error,uuid
-PROM_PORT,PDU_PORT,METRICS_PORT,GRAFANA_PORT,ELASTIC_PORT,KIBANA_PORT=[int(os.environ[n]) for n in ("PROM_PORT","PDU_PORT","METRICS_PORT","GRAFANA_PORT","ELASTIC_PORT","KIBANA_PORT")]
+PROM_PORT,PDU_PORT,METRICS_PORT,GRAFANA_PORT=[int(os.environ[n]) for n in ("PROM_PORT","PDU_PORT","METRICS_PORT","GRAFANA_PORT")]
 
 def get(port,path,body=None,auth=None):
  headers={}
@@ -62,6 +83,10 @@ auth=(os.environ['GRAFANA_USER'],os.environ['GRAFANA_PASSWORD'])
 check(json.loads(get(GRAFANA_PORT,'/api/health'))['database']=='ok')
 retry(lambda:metric(GRAFANA_PORT,'/api/datasources/proxy/uid/prometheus/api/v1/query?query='+query,auth))
 print('PASS Grafana health and authenticated datasource query',flush=True)
+if os.environ['ELK_PAUSED']=='true':
+ print('PASS synthetic PDU -> Telegraf -> Prometheus -> Grafana; ELK paused by source profile')
+ raise SystemExit(0)
+ELASTIC_PORT,KIBANA_PORT=[int(os.environ[n]) for n in ('ELASTIC_PORT','KIBANA_PORT')]
 eauth=('elastic',os.environ['ELASTIC_PASSWORD'])
 retry(lambda:check(json.loads(get(ELASTIC_PORT,'/_cluster/health',auth=eauth))['status'] in ('yellow','green')))
 retry(lambda:check(json.loads(get(KIBANA_PORT,'/api/status',auth=eauth))['status']['overall']['level']=='available'))

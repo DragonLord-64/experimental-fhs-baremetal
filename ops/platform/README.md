@@ -24,3 +24,5 @@ Storage uses twelve static `Retain` hostPath volumes in `/data/fhs-platform/` in
 The fhs-test Docker container was increased from 4 GiB to 6 GiB using `docker update --memory=6g --memory-swap=8g fhs-test`; minikube cannot resize an existing profile itself. `lifecycle.sh up` requests 6 GiB for new profiles. Kubernetes reports host memory rather than the container cgroup limit, so watch actual `docker stats` use. No unrelated container or default context is changed.
 
 Live evidence and initial corrections: [VALIDATION.md](VALIDATION.md).
+
+The lab ELK profile intentionally sets both `replicas` to zero in `monitoring-values/elasticsearch.yaml`. Base monitoring redeploys keep it paused; StatefulSet claims and retained PVs remain. The setup Job is omitted while Elasticsearch is paused. `monitoring-test.sh` requires both workloads at zero before skipping ELK health checks. To resume, review changing both source replica values to one and redeploy; no live pause/resume was performed by the implementation worker. Chart defaults remain one; schema permits only zero or one for this single-node service.

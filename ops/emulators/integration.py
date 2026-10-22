@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Generate additive lab Helm overlays from current deployed release values."""
 import json
+from copy import deepcopy
 import os
 from pathlib import Path
 import subprocess
@@ -31,7 +32,7 @@ def overlays(prom,telegraf,t,remove=False):
     config=prom_files.get('prometheus.yml',{}).copy()
     config['scrape_configs']=[j for j in config.get('scrape_configs',[]) if j.get('job_name') not in ('fhs-emulator','node-emulator')]+([] if remove else scrape_configs(t))
     prom_files['prometheus.yml']=config
-    tc=telegraf['config'].copy()
+    tc=deepcopy(telegraf['config'])
     inputs=json.loads(json.dumps(tc['inputs']))
     for item in inputs:
         if 'cisco_telemetry_mdt' in item:
@@ -48,9 +49,28 @@ def overlays(prom,telegraf,t,remove=False):
         processors.append({'regex':{'namepass':['nexus_interfaces','nexus_lldp'],'tags':[{'key':'dn','pattern':r'^.*(?:phys|if)-\[(?P<interface>[^\]]+)\].*$','replacement':'${interface}','result_key':'interface'}]}})
     tc['processors']=processors
     for output in tc['outputs']:
-        if 'prometheus_client' in output:
+        if not remove and 'prometheus_client' in output:
             output['prometheus_client']['string_as_label']=True
     return {'serverFiles':prom_files},{'config':tc}
+
+def restore_outputs(config, before):
+    """Restore only our output setting; retain unrelated operator changes."""
+    old = [o['prometheus_client'] for o in before['outputs'] if 'prometheus_client' in o]
+    current = [o['prometheus_client'] for o in config['outputs'] if 'prometheus_client' in o]
+    if len(old) != len(current):
+        raise ValueError('Prometheus outputs changed; manual cleanup review required')
+    for output, original in zip(current, old):
+        if 'string_as_label' in original:
+            output['string_as_label'] = original['string_as_label']
+        else:
+            output.pop('string_as_label', None)
+
+def restore_mdt(current, original):
+    for section,key in [('aliases','nexus_lldp'),('dmes','dnpath_lldp')]:
+        if key in original.get(section,{}):
+            current.setdefault(section,{})[key]=original[section][key]
+        elif section not in original and not current.get(section):
+            current.pop(section, None)
 
 def main():
     RUNTIME.mkdir(exist_ok=True,mode=0o700)
@@ -66,11 +86,13 @@ def main():
     for release,data in zip(('prometheus','telegraf'),overlays(*values,configured(),remove='--remove' in sys.argv)):
         if '--remove' in sys.argv and release=='telegraf':
             before=json.loads((RUNTIME/'telegraf-before.json').read_text())
+            restore_outputs(data['config'], before['config'])
+            for processor in before['config'].get('processors', []):
+                if processor.get('regex', {}).get('namepass') == ['nexus_interfaces','nexus_lldp']:
+                    data['config']['processors'].append(deepcopy(processor))
             original=next(i['cisco_telemetry_mdt'] for i in before['config']['inputs'] if 'cisco_telemetry_mdt' in i)
             current=next(i['cisco_telemetry_mdt'] for i in data['config']['inputs'] if 'cisco_telemetry_mdt' in i)
-            for section,key in [('aliases','nexus_lldp'),('dmes','dnpath_lldp')]:
-                if key in original.get(section,{}):
-                    current.setdefault(section,{})[key]=original[section][key]
+            restore_mdt(current, original)
         target=RUNTIME/(release+'-overlay.json')
         target.write_text(json.dumps(data,indent=2)+'\n');target.chmod(0o600)
     print('Prepared additive overlays; existing platform jobs, inputs and outputs retained.')

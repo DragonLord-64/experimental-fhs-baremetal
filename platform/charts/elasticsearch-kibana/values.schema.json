@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "required": [
     "existingSecret",
@@ -17,7 +17,8 @@
         "image",
         "persistence",
         "heap",
-        "resources"
+        "resources",
+        "replicas"
       ],
       "properties": {
         "image": {
@@ -54,6 +55,11 @@
               ]
             }
           }
+        },
+        "replicas": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },
@@ -62,7 +68,8 @@
       "required": [
         "enabled",
         "image",
-        "resources"
+        "resources",
+        "replicas"
       ],
       "properties": {
         "enabled": {
@@ -81,6 +88,11 @@
         "publicBaseUrl": {
           "type": "string",
           "pattern": "^(|https?://[^\\s]+[^/])$"
+        },
+        "replicas": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },

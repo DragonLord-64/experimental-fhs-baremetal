@@ -1,5 +1,5 @@
 {
   "mode": "shared",
-  "vcc_units": 24,
-  "fsp_units": 27
+  "vcc_units": 4,
+  "fsp_units": 3
 }

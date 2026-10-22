@@ -3,3 +3,4 @@ cisco/sender
 .runtime/
 fixtures/topology.json
 fixtures/node.prom
+cisco/cache/cache-worker

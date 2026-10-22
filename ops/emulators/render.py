@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Render the isolated monitoring fixtures as Kubernetes JSON."""
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -23,6 +24,7 @@ def render():
     objects = [{'apiVersion': 'v1', 'kind': 'Namespace', 'metadata': {'name': NAMESPACE, 'labels': LABELS}},
         {'apiVersion': 'v1', 'kind': 'ConfigMap', 'metadata': metadata('monitoring-fixtures'),
          'data': {'topology.json': json.dumps(t, separators=(',', ':')), 'node.prom': node_metrics(t), **{p.name: p.read_text() for p in sorted((ROOT / 'fixtures').glob('fhstelemetry-*.yaml'))}}}]
+    checksum = hashlib.sha256(json.dumps(objects[1]['data'], sort_keys=True).encode()).hexdigest()
     fhs = {'name': 'fhs', 'image': pins['fhs'],
            'command': ['/app/bin/fhs-prometheus-exporter'],
            'args': ['--emulation_mode', '--fpga_card_names', 'shared-fpga0,shared-fpga1', '--port', '9110'],
@@ -49,18 +51,26 @@ def render():
               'volumeMounts': [{'name': 'fixtures', 'mountPath': '/fixtures', 'readOnly': True}],
               'resources': {'requests': {'cpu': '5m', 'memory': '32Mi'}, 'limits': {'cpu': '100m', 'memory': '64Mi'}},
               'securityContext': security()}
-    for name, containers in [('fhs-emulator', [fhs, fault, node]), ('cisco-emulator', [sender])]:
+    caches = []
+    for name, upstream, port in [('healthy-cache', 9110, 9210), ('fault-cache', 9111, 9211)]:
+        caches.append({'name': name, 'image': pins['cache'], 'imagePullPolicy': 'Never',
+            'args': [f'--listen=:{port}', f'--upstream=http://127.0.0.1:{upstream}/metrics'],
+            'resources': {'requests': {'cpu': '5m', 'memory': '8Mi'}, 'limits': {'cpu': '100m', 'memory': '32Mi'}},
+            'securityContext': security(),
+            'readinessProbe': {'httpGet': {'path': '/ready', 'port': port}, 'periodSeconds': 5}})
+    # Native readiness still scrapes the actual worker; cache readiness also expires.
+    for name, containers in [('fhs-emulator', [fhs, fault, node] + caches), ('cisco-emulator', [sender])]:
         labels = {'app': name}
         objects.append({'apiVersion': 'apps/v1', 'kind': 'Deployment', 'metadata': metadata(name),
             'spec': {'replicas': 1, 'strategy': {'type': 'Recreate'}, 'selector': {'matchLabels': labels},
-                     'template': {'metadata': {'labels': {**LABELS, **labels}}, 'spec': {
+                     'template': {'metadata': {'labels': {**LABELS, **labels}, 'annotations': {'checksum/fixtures': checksum}}, 'spec': {
                          'automountServiceAccountToken': False,
                          'securityContext': {'runAsNonRoot': True, 'runAsUser': 65532, 'runAsGroup': 65532, 'seccompProfile': {'type': 'RuntimeDefault'}},
                          'containers': containers,
                          'volumes': [{'name': 'fixtures', 'configMap': {'name': 'monitoring-fixtures'}}]}}}})
     objects.append({'apiVersion': 'v1', 'kind': 'Service', 'metadata': metadata('fhs-emulator'),
         'spec': {'type': 'ClusterIP', 'selector': {'app': 'fhs-emulator'},
-                 'ports': [{'name': 'fhs-metrics', 'port': 9110, 'targetPort': 9110}, {'name': 'fault-metrics', 'port': 9111, 'targetPort': 9111}, {'name': 'node-metrics', 'port': 9100, 'targetPort': 9100}]}})
+                 'ports': [{'name': 'fhs-metrics', 'port': 9110, 'targetPort': 9210}, {'name': 'fault-metrics', 'port': 9111, 'targetPort': 9211}, {'name': 'node-metrics', 'port': 9100, 'targetPort': 9100}]}})
     return {'apiVersion': 'v1', 'kind': 'List', 'items': objects}
 
 if __name__ == '__main__':

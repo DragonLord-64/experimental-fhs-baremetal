@@ -52,6 +52,16 @@ def main():
     t = configured()
     present = [h for h in t['hosts'] if h['telemetry'] != 'missing']
     with forward('fhs-emulators', 'fhs-emulator', 9110) as fhs, forward('fhs-emulators', 'fhs-emulator', 9111) as fault, forward('fhs-emulators', 'fhs-emulator', 9100) as node, forward('fhs-platform', 'switch-telegraf', 9273) as telegraf, forward('fhs-platform', 'monitoring-prometheus', 9090) as prom:
+        def collected(port):
+            with urllib.request.urlopen(f'http://127.0.0.1:{port}/metrics', timeout=10) as response:
+                stamp = response.headers.get('X-Exporter-Collected-At')
+                assert stamp, 'Native-response cache lacks collection timestamp'
+                return stamp
+        initial = retry(lambda: collected(fhs))
+        def refreshed():
+            assert collected(fhs) != initial, 'Native snapshot did not refresh'
+        retry(refreshed, 30)
+        print('PASS actual native cache collection timestamp advances', flush=True)
         raw = retry(lambda: get(fhs, '/metrics'))
         assert 'nic_temperature_celcius{data_type="temperature",source="NIC"} 50.0' in raw
         assert 'sts_psu1_fan{data_type="flag",source="PSU1"} 0.0' in raw
@@ -74,13 +84,31 @@ def main():
         retry(lambda: scalar('count(up{job="fhs-emulator",unit="FSPUnit1"} == 0)', 4))
         retry(lambda: scalar('count(up{job="fhs-emulator"} == 1)', len(present)))
         def absent():
-            assert not query('nic_temperature_celcius{job="fhs-emulator",unit="FSPUnit1"}')
-            assert not query('node_network_info{job="node-emulator",unit="FSPUnit1"}')
+            assert not query('{job="fhs-emulator",unit="FSPUnit1",__name__!~"up|scrape_.*"}')
+            assert not query('{job="node-emulator",unit="FSPUnit1"}')
         retry(absent)
+        healthy_statuses = re.findall(r'^(sts_[a-zA-Z0-9_]+)\{[^\n]*\} ([^\s]+)$', raw, re.MULTILINE)
+        assert healthy_statuses and all(float(value)==0 for _,value in healthy_statuses), 'Healthy exporter has nonzero status flags'
+        retry(lambda: scalar('count({job="fhs-emulator",__name__=~"sts_.*"})', len(healthy_statuses)*len(present)))
+        def healthy_flags():
+            flags = query('{job="fhs-emulator",__name__=~"sts_.*"} != 0')
+            assert len(flags) == 1, flags
+            labels = flags[0]['metric']
+            assert (labels['__name__'], labels['unit'], labels['fhs'], labels['source']) == ('sts_psu1_fan', 'FSPUnit2', 'FHS1', 'PSU1'), labels
+            assert float(flags[0]['value'][1]) == 1
+        retry(healthy_flags)
         retry(lambda: scalar('count(sts_psu1_fan{job="fhs-emulator"} == 1)', 1))
         retry(lambda: scalar('sts_psu1_fan{job="fhs-emulator",unit="FSPUnit2",fhs="FHS1"}', 1))
         retry(lambda: scalar('count(sts_psu1_fan{job="fhs-emulator"} == 0)', len(present)-1))
         retry(lambda: scalar('count(node_network_info{job="node-emulator"})', len(present)*2))
+        node_interfaces=query('node_network_info{job="node-emulator"}')
+        actual_node={(r['metric']['fhs_name'],r['metric']['device']):
+                     (r['metric']['address'],r['metric']['ifalias'],r['metric']['unit'],r['metric']['fhs'])
+                     for r in node_interfaces}
+        expected_node={(h['name'],i['node_device']):
+                       (i['node_mac'],i['switch']+':'+i['switch_port'],h['unit'],h['fhs'])
+                       for h in present for i in h['interfaces']}
+        assert len(node_interfaces)==len(expected_node) and actual_node==expected_node, 'Node MAC/interface associations disagree with topology'
         expected_neighbors = sum(len(sw['links']) for sw in t['switches'])
         retry(lambda: scalar('count(nexus_lldp_id)', expected_neighbors))
         retry(lambda: scalar('count(nexus_interfaces_vdcId{operSt="down"})', 2))
@@ -93,7 +121,14 @@ def main():
         result=query('nexus_lldp_id')
         actual={(r['metric']['source'],r['metric']['interface']):(r['metric']['sysName'],r['metric']['portIdV'],r['metric']['chassisIdV'],r['metric']['mgmtIp']) for r in result}
         expected={(sw['name'],l['local_port']):(l['neighbor']['name'],l['remote_port'],l['neighbor']['chassis_mac'],l['neighbor']['management_ip']) for sw in t['switches'] for l in sw['links']}
-        assert actual==expected, 'LLDP neighbor labels disagree with canonical topology'
+        assert len(result)==len(expected) and actual==expected, 'LLDP neighbor labels disagree with canonical topology'
+        states=query('nexus_interfaces_vdcId')
+        actual_states={(r['metric']['source'],r['metric']['interface']):r['metric']['operSt'] for r in states}
+        expected_states={(sw['name'],l['local_port']):l['state'] for sw in t['switches'] for l in sw['links']}
+        assert len(states)==len(expected_states) and actual_states==expected_states, 'Interface states disagree with canonical topology'
+        cardinality=query('count({job=~"fhs-emulator|node-emulator"})')
+        switch_cardinality=query('count({__name__=~"nexus_.*"})')
+        print('Observed cardinality: FHS/node='+json.dumps(cardinality)+'; Cisco='+json.dumps(switch_cardinality), flush=True)
         assert 'nexus_lldp_id' in get(telegraf,'/metrics')
         print(f"PASS actual Cisco MDT -> Telegraf -> Prometheus: {len(t['hosts'])} FHS identities, {len(t['switches'])} switches, {len(t['mesh_links'])} mesh edges; exactly one PSU fault, four NoData hosts and one bidirectional failed link", flush=True)
 

@@ -1,6 +1,7 @@
 # Fresh Elasticsearch/Kibana installation; Secret values are supplied separately.
 existingSecret: elastic-credentials
 elasticsearch:
+  replicas: 1
   image:
     repository: docker.io/library/elasticsearch
     tag: 9.5.5
@@ -19,6 +20,7 @@ elasticsearch:
   service:
     type: ClusterIP
 kibana:
+  replicas: 1
   basePath: ''
   publicBaseUrl: ''
   ingress:

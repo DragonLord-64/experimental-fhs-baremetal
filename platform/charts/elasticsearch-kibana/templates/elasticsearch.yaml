@@ -29,7 +29,7 @@ kind: StatefulSet
 metadata:
   name: {{ include "elastic-small.name" . }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.elasticsearch.replicas }}
   serviceName: {{ include "elastic-small.name" . }}
   selector:
     matchLabels: {app: {{ include "elastic-small.name" . }}}

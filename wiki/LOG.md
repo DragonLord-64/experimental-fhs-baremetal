@@ -27,3 +27,13 @@ Append completed events here; keep proposed work in the plan.
 - Final optional all-components command `deploy.sh deploy --with-bifrost` passed after full cluster resume, including the corrected transient database-restart cleanup handling. All service pods were Ready; disposable API sites, forwarding processes and Bifrost resources were cleaned up. Default context remained `monitoring`.
 
 - Recorded the user-confirmed VCC/FSP unit composition and full VCC-to-FSP connectivity, with links to the SKA MCS architecture and interface documentation; see [unit topology](unit-topology.md).
+
+## 2026-10-22
+
+- Corrected monitoring emulator overlay mutation and cleanup restoration; six local contract tests pass. Added bounded configuration selection and stricter live assertions. Supervisor integration request is pending; no new deployment or data-readiness claim. See [current evidence and remaining checks](../ops/emulators/VALIDATION.md).
+
+- Diagnosed the bounded emulator integration failure: Prometheus had not reloaded its changed ConfigMap. Supervisor-run explicit reload and real bounded verification passed (13 FHS, four switches, three links). Added checked reloads and fixture checksum rollouts; eleven local tests pass. Full shared expansion awaits measured supervisor review. See [validation evidence](../ops/emulators/VALIDATION.md).
+
+- Added bounded replay of actual native FHS exporter responses after full shared scrape availability failed. Supervisor bounded/full protocol and Prometheus assertions passed (132 FHS, 51 switches, 648 mesh links; 13,264 FHS/node and 11,073 Cisco series). Reset, exact cleanup restoration and full reapply passed; final platform check hit a failed local tunnel and fresh read-only proof is pending. Independent review remains required. See [validation and resource evidence](../ops/emulators/VALIDATION.md).
+
+- Reduced the default emulator inventory to VCCUnit1..4 / FSPUnit1..3 while retaining original full-topology identities and the optional full reference. Source regressions pass; reduced supervisor acceptance remains pending. Added a reversible source ELK pause profile with retained claims and offline render checks. See [validation](../ops/emulators/VALIDATION.md) and [platform profile](../ops/platform/README.md).

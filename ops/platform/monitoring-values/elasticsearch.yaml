@@ -1,6 +1,7 @@
 # Isolated dragonvm lab; no production targets.
 existingSecret: elastic-credentials
 elasticsearch:
+  replicas: 0
   image:
     repository: docker.io/library/elasticsearch
     tag: 9.5.5
@@ -21,6 +22,7 @@ elasticsearch:
     type: ClusterIP
     port: 9200
 kibana:
+  replicas: 0
   basePath: ''
   publicBaseUrl: ''
   enabled: true

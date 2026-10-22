@@ -29,11 +29,11 @@ docker run -d --name fhs-protocol-sender --network=container:fhs-protocol-telegr
   -v "$PWD/fixtures:/fixtures:ro" fhs-lab/cisco-emulator:1 --target=127.0.0.1:57000 --interval=10s >/dev/null
 expected=$(python3 -c 'import json; t=json.load(open("fixtures/topology.json")); print(sum(len(s["links"]) for s in t["switches"]))')
 for attempt in $(seq 1 60); do
-  docker run --rm --network=container:fhs-protocol-telegraf --memory=16m --cpus=.1 busybox:1.37.0 wget -qO- http://127.0.0.1:9273/metrics > .runtime/telegraf.prom || true
+  docker run --rm --network=container:fhs-protocol-telegraf --memory=16m --cpus=.1 busybox:1.37.0@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e wget -qO- http://127.0.0.1:9273/metrics > .runtime/telegraf.prom || true
   if [[ $(grep -c '^nexus_lldp_id{' .runtime/telegraf.prom || true) == "$expected" ]]; then break; fi
   sleep 1
 done
-docker run --rm --network=container:fhs-protocol-telegraf --memory=16m --cpus=.1 busybox:1.37.0 wget -qO- http://127.0.0.1:9100/metrics > .runtime/node.prom
+docker run --rm --network=container:fhs-protocol-telegraf --memory=16m --cpus=.1 busybox:1.37.0@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e wget -qO- http://127.0.0.1:9100/metrics > .runtime/node.prom
 python3 - <<'PY'
 import json,re
 from pathlib import Path

@@ -12,3 +12,5 @@ docker run --rm --memory=512m --cpus=1 --user "$(id -u):$(id -g)" \
   golang:1.24.2-alpine3.21@sha256:7772cb5322baa875edd74705556d08f0eeca7b9c4b5367754ce3f2f00041ccee \
   sh -c 'go test -mod=readonly ./... && CGO_ENABLED=0 go build -mod=readonly -trimpath -ldflags="-s -w" -o sender .'
 docker build -f cisco/Runtime.Dockerfile -t fhs-lab/cisco-emulator:1 cisco
+
+./build-cache.sh

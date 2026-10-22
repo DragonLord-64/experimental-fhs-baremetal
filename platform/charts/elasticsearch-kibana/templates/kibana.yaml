@@ -13,7 +13,7 @@ kind: Deployment
 metadata:
   name: {{ include "elastic-small.name" . }}-kibana
 spec:
-  replicas: 1
+  replicas: {{ .Values.kibana.replicas }}
   selector:
     matchLabels: {app: {{ include "elastic-small.name" . }}-kibana}
   template:
