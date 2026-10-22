@@ -100,6 +100,16 @@ def main():
         retry(lambda: scalar('count(sts_psu1_fan{job="fhs-emulator"} == 1)', 1))
         retry(lambda: scalar('sts_psu1_fan{job="fhs-emulator",unit="FSPUnit2",fhs="FHS1"}', 1))
         retry(lambda: scalar('count(sts_psu1_fan{job="fhs-emulator"} == 0)', len(present)-1))
+        # Review note: observed native flags/fans must reach storage; missing-host assertions above still apply.
+        for metric in ('prochot_cpu','cpu1_thermtrip','sts_cpu_mce','watchdog2','chassis_intr'):
+            retry(lambda metric=metric: scalar('count('+metric+'{job="fhs-emulator"} == 0)', len(present)))
+        for metric in ('fan1_rpm','fan2_rpm'):
+            retry(lambda metric=metric: scalar('count('+metric+'{job="fhs-emulator"} > 0)', len(present)))
+        for metric in ('volt_12v_volts','volt_3v_volts'):
+            retry(lambda metric=metric: scalar('count('+metric+'{job="fhs-emulator",source="x550_bmc"} > 0)', len(present)))
+        # Review note: validate reference-shaped synthetic NVMe temperature/state per present logical host.
+        retry(lambda: scalar('count(node_hwmon_temp_celsius{job="node-emulator",chip=~"nvme_nvme[01]",sensor="temp1"} == 36.85)', len(present)*2))
+        retry(lambda: scalar('count(node_nvme_info{job="node-emulator",device=~"nvme[01]",state="live"} == 1)', len(present)*2))
         retry(lambda: scalar('count(node_network_info{job="node-emulator"})', len(present)*2))
         node_interfaces=query('node_network_info{job="node-emulator"}')
         actual_node={(r['metric']['fhs_name'],r['metric']['device']):

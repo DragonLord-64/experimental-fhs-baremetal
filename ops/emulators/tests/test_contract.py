@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 import sys
 import unittest
@@ -44,6 +45,36 @@ class Contracts(unittest.TestCase):
   self.assertEqual(sum('missing-telemetry' in e['targets'][0] for e in configs[0]['static_configs']),4)
   self.assertEqual(sum(':9111' in e['targets'][0] for e in configs[0]['static_configs']),1)
   self.assertFalse(any(line.startswith(('up ', 'up{')) for line in data.splitlines()))
+
+ # Review note: native chassis fan/CPU flags are dashboard inputs; retain them without widening unrelated names.
+ def test_native_component_health_metrics_survive_relabel(self):
+  config=scrape_configs(topology(4,3))[0]
+  keep=config['metric_relabel_configs'][0]
+  self.assertEqual((keep['source_labels'],keep['action']),(['__name__'],'keep'))
+  for name in ('fan1_rpm','fan2_rpm','prochot_cpu','cpu1_thermtrip','sts_cpu_mce','volt_12v_volts','volt_3v_volts','watchdog2','chassis_intr'):
+   self.assertIsNotNone(re.fullmatch(keep['regex'],name),name)
+  for name in ('fan3_rpm','prochot_cpu_extra','cpu2_thermtrip','volt_5v_volts','watchdog2_extra','unrelated_metric'):
+   self.assertIsNone(re.fullmatch(keep['regex'],name),name)
+  self.assertEqual(sum('missing-telemetry' in e['targets'][0] for e in config['static_configs']),4)
+  self.assertEqual(sum(':9111' in e['targets'][0] for e in config['static_configs']),1)
+
+ # Review note: missing hosts must not gain NVMe state; present hosts get reference-shaped synthetic telemetry.
+ def test_synthetic_nvme_component_metrics(self):
+  t=topology(4,3);data=node_metrics(t)
+  self.assertIn('# TYPE node_hwmon_temp_celsius gauge',data)
+  self.assertIn('# TYPE node_nvme_info gauge',data)
+  temperatures=[line for line in data.splitlines() if line.startswith('node_hwmon_temp_celsius{')]
+  info=[line for line in data.splitlines() if line.startswith('node_nvme_info{')]
+  self.assertEqual((len(temperatures),len(info)),(24,24))
+  for host in t['hosts']:
+   rows=[line for line in temperatures+info if 'fhs_name="'+host['name']+'"' in line]
+   self.assertEqual(len(rows),0 if host['telemetry']=='missing' else 4)
+   for line in rows:
+    if line.startswith('node_hwmon'):
+     self.assertRegex(line,r'chip="nvme_nvme[01]".*sensor="temp1".*} 36\.85$')
+    else:
+     self.assertIn('state="live"',line)
+     self.assertIn('serial="synthetic-',line)
 
  def test_additive_integration(self):
   p={'serverFiles':{'prometheus.yml':{'scrape_configs':[{'job_name':'existing'}],'rule_files':['existing.yml']}}}

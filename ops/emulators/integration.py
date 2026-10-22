@@ -21,9 +21,10 @@ def scrape_configs(t):
         if host['telemetry']=='missing':
             endpoint='missing-telemetry.fhs-emulators.svc.cluster.local:9110'
         entries.append({'targets':[endpoint], 'labels':{k:host[k] for k in ('unit','role','fhs')} | {'fhs_name':host['name'],'synthetic':'true','emulation_mode':'shared'}})
+    # Review note: keep all native chassis fan, CPU and BMC inputs required by the 21-component catalog.
     return [
         {'job_name':'fhs-emulator','scrape_interval':'15s','scrape_timeout':'5s','static_configs':entries,
-         'metric_relabel_configs':[{'source_labels':['__name__'],'regex':'(?:.*temperature.*|.*_fan_rpm|.*power_watts|sts_.*|test_.*|num_metrics_.*|.*voltage_volts)','action':'keep'}]},
+         'metric_relabel_configs':[{'source_labels':['__name__'],'regex':'(?:.*temperature.*|.*_fan_rpm|.*power_watts|sts_.*|test_.*|num_metrics_.*|.*voltage_volts|fan[12]_rpm|prochot_cpu|cpu1_thermtrip|volt_12v_volts|volt_3v_volts|watchdog2|chassis_intr)','action':'keep'}]},
         {'job_name':'node-emulator','scrape_interval':'15s','static_configs':[{'targets':['fhs-emulator.fhs-emulators.svc.cluster.local:9100'],'labels':{'synthetic':'true','emulation_mode':'shared'}}]},
     ]
 

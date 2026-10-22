@@ -59,3 +59,5 @@ Integration copies observed values before editing. Cleanup restores the recorded
 - Real upstream node exporter `v1.9.1`, immutable digest in `images.json`; only textfile collector enabled. Private scratch sender is built locally from the pinned Go module; no upstream publishing.
 
 Standalone HTTP probes use BusyBox 1.37.0 pinned to the cached image digest in `protocol-test.sh` (GPL-2.0-only); no BusyBox source is copied.
+
+Component-health fixture addition: retain actual native `fan1_rpm`, `fan2_rpm`, `prochot_cpu`, `cpu1_thermtrip`, `volt_12v_volts`, `volt_3v_volts`, `watchdog2` and `chassis_intr` through the lab scrape filter. Present logical hosts also expose synthetic `node_hwmon_temp_celsius{chip="nvme_nvme0/1",sensor="temp1"}=36.85` and `node_nvme_info{device="nvme0/1",state="live"}=1`, following reference node-exporter labels and units. Model/firmware/serial values are explicitly synthetic; no production identity is copied. Missing FSPUnit1 hosts remain omitted. These fixtures describe expected monitoring input, not physical storage health.

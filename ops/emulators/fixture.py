@@ -23,6 +23,15 @@ def node_metrics(t):
         define(name)
         for host in present:
             lines.append(name+'{'+labels(host)+'} '+str(value))
+    # Review note: synthetic NVMe fixtures follow reference node-exporter labels/units; never copy real serials.
+    define('node_hwmon_temp_celsius')
+    for host in present:
+        for device in ('nvme0','nvme1'):
+            lines.append('node_hwmon_temp_celsius{'+labels(host,chip='nvme_'+device,sensor='temp1')+'} 36.85')
+    define('node_nvme_info')
+    for host in present:
+        for device in ('nvme0','nvme1'):
+            lines.append('node_nvme_info{'+labels(host,device=device,state='live',cntlid='6',firmware_revision='synthetic',model='Lab synthetic NVMe',serial='synthetic-'+host['name']+'-'+device)+'} 1')
     for name,value in [('up',1),('carrier',1),('mtu_bytes',9216),('speed_bytes',None)]:
         metric = 'node_network_'+name
         define(metric)
