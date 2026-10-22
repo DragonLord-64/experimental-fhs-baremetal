@@ -88,9 +88,9 @@ def topology_fixture(directory):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     data = module.configured()
-    if (data.get('synthetic') is not True or len(data['hosts']) != 132
-            or len(data['switches']) != 51 or len(data['mesh_links']) != 648):
-        raise LabError('Expected canonical 24 VCC / 27 FSP synthetic topology')
+    if (data.get('synthetic') is not True or (len(data['hosts']), len(data['switches']), len(data['mesh_links']))
+            not in ((132, 51, 648), (16, 7, 12))):
+        raise LabError('Expected canonical full or reduced synthetic topology')
     return select_population(data)
 
 

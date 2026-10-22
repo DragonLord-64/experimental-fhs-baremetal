@@ -40,6 +40,32 @@ def fixture():
                 row.pop('primary_ip4')
                 row['custom_fields']['fhs_lab'].update(canonical_name=canonical, unit=f'{role}unit{unit}')
                 snapshot[prune.TABLES[0]].append(row)
+    keep = {lab.PREFIX + r['name']: r for key in ('hosts', 'switches') for r in topology[key]}
+    for row in snapshot[prune.TABLES[0]]:
+        if row['name'] not in keep:
+            continue
+        source = keep[row['name']]
+        source.update(unit=row['custom_fields']['fhs_lab']['unit'].replace('vccunit', 'VCCUnit').replace('fspunit', 'FSPUnit'),
+                      management_ip='192.0.2.' + str(len([r for r in snapshot[prune.TABLES[2]]]) + 1),
+                      chassis_mac='02:aa:00:00:%02x:00' % len(snapshot[prune.TABLES[2]]))
+        row['serial'] = ''
+        kind = 'switch' if source['name'].endswith('switch') else 'fhs'
+        offset = lab.seed_offset(kind, source, None)
+        for name, pointer, address, mac_address in (
+                ('mgmt0', 'primary_ip4', source['management_ip'], source['chassis_mac']),
+                ('bmc0', 'oob_ip', '203.0.113.' + str(offset), '02:fb:00:%02x:%02x:00' % (offset >> 8, offset & 255))):
+            pk = 10000 + len(snapshot[prune.TABLES[1]])
+            snapshot[prune.TABLES[1]].append(dict(port, id=pk, device={'id': row['id']}, name=name,
+                enabled=True, mgmt_only=name == 'bmc0', primary_mac_address={'id': pk}))
+            snapshot[prune.TABLES[2]].append(dict(ip, id=pk, assigned_object_id=pk, address=address + '/32'))
+            snapshot[prune.TABLES[3]].append(dict(mac, id=pk, assigned_object_id=pk, mac_address=mac_address))
+            row[pointer] = {'id': pk}
+    retained_ids = {r['id'] for r in snapshot[prune.TABLES[0]] if r['name'] in keep}
+    retained_ports = {r['id'] for r in snapshot[prune.TABLES[1]] if r['device']['id'] in retained_ids}
+    topology['retained_snapshot'] = copy.deepcopy({
+        prune.TABLES[0]: [r for r in snapshot[prune.TABLES[0]] if r['id'] in retained_ids],
+        prune.TABLES[1]: [r for r in snapshot[prune.TABLES[1]] if r['id'] in retained_ports],
+        **{t: [r for r in snapshot[t] if r['assigned_object_id'] in retained_ports] for t in prune.TABLES[2:]}})
     refresh_evidence(snapshot, topology)
     return snapshot, topology
 
@@ -50,8 +76,9 @@ def refresh_evidence(state, topology):
     evidence = {'complete': True, 'device_ids': sorted(r['id'] for r in devices),
                 'blockers': [], 'updates': [], 'effects': [
                     {'model': model, 'id': row['id'], 'owned': True}
-                    for model, rows in zip(prune.MODELS, (devices, *[state[t] for t in prune.TABLES[1:]]))
+                    for model, rows in zip(prune.MODELS[:2], (devices, [r for r in state[prune.TABLES[1]] if r['device']['id'] in {d['id'] for d in devices}]))
                     for row in rows]}
+    evidence['facts_sha256'] = prune.digest(prune.safety_projection(prune.normalized(state)))
     evidence['sha256'] = prune.digest(evidence)
     state['dependency_evidence'] = evidence
 
@@ -75,15 +102,23 @@ class PruneTests(unittest.TestCase):
                 if self.fail and self.calls == 2:
                     raise lab.LabError('lost response after write')
         api = API()
+        def provider():
+            # A real scoped provider recollects dependencies after every batch.
+            refresh_evidence(api.state, topology)
+            return copy.deepcopy(api.state)
         with self.assertRaises(lab.LabError):
-            prune.apply(api, lambda: api.state, plan, plan['sha256'])
+            prune.apply(api, provider, plan, plan['sha256'])
         api.fail = False
-        self.assertEqual(prune.apply(api, lambda: api.state, plan, plan['sha256'])['resumed_at'], 2)
+        self.assertEqual(prune.apply(api, provider, plan, plan['sha256'])['resumed_at'], 2)
         calls = api.calls
-        prune.apply(api, lambda: api.state, plan, plan['sha256'])
+        prune.apply(api, provider, plan, plan['sha256'])
         self.assertEqual(api.calls, calls)
         self.assertEqual(len(api.state[prune.TABLES[0]]), 23)
-        self.assertTrue(all(not api.state[t] for t in prune.TABLES[1:]))
+        self.assertEqual(api.state[prune.TABLES[1]], topology['retained_snapshot'][prune.TABLES[1]])
+        for table in prune.TABLES[2:]:
+            self.assertEqual(len(api.state[table]), 1 + len(topology['retained_snapshot'][table]))
+            self.assertIsNone(api.state[table][0]['assigned_object_id'])
+            self.assertIsNone(api.state[table][0]['assigned_object_type'])
 
     def test_stale_or_unapproved_plan_never_writes(self):
         state, topology = fixture()
@@ -118,6 +153,9 @@ class PruneTests(unittest.TestCase):
             state[prune.TABLES[0]].append({'id': 100+n, 'name': lab.PREFIX + f'provision-{n}',
                                          'tags': [{'slug': 'lab-provisioning'}]})
         state[prune.TABLES[0]].append({'id': 200, 'name': 'reachable-ansible-fixture'})
+        evidence = state['dependency_evidence']
+        evidence['facts_sha256'] = prune.digest(prune.safety_projection(prune.normalized(state)))
+        evidence['sha256'] = prune.digest({k: v for k, v in evidence.items() if k != 'sha256'})
         plan = prune.plan(state, topology)
         self.assertEqual(plan['obsolete_logical'], 160)
         self.assertTrue({op['id'] for op in plan['operations'] if op['table'] == prune.TABLES[0]}.isdisjoint({100, 101, 102, 200}))

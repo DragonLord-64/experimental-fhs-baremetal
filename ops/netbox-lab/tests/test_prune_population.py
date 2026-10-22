@@ -33,3 +33,38 @@ class ExactPopulationTests(unittest.TestCase):
         state['dependency_evidence']['device_ids'].remove(missing['id'])
         with self.assertRaises(LabError):
             prune.plan(state, topology)
+
+    def test_retained_drift_fails_without_repair(self):
+        mutations = (
+            ('device', 'tags', []), ('device', 'serial', 'changed'),
+            ('device', 'oob_ip', {'id': 999}),
+            ('device', 'custom_fields', {'fhs_lab': {'kind': 'logical'}}),
+            ('port', 'mgmt_only', False), ('ip', 'address', '203.0.113.250/32'),
+            ('mac', 'mac_address', '02:ff:00:00:00:00'))
+        for kind, field, value in mutations:
+            state, topology = fixture()
+            baseline = topology['retained_snapshot']
+            table = {'device': 0, 'port': 1, 'ip': 2, 'mac': 3}[kind]
+            expected = next((r for r in baseline[prune.TABLES[table]]
+                             if kind != 'port' or r['name'] == 'bmc0'))
+            row = next(r for r in state[prune.TABLES[table]] if r['id'] == expected['id'])
+            row[field] = value
+            before = copy.deepcopy(state)
+            with self.subTest(kind=kind, field=field), self.assertRaises(LabError):
+                prune.plan(state, topology)
+            self.assertEqual(state, before)
+
+    def test_canonical_evidence_is_required_and_must_include_bmc_defaults(self):
+        for mutation in ('missing', 'renumbered', 'missing-bmc', 'unowned'):
+            state, topology = fixture()
+            baseline = topology['retained_snapshot']
+            if mutation == 'missing':
+                del topology['retained_snapshot']
+            elif mutation == 'renumbered':
+                baseline[prune.TABLES[2]][1]['address'] = '203.0.113.250/32'
+            elif mutation == 'missing-bmc':
+                baseline[prune.TABLES[1]] = [r for r in baseline[prune.TABLES[1]] if r['name'] != 'bmc0']
+            else:
+                baseline[prune.TABLES[0]][0]['tags'] = []
+            with self.subTest(mutation=mutation), self.assertRaises(LabError):
+                prune.plan(state, topology)
