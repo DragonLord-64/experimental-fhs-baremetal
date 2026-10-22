@@ -18,7 +18,7 @@ GitHub rejected the original history because it contains files over 100 MB. This
 
 ## Test layers
 
-Replicate the user's environment as closely as practical on dragonvm and run integration tests there, with local orchestration. Assess the latest development configuration and NetBox values before deploying the stack. No full-stack deployment has been performed.
+Keep a persistent test lab on dragonvm, replicate the user's environment as closely as practical, and run integration tests against that environment with local orchestration. Use [lifecycle commands](../ops/kubernetes/README.md) to stop/resume the cluster without deleting it. VM-local storage needs external backups; no delete/reset helper is provided. Assess the latest development configuration and NetBox values before deploying the stack. No full-stack deployment has been performed.
 
 The original checkout `/home/dragonlord/ska-mid-cbf-fhs-baremetal` was fast-forwarded to official development `87dc794`. It contains the monitoring-to-platform rename, current NetBox values and tracked `bifrost-infra` source missing from the experimental snapshot. Assess and adapt that source before importing: Bifrost currently assumes privileged containers, host networking, real inventory and DHCP. The exact NetBox chart version is unconfirmed; the image tag is blank in values and requires chart default/version resolution. Resolve versions before close replication.
 
@@ -26,6 +26,8 @@ The original checkout `/home/dragonlord/ska-mid-cbf-fhs-baremetal` was fast-forw
 2. Kubernetes integration: dedicated minikube `fhs-test` profile on dragonvm, Docker driver and containerd, four CPUs and 4096 MiB RAM. Kubernetes `v1.37.1` is running with a Ready node; the existing `monitoring` profile and default context are preserved. [Bootstrap and smoke checks](../ops/kubernetes/README.md) are implemented; live node/system readiness, DNS, Service traffic and PVC write/read checks passed. The corrected run exited successfully; both smoke namespaces and their PVs are gone. Monitoring deployment and metrics/log flow remain deferred.
 3. Provisioning: disposable target VMs and isolated provisioning networks for Bifrost and system configuration roles. Check nested virtualization support before implementing this on Hyper-V. Use simulated management interfaces where appropriate.
 4. Hardware: separate lab validation for FPGA cards, NIC behavior, and Cisco switches. Simulations do not establish physical hardware correctness.
+
+The persistent lab's stop/start took 7.62/48.2 seconds before full-stack deployment; PVC persistence and post-resume smoke checks passed. All owned fixtures were reclaimed, but minikube's known post-restart reclamation issue requires a stable storage/reclaim choice before full-stack destructive lifecycle tests; see [evidence and limits](../ops/kubernetes/README.md).
 
 Use the same test commands locally and in CI. Record the tested commit and retain logs, reports, and screenshots. The [agent pipeline](../ops/agent-pipeline/README.md) is implemented and has completed a bounded real run on dragonvm; see its [validation evidence](../ops/agent-pipeline/VALIDATION.md). A dedicated CI runner remains proposed.
 
