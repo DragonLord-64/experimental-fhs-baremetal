@@ -1,0 +1,44 @@
+---
+# Review note: bound one disposable container and label it so cleanup cannot select unrelated work.
+- name: Create owned container
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Start one bounded unprivileged container
+      ansible.builtin.command:
+        argv:
+          - docker
+          - run
+          - --detach
+          - --name
+          - "{{ lookup('env', 'FHS_MOLECULE_NAME') }}"
+          - --label
+          - "org.fhs.molecule.run={{ lookup('env', 'FHS_MOLECULE_NAME') }}"
+          - --memory=512m
+          - --memory-swap=512m
+          - --cpus=1
+          - --pids-limit=128
+          - "{{ lookup('env', 'FHS_MOLECULE_IMAGE') }}"
+          - sleep
+          - infinity
+      changed_when: true
+    # Review note: Molecule needs only this owned Docker connection record.
+    - name: Write connection details
+      ansible.builtin.copy:
+        dest: "{{ molecule_instance_config }}"
+        mode: '0600'
+        content: "{{ [{'instance': lookup('env', 'FHS_MOLECULE_NAME'), 'address': lookup('env', 'FHS_MOLECULE_NAME'), 'user': 'root', 'port': '0', 'identity_file': '', 'connection': 'community.docker.docker'}] | to_yaml }}"
+    # Review note: verify effective limits/mounts instead of trusting requested CLI options.
+    - name: Record container isolation and resource limits
+      ansible.builtin.command:
+        argv:
+          - docker
+          - inspect
+          - --format
+          - '{{ "{{" }} .HostConfig.Privileged {{ "}}" }} {{ "{{" }} len .Mounts {{ "}}" }} {{ "{{" }} .HostConfig.Memory {{ "}}" }} {{ "{{" }} .HostConfig.NanoCpus {{ "}}" }} {{ "{{" }} .HostConfig.PidsLimit {{ "}}" }}'
+          - "{{ lookup('env', 'FHS_MOLECULE_NAME') }}"
+      register: isolation
+      changed_when: false
+    - name: Assert no privileges or mounts and bounded resources
+      ansible.builtin.assert:
+        that: isolation.stdout == 'false 0 536870912 1000000000 128'

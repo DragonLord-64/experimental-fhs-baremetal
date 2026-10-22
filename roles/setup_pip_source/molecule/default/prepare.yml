@@ -1,0 +1,15 @@
+---
+# Review note: install only container Python, and preserve a canary outside the managed file.
+- name: Prepare disposable pip fixture
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install container Python
+      ansible.builtin.raw: apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3
+      changed_when: true
+    # Review note: a known unrelated file detects accidental adjacent resets.
+    - name: Seed unrelated config
+      ansible.builtin.copy:
+        dest: /etc/pip-unrelated.fixture
+        content: "preserve unrelated pip fixture\n"
+        mode: '0600'

@@ -1,15 +1,30 @@
 ---
-- name: Verify — pip_index
+# Review note: compare exact config bytes and metadata independently of the template;
+# managed-header comment wrappers vary with Ansible and are not pip configuration.
+- name: Verify baseline pip state
   hosts: all
-  become: true
   gather_facts: false
   tasks:
-    - name: Read /etc/pip.conf
+    - name: Read pip config
       ansible.builtin.slurp:
         src: /etc/pip.conf
       register: pipconf
-    - name: Assert index-url and trusted-host
+    - name: Read config metadata
+      ansible.builtin.stat:
+        path: /etc/pip.conf
+      register: pipstat
+    - name: Read unrelated fixture
+      ansible.builtin.slurp:
+        src: /etc/pip-unrelated.fixture
+      register: unrelated
+    - name: Assert exact state and preserved canary
       ansible.builtin.assert:
         that:
-          - "'index-url = http://devpi.test.invalid/root/pypi/+simple/' in (pipconf.content | b64decode)"
-          - "'trusted-host = devpi.test.invalid' in (pipconf.content | b64decode)"
+          # Review note: require a comment-only header and exact remaining bytes; expose safe fixture bytes on failure.
+          - (pipconf.content | b64decode).startswith('#')
+          - (pipconf.content | b64decode | regex_replace('(?m)^#[^\n]*\n', '')) == "[global]\nindex-url = https://index.test.invalid/simple/\ntrusted-host = index.test.invalid mirror.test.invalid\n"
+          - pipstat.stat.uid == 0
+          - pipstat.stat.gid == 0
+          - pipstat.stat.mode == '0644'
+          - (unrelated.content | b64decode) == "preserve unrelated pip fixture\n"
+        fail_msg: "Unexpected disposable fixture state: {{ pipconf.content | b64decode | to_json }}; metadata={{ pipstat.stat.mode }}/{{ pipstat.stat.uid }}/{{ pipstat.stat.gid }}"

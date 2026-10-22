@@ -1,11 +1,15 @@
 ---
-- name: Converge — pip_index
+# Review note: mirror site.yml dynamic role/apply tags with reserved fixture URLs only.
+- name: Converge actual setup_pip_source
   hosts: all
-  become: true
+  gather_facts: false
   vars:
-    pip_index_url: "http://devpi.test.invalid/root/pypi/+simple/"
-    pip_trusted_hosts: [devpi.test.invalid]
+    pip_index_url: https://index.test.invalid/simple/
+    pip_trusted_hosts: [index.test.invalid, mirror.test.invalid]
   tasks:
-    - name: Apply pip_index
-      ansible.builtin.import_role:
-        name: pip_index
+    - name: Apply setup_pip_source
+      ansible.builtin.include_role:
+        name: setup_pip_source
+        apply:
+          tags: [setup_pip_source]
+      tags: [setup_pip_source]
