@@ -3,6 +3,11 @@
 
 Imported configuration from official development `87dc794`; these commands target the original cluster, not the private VM lab. Review values, storage, endpoints and credentials before use. For observed dragonvm behavior and separate VM overrides, see [lab deployment](../ops/platform/README.md) and [validation](../ops/platform/VALIDATION.md). NetBox is included in `platform/netbox.yaml`; its lab chart/version selection is documented there.
 
+For a separate candidate namespace with one Helm install/upgrade, copy the
+self-contained [FHS platform chart](charts/fhs-platform/README.md). It includes
+NetBox, the monitoring/logging services and six runtime dashboards; the legacy
+commands below remain separate releases.
+
 **Objective**  
 Deploy a complete monitoring stack (Prometheus, Telegraf, Elasticsearch‑Kibana, Filebeat) on a Kubernetes cluster.
 

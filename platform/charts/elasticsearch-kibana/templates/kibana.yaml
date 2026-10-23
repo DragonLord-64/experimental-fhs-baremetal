@@ -28,36 +28,36 @@ spec:
           ports: [{name: http, containerPort: 5601}]
           env:
             - {name: SERVER_HOST, value: "0.0.0.0"}
-            {{- if .Values.kibana.basePath }}
-            - {name: SERVER_BASEPATH, value: {{ .Values.kibana.basePath | quote }}}
+            {{- if (include "elastic-small.basePath" .) }}
+            - {name: SERVER_BASEPATH, value: {{ (include "elastic-small.basePath" .) | quote }}}
             - {name: SERVER_REWRITEBASEPATH, value: "true"}
             {{- end }}
-            {{- with .Values.kibana.publicBaseUrl }}
+            {{- with (include "elastic-small.publicBaseUrl" .) }}
             - {name: SERVER_PUBLICBASEURL, value: {{ . | quote }}}
             {{- end }}
             - {name: ELASTICSEARCH_HOSTS, value: '["http://{{ include "elastic-small.name" . }}:9200"]'}
             - {name: ELASTICSEARCH_USERNAME, value: kibana_system}
             - name: ELASTICSEARCH_PASSWORD
               valueFrom:
-                secretKeyRef: {name: {{ .Values.existingSecret }}, key: kibana-password}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: kibana-password}
             - {name: STATUS_ALLOWANONYMOUS, value: "true"}
             - name: XPACK_SECURITY_ENCRYPTIONKEY
               valueFrom:
-                secretKeyRef: {name: {{ .Values.existingSecret }}, key: kibana-encryption-key}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: kibana-encryption-key}
             - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
               valueFrom:
-                secretKeyRef: {name: {{ .Values.existingSecret }}, key: kibana-encryption-key}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: kibana-encryption-key}
             - name: XPACK_REPORTING_ENCRYPTIONKEY
               valueFrom:
-                secretKeyRef: {name: {{ .Values.existingSecret }}, key: kibana-encryption-key}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: kibana-encryption-key}
           resources:
             {{- toYaml .Values.kibana.resources | nindent 12 }}
           startupProbe:
-            httpGet: {path: {{ printf "%s/api/status" .Values.kibana.basePath | quote }}, port: http}
+            httpGet: {path: {{ printf "%s/api/status" (include "elastic-small.basePath" .) | quote }}, port: http}
             periodSeconds: 10
             failureThreshold: 60
           readinessProbe:
-            httpGet: {path: {{ printf "%s/api/status" .Values.kibana.basePath | quote }}, port: http}
+            httpGet: {path: {{ printf "%s/api/status" (include "elastic-small.basePath" .) | quote }}, port: http}
             periodSeconds: 10
           livenessProbe:
             tcpSocket: {port: http}

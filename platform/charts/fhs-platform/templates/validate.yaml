@@ -1,0 +1,16 @@
+{{- if has .Release.Namespace (list "default" "kube-system" "kube-public" "kube-node-lease" "mid-cbf-monitoring") -}}
+{{- fail "Use a separate candidate namespace via --namespace (not default, Kubernetes system namespaces or mid-cbf-monitoring)" -}}
+{{- end -}}
+{{- if hasKey .Values.global.ingressAnnotations "nginx.ingress.kubernetes.io/rewrite-target" -}}
+{{- fail "Ingress rewrites break the applications' own base paths; remove rewrite-target" -}}
+{{- end -}}
+{{- if .Values.netbox.postgresql.enabled -}}{{- fail "Keep NetBox bundled PostgreSQL disabled; use umbrella postgresql.enabled" -}}{{- end -}}
+{{- if .Values.netbox.valkey.enabled -}}{{- fail "Keep NetBox bundled Valkey disabled; umbrella Valkey owns fresh task/cache state" -}}{{- end -}}
+{{- if not .Values.postgresql.enabled -}}
+{{- if or (eq .Values.netbox.externalDatabase.host "fhs-postgresql") (not (contains "." .Values.netbox.externalDatabase.host)) (eq .Values.netbox.externalDatabase.database "netbox") (eq .Values.netbox.externalDatabase.username "netbox") -}}
+{{- fail "External PostgreSQL requires qualified host, separate copied database and separate login role" -}}
+{{- end -}}
+{{- if eq .Values.netbox.externalDatabase.existingSecretName "fhs-platform-credentials" -}}
+{{- fail "External PostgreSQL requires an operator-supplied existingSecretName" -}}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "required": [
+        "hostname",
+        "urlPrefix",
+        "scheme",
+        "ingressClassName"
+      ],
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?$"
+        },
+        "urlPrefix": {
+          "type": "string",
+          "pattern": "^(|/[A-Za-z0-9_-]+(/[A-Za-z0-9_-]+)*/?)$"
+        },
+        "scheme": {
+          "enum": [
+            "https",
+            "http"
+          ]
+        },
+        "ingressClassName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tlsSecretName": {
+          "type": "string"
+        },
+        "ingressAnnotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "credentials": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean"
+        },
+        "netboxEmail": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

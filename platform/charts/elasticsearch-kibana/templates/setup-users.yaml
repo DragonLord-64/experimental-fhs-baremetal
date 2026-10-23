@@ -22,16 +22,16 @@ spec:
           env:
             - name: ELASTIC_PASSWORD
               valueFrom:
-                secretKeyRef: {name: {{ .Values.existingSecret }}, key: elastic-password}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: elastic-password}
             {{- if .Values.kibana.enabled }}
             - name: KIBANA_PASSWORD
               valueFrom:
-                secretKeyRef: {name: {{ .Values.existingSecret }}, key: kibana-password}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: kibana-password}
             {{- end }}
             {{- if .Values.filebeat.enabled }}
             - name: FILEBEAT_PASSWORD
               valueFrom:
-                secretKeyRef: {name: {{ .Values.existingSecret }}, key: filebeat-password}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: filebeat-password}
             {{- end }}
           command: [/bin/bash, -ec]
           args:

@@ -19,6 +19,8 @@ elasticsearch:
   service:
     type: ClusterIP
 kibana:
+  # Umbrella only: derive app paths from global.urlPrefix/hostname/scheme.
+  useGlobalUrl: false
   basePath: ''
   publicBaseUrl: ''
   ingress:

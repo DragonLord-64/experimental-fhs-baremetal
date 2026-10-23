@@ -1,0 +1,8 @@
+Candidate web URLs (verify TLS, login, redirects and assets on the target cluster):
+{{ include "fhs-platform.origin" . }}{{ include "fhs-platform.prefix" . }}/netbox/
+{{ include "fhs-platform.origin" . }}{{ include "fhs-platform.prefix" . }}/grafana/
+{{ include "fhs-platform.origin" . }}{{ include "fhs-platform.prefix" . }}/mid-cbf-kibana/
+
+One release owns this namespace's candidate stack. Keep the same release name,
+namespace, credentials Secret and PVCs on upgrades. Back up databases before
+updating images; Helm rollback does not undo database migrations.

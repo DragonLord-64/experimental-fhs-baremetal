@@ -48,7 +48,7 @@ spec:
           env:
             - name: ELASTIC_PASSWORD
               valueFrom:
-                secretKeyRef: {name: {{ required "Set existingSecret" .Values.existingSecret }}, key: elastic-password}
+                secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: elastic-password}
             - {name: ES_JAVA_OPTS, value: "-Xms{{ .Values.elasticsearch.heap }} -Xmx{{ .Values.elasticsearch.heap }}"}
           resources:
             {{- toYaml .Values.elasticsearch.resources | nindent 12 }}

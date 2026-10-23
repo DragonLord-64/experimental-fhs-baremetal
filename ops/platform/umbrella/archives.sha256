@@ -1,0 +1,13 @@
+606cf82f9be16ca30e0656b5e487f479498d5b64107e9583d9bf89581e5fc5f8  platform/charts/fhs-platform/charts/elasticsearch-kibana-0.5.1.tgz
+5189a48131311513ef7bf5e22f1ed6424cd1c7cec61bc1995fab04d3cf46f36a  platform/charts/fhs-platform/charts/grafana-13.2.7.tgz
+b84ca6ee37cb7bb8a160585d1afc932411074f0e40b8aec67de610c949b667bc  platform/charts/fhs-platform/charts/netbox-8.3.67.tgz
+782a11d83c7c6a69689f1b1f93e4323cd495c57d843f5ad1b04ac33b2a9cff35  platform/charts/fhs-platform/charts/postgresql-18.8.13.tgz
+58bd043404026c30298d2f319711fd32c91e255f1c9d29be557a3d465ad91239  platform/charts/fhs-platform/charts/prometheus-29.35.0.tgz
+0f2d5e49ad8f7a75053da0c915afcd54f56ce588d6ae6006832fbecfbb188699  platform/charts/fhs-platform/charts/telegraf-1.8.77.tgz
+8786343b856ac66ab61403124be218f070d0db3b2fa0a2e26797c2a6ebe77ace  platform/charts/fhs-platform/charts/valkey-6.2.16.tgz
+7627fc25d3073ff526f53d234b099b91db610f58ea86498a523efad27ff97072  platform/charts/fhs-platform/dashboards/fhs.json.gz
+d5160926549e116d4314ecd20be36d44008dbc436cc6957421dcded1ab5a93a1  platform/charts/fhs-platform/dashboards/interface.json.gz
+90fa69cb1a513f3dbbf7cad60ae54f820b5fdd21075f93bff4301bb55bb9eb30  platform/charts/fhs-platform/dashboards/mesh.json.gz
+1ae8efffcf61274ded43119cbc7b663c16bcb6d3e1a5e036c0746a9d9312c94f  platform/charts/fhs-platform/dashboards/rack.json.gz
+b4c965624e92bfd2799b6435f54a9de97720288459d2cf05cd6e94746ff3072f  platform/charts/fhs-platform/dashboards/switch.json.gz
+1d8a4f8fe51435d2bc6c32e3b4c942d5270b777493c470a010b1b75fbb0af90f  platform/charts/fhs-platform/dashboards/vlan.json.gz

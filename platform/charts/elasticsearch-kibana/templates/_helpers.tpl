@@ -7,3 +7,17 @@
 {{- define "elastic-small.kibanaImage" -}}
 {{ .Values.kibana.image.repository }}:{{ .Values.kibana.image.tag }}{{ if .Values.kibana.image.digest }}@{{ .Values.kibana.image.digest }}{{ end }}
 {{- end -}}
+
+{{- define "elastic-small.basePath" -}}
+{{- if .Values.kibana.useGlobalUrl -}}
+{{- printf "%s/mid-cbf-kibana" (trimSuffix "/" .Values.global.urlPrefix) -}}
+{{- else -}}{{- .Values.kibana.basePath -}}{{- end -}}
+{{- end -}}
+{{- define "elastic-small.publicBaseUrl" -}}
+{{- if .Values.kibana.useGlobalUrl -}}
+{{- printf "%s://%s%s" .Values.global.scheme .Values.global.hostname (include "elastic-small.basePath" .) -}}
+{{- else -}}{{- .Values.kibana.publicBaseUrl -}}{{- end -}}
+{{- end -}}
+{{- define "elastic-small.secret" -}}
+{{- tpl .Values.existingSecret . -}}
+{{- end -}}

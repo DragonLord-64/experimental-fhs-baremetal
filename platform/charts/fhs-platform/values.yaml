@@ -1,0 +1,518 @@
+# Candidate defaults. --namespace selects the namespace; global.urlPrefix selects all web paths.
+global:
+  hostname: rmdskadevdu011.mda.ca
+  urlPrefix: /test
+  scheme: https
+  ingressClassName: nginx
+  tlsSecretName: ''
+  ingressAnnotations: {}
+credentials:
+  # Default: generate fhs-platform-credentials once and preserve it on upgrades.
+  # Set create=false only after supplying that Secret in the candidate namespace.
+  # Required keys: username, email, password, api_token (40 hex), secret_key,
+  # api_token_peppers (JSON map), email_password (may be empty), postgres-password,
+  # db-password, valkey-password, admin-user, admin-password, elastic-password,
+  # kibana-password, filebeat-password, kibana-encryption-key.
+  # Logging passwords/encryption keys require at least 32 hexadecimal characters.
+  create: true
+  netboxEmail: admin@localhost
+netbox:
+  fullnameOverride: fhs-netbox
+  basePath: netbox/
+  image:
+    tag: v4.7.0
+    digest: sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba
+  postgresql:
+    enabled: false
+  valkey:
+    enabled: false
+  externalDatabase:
+    # To reuse a PostgreSQL >=15 SERVER: set umbrella postgresql.enabled=false;
+    # use a qualified host such as postgresql.old-monitoring.svc.cluster.local,
+    # a separate restored database (netbox_candidate_copy) and role (netbox_candidate).
+    # Set existingSecretName=candidate-db after creating that namespace-local
+    # Secret with key db-password; configure options.sslmode for that server.
+    # Never run candidate migrations against the original live database.
+    host: fhs-postgresql
+    database: netbox
+    username: netbox
+    existingSecretName: fhs-platform-credentials
+    existingSecretKey: db-password
+  tasksDatabase:
+    host: fhs-valkey-primary
+    database: 0
+    existingSecretName: fhs-platform-credentials
+    existingSecretKey: valkey-password
+  cachingDatabase:
+    host: fhs-valkey-primary
+    database: 1
+    existingSecretName: fhs-platform-credentials
+    existingSecretKey: valkey-password
+  existingSecret: fhs-platform-credentials
+  superuser:
+    existingSecret: fhs-platform-credentials
+  ingress:
+    enabled: false
+  service:
+    type: ClusterIP
+  persistence:
+    storageClass: nfss1
+    size: 1Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  extraEnvs:
+  - name: GRANIAN_EXTRA_ARGS
+    value: --host=0.0.0.0
+  - name: GRANIAN_WORKERS
+    value: '2'
+  resources:
+    requests:
+      cpu: 100m
+      memory: 768Mi
+    limits:
+      cpu: '2'
+      memory: 2048Mi
+  worker:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: '1'
+        memory: 768Mi
+  readinessProbe:
+    path: null
+  startupProbe:
+    path: null
+  updateStrategy:
+    type: Recreate
+  allowedHosts:
+  - '*'
+  loginRequired: true
+  sessionCookieName: fhs_netbox_session
+  extraConfig:
+  - values:
+      BASE_PATH: '{{ trimPrefix "/" (printf "%s/netbox/" (include "fhs-platform.prefix" .)) }}'
+      ALLOWED_HOSTS:
+      - '{{ .Values.global.hostname }}'
+      - localhost
+      - 127.0.0.1
+      CSRF_TRUSTED_ORIGINS:
+      - '{{ include "fhs-platform.origin" . }}'
+      SESSION_COOKIE_NAME: '{{ include "fhs-platform.cookie" . }}_netbox'
+      CSRF_COOKIE_NAME: '{{ include "fhs-platform.cookie" . }}_csrf'
+      SESSION_COOKIE_PATH: '{{ include "fhs-platform.prefix" . }}/netbox/'
+      CSRF_COOKIE_PATH: '{{ include "fhs-platform.prefix" . }}/netbox/'
+  customReadinessProbe:
+    httpGet:
+      path: '{{ include "fhs-platform.prefix" . }}/netbox/login/'
+      port: http
+    periodSeconds: 10
+    timeoutSeconds: 5
+  customStartupProbe:
+    httpGet:
+      path: '{{ include "fhs-platform.prefix" . }}/netbox/login/'
+      port: http
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 60
+postgresql:
+  fullnameOverride: fhs-postgresql
+  image:
+    digest: sha256:660da0a4a65848258ff3a93c13a20b304c6f78dc3ce6153c7c44f4ba209e28d3
+  auth:
+    username: netbox
+    database: netbox
+    existingSecret: fhs-platform-credentials
+    secretKeys:
+      userPasswordKey: db-password
+  primary:
+    persistence:
+      storageClass: bds1
+      size: 8Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: '1'
+        memory: 768Mi
+  enabled: true
+valkey:
+  fullnameOverride: fhs-valkey
+  architecture: standalone
+  image:
+    digest: sha256:c21f8222b20f7d712399a30249e181fc9a8dec5a12118c36efa01ae4b300b277
+  auth:
+    existingSecret: fhs-platform-credentials
+    existingSecretPasswordKey: valkey-password
+  primary:
+    persistence:
+      storageClass: bds1
+      size: 1Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+prometheus:
+  server:
+    persistentVolume:
+      enabled: true
+      storageClass: bds1
+      size: 50G
+      accessModes:
+      - ReadWriteOnce
+      annotations:
+        helm.sh/resource-policy: keep
+    retention: 15d
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 500m
+      limits:
+        memory: 4Gi
+        cpu: '2'
+    service:
+      enabled: true
+      type: ClusterIP
+      servicePort: 9090
+    global:
+      scrape_interval: 30s
+      scrape_timeout: 20s
+    retentionSize: 37GB
+    strategy:
+      type: Recreate
+    fullnameOverride: fhs-prometheus
+    image:
+      repository: docker.io/prom/prometheus
+      tag: v3.15.0
+      digest: sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
+    alertingFiles: {}
+  serverFiles:
+    recording_rules.yml:
+      groups:
+      - name: data_rates
+        interval: 30s
+        rules:
+        - record: instance:nexus_vlans_inBcastOctets:rate1m
+          expr: rate(nexus_vlans_inBcastOctets[1m])
+        - record: instance:nexus_vlans_inBcastPkts:rate1m
+          expr: rate(nexus_vlans_inBcastPkts[1m])
+        - record: instance:nexus_interfaces_broadcastPkts:rate1m
+          expr: rate(nexus_interfaces_broadcastPkts[1m])
+    prometheus.yml:
+      scrape_configs:
+      - job_name: switch-telegraf
+        static_configs:
+        - targets:
+          - fhs-telegraf:9273
+      - job_name: node
+        metrics_path: /metrics
+        static_configs:
+        - targets:
+          - 192.168.8.31:9100
+          labels:
+            node_name: sys1353
+        - targets:
+          - 192.168.8.33:9100
+          labels:
+            node_name: sys1389
+        - targets:
+          - 192.168.8.35:9100
+          labels:
+            node_name: sys1390
+        - targets:
+          - 192.168.8.37:9100
+          labels:
+            node_name: sys1413
+        - targets:
+          - 192.168.8.39:9100
+          labels:
+            node_name: sys1412
+        - targets:
+          - 192.168.8.41:9100
+          labels:
+            node_name: sys1392
+        - targets:
+          - 192.168.8.43:9100
+          labels:
+            node_name: sys1391
+        - targets:
+          - 192.168.8.45:9100
+          labels:
+            node_name: sys1354
+      - job_name: fhs-exporter
+        metrics_path: /metrics
+        static_configs:
+        - targets:
+          - 192.168.8.31:9110
+          labels:
+            node_name: sys1353
+        - targets:
+          - 192.168.8.33:9110
+          labels:
+            node_name: sys1389
+        - targets:
+          - 192.168.8.35:9110
+          labels:
+            node_name: sys1390
+        - targets:
+          - 192.168.8.37:9110
+          labels:
+            node_name: sys1413
+        - targets:
+          - 192.168.8.39:9110
+          labels:
+            node_name: sys1412
+        - targets:
+          - 192.168.8.41:9110
+          labels:
+            node_name: sys1392
+        - targets:
+          - 192.168.8.43:9110
+          labels:
+            node_name: sys1391
+        - targets:
+          - 192.168.8.45:9110
+          labels:
+            node_name: sys1354
+      rule_files:
+      - /etc/config/recording_rules.yml
+  alertmanager:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  configmapReload:
+    prometheus:
+      enabled: false
+  rbac:
+    create: false
+telegraf:
+  config:
+    agent:
+      interval: 10s
+      round_interval: true
+      metric_batch_size: 1000
+      metric_buffer_limit: 10000
+      flush_interval: 10s
+    inputs:
+    - cisco_telemetry_mdt:
+        transport: grpc
+        service_address: :57000
+        aliases:
+          nexus_interfaces: sys/intf
+          nexus_vlans: sys/bd
+          nexus_ch: sys/ch
+        fielddrop:
+        - clearTs
+        - modTs
+        - subscription
+    - http_listener_v2:
+        service_address: :8080
+        paths:
+        - /pdu
+        methods:
+        - POST
+        - PUT
+        data_source: body
+        data_format: json
+        name_override: pdu
+        tag_keys:
+        - pdu_id
+        read_timeout: 10s
+        write_timeout: 10s
+        max_body_size: 1MB
+    processors:
+    - regex:
+        namepass:
+        - nexus_interfaces_*
+        tags:
+        - key: dn
+          pattern: phys-\[(?P<interface>[^\]]+)\]
+          replacement: ${interface}
+          result_key: interface
+        - key: dn
+          pattern: dbgIf(?P<direction>In|Out)
+          replacement: ${direction}
+          result_key: direction
+    outputs:
+    - prometheus_client:
+        listen: :9273
+        metric_version: 2
+        path: /metrics
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 57000
+    additionalPorts:
+    - name: pdu-http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: metrics
+      port: 9273
+      targetPort: 9273
+      protocol: TCP
+  containerPorts:
+  - name: pdu-http
+    containerPort: 8080
+    protocol: TCP
+  - name: nxos
+    containerPort: 57000
+    protocol: TCP
+  - name: metrics
+    containerPort: 9273
+    protocol: TCP
+  fullnameOverride: fhs-telegraf
+  image:
+    repo: docker.io/library/telegraf
+    tag: 1.40.1@sha256:e91237482edcb054c81571923c6b7cf64f06ed6087a2f9cf0bd3bc2cd8c0ed61
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  tplVersion: 2
+grafana:
+  fullnameOverride: fhs-grafana
+  image:
+    registry: docker.io
+    repository: grafana/grafana
+    tag: 13.2.3
+    sha: b28bae15e219c998fb0e0424ed724930cc61b1f61fb404d47c862f9a23f9e572
+  admin:
+    existingSecret: fhs-platform-credentials
+    userKey: admin-user
+    passwordKey: admin-password
+  persistence:
+    enabled: true
+    type: pvc
+    storageClassName: bds1
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  deploymentStrategy:
+    type: Recreate
+  initChownData:
+    enabled: false
+  testFramework:
+    enabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: '1'
+      memory: 1Gi
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://fhs-prometheus.{{ .Release.Namespace }}.svc:9090
+        isDefault: true
+  rbac:
+    namespaced: true
+  grafana.ini:
+    server:
+      domain: '{{ .Values.global.hostname }}'
+      root_url: '{{ include "fhs-platform.origin" . }}{{ include "fhs-platform.prefix" . }}/grafana/'
+      serve_from_sub_path: true
+    auth:
+      login_cookie_name: '{{ include "fhs-platform.cookie" . }}_grafana'
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: fhs-infrastructure
+        orgId: 1
+        folder: FHS infrastructure
+        type: file
+        disableDeletion: true
+        editable: false
+        options:
+          path: /var/lib/grafana/fhs-dashboards
+  extraVolumes:
+  - name: dashboard-archives
+    configMap:
+      name: fhs-dashboard-archives
+  extraEmptyDirMounts:
+  - name: fhs-dashboards
+    mountPath: /var/lib/grafana/fhs-dashboards
+  extraInitContainers:
+  - name: unpack-dashboards
+    image: docker.io/grafana/grafana:13.2.3@sha256:b28bae15e219c998fb0e0424ed724930cc61b1f61fb404d47c862f9a23f9e572
+    command:
+    - /bin/sh
+    - -ec
+    args:
+    - "for archive in /archives/*.json.gz; do\n  name=\"$(basename \"$archive\" .gz)\"\n  gzip -dc \"$archive\"\
+      \ | sed 's|/d/|{{ include \"fhs-platform.prefix\" . }}/grafana/d/|g' > \"/dashboards/$name\"\ndone\n"
+    securityContext:
+      runAsUser: 472
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+        - ALL
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+    volumeMounts:
+    - name: dashboard-archives
+      mountPath: /archives
+      readOnly: true
+    - name: fhs-dashboards
+      mountPath: /dashboards
+  podAnnotations:
+    checksum/fhs-dashboards: a7301487d21b661c9a50db0bc02984a4a0e0e27735e098d668e30134d1fc34a4
+  env:
+    FHS_GRAFANA_HEALTH_PATH: '{{ include "fhs-platform.prefix" . }}/grafana/api/health'
+  readinessProbe:
+    httpGet: null
+    exec:
+      command:
+      - /bin/sh
+      - -ec
+      - wget -q -O /dev/null "http://127.0.0.1:3000${FHS_GRAFANA_HEALTH_PATH}"
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+  livenessProbe:
+    httpGet: null
+    exec:
+      command:
+      - /bin/sh
+      - -ec
+      - wget -q -O /dev/null "http://127.0.0.1:3000${FHS_GRAFANA_HEALTH_PATH}"
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+logging:
+  existingSecret: fhs-platform-credentials
+  elasticsearch:
+    persistence:
+      storageClass: bds1
+  kibana:
+    useGlobalUrl: true
+    ingress:
+      enabled: false
+  filebeat:
+    enabled: true

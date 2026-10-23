@@ -1,0 +1,24 @@
+dependencies:
+- name: netbox
+  version: 8.3.67
+  repository: oci://ghcr.io/netbox-community/netbox-chart
+- name: postgresql
+  version: 18.8.13
+  repository: oci://registry-1.docker.io/bitnamicharts
+- name: valkey
+  version: 6.2.16
+  repository: oci://registry-1.docker.io/bitnamicharts
+- name: prometheus
+  version: 29.35.0
+  repository: https://prometheus-community.github.io/helm-charts
+- name: telegraf
+  version: 1.8.77
+  repository: https://helm.influxdata.com
+- name: grafana
+  version: 13.2.7
+  repository: https://grafana-community.github.io/helm-charts
+- name: elasticsearch-kibana
+  version: 0.5.1
+  repository: file://../elasticsearch-kibana
+digest: sha256:5de5af908db9ab629f3a6c7373926a4e682f88bf4f4012707e8bf2789b595c4b
+generated: '2026-10-23T20:56:55.706099+00:00'

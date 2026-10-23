@@ -1,0 +1,37 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-web
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.global.ingressAnnotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.global.ingressClassName | quote }}
+  {{- with .Values.global.tlsSecretName }}
+  tls:
+    - hosts: [{{ $.Values.global.hostname | quote }}]
+      secretName: {{ . | quote }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.global.hostname | quote }}
+      http:
+        paths:
+          - path: {{ printf "%s/netbox/" (include "fhs-platform.prefix" .) | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: fhs-netbox
+                port: {name: http}
+          - path: {{ printf "%s/grafana/" (include "fhs-platform.prefix" .) | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: fhs-grafana
+                port: {name: service}
+          - path: {{ printf "%s/mid-cbf-kibana/" (include "fhs-platform.prefix" .) | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "elastic-small.name" . }}-kibana
+                port: {number: 5601}
