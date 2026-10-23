@@ -16,11 +16,31 @@ not a real credential. Keep the loopback binding. Prometheus/exporter are intern
 
 ## Screenshots
 
-Synthetic demo mesh capacity and switch ports:
+All six dashboards with synthetic demo data:
+
+Rack overview — server and switch status across the rack.
+
+![Rack overview](screenshots/rack.png)
+
+FHS detail — component status and readings for one server.
+
+![FHS detail](screenshots/fhs.png)
+
+Mesh capacity — link capacity across the switch mesh.
 
 ![Mesh capacity](screenshots/mesh-capacity.png)
 
+Switch ports — physical ports and transceiver status.
+
 ![Switch ports](screenshots/switch-ports.png)
+
+Interface detail — link status, peer and traffic for one interface.
+
+![Interface detail](screenshots/interface.png)
+
+VLAN detail — VLAN status and interface membership.
+
+![VLAN detail](screenshots/vlan.png)
 
 ## Edit and refresh
 

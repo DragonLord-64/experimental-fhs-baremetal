@@ -50,3 +50,5 @@ Append completed events here; keep proposed work in the plan.
 - Consolidated cluster definitions in top-level `platform/` and removed the duplicate `monitoring/` tree. All 16 non-README files were byte-identical to their platform counterparts, including metric captures; the platform README already preserves and corrects the former instructions. Updated current provenance notes; no deployment, Helm apply or service restart was run.
 
 - Added the synthetic [mesh capacity](../examples/grafana-static-demo/screenshots/mesh-capacity.png) and [switch ports](../examples/grafana-static-demo/screenshots/switch-ports.png) screenshots to the [static demo README](../examples/grafana-static-demo/README.md) for GitHub viewing. Image hashes, PNG dimensions and relative links passed static checks; no runtime services were changed.
+
+- Completed the [static demo screenshot gallery](../examples/grafana-static-demo/README.md#screenshots) with rack, FHS, interface and VLAN captures alongside mesh capacity and switch ports. All six PNGs passed integrity, hash and relative-link checks; no runtime services or dashboard configuration changed.
