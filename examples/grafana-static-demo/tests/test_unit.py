@@ -298,7 +298,7 @@ class ExporterHTTP(unittest.TestCase):
         for target in capacity:
             vcc, fsp = target['legendFormat'].split()
             self.assertEqual(
-                f'((demo_mesh_capacity_bps{{vcc="{vcc}",fsp="{fsp}"}} / 1e9) '
+                f'((demo_mesh_available_capacity_percent{{vcc="{vcc}",fsp="{fsp}"}}) '
                 'and on(job,instance) (up{job="static-demo"} == 1)) or on() vector(-1)',
                 target['expr'])
             self.assertTrue(target['instant'])
@@ -318,6 +318,97 @@ class ExporterHTTP(unittest.TestCase):
 
         self.assertEqual(161,len(dashboards['switch']['panels'][1]['targets']))
         self.assertIn('demo_transceiver_status',dashboards['switch']['panels'][3]['targets'][0]['expr'])
+
+
+class RequestedDemoFixes(unittest.TestCase):
+    def setUp(self):
+        self.data = json.loads((ROOT / 'scenarios.json').read_text())
+
+    def metric(self, body, name, **labels):
+        rows = [r for r in body.splitlines() if r.startswith(name + '{')
+                and all(f'{k}="{v}"' in r for k, v in labels.items())]
+        self.assertEqual(1, len(rows), (name, labels))
+        return float(rows[0].rsplit(' ', 1)[1])
+
+    def test_fault_reaches_rack_switch_without_faking_hardware_failure(self):
+        body = EXPORTER.render(self.data)
+        for source in ('VCCUnit1-switch', 'FSPUnit3-switch'):
+            self.assertEqual(2, self.metric(body, 'demo_switch_operational_status', source=source))
+            self.assertEqual(0, self.metric(body, 'demo_switch_status', source=source))
+        self.assertEqual(0, self.metric(body, 'demo_switch_operational_status', source='VCCUnit2-switch'))
+        rack = json.loads((ROOT / 'grafana/dashboards/rack.json').read_text())
+        switch_targets = [t for p in rack['panels'] for t in p.get('targets', [])
+                          if t.get('legendFormat', '').endswith('-switch')]
+        self.assertEqual(51, len(switch_targets))
+        self.assertTrue(all('demo_switch_operational_status{' in t['expr'] for t in switch_targets))
+        self.data['links'][2]['status'] = 'ok'
+        body = EXPORTER.render(self.data)
+        for source in ('VCCUnit1-switch', 'FSPUnit3-switch'):
+            self.assertEqual(0, self.metric(body, 'demo_switch_operational_status', source=source))
+
+    def test_mesh_available_capacity_fault_and_endpoint_override(self):
+        self.data['links'][2]['available_capacity_percent'] = 87
+        for status, expected in [('fault', 0), ('ok', 87), ('degraded', 87), ('unknown', None), ('notdeployed', None)]:
+            self.data['interfaces'] = {'fspu3-switch': {'eth1/1/1': status}}
+            body = EXPORTER.render(self.data)
+            name = 'demo_mesh_available_capacity_percent'
+            if expected is None:
+                self.assertFalse(any(r.startswith(name+'{') and 'fsp="FSPUnit3"' in r and 'vcc="VCCUnit1"' in r for r in body.splitlines()))
+            else:
+                self.assertEqual(expected, self.metric(body, name, fsp='FSPUnit3', vcc='VCCUnit1'))
+            # Configured physical line rate survives a down link.
+            self.assertEqual(100000000000, self.metric(body, 'demo_mesh_capacity_bps', fsp='FSPUnit3', vcc='VCCUnit1'))
+
+    def test_default_healthy_pattern_is_varied_stable_and_bounded(self):
+        first = EXPORTER.render(self.data)
+        self.assertEqual(first, EXPORTER.render(self.data))
+        values = [float(r.rsplit(' ', 1)[1]) for r in first.splitlines()
+                  if r.startswith('demo_mesh_available_capacity_percent{')]
+        self.assertEqual(648, len(values))
+        self.assertTrue({0, 45, 50, 87} <= set(values))
+        self.assertTrue(all(0 <= n <= 100 for n in values))
+        self.assertGreater(len(set(values)), 4)
+        self.data['defaults']['mock_readings'] = False
+        self.assertNotIn('demo_mesh_available_capacity_percent{', EXPORTER.render(self.data))
+
+    def test_available_capacity_override_validation(self):
+        for value in (-1, 101, float('nan'), float('inf'), True, '87'):
+            with self.subTest(value=value):
+                self.data['links'][0]['available_capacity_percent'] = value
+                with self.assertRaises(ValueError):
+                    EXPORTER.render(self.data)
+
+    def test_switch_rollup_all_members_and_severity(self):
+        self.data['links'][2]['status'] = 'ok'
+        for field, override in (
+            ('switches', {'vccu1-switch': 'fault'}),
+            ('interfaces', {'vccu1-switch': {'eth1/32/4': 'fault'}}),
+            ('physical_ports', {'vccu1-switch': {'32': 'fault'}}),
+            ('transceivers', {'vccu1-switch': {'32': 'fault'}}),
+        ):
+            with self.subTest(field=field):
+                data = copy.deepcopy(self.data)
+                data[field] = override
+                # Missing chassis/other-member telemetry must not mask a fault.
+                if field != 'switches':
+                    data['switches'] = {'vccu1-switch': 'unknown'}
+                body = EXPORTER.render(data)
+                self.assertEqual(2, self.metric(body, 'demo_switch_operational_status', source='VCCUnit1-switch'))
+        for status, expected in [('degraded', 1), ('unknown', 3), ('notdeployed', 4), ('ok', 0)]:
+            self.data['switches'] = {'vccu1-switch': status}
+            self.assertEqual(expected, self.metric(EXPORTER.render(self.data), 'demo_switch_operational_status', source='VCCUnit1-switch'))
+
+    def test_mesh_grid_and_selected_link_use_available_percent(self):
+        dashboard = json.loads((ROOT / 'grafana/dashboards/mesh.json').read_text())
+        panels = {p['id']: p for p in dashboard['panels']}
+        for panel_id in (6, 9):
+            panel = panels[panel_id]
+            self.assertIn('available capacity', panel['title'].lower())
+            self.assertEqual('percent', panel['fieldConfig']['defaults']['unit'])
+            for target in panel['targets']:
+                self.assertIn('demo_mesh_available_capacity_percent', target['expr'])
+                self.assertNotIn('demo_mesh_capacity_bps', target['expr'])
+                self.assertNotIn('/ 1e9', target['expr'])
 
 
 if __name__ == '__main__':

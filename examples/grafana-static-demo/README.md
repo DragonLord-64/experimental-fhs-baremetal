@@ -26,7 +26,7 @@ FHS detail — component status and readings for one server.
 
 ![FHS detail](screenshots/fhs.png)
 
-Mesh capacity — link capacity across the switch mesh.
+Mesh capacity — available capacity (%) across the switch mesh.
 
 ![Mesh capacity](screenshots/mesh-capacity.png)
 
@@ -66,6 +66,10 @@ division), lane `1+(N-1)%4`. Link edits drive both ends and mesh together.
 An `interfaces` override on either linked end also drives both ends/mesh;
 conflicting endpoint overrides are rejected. Interface overrides take precedence
 over link status. Physical port and shared QSFP status remain independent.
+Rack switch tiles summarize chassis, interfaces, physical ports and QSFPs:
+fault takes priority over degraded, unknown, notdeployed and ok. A failed link
+marks both endpoint switches as fault; restoring it clears their fault when
+all other members are ok. `switches` edits only the independent chassis status.
 Unused interface slots have synthetic peer names, not real cabling.
 
 Save a complete file beside the original, then atomically rename it over
@@ -83,7 +87,8 @@ racks, 132 FHS, 51 switches, 648 mesh cells and 32×4 interfaces per switch are
 populated. Four vccu / three fspu retain the scenario identities as static replay.
 Only fspu1's four FHS intentionally lack telemetry. fspu2-fhs1 is degraded with
 PSU1 fault; vccu1-switch eth1/1/3 ↔ fspu3-switch eth1/1/1 is fault. That port and
-QSFP hardware remain ok. Everything else defaults to explicit synthetic ok.
+QSFP hardware remain ok; both rack switch tiles show the operational fault.
+Everything else defaults to explicit synthetic ok.
 
 `defaults.mock_readings` enables catalog readings and bounded synthetic rate gauges
 consumed directly by demo queries. Set false to omit default numbers. Optional `readings`
@@ -92,9 +97,15 @@ finite numeric `value`, and `provenance: "synthetic demo"`. See
 `exporter/components.json` for component keys (compact lowercase titles) and units.
 Links optionally accept `rate_bps` (default 1e9) and `capacity_bps` (default 1e11);
 0 ≤ rate ≤ capacity is required. Both ends emit zero rate at fault/unknown/notdeployed.
-The mesh shows capacity in Gbit/s, not throughput: healthy links use blue capacity
-thresholds, failed links stay red with their capacity visible, and unknown or missing
-data is gray. Selected-link throughput remains a separate panel.
+The mesh shows **available capacity (%)**: healthy links use varied, deterministic
+synthetic percentages, failed links show **0%** in red, and unknown/notdeployed or
+missing data is gray with no numeric capacity. Optional link
+`available_capacity_percent` sets a healthy/degraded value (finite 0–100); fault
+always forces zero. The first healthy cells show 87% and 50%; the failed cell
+returns to its configured 45% when restored. This headroom is synthetic, not
+calculated from traffic. `capacity_bps` remains the configured physical line rate
+even on a failed link. The selected-link capacity panel also shows available
+capacity in percent; selected-link throughput remains separate in Gbit/s. `mock_readings: false` suppresses mesh capacity numbers.
 No CPU/memory workload is simulated. Six native layouts/UIDs/links are copied;
 demo-only adapters provide status/optic/capacity/VLAN values where source queries
 had no data. Source provenance is in `tests/source-provenance.json`.

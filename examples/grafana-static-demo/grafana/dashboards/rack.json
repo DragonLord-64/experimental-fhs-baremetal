@@ -395,7 +395,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"VCCUnit1-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit1-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit1-switch"
@@ -409,7 +409,7 @@
         },
         {
           "refId": "2",
-          "expr": "(demo_switch_status{source=\"VCCUnit2-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit2-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit2-switch"
@@ -423,7 +423,7 @@
         },
         {
           "refId": "4",
-          "expr": "(demo_switch_status{source=\"VCCUnit3-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit3-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit3-switch"
@@ -437,7 +437,7 @@
         },
         {
           "refId": "6",
-          "expr": "(demo_switch_status{source=\"VCCUnit4-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit4-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit4-switch"
@@ -451,7 +451,7 @@
         },
         {
           "refId": "8",
-          "expr": "(demo_switch_status{source=\"FSPUnit1-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit1-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit1-switch"
@@ -486,7 +486,7 @@
         },
         {
           "refId": "13",
-          "expr": "(demo_switch_status{source=\"FSPUnit2-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit2-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit2-switch"
@@ -521,7 +521,7 @@
         },
         {
           "refId": "18",
-          "expr": "(demo_switch_status{source=\"FSPUnit3-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit3-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit3-switch"
@@ -4168,7 +4168,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -4182,7 +4183,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"VCCUnit5-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit5-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit5-switch"
@@ -4196,7 +4197,7 @@
         },
         {
           "refId": "2",
-          "expr": "(demo_switch_status{source=\"VCCUnit6-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit6-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit6-switch"
@@ -4210,7 +4211,7 @@
         },
         {
           "refId": "4",
-          "expr": "(demo_switch_status{source=\"VCCUnit7-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit7-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit7-switch"
@@ -4224,7 +4225,7 @@
         },
         {
           "refId": "6",
-          "expr": "(demo_switch_status{source=\"VCCUnit8-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit8-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit8-switch"
@@ -4238,7 +4239,7 @@
         },
         {
           "refId": "8",
-          "expr": "(demo_switch_status{source=\"FSPUnit4-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit4-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit4-switch"
@@ -4273,7 +4274,7 @@
         },
         {
           "refId": "13",
-          "expr": "(demo_switch_status{source=\"FSPUnit5-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit5-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit5-switch"
@@ -4308,7 +4309,7 @@
         },
         {
           "refId": "18",
-          "expr": "(demo_switch_status{source=\"FSPUnit6-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit6-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit6-switch"
@@ -7955,7 +7956,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -7969,7 +7971,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"VCCUnit9-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit9-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit9-switch"
@@ -7983,7 +7985,7 @@
         },
         {
           "refId": "2",
-          "expr": "(demo_switch_status{source=\"VCCUnit10-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit10-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit10-switch"
@@ -7997,7 +7999,7 @@
         },
         {
           "refId": "4",
-          "expr": "(demo_switch_status{source=\"VCCUnit11-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit11-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit11-switch"
@@ -8011,7 +8013,7 @@
         },
         {
           "refId": "6",
-          "expr": "(demo_switch_status{source=\"VCCUnit12-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit12-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit12-switch"
@@ -8025,7 +8027,7 @@
         },
         {
           "refId": "8",
-          "expr": "(demo_switch_status{source=\"FSPUnit7-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit7-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit7-switch"
@@ -8060,7 +8062,7 @@
         },
         {
           "refId": "13",
-          "expr": "(demo_switch_status{source=\"FSPUnit8-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit8-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit8-switch"
@@ -8095,7 +8097,7 @@
         },
         {
           "refId": "18",
-          "expr": "(demo_switch_status{source=\"FSPUnit9-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit9-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit9-switch"
@@ -11742,7 +11744,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -11756,7 +11759,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"VCCUnit13-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit13-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit13-switch"
@@ -11770,7 +11773,7 @@
         },
         {
           "refId": "2",
-          "expr": "(demo_switch_status{source=\"VCCUnit14-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit14-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit14-switch"
@@ -11784,7 +11787,7 @@
         },
         {
           "refId": "4",
-          "expr": "(demo_switch_status{source=\"VCCUnit15-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit15-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit15-switch"
@@ -11798,7 +11801,7 @@
         },
         {
           "refId": "6",
-          "expr": "(demo_switch_status{source=\"VCCUnit16-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit16-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit16-switch"
@@ -11812,7 +11815,7 @@
         },
         {
           "refId": "8",
-          "expr": "(demo_switch_status{source=\"FSPUnit10-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit10-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit10-switch"
@@ -11847,7 +11850,7 @@
         },
         {
           "refId": "13",
-          "expr": "(demo_switch_status{source=\"FSPUnit11-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit11-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit11-switch"
@@ -11882,7 +11885,7 @@
         },
         {
           "refId": "18",
-          "expr": "(demo_switch_status{source=\"FSPUnit12-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit12-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit12-switch"
@@ -15529,7 +15532,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -15543,7 +15547,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"VCCUnit17-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit17-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit17-switch"
@@ -15557,7 +15561,7 @@
         },
         {
           "refId": "2",
-          "expr": "(demo_switch_status{source=\"VCCUnit18-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit18-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit18-switch"
@@ -15571,7 +15575,7 @@
         },
         {
           "refId": "4",
-          "expr": "(demo_switch_status{source=\"VCCUnit19-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit19-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit19-switch"
@@ -15585,7 +15589,7 @@
         },
         {
           "refId": "6",
-          "expr": "(demo_switch_status{source=\"VCCUnit20-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit20-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit20-switch"
@@ -15599,7 +15603,7 @@
         },
         {
           "refId": "8",
-          "expr": "(demo_switch_status{source=\"FSPUnit13-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit13-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit13-switch"
@@ -15634,7 +15638,7 @@
         },
         {
           "refId": "13",
-          "expr": "(demo_switch_status{source=\"FSPUnit14-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit14-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit14-switch"
@@ -15669,7 +15673,7 @@
         },
         {
           "refId": "18",
-          "expr": "(demo_switch_status{source=\"FSPUnit15-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit15-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit15-switch"
@@ -19316,7 +19320,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -19330,7 +19335,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"VCCUnit21-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit21-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit21-switch"
@@ -19344,7 +19349,7 @@
         },
         {
           "refId": "2",
-          "expr": "(demo_switch_status{source=\"VCCUnit22-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit22-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit22-switch"
@@ -19358,7 +19363,7 @@
         },
         {
           "refId": "4",
-          "expr": "(demo_switch_status{source=\"VCCUnit23-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit23-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit23-switch"
@@ -19372,7 +19377,7 @@
         },
         {
           "refId": "6",
-          "expr": "(demo_switch_status{source=\"VCCUnit24-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"VCCUnit24-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "VCCUnit24-switch"
@@ -19386,7 +19391,7 @@
         },
         {
           "refId": "8",
-          "expr": "(demo_switch_status{source=\"FSPUnit16-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit16-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit16-switch"
@@ -19421,7 +19426,7 @@
         },
         {
           "refId": "13",
-          "expr": "(demo_switch_status{source=\"FSPUnit17-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit17-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit17-switch"
@@ -19456,7 +19461,7 @@
         },
         {
           "refId": "18",
-          "expr": "(demo_switch_status{source=\"FSPUnit18-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit18-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit18-switch"
@@ -23103,7 +23108,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -23117,7 +23123,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"FSPUnit19-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit19-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit19-switch"
@@ -23152,7 +23158,7 @@
         },
         {
           "refId": "5",
-          "expr": "(demo_switch_status{source=\"FSPUnit20-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit20-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit20-switch"
@@ -23187,7 +23193,7 @@
         },
         {
           "refId": "10",
-          "expr": "(demo_switch_status{source=\"FSPUnit21-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit21-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit21-switch"
@@ -26458,7 +26464,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -26472,7 +26479,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"FSPUnit22-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit22-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit22-switch"
@@ -26507,7 +26514,7 @@
         },
         {
           "refId": "5",
-          "expr": "(demo_switch_status{source=\"FSPUnit23-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit23-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit23-switch"
@@ -26542,7 +26549,7 @@
         },
         {
           "refId": "10",
-          "expr": "(demo_switch_status{source=\"FSPUnit24-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit24-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit24-switch"
@@ -29813,7 +29820,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     },
     {
       "type": "canvas",
@@ -29827,7 +29835,7 @@
       "targets": [
         {
           "refId": "0",
-          "expr": "(demo_switch_status{source=\"FSPUnit25-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit25-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit25-switch"
@@ -29862,7 +29870,7 @@
         },
         {
           "refId": "5",
-          "expr": "(demo_switch_status{source=\"FSPUnit26-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit26-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit26-switch"
@@ -29897,7 +29905,7 @@
         },
         {
           "refId": "10",
-          "expr": "(demo_switch_status{source=\"FSPUnit27-switch\"}) or on() vector(3)",
+          "expr": "(demo_switch_operational_status{source=\"FSPUnit27-switch\"}) or on() vector(3)",
           "instant": true,
           "range": false,
           "legendFormat": "FSPUnit27-switch"
@@ -33168,7 +33176,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${ds}"
-      }
+      },
+      "description": "Switch operational status includes chassis, logical interfaces, physical ports and QSFPs. Fault takes priority over degraded, unknown, notdeployed and ok; individual hardware states remain independent."
     }
   ],
   "description": "STATIC DEMO: fully populated synthetic mock values and peer inventory; not observed hardware or protocol simulation."

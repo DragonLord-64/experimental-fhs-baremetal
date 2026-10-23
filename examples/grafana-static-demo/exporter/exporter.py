@@ -128,11 +128,15 @@ def render(data):
     require(isinstance(data['links'],list),'links must be an array')
     links, ids = {}, set()
     for link in data['links']:
-        keys(link, ('id','status','ends'), ('rate_bps','capacity_bps'))
+        keys(link, ('id','status','ends'), ('rate_bps','capacity_bps','available_capacity_percent'))
         capacity = link.get('capacity_bps',100000000000)
         rate = link.get('rate_bps',1000000000)
         require(type(capacity) in (int,float) and math.isfinite(capacity) and capacity > 0, 'positive finite capacity_bps required')
         require(type(rate) in (int,float) and math.isfinite(rate) and 0 <= rate <= capacity, 'rate_bps must be finite and within capacity')
+        available = link.get('available_capacity_percent')
+        if 'available_capacity_percent' in link:
+            require(type(available) in (int,float) and math.isfinite(available) and 0 <= available <= 100,
+                    'available_capacity_percent must be finite and within 0..100')
         require(isinstance(link['id'],str) and re.fullmatch('[a-z0-9-]+',link['id']) and link['id'] not in ids, 'invalid or duplicate link id')
         ids.add(link['id'])
         require(isinstance(link['ends'],list) and len(link['ends']) == 2,'one link needs two ends')
@@ -140,7 +144,7 @@ def render(data):
         require(ends[0][0].startswith('vccu') and ends[1][0].startswith('fspu'),'ends must be vccu then fspu')
         pair = tuple(e[0].removesuffix('-switch') for e in ends)
         require(pair not in links,'duplicate mesh pair')
-        links[pair] = (ends,state(link['status']),rate,capacity)
+        links[pair] = (ends,state(link['status']),rate,capacity,available)
     # One deterministic synthetic peer inventory fills the mesh. Overrides replace
     # the pair's definition, never add an unrelated second interface health source.
     peers, seen = {}, set()
@@ -148,7 +152,7 @@ def render(data):
         for f in range(1,28):
             pair = ('vccu'+str(v),'fspu'+str(f))
             slot = lambda n: 'eth1/'+str((n-1)//4+1)+'/'+str((n-1)%4+1)
-            ends,value,rate,capacity = links.get(pair, ([(pair[0]+'-switch',slot(f)),(pair[1]+'-switch',slot(v))],normal,1000000000,100000000000))
+            ends,value,rate,capacity,available = links.get(pair, ([(pair[0]+'-switch',slot(f)),(pair[1]+'-switch',slot(v))],normal,1000000000,100000000000,None))
             edits = {interfaces[e] for e in ends if e in interfaces}
             require(len(edits) <= 1,'conflicting logical endpoint overrides')
             if edits:
@@ -156,6 +160,12 @@ def render(data):
             emit('demo_mesh_status',{'vcc':raw_unit(pair[0]),'fsp':raw_unit(pair[1])},value)
             if mock:
                 emit('demo_mesh_capacity_bps',{'vcc':raw_unit(pair[0]),'fsp':raw_unit(pair[1])},capacity)
+                # Synthetic available headroom is distinct from configured line rate
+                # and traffic. A down link has no available capacity; missing states
+                # must never look like a measured zero or a healthy percentage.
+                if value < 3:
+                    healthy = available if available is not None else 45 + ((v-1)*17 + (f-1)*23) % 56
+                    emit('demo_mesh_available_capacity_percent',{'vcc':raw_unit(pair[0]),'fsp':raw_unit(pair[1])},0 if value == 2 else healthy)
             for e,peer in (ends,ends[::-1]):
                 require(e not in seen,'duplicate interface endpoint')
                 seen.add(e)
@@ -165,6 +175,7 @@ def render(data):
     for switch in sorted(SWITCHES):
         source = raw_unit(switch.removesuffix('-switch'))+'-switch'
         emit('demo_switch_status',{'source':source},switches.get(switch,normal))
+        member_statuses = [switches.get(switch,normal)]
         if mock:
             emit('nexus_ch_tempValue',{'source':source,'sensor':'synthetic chassis','provenance':'synthetic demo'},35)
             emit('nexus_ch_volt',{'source':source,'sensor':'synthetic psu','provenance':'synthetic demo'},12)
@@ -173,6 +184,7 @@ def render(data):
             hardware = {'source':source,'port':str(port)}
             emit('demo_port_status',hardware,ports.get((switch,str(port)),normal))
             emit('demo_transceiver_status',hardware,optics.get((switch,str(port)),normal))
+            member_statuses.extend((ports.get((switch,str(port)),normal),optics.get((switch,str(port)),normal)))
             if mock:
                 for metric,value in [('demo_optic_temperature_celsius',32),('demo_optic_voltage_volts',3.3),('demo_optic_rx_dbm',-2),('demo_optic_tx_dbm',-1)]:
                     emit(metric,{**hardware,'provenance':'synthetic demo'},value)
@@ -181,6 +193,7 @@ def render(data):
                 peer,value,rate,capacity = peers.get((switch,interface), ((f'demo-peer-{switch}-{port}-{lane}','demo0'),interfaces.get((switch,interface),normal),1000000000,100000000000))
                 labels = {'source':source,'interface':interface}
                 emit('demo_interface_status',labels,value)
+                member_statuses.append(value)
                 emit('nexus_interfaces_vdcId',{**labels,'operSt':'up' if value < 2 else 'down' if value == 2 else 'unknown','provenance':'synthetic demo'},1)
                 peer_switch = raw_unit(peer[0].removesuffix('-switch'))+'-switch' if peer[0] in SWITCHES else peer[0]
                 emit('nexus_lldp_id',{**labels,'sysName':peer_switch,'portId':peer[1],'provenance':'synthetic demo'},1)
@@ -191,6 +204,10 @@ def render(data):
                         emit(metric,{**labels,'provenance':'synthetic demo'},0)
                     emit('demo_interface_capacity_bps',{**labels,'provenance':'synthetic demo'},capacity)
                 emit('demo_vlan_membership',{'Unit':switch.removesuffix('-switch'),'interface':interface,'vlan':'55','Deployment':'ok','Allowed_VLANs':'55 (synthetic demo)','provenance':'synthetic demo'},1)
+        # Known failures take priority over missing telemetry. Keep the independent
+        # chassis/port/QSFP metrics intact while the rack summarizes operations.
+        overall = next(s for s in (2,1,3,4,0) if s in member_statuses)
+        emit('demo_switch_operational_status',{'source':source},overall)
     if mock:
         for switch in sorted(SWITCHES):
             emit('demo_vlan_translation',{'Unit':switch.removesuffix('-switch'),'vlan':'55','From':'55','To':'155','Provenance':'synthetic demo'},1)

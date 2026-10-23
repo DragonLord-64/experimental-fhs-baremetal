@@ -151,7 +151,7 @@ def main():
             dashboard_evidence.append({'uid':actual['uid'],'targets':queried})
         (output/'dashboard-queries.json').write_text(json.dumps(dashboard_evidence,indent=2))
         report['checks']['six_dashboards_passed']=True
-        for metric,count in [('demo_server_status',132),('demo_component_status',2772),('demo_switch_status',51),('demo_mesh_status',648),('demo_interface_status',6528),('demo_port_status',1632),('demo_transceiver_status',1632)]:
+        for metric,count in [('demo_server_status',132),('demo_component_status',2772),('demo_switch_status',51),('demo_switch_operational_status',51),('demo_mesh_status',648),('demo_mesh_available_capacity_percent',648),('demo_interface_status',6528),('demo_port_status',1632),('demo_transceiver_status',1632)]:
             number(base,'count('+metric+')',count)
         number(base,'count(demo_server_status == 3)',4)
         number(base,'count(demo_component_status == 3)',84)
@@ -164,7 +164,20 @@ def main():
         psu='demo_component_status{unit="FSPUnit2",fhs="FHS1",component="psu1"}'
         port='demo_port_status{source="VCCUnit1-switch",port="1"}'
         optic='demo_transceiver_status{source="VCCUnit1-switch",port="1"}'
+        rack_left='demo_switch_operational_status{source="VCCUnit1-switch"}'
+        rack_right='demo_switch_operational_status{source="FSPUnit3-switch"}'
+        available='demo_mesh_available_capacity_percent{vcc="VCCUnit1",fsp="FSPUnit3"}'
         for expr,value in [(mesh,2),(left,2),(right,2),(server,1),(psu,2),(port,0),(optic,0)]:number(base,expr,value)
+        for expr,value in [(rack_left,2),(rack_right,2),(available,0),
+                           ('demo_switch_status{source="VCCUnit1-switch"}',0),
+                           ('demo_switch_status{source="FSPUnit3-switch"}',0),
+                           ('demo_mesh_available_capacity_percent{vcc="VCCUnit1",fsp="FSPUnit1"}',87),
+                           ('demo_mesh_available_capacity_percent{vcc="VCCUnit1",fsp="FSPUnit2"}',50),
+                           ('demo_mesh_capacity_bps{vcc="VCCUnit1",fsp="FSPUnit3"}',100000000000)]:
+            number(base,expr,value)
+        number(base,'count(demo_mesh_available_capacity_percent < 0 or demo_mesh_available_capacity_percent > 100) or vector(0)',0)
+        assert len(query(base,'count_values("percent", demo_mesh_available_capacity_percent)')) > 4
+        report['checks']['rack_fault_and_available_capacity_passed']=True
         number(base,'count(cpu_temperature_celcius)',128)
         for status,count in [(0,647),(2,1),(3,0),(4,0)]:
             number(base,f'count(demo_mesh_status == {status}) or vector(0)',count)
@@ -189,15 +202,17 @@ def main():
         data['servers']['fspu2-fhs1']['components']['psu1']='ok'
         data['links'][2]['status']='ok'
         save(data)
-        for expr in (server,psu,mesh,left,right):wait_number(base,expr,0)
+        for expr in (server,psu,mesh,left,right,rack_left,rack_right):wait_number(base,expr,0)
+        wait_number(base,available,45)
         bounded_rates(1000000000)
         browser(base,'ok')
         # Fault the parent hardware while the logical link and QSFP stay healthy.
         data['physical_ports']={'vccu1-switch':{'1':'fault'}};save(data)
         wait_number(base,port,2);number(base,optic,0);number(base,left,0);number(base,mesh,0)
+        wait_number(base,rack_left,2);number(base,rack_right,0);number(base,available,45)
         browser(base,'port-independent')
         source.write_text(original)
-        for expr,value in [(server,1),(psu,2),(mesh,2),(left,2),(right,2),(port,0)]:wait_number(base,expr,value)
+        for expr,value in [(server,1),(psu,2),(mesh,2),(left,2),(right,2),(port,0),(rack_left,2),(rack_right,2),(available,0)]:wait_number(base,expr,value)
         bounded_rates(0)
         browser(base,'back')
         assert identity(copy,project)==original_identity,'edit caused restart/recreation'
@@ -238,6 +253,7 @@ def main():
         zipped=fresh(folder,'zip');launch(folder,zipped)
         zipbase='http://127.0.0.1:13081'
         time.sleep(10);number(zipbase,mesh,2);number(zipbase,psu,2)
+        number(zipbase,rack_left,2);number(zipbase,rack_right,2);number(zipbase,available,0)
         assert len(http(zipbase,'/api/search?type=dash-db'))==6
         report['checks']['zip_extract_launch_passed']=True
         report['zip']={'path':str(archive),'sha256':hashlib.sha256(archive.read_bytes()).hexdigest()}

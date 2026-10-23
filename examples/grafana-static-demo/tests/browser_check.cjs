@@ -18,6 +18,7 @@ const { chromium } = require('playwright');
     ['interface', 'fhs-infra-interface', '&var-switch=VCCUnit1-switch&var-interface=eth1%2F1%2F3'],
     ['vlan', 'fhs-infra-vlan', '&var-vlan=55']
   ] : [
+    ['rack-'+phase, 'fhs-infra-rack', ''],
     ['fhs-'+phase, 'fhs-infra-server', '&var-unit=FSPUnit2&var-fhs=FHS1'],
     ['mesh-'+phase, 'fhs-infra-mesh', '&var-vccu=1&var-fspu=3'],
     ['switch-'+phase, 'fhs-infra-switch', '&var-switch=VCCUnit1-switch&var-port=1']
@@ -46,6 +47,21 @@ const { chromium } = require('playwright');
       if (!queries.length) throw Error(name+': no real Grafana datasource requests');
       if (name.startsWith('fhs') && !text.includes(['ok', 'port-independent'].includes(phase) ? 'ok' : 'fault')) throw Error(name+': scenario status absent');
       if (name.startsWith('mesh') && !text.includes(['ok', 'port-independent'].includes(phase) ? 'ok' : 'fault')) throw Error(name+': link state absent');
+      if (name.startsWith('rack')) {
+        // Native Canvas field mappings include the switch identity and status.
+        for (const [unit, expected] of [
+          ['vccu1', phase === 'ok' ? 'ok' : 'fault'],
+          ['fspu3', ['ok', 'port-independent'].includes(phase) ? 'ok' : 'fault']
+        ]) {
+          if (!new RegExp(`${unit}-switch\\s*[·:]?\\s*${expected}`, 'i').test(text)) throw Error(`${name}: ${unit} operational ${expected} absent`);
+        }
+      }
+      if (name.startsWith('mesh')) {
+        if (!/available capacity.*%/i.test(text)) throw Error(name+': percent capacity label absent');
+        for (const value of [87, 50, ['ok', 'port-independent'].includes(phase) ? 45 : 0]) {
+          if (!new RegExp(`\\b${value}\\s*%`).test(text)) throw Error(`${name}: visible ${value}% absent`);
+        }
+      }
       if (phase === 'port-independent' && name.startsWith('switch') && (!text.includes('fault') || !text.includes('ok'))) throw Error(name+': independent port fault and healthy hardware/link states absent');
       if (/unavailable|observed throughput|observed status/i.test(text)) throw Error(name+': stale provenance prose');
       if (name === 'mesh') {
