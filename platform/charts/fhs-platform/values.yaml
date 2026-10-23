@@ -22,6 +22,14 @@ netbox:
   image:
     tag: v4.7.0
     digest: sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba
+  # The pinned launcher hardcodes /static; align it with BASE_PATH without
+  # bypassing initialization or replacing its other Granian settings.
+  command:
+  - /opt/netbox/docker-entrypoint.sh
+  - /bin/bash
+  - -c
+  - >-
+    exec /bin/bash <(sed 's|--static-path-route "/static"|--static-path-route "{{ include "fhs-platform.prefix" . }}/netbox/static"|' /opt/netbox/launch-netbox.sh)
   postgresql:
     enabled: false
   valkey:

@@ -5,6 +5,7 @@ import gzip
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -40,6 +41,57 @@ def pod_specs(objects):
             yield obj, obj["spec"]["template"]["spec"]
         elif obj["kind"] == "CronJob":
             yield obj, obj["spec"]["jobTemplate"]["spec"]["template"]["spec"]
+
+
+def netbox_launch(container):
+    """Execute the rendered launch command with only entrypoint/Granian stubbed.
+
+    The pinned image's actual launcher is a fixture: unlike a manifest-only
+    assertion, this catches its hardcoded /static route overriding BASE_PATH.
+    No NetBox services, image runtime, or network access are needed here.
+    """
+    entrypoint = "/opt/netbox/docker-entrypoint.sh"
+    launcher = "/opt/netbox/launch-netbox.sh"
+    command = container.get("command") or [entrypoint]
+    args = container.get("args") or ([] if container.get("command") else [launcher])
+    if command[0] != entrypoint:
+        raise AssertionError("NetBox's initialization entrypoint must still run")
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        marker = tmp / "entrypoint-called"
+        local_entrypoint = tmp / "docker-entrypoint.sh"
+        local_entrypoint.write_text(f'#!/bin/sh\nprintf called > "{marker}"\nexec "$@"\n')
+        local_entrypoint.chmod(0o700)
+        local_launcher = tmp / "launch-netbox.sh"
+        shutil.copyfile(Path(__file__).with_name("fixtures") / "launch-netbox.sh", local_launcher)
+        local_launcher.chmod(0o700)
+        granian = tmp / "granian"
+        granian.write_text(
+            "#!/usr/bin/env python3\nimport json, os, sys\n"
+            "print(json.dumps({'args': sys.argv[1:], 'port': os.environ.get('GRANIAN_PORT'), "
+            "'workers': os.environ.get('GRANIAN_WORKERS')}))\n"
+        )
+        granian.chmod(0o700)
+        argv = [a.replace(entrypoint, str(local_entrypoint)).replace(launcher, str(local_launcher))
+                for a in command + args]
+        env = {k:v for k,v in os.environ.items() if not k.startswith("GRANIAN_")}
+        env["PATH"] = str(tmp) + os.pathsep + env.get("PATH", os.defpath)
+        env.update({e["name"]: e["value"] for e in container.get("env", []) if "value" in e})
+        result = subprocess.run(argv, env=env, capture_output=True, text=True, check=True, timeout=10)
+        if not marker.exists():
+            raise AssertionError("NetBox initialization entrypoint did not execute")
+        return json.loads(result.stdout)
+
+
+def last_option(args, name):
+    """Read the last occurrence, accepting --option value and --option=value."""
+    value = None
+    for index, arg in enumerate(args):
+        if arg == name:
+            value = args[index + 1]
+        elif arg.startswith(name + "="):
+            value = arg.partition("=")[2]
+    return value
 
 
 class UmbrellaTest(unittest.TestCase):
@@ -157,6 +209,27 @@ class UmbrellaTest(unittest.TestCase):
                 self.assertNotIn('"url": "/d/', actual)
                 self.assertNotIn('"libraryPanel"', actual)
             self.assertIn("/var/lib/grafana/fhs-dashboards", json.dumps(next(o for o in objects if o["metadata"]["name"] == "fhs-grafana" and o["kind"] == "ConfigMap")))
+
+    def test_netbox_launcher_serves_static_at_the_configured_base_path(self):
+        for raw_prefix in ("/mid-cbf-hw", "/test", "/review/team-a", "/review/team-a/", ""):
+            with self.subTest(prefix=raw_prefix):
+                _, objects = render(prefix=raw_prefix)
+                pod = next(p for o, p in pod_specs(objects) if o["metadata"]["name"] == "fhs-netbox")
+                container = pod["containers"][0]
+                self.assertTrue(container["image"].endswith(
+                    "@sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba"),
+                    "Refresh the launcher fixture/provenance when changing the pinned image")
+                launched = netbox_launch(container)
+                args = launched["args"]
+                expected = raw_prefix.rstrip("/") + "/netbox/static"
+                self.assertEqual(1, sum(a == "--static-path-route" or a.startswith("--static-path-route=") for a in args))
+                self.assertEqual(expected, last_option(args, "--static-path-route"))
+                self.assertEqual("/opt/netbox/netbox/static/", last_option(args, "--static-path-mount"))
+                self.assertEqual("0.0.0.0", last_option(args, "--host"))
+                self.assertEqual("8080", launched["port"])
+                self.assertEqual("2", launched["workers"])
+                self.assertEqual("wsgi", last_option(args, "--interface"))
+                self.assertEqual("netbox.granian:application", args[-1])
 
     def test_external_database_preserves_separate_valkey(self):
         extra = ["--set", "postgresql.enabled=false", "--set-string", "netbox.externalDatabase.host=postgresql.old-monitoring.svc.cluster.local",

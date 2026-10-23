@@ -50,3 +50,23 @@ hardware labels remains an operator check. Update the archive checksum in
 dashboard assets. The semantic checker derives routes from the shared prefix;
 its cluster-resource, exposure, hostPath and backend checks retain the screen
 baseline. The route suffix check changed only for the user's later prefix requirement.
+
+The ninth test executes the rendered NetBox startup command with the pinned
+image's [actual launcher](fixtures/README.md), stubbing initialization and
+Granian. It checks the effective static route for user, default, nested,
+trailing-slash and empty prefixes, plus the retained host, port, workers and app
+settings. Earlier checks covered `BASE_PATH`, probes and ingress manifests but
+never ran the image launcher: its hardcoded `/static` route escaped those checks.
+This local regression does not verify HTTP serving or full NetBox startup.
+2026-10-23: all nine tests passed with loopback permission, plus both chart lints
+and the six logging tests. The launcher regression failed before the fix because
+the effective route remained `/static`; it now passes for all five prefixes.
+
+A separate runtime check on `dragonvm` used the same pinned NetBox image, actual
+launcher, Granian and application target. `setmode.js`, `netbox.js`, `netbox.css`
+and `netbox-external.css` returned HTTP 200 under `/mid-cbf-hw`, `/test`,
+`/review/team-a`, `/review/team-a/` and the empty prefix. The disposable container
+ran as UID/GID 1000 with all capabilities dropped, no new privileges, no network
+or host mounts, a read-only root and temporary `/tmp`. This check bypassed only
+the database initialization entrypoint; migrations, ingress/TLS and browser
+behavior remain unverified. The chart still runs that initialization entrypoint.

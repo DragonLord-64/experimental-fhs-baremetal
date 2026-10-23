@@ -41,6 +41,11 @@ HTTPS uses the existing front door's host certificate. If setting
 The chart creates no certificates. Dashboards appear in **FHS infrastructure**;
 their links automatically use the configured prefix.
 
+NetBox's pinned image launcher serves static assets at `/static` by default.
+The chart adjusts that launcher route to `<global.urlPrefix>/netbox/static`,
+matching NetBox's base path. Initialization and the other launcher settings are
+preserved; no separate values override is needed.
+
 ## Login / verify
 
 NetBox and Grafana use `admin`; Kibana uses `elastic`. First install generates
