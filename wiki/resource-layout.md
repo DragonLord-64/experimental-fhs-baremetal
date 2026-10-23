@@ -42,3 +42,9 @@ groups:
 Ansible then loads `inventory/dev_env/group_vars/ubuntu24_cis_production.yml` for that group when using the adjacent NetBox inventory. NetBox selects membership; Git retains the CIS policy. Verify the installed plugin's tag representation and resolved group membership with `ansible-inventory --graph` before deployment.
 
 Keep `group_vars/all.yml` small: genuinely global settings only. Standard profiles and reusable defaults remain in Git; NetBox supplies membership and selected overrides, with resolved precedence checked before use.
+
+### Spare assets — trial 2026-10-23
+
+User requires a free, openly licensed inventory extension permitting commercial use; NetBox version changes are allowed. The isolated [NetBox Inventory trial](../ops/platform/inventory-trial/README.md) uses MIT-licensed `2.7.1` with NetBox `4.7.0`. Seventeen real API checks and independent review passed: DAC assets retain serial, shelf and faulty status without an installed connection; an FPGA asset retains serial and change history after its installed module is deleted. The surviving asset identity is separate from its installed module record. Importer integration remains pending.
+
+The DAC is a standalone asset with an inventory-item type; no native Cable association was needed for this stock-tracking trial. Status/location transitions are manual and faulty status does not prevent reuse automatically. Default change-log retention is 90 days; the trial has no maintenance worker. Recorded screenshots and synthetic fixtures do not prove physical discovery or production readiness.

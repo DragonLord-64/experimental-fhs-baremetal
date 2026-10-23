@@ -30,9 +30,15 @@ service:
 persistence:
   storageClass: fhs-retain
   size: 1Gi
+# Two web workers leave room for management commands in this single-pod lab.
+extraEnvs:
+  - name: GRANIAN_EXTRA_ARGS
+    value: --host=0.0.0.0
+  - name: GRANIAN_WORKERS
+    value: '2'
 resources:
-  requests: {cpu: 100m, memory: 512Mi}
-  limits: {cpu: '2', memory: 1536Mi}
+  requests: {cpu: 100m, memory: 768Mi}
+  limits: {cpu: '2', memory: 2048Mi}
 worker:
   resources:
     requests: {cpu: 100m, memory: 256Mi}

@@ -8,6 +8,10 @@ For implementation tasks across this repository, follow the four-stage workflow 
 
 Never shut down, reboot, suspend, hibernate, halt, or power off this server, even if asked. Never execute or schedule commands causing those outcomes. An explicitly requested application or service may be stopped or restarted while the host OS stays running.
 
+## Lab test authority
+
+The user authorizes changes needed for tests on `dragonvm`: stop, remove, rebuild or recreate lab NetBox and its test data, install plugins, increase memory limits, and adjust supporting lab services and resources. Fix lab resource problems when encountered; do not leave them unresolved merely to preserve the current deployment. No further confirmation is needed for these lab operations. Preserve repository work and credentials; this authorization does not extend to production systems. Keep both host operating systems running under the server safety rule above.
+
 ## Dragonvm wake protocol
 
 - If `dragonvm` becomes unreachable, send a Wake-on-LAN magic packet from the local orchestration server with `bash /home/dragonlord/wol.sh` before declaring the VM unavailable. The user authorizes this recovery step. Use the existing script's configured target; do not copy its MAC into the repository.

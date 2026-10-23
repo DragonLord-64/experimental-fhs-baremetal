@@ -8,6 +8,7 @@ Run on dragonvm from the repository root:
 ./ops/platform/deploy.sh test
 ./ops/platform/deploy.sh deploy --with-bifrost  # also isolated Ironic API smoke
 python3 ops/platform/netbox-test.py --lifecycle # object survives full down/up
+python3 ops/platform/netbox-resource-test.py   # read-only API + Django shell concurrency
 ./ops/kubernetes/lifecycle.sh down
 ```
 
@@ -18,6 +19,13 @@ Requires Python 3, minikube and Helm (`~/.local/bin/helm`, or `HELM_BIN`). Every
 Upstream versions: NetBox `8.3.67` (NetBox `v4.7.0`), PostgreSQL `18.8.13`, Valkey `6.2.16`, Prometheus `29.35.0`, Telegraf `1.8.77`, Grafana `13.2.7`. NetBox chart version was absent from the source capture; `8.3.67` was selected and fetched from the official [NetBox chart](https://github.com/netbox-community/netbox-chart), OCI digest `sha256:b44ee411c125076547a498162035731a56863c40bf97aa5ba0bc2c09c2a4385a`. Its dependencies are separate releases here. Source blank NetBox image tag is resolved to `v4.7.0` and an amd64 digest; source rolling PostgreSQL/Valkey images are pinned to verified amd64 digests. VM overrides disable ingress, LoadBalancers and production scrape targets, lower resource/storage requests, and replace `nfss1`/`bds1` with `fhs-retain`. Legacy flat NetBox probe paths are removed; chart-generated HTTP paths follow `/netbox/`. Recreate strategy prevents concurrent schema migrations. The pinned image no longer creates the chart's legacy `api_token` automatically; `netbox-bootstrap.sh` creates one named lab validation token from the mounted Secret, inside the pod. It preserves existing tokens and uses the source-compatible v1 API scheme; v2 token rollout is outside this lab change.
 
 Preparation creates fresh lab secrets only if absent; no credentials are printed or stored in Git. Test API objects are disposable. NetBox checks authenticated CRUD and reads the object after PostgreSQL pod recreation; monitoring checks synthetic PDU metrics through Telegraf, Prometheus and Grafana, plus authenticated Elasticsearch/Kibana health.
+
+The VM NetBox web uses two Granian workers and a 2 GiB limit, with a 768 MiB
+request. Four default workers plus a management command exceeded the old 1536 MiB
+limit. The resource check runs read-only API traffic beside one Django shell and
+checks inventory count, pod restarts and cgroup OOM events.
+
+Separate synthetic plugin tests: [Inventory trial](inventory-trial/README.md).
 
 Storage uses twelve static `Retain` hostPath volumes in `/data/fhs-platform/` inside the minikube node. This avoids the default provisioner's changing identity after restart. Each PV's `8Gi` is nominal scheduling capacity, not a disk quota or reservation; all share the VM disk. Deleted claims leave retained data/PVs for explicit operator recovery; there is no automatic reset/reclaim command. This is a single-node lab without HA or a backup guarantee. `down`/`up` retains objects and data; never delete the minikube profile to stop work.
 

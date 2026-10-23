@@ -1,0 +1,40 @@
+name: fhs-inventory-trial
+services:
+  postgres:
+    image: postgres@sha256:eee6c6e1b0894fa4fe0075eb054af9fd1cf39a35321c2d4110626cfe506411fb
+    environment:
+      POSTGRES_DB: netbox
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run prepare.py first}
+    mem_limit: 384m
+    cpus: 0.5
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U netbox -d netbox']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  valkey:
+    image: valkey/valkey@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
+    mem_limit: 128m
+    cpus: 0.25
+    command: [valkey-server, --maxmemory, 64mb, --maxmemory-policy, allkeys-lru]
+  netbox:
+    build: .
+    image: fhs-netbox-inventory-trial:4.7.0-2.7.1
+    env_file: .env
+    mem_limit: 2560m
+    cpus: 2
+    ports:
+      - '127.0.0.1:18087:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    volumes:
+      - media:/opt/netbox/netbox/media
+volumes:
+  postgres:
+  media:
