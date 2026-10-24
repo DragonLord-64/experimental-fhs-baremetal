@@ -92,7 +92,7 @@ def main():
         variables=dict(netbox_url=base,netbox_token="{{ lookup('env', 'FHS_ACCEPT_TOKEN') }}",
             netbox_auth="{{ ('Bearer ' if netbox_token.startswith('nbt_') else 'Token ') ~ netbox_token }}",
             netbox_validate_certs_default=True,netbox_api_retries=1,netbox_api_retry_delay=0,
-            facts=dict(hostname=renamed,product_serial=dargs['serial'],distribution='Synthetic',distribution_version='1'),
+            bootstrap_chassis_serial=dargs['serial'],facts=dict(hostname=renamed,product_serial=prefix+'-PRODUCT',distribution='Synthetic',distribution_version='1'),
             ansible_facts=dict(hostname=renamed),resource_field_definitions={},resource_field_types={},resource_fields={},
             netbox_resource_fields={},hardware_fields={},discovered_components=[],server_info={},ip_ownership=[],mac_ownership=[],
             discovered_interfaces=[dict(name='eth0',mac=mac,addresses=[dict(address=address,prefix=64)])],

@@ -146,6 +146,135 @@ def module_type_ids(probes):
     return {json.dumps([p['item']['manufacturer'],p['item']['model']]):p['module_type']['id'] for p in probes if not p.get('skipped')}
 
 
+# FRU is optional. Values are observations, never evidence of an absent component.
+IDENTITY_PLACEHOLDERS = {'', 'unknown', 'none', 'n/a', 'not specified', 'not available',
+    'not applicable', 'unavailable', 'default string', 'system serial number',
+    'chassis serial number', 'no asset information', 'unspecified'}
+
+
+def identity_value(value):
+    value = str(value or '').strip()
+    compact = re.sub(r'[^a-z0-9]', '', value.lower())
+    if value.lower() in IDENTITY_PLACEHOLDERS or compact.startswith('tobefilledbyoem'):
+        return ''
+    if compact and set(compact) in ({'0'}, {'f'}):
+        return ''
+    return value
+
+
+def identity_model(value):
+    value = identity_value(value)
+    # Some BMCs put a build date in Product Name or Chassis Part Number.
+    if re.fullmatch(r'(?i)(?:\d{1,2}[-/ ](?:[a-z]{3,9}|\d{1,2})[-/ ]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})', value):
+        return ''
+    return value
+
+
+def fru_identity(probe, facts=None, overrides=None, chassis_probe=None, fru_id='0'):
+    """Keep FRUs separate; only the explicitly selected system FRU fills DMI gaps."""
+    facts = facts or {}; overrides = overrides or {}; chassis_probe = chassis_probe or {}
+    records = []; current = None; warnings = []
+    if probe.get('rc', 1) == 0:
+        for line in probe.get('stdout', '').replace('\r', '').splitlines():
+            header = re.match(r'^\s*FRU Device Description\s*:\s*(.*?)\s*\(ID\s+(\d+)\)\s*$', line)
+            if header:
+                current = dict(id=header[2], description=header[1], fields={})
+                records.append(current)
+                continue
+            field = re.match(r'^\s*((?:Chassis|Board|Product) [^:]+?)\s*:\s*(.*?)\s*$', line)
+            if field and current is not None:
+                key, value = field[1].strip(), identity_value(field[2])
+                if value:
+                    # Repeated Extra fields are common; conflicting identity fields
+                    # must not silently select the last serial/model.
+                    if key in current['fields'] and current['fields'][key] != value:
+                        if key.endswith(' Extra'):
+                            current['fields'][key] += '\n' + value
+                        else:
+                            current.setdefault('ambiguous', []).append(key)
+                            warnings.append('Conflicting FRU field: ' + key)
+                    else:
+                        current['fields'][key] = value
+    else:
+        warnings.append('IPMI FRU unavailable; existing values preserved')
+    selected = [r for r in records if r['id'] == str(fru_id)]
+    record = selected[0] if len(selected) == 1 else None
+    if records and record is None:
+        warnings.append('System FRU ID missing or ambiguous; no FRU identity fallback')
+    fields = record['fields'] if record else {}
+    sources = {}; hardware = {}; identity = {}
+
+    def choose(target, candidates, model=False, destination=None):
+        clean = identity_model if model else identity_value
+        for raw, source in candidates:
+            value = clean(raw)
+            if value:
+                (identity if destination is None else destination)[target] = value
+                sources[target] = source
+                return value
+        return ''
+
+    def fru(label):
+        if record is None or label in record.get('ambiguous', []):
+            return ('', '')
+        return (fields.get(label, ''), 'ipmitool fru ID ' + str(fru_id) + ': ' + label)
+
+    choose('serial', [(overrides.get('serial'), 'bootstrap_chassis_serial'),
+        (chassis_probe.get('stdout') if chassis_probe.get('rc', 1) == 0 else facts.get('chassis_serial'), 'Linux DMI chassis_serial'), fru('Chassis Serial')])
+    choose('manufacturer', [(overrides.get('manufacturer'), 'bootstrap_manufacturer'),
+        (facts.get('system_vendor'), 'Linux DMI system_vendor'), fru('Product Manufacturer')])
+    choose('model', [(overrides.get('model'), 'bootstrap_device_type'),
+        (facts.get('product_name'), 'Linux DMI product_name'), fru('Product Name'),
+        fru('Product Part Number'), fru('Chassis Part Number')], model=True)
+    mappings = {
+        'motherboard_manufacturer': ('board_vendor', 'Board Mfg'),
+        'motherboard_model': ('board_name', 'Board Product'),
+        'motherboard_serial': ('board_serial', 'Board Serial'),
+        'motherboard_part_number': ('', 'Board Part Number'),
+        'motherboard_manufacture_date': ('', 'Board Mfg Date'),
+        'product_serial': ('product_serial', 'Product Serial'),
+        'product_manufacturer': ('system_vendor', 'Product Manufacturer'),
+        'product_name': ('product_name', 'Product Name'),
+        'product_part_number': ('', 'Product Part Number'),
+        'product_version': ('product_version', 'Product Version'),
+        'chassis_part_number': ('', 'Chassis Part Number'),
+        'chassis_type': ('', 'Chassis Type'),
+    }
+    for target, (fact, label) in mappings.items():
+        choose(target, [(facts.get(fact), 'Linux DMI ' + fact), fru(label)], destination=hardware)
+    components = []
+    if all(hardware.get(k) for k in ('motherboard_serial', 'motherboard_manufacturer', 'motherboard_model')) and identity_model(hardware['motherboard_model']):
+        components.append(dict(name='Motherboard', kind='Motherboard',
+            model=hardware['motherboard_model'], part=hardware.get('motherboard_part_number', ''),
+            serial=hardware['motherboard_serial'], manufacturer=hardware['motherboard_manufacturer']))
+    return dict(identity=identity, hardware_fields=hardware, sources=sources,
+                records=records, components=components, warnings=warnings)
+
+
+def identity_metadata(discovery, existing=None):
+    """Merge partial observations without clearing previous fields or FRU records."""
+    existing = existing or {}; result = dict(discovery['hardware_fields'])
+    sources = dict(existing.get('hardware_identity_sources') or {})
+    sources.update(discovery['sources'])
+    if sources:
+        result['hardware_identity_sources'] = sources
+    # JSON objects with an `id` member inside a list are interpreted as related
+    # NetBox objects by pynetbox serialization. Key records by FRU ID instead.
+    previous_records = existing.get('fru_inventory') or {}
+    if isinstance(previous_records, list):
+        previous_records = {str(r['id']): r for r in previous_records if isinstance(r, dict) and 'id' in r}
+    records = dict(previous_records)
+    for record in discovery['records']:
+        previous = records.get(record['id'], {})
+        records[record['id']] = dict(description=record['description'],
+            fields=dict(previous.get('fields', {}), **record['fields']))
+        if record.get('ambiguous'):
+            records[record['id']]['ambiguous'] = record['ambiguous']
+    if records:
+        result['fru_inventory'] = records
+    return result
+
+
 class FilterModule:
     def filters(self):
-        return {'fhs_fpga_cards':cards,'fhs_fpga_modules':modules,'fhs_nic_vpd':vpd,'fhs_nic_candidates':nic_candidates,'fhs_nic_cards':nic_cards,'fhs_netbox_transient':netbox_transient,'fhs_unique_module_types':unique_module_types,'fhs_module_type_ids':module_type_ids}
+        return {'fhs_fru_identity':fru_identity,'fhs_identity_metadata':identity_metadata,'fhs_fpga_cards':cards,'fhs_fpga_modules':modules,'fhs_nic_vpd':vpd,'fhs_nic_candidates':nic_candidates,'fhs_nic_cards':nic_cards,'fhs_netbox_transient':netbox_transient,'fhs_unique_module_types':unique_module_types,'fhs_module_type_ids':module_type_ids}

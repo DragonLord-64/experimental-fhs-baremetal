@@ -100,12 +100,14 @@ UNKNOWN_SERIALS = {'', 'unknown', 'none', 'n/a', 'not specified', 'not available
 
 def physical_serial(value):
     value=str(value or '').strip()
-    if value.lower() in UNKNOWN_SERIALS: raise ValueError('Physical serial is missing or unavailable; preserve existing inventory')
+    if value.lower() in UNKNOWN_SERIALS or re.sub(r'[^a-z0-9]', '', value.lower()).startswith('tobefilledbyoem'): raise ValueError('Physical serial is missing or unavailable; preserve existing inventory')
     return value
 
 
-def physical_device(sync, name, serial):
+def physical_device(sync, name, serial, allow_missing=False):
     """Resolve stable chassis identity without changing hostname or inventory."""
+    if allow_missing and not str(serial or '').strip():
+        return sync.find('dcim/devices/',name=name)
     serial=physical_serial(serial)
     by_serial=sync.find('dcim/devices/',serial=serial)
     by_name=sync.find('dcim/devices/',name=name)

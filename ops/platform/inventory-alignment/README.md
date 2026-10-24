@@ -42,3 +42,26 @@ Ansible they explicitly skip. No skip substitutes for runtime acceptance.
 
 See [screen/baseline](HANDOFF.md), [official source review](UPSTREAM.md) and
 [actual validation](VALIDATION.md).
+
+## Optional IPMI FRU
+
+`test_fru.py` covers distinct identities, source precedence, placeholders/date
+models, missing/failed/partial records, selected/multiple FRUs and asset
+preservation. Its native task checks use fake local commands and synthetic REST.
+`fixtures/fru.txt` follows a user-supplied FRU photo's field structure; serials,
+product part number and extra metadata are synthetic. Manufacturer and board
+model names retain the distinct system/board vendors. The private image is not
+stored here.
+
+Run the actual identity/compare/apply tasks against the isolated chart NetBox:
+
+```bash
+python3 ops/platform/inventory-alignment/acceptance_fru.py \
+  --credentials /private/alignment.json --report /tmp/fru-acceptance.json
+```
+
+Use the same dependencies/private URL-token JSON as `acceptance.py`, plus the
+NetBox collection and `pynetbox` from the importer requirements. Only fake local
+IPMI/DMI commands are executed. The run retains unique `SYN-FRU-*` objects and a
+sanitized last-task log beside the report. It does not establish physical BMC
+access or firmware behavior.

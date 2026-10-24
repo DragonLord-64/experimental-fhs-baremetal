@@ -28,19 +28,22 @@ read-only behavior; `apply` writes the selected scope. The old
 
 ## Asset reconciliation
 
-Chassis identity is the observed DMI `product_serial` (`bootstrap_chassis_serial`
-can explicitly override it), with discovered `system_vendor` and `product_name`
-or the existing `bootstrap_manufacturer` / `bootstrap_device_type` overrides.
-A hostname is a mutable device name. Conflicting names/serials, missing physical
-serials and assigned/quarantined asset conflicts require review; no synthetic
-identity is invented. DDR5/NVMe items need both a part and serial; unknown items
-are omitted and prevent complete-scope removal.
+Chassis identity comes from `bootstrap_chassis_serial`, Linux DMI
+`chassis_serial`, then the selected IPMI FRU `Chassis Serial`. Product and board
+serials remain separate. Usable DMI manufacturer/model values take precedence
+over FRU; `bootstrap_manufacturer` / `bootstrap_device_type` override discovery.
+A hostname is a mutable device name. Conflicting names/serials and assigned or
+quarantined assets require review; no synthetic identity is invented.
 
-OEM placeholders are unavailable identities. An IPMI FRU motherboard serial is
-not a chassis serial; never use it as a fallback. Keep board/chassis sources
-distinct and use a verified explicit chassis override when DMI is unavailable.
-On real hardware, inspect `--tags facts` first and compare BIOS/BMC versions
-against their distinct sources before `--tags compare` and a limited apply.
+Local `ipmitool fru` is optional. Missing tools, denied access, failed reads and
+absent fields leave new optional values unset and preserve known NetBox values.
+A device without a chassis serial gets no chassis asset. Existing devices can
+retain their type; creating a device without manufacturer/model is skipped until
+verified type overrides are supplied. DDR5/NVMe items still need part and serial.
+
+See the [importer README](../../../playbooks/netbox/README.md) for FRU selection,
+field mapping and provenance. Inspect `--tags facts` before compare/apply;
+BIOS, BMC firmware and FRU product version have separate sources.
 
 `fhs_fpga_sync` and `fhs_inventory_sync` reconcile Inventory assets by hardware
 type + serial. Repeat imports reuse the asset. A different bay serial deletes

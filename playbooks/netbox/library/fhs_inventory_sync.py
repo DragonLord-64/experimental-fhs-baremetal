@@ -7,28 +7,33 @@ import hashlib
 import re
 
 
-def item_type(sync,maker,model):
+def item_type(sync,maker,model,part_number=None):
     slug=re.sub('[^a-z0-9]+','-',model.lower()).strip('-')[:80] or 'component'
     slug+='-'+hashlib.sha256(model.encode()).hexdigest()[:8]
+    data={'manufacturer':maker,'model':model,'slug':slug}
+    if part_number: data['part_number']=part_number
     return sync.ensure('plugins/inventory/inventory-item-types/',
         {'manufacturer_id':maker,'model':model},
-        {'manufacturer':maker,'model':model,'slug':slug},model+' inventory type')
+        data,model+' inventory type')
 
 
 def synchronize(params,check):
     sync=Sync(params,check)
     mode=params['mode']; name=params['device']
     if mode=='device':
-        serial=physical_serial(params.get('serial'))
+        serial=str(params.get('serial') or '').strip()
+        optional=params.get('allow_missing_serial',False)
+        if serial or not optional: serial=physical_serial(serial)
         maker=sync.find('dcim/manufacturers/',name=params['manufacturer'])
         if not maker: raise ValueError('Create manufacturer before chassis reconciliation')
         dtype=sync.find('dcim/device-types/',manufacturer_id=maker['id'],model=params['model'])
         if not dtype: raise ValueError('Create device type before chassis reconciliation')
-        device=physical_device(sync,name,serial)
+        device=physical_device(sync,name,serial,optional)
         if device and scalar(device['device_type'])!=dtype['id']:
             raise ValueError('Chassis model differs; review identity before applying')
-        asset_candidate(sync,'device',dtype['id'],serial,device['id'] if device else None)
-        data={'name':name,'serial':serial,'device_type':dtype['id']}
+        if serial: asset_candidate(sync,'device',dtype['id'],serial,device['id'] if device else None)
+        data={'name':name,'device_type':dtype['id']}
+        if serial: data['serial']=serial
         if not device:
             site=sync.find('dcim/sites/',name=params['site'])
             role=sync.find('dcim/device-roles/',name=params['role'])
@@ -36,7 +41,7 @@ def synchronize(params,check):
             data.update(site=site['id'],role=role['id'],status='active')
         key={'id':device['id']} if device else {'name':name}
         device=sync.ensure('dcim/devices/',key,data,name+' chassis')
-        ensure_asset(sync,'device',dtype['id'],serial,device,name)
+        if serial: ensure_asset(sync,'device',dtype['id'],serial,device,name)
         return sync.plan
     device=sync.find('dcim/devices/',name=name)
     if not device: raise ValueError('Create parent device before asset reconciliation')
@@ -77,10 +82,13 @@ def synchronize(params,check):
         return sync.plan
     maker=ensure_manufacturers(sync,[params['manufacturer']])[params['manufacturer']]
     for item in items:
-        serial=physical_serial(item['serial']); model=str(item.get('part') or '').strip()
+        item_maker=item.get('manufacturer') or params['manufacturer']
+        maker=ensure_manufacturers(sync,[item_maker])[item_maker]
+        serial=physical_serial(item['serial']); model=str(item.get('model') or item.get('part') or '').strip()
+        part=str(item.get('part') or '').strip()
         if not model: raise ValueError('Component model/part missing; preserve existing inventory')
         kind=item.get('kind','Component')
-        itype=item_type(sync,maker['id'],model)
+        itype=item_type(sync,maker['id'],model,part)
         key={'device_id':did,'name':item['name']}
         old=sync.find('dcim/inventory-items/',**key)
         asset_candidate(sync,'inventoryitem',itype['id'],serial,old['id'] if old and old.get('serial')==serial else None)
@@ -97,9 +105,10 @@ def synchronize(params,check):
             sync.journal(did,item['name'],old_serial,serial,'started',cabling='not mapped')
             sync.delete('dcim/inventory-items/',old,item['name']+' installation')
         try:
-            installed=sync.ensure('dcim/inventory-items/',key,
-                {'device':did,'name':item['name'],'manufacturer':maker['id'],'part_id':model,'serial':serial,
-                 'description':old.get('description') if old and not replacement and old.get('description') else 'FHS managed '+kind},item['name']+' component')
+            data={'device':did,'name':item['name'],'manufacturer':maker['id'],'serial':serial,
+                  'description':old.get('description') if old and not replacement and old.get('description') else 'FHS managed '+kind}
+            if part: data['part_id']=part
+            installed=sync.ensure('dcim/inventory-items/',key,data,item['name']+' component')
             ensure_asset(sync,'inventoryitem',itype['id'],serial,installed,item['name'])
             if replacement: sync.journal(did,item['name'],previous,serial,'installed',cabling='not mapped')
         except Exception:
@@ -124,13 +133,14 @@ def main():
         netbox_url=dict(required=True),netbox_token=dict(required=True,no_log=True),
         validate_certs=dict(type='bool',default=True),device=dict(required=True),
         mode=dict(required=True,choices=['resolve','device','components','nexus']),
+        allow_missing_serial=dict(type='bool',default=False),
         serial=dict(default=''),manufacturer=dict(default='Unknown'),model=dict(default=''),
         site=dict(default=''),role=dict(default=''),items=dict(type='list',elements='dict',default=[]),
         complete=dict(type='bool',default=False),scope=dict(type='list',elements='str',default=[]),
         preview=dict(type='bool',default=False)),supports_check_mode=True)
     try:
         if module.params['mode']=='resolve':
-            device=physical_device(Sync(module.params,True),module.params['device'],module.params['serial'])
+            device=physical_device(Sync(module.params,True),module.params['device'],module.params['serial'],module.params['allow_missing_serial'])
             module.exit_json(changed=False,device=device)
         plan=synchronize(module.params,module.check_mode or module.params['preview'])
         module.exit_json(changed=bool(plan),plan=plan)

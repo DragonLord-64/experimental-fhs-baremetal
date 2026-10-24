@@ -121,3 +121,6 @@
     matching_rack_metadata: '{{ ansible_play_hosts | map(''extract'', hostvars, ''server_info'') | selectattr(''site'', ''defined'') | selectattr(''site'',
       ''equalto'', server_info.site) | selectattr(''rack'', ''equalto'', server_info.rack) | list }}'
   when: server_info.rack is defined
+
+- name: Discover chassis product and motherboard identities
+  ansible.builtin.import_tasks: identity.yml

@@ -69,3 +69,30 @@ on all four new reconciliation tasks, permanent-error/retry-budget controls,
 partial SDK preservation and explicit empty removal. No tests skipped in that
 run. Ten umbrella checks also passed. The user requested the human review step
 in place of a further automated review round; no additional review pass is claimed.
+
+## Optional FRU identity — 2026-10-24
+
+Private issue [#10](https://github.com/DragonLord-64/experimental-fhs-baremetal/issues/10).
+The [FRU fixtures and entrypoint](README.md#optional-ipmi-fru) use synthetic
+serials/part/extra metadata; the user's private photo is not committed.
+
+- Local alignment suite: **50/50**, no skips, with real Ansible routing/task
+  execution. Both importer syntax checks passed in the lab Ansible runtime;
+  Python compilation and `git diff --check` passed. Six source-boundary checks
+  passed after integration with the concurrent source/lab reorganization.
+- Actual identity/compare/apply tasks against delivered-chart NetBox `4.7.0` /
+  Inventory `2.7.1`, namespace `fhs-inventory-alignment`, context `fhs-test`:
+  **16 checks**, run `SYN-FRU-0700dc6b`. Distinct chassis/product/board identities,
+  board manufacturer/model, separate firmware/product version, JSON provenance
+  round-trip, unchanged full rerun, partial updates, failed/missing IPMI, existing
+  asset preservation, no-type skip and empty identities on new no-IPMI devices.
+- Final native asset regression: **69 checks**, run `SYN-ALIGN-ba92a67f`, including
+  chassis rename/IP/MAC guards, cabled refusal, FPGA/NIC/component/Nexus
+  replacement/removal, retained asset IDs, journals and real change logs.
+
+Reports and retained synthetic fixtures are on dragonvm under
+`/home/dragon-lord/fhs-fru-20261024/` (`fru-acceptance.json`, sanitized last-task
+log, `asset-regression-final.json`). Existing lab services were inspected before
+execution. No cluster recreation, production inventory or physical hardware
+access occurred. Fake local commands exercise collection/task wiring, not actual
+IPMI access or physical firmware behavior.

@@ -1,0 +1,42 @@
+- name: Discover optional Linux DMI and IPMI system identities
+  tags: [always, facts, bmc, compare, apply]
+  become: '{{ not (hardware_simulation | default(false) | bool) }}'
+  environment:
+    PATH: '{{ hardware_command_path }}'
+    LC_ALL: C
+    LANG: C
+  block:
+  - name: Read Linux chassis serial without substituting a product or board serial
+    ansible.builtin.command:
+      argv: [cat, /sys/class/dmi/id/chassis_serial]
+    register: chassis_serial_probe
+    changed_when: false
+    failed_when: false
+    check_mode: false
+    no_log: true
+  - name: Read all local IPMI FRU records
+    ansible.builtin.command:
+      argv: [ipmitool, fru]
+    register: fru_probe
+    changed_when: false
+    failed_when: false
+    check_mode: false
+    no_log: true
+  - name: Normalize distinct chassis product and motherboard identities
+    ansible.builtin.set_fact:
+      system_identity: '{{ fru_probe | fhs_fru_identity(facts, identity_overrides, chassis_serial_probe, system_fru_id | default(motherboard_fru_id | default("0"))) }}'
+    vars:
+      identity_overrides:
+        serial: '{{ bootstrap_chassis_serial | default("") }}'
+        manufacturer: '{{ bootstrap_manufacturer | default("") }}'
+        model: '{{ bootstrap_device_type | default("") }}'
+  - name: Retain discovered identity fields and motherboard component
+    ansible.builtin.set_fact:
+      hardware_fields: '{{ hardware_fields | combine(system_identity | fhs_identity_metadata) }}'
+      discovered_components: '{{ discovered_components + system_identity.components }}'
+  - name: Report optional identity discovery status
+    ansible.builtin.debug:
+      msg:
+        warnings: '{{ system_identity.warnings }}'
+        sources: '{{ system_identity.sources }}'
+        policy: Missing values remain unset; existing values are preserved. FRU discovery never authorizes component removal.

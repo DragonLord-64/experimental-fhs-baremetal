@@ -15,7 +15,8 @@
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
       device: '{{ facts.hostname }}'
       mode: resolve
-      serial: '{{ bootstrap_chassis_serial | default(facts.product_serial | default("")) }}'
+      serial: '{{ system_identity.identity.serial | default(bootstrap_chassis_serial | default("")) }}'
+      allow_missing_serial: true
     register: resolved_identity
     until: resolved_identity is succeeded or not (resolved_identity | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -29,6 +30,16 @@
           count: '{{ 1 if resolved_identity.device else 0 }}'
           results: '{{ [resolved_identity.device] if resolved_identity.device else [] }}'
       desired_device_id: '{{ resolved_identity.device.id | default(-1) }}'
+  - name: Preserve existing device type when optional discovery is unavailable
+    ansible.builtin.set_fact:
+      netbox_manufacturer: '{{ netbox_manufacturer or resolved_identity.device.device_type.manufacturer.name | default("") }}'
+      netbox_device_type: '{{ netbox_device_type or resolved_identity.device.device_type.model | default("") }}'
+      hardware_fields: '{{ hardware_fields | combine(system_identity | fhs_identity_metadata(resolved_identity.device.custom_fields | default({}))) }}'
+    when: system_identity is defined
+  - name: Report new devices without required NetBox type information
+    ansible.builtin.debug:
+      msg: No manufacturer/model available for a NetBox device type; apply is skipped. Supply verified bootstrap_manufacturer and bootstrap_device_type to create this device. Optional identity fields remain empty.
+    when: netbox_manufacturer | length == 0 or netbox_device_type | length == 0
   - name: Read existing custom field definitions without changing their types
     ansible.builtin.uri:
       url: '{{ netbox_url }}/api/extras/custom-fields/?limit=1000'

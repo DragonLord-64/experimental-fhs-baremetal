@@ -92,31 +92,12 @@
     changed_when: false
     failed_when: false
     check_mode: false
-  - name: Read motherboard FRU information
-    ansible.builtin.command:
-      argv:
-      - ipmitool
-      - fru
-      - print
-      - '{{ motherboard_fru_id | default(''0'') }}'
-    register: motherboard_probe
-    changed_when: false
-    failed_when: false
-    check_mode: false
-  - name: Record available motherboard and BMC fields
+  - name: Record available BMC firmware from management controller only
     ansible.builtin.set_fact:
-      hardware_fields: '{{ hardware_fields | combine({item.key: item.value}) }}'
+      hardware_fields: '{{ hardware_fields | combine({"bmc_firmware": bmc_firmware}) }}'
     vars:
-      available_fields:
-        bmc_firmware: '{{ (bmc_info_probe.stdout | default('''')) | regex_findall(''(?m)^Firmware Revision\s*:\s*(.+)$'') | first | default('''') | trim
-          }}'
-        motherboard_part_number: '{{ (motherboard_probe.stdout | default('''')) | regex_findall(''(?m)^\s*Board Part Number\s*:\s*(.+)$'') | first | default('''')
-          | trim }}'
-        motherboard_serial: '{{ (motherboard_probe.stdout | default('''')) | regex_findall(''(?m)^\s*Board Serial\s*:\s*(.+)$'') | first | default('''')
-          | trim }}'
-    loop: '{{ available_fields | dict2items }}'
-    when: item.value | lower not in unavailable_values and ((item.key == 'bmc_firmware' and bmc_info_probe.rc == 0) or (item.key != 'bmc_firmware' and motherboard_probe.rc
-      == 0))
+      bmc_firmware: '{{ (bmc_info_probe.stdout | default("")) | regex_findall("(?m)^Firmware Revision\\s*:\\s*(.+)$") | first | default("") | trim }}'
+    when: bmc_info_probe.rc | default(1) == 0 and bmc_firmware | lower not in unavailable_values
   - name: Record available BMC address
     ansible.builtin.set_fact:
       bmc_address: '{{ discovered_bmc_address }}'
@@ -130,7 +111,7 @@
         simulation: '{{ hardware_simulation | default(false) | bool }}'
         motherboard_and_firmware: '{{ hardware_fields }}'
         bmc_address: '{{ bmc_address | default(''unavailable; existing value preserved'') }}'
-        unavailable_probes: '{{ [bmc_info_probe, bmc_lan_probe, motherboard_probe] | rejectattr(''rc'', ''equalto'', 0) | map(attribute=''msg'', default=''IPMI
+        unavailable_probes: '{{ [bmc_info_probe, bmc_lan_probe] | rejectattr(''rc'', ''equalto'', 0) | map(attribute=''msg'', default=''IPMI
           read failed'') | list }}'
         unavailable_fields: '{{ [''bmc_firmware'', ''motherboard_part_number'', ''motherboard_serial''] | difference(hardware_fields.keys() | list) }}'
 - name: Discover DDR5 modules

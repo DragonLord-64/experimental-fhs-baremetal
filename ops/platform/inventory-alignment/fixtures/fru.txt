@@ -1,0 +1,18 @@
+FRU Device Description : Builtin FRU Device (ID 0)
+ Chassis Type          : Other
+ Chassis Part Number   : 09-MAY-2025
+ Chassis Serial        : SYN-CHASSIS-001
+ Board Mfg Date        : Sat Jul 8 12:46:00 2023
+ Board Mfg             : ASRockRack
+ Board Product         : GENOAD8UD-2T/X550
+ Board Serial          : SYN-BOARD-001
+ Product Manufacturer  : BittWare
+ Product Name          : 09-MAY-2025
+ Product Part Number   : SYN-SERVER-PART
+ Product Version       : 0.2.0.0.0
+ Product Serial        : SYN-PRODUCT-001
+ Product Extra         : SYN-EXTRA
+FRU Device Description : Power Supply (ID 3)
+ Product Manufacturer  : Synthetic PSU vendor
+ Product Name          : SYN-PSU-MODEL
+ Product Serial        : SYN-PSU-001

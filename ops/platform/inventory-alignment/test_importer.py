@@ -128,6 +128,9 @@ class NetBox:
                     result['status']='used'
                     hardware=self.tables[path][scalar(result[kind])]
                     hardware.update(serial=result['serial'],asset_tag=result.get('asset_tag'))
+                    if kind=='inventoryitem':
+                        itype=self.tables.get('plugins/inventory/inventory-item-types/',{}).get(scalar(result.get('inventoryitem_type')),{})
+                        hardware['part_id']=itype.get('part_number','')
             self.history.append(copy.deepcopy(result))
         return Response(result)
 

@@ -56,8 +56,8 @@
     facts: '{{ hostvars[inventory_hostname].ansible_facts }}'
     netbox_site: '{{ server_info.site | default(bootstrap_site | default(''MDA'')) }}'
     netbox_role: '{{ server_info.role | default(bootstrap_role | default(''FPGA_HOST_SERVER'')) }}'
-    netbox_manufacturer: '{{ bootstrap_manufacturer | default(facts.system_vendor | default("Unknown")) | trim }}'
-    netbox_device_type: '{{ bootstrap_device_type | default(facts.product_name | default("")) | trim }}'
+    netbox_manufacturer: '{{ system_identity.identity.manufacturer | default("") }}'
+    netbox_device_type: '{{ system_identity.identity.model | default("") }}'
     netbox_auth: '{{ (''Bearer '' if netbox_token.startswith(''nbt_'') else ''Token '') ~ netbox_token }}'
     bootstrap_bittware_pci_list_argv:
     - lspci

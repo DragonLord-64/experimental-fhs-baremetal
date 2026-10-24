@@ -67,7 +67,7 @@ class TaskFlowTest(unittest.TestCase):
         self.vars=dict(netbox_url='http://127.0.0.1:'+str(self.server.server_port),netbox_token='synthetic',
             netbox_validate_certs_default=True,netbox_auth='Token synthetic',netbox_api_retries=1,netbox_api_retry_delay=0,
             netbox_api_loop_pause=0,ansible_python_interpreter=sys.executable,
-            facts=dict(hostname='renamed-server',product_serial='CHASSIS-001',distribution='Synthetic',distribution_version='1'),
+            bootstrap_chassis_serial='CHASSIS-001',facts=dict(hostname='renamed-server',product_serial='PRODUCT-001',distribution='Synthetic',distribution_version='1'),
             ansible_facts=dict(hostname='renamed-server'),resource_field_definitions={},resource_field_types={},resource_fields={},
             netbox_resource_fields={},hardware_fields={},discovered_components=[],server_info={},ip_ownership=[],mac_ownership=[],
             discovered_interfaces=[dict(name='eth0',mac='02:11:22:33:44:55',addresses=[dict(address='192.0.2.1',prefix=24)])],
