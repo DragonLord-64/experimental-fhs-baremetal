@@ -9,6 +9,12 @@
 - Keep a short plan and a linked knowledge wiki inspired by DragonMind.
 - Grafana dashboards are a workflow example; detailed dashboard scope is deferred.
 
+## Confirmed with the user — 2026-10-23
+
+- Focus on testing the current [native NetBox discovery/import and export playbooks](../docs/src/playbooks/development.md) with the [delivered platform chart](../platform/charts/fhs-platform/README.md) in the existing `fhs-test` lab on `dragonvm`; see [lab test authority](../AGENTS.md#lab-test-authority). Full chart/importer integration remains to be verified.
+- Defer spare-parts work and NetBox Inventory server-plugin integration until the user resumes that scope. The [separate plugin trial](../ops/platform/inventory-trial/README.md) is evidence for its bounded asset tests, not chart/importer integration.
+- The [`netbox.netbox` Ansible collection](../playbooks/netbox/requirements.yml) runs on the control machine and supports native NetBox API objects. It is distinct from the trial's NetBox Inventory server extension; current playbooks do not require that extension.
+
 ## Proposed, not implemented
 
 - Fast lint and syntax checks, disposable Kubernetes tests, VM provisioning tests, and separate physical hardware verification.

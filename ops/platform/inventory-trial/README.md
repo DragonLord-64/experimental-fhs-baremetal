@@ -32,7 +32,12 @@ is recorded there; this is not a permanent history guarantee. On the trial insta
 NetBox's default is 90 days; the background maintenance worker is absent here.
 
 Stop this trial with `docker compose stop` from its folder. Its named volumes and
-fixtures remain. Leave the separate minikube cluster and paused pipelines untouched.
+fixtures remain. Trial cleanup leaves the separate minikube cluster and paused
+pipelines untouched. This is a cleanup boundary, not a restriction on authorized
+`fhs-test` integration testing; see [lab test authority](../../../AGENTS.md#lab-test-authority).
+
+Spare-parts and plugin integration work is [deferred](../../../wiki/decisions.md#confirmed-with-the-user--2026-10-23).
+This standalone trial does not validate the delivered platform chart or native importers.
 
 Actual synthetic trial: [assets](screenshots/assets-overview.jpg),
 [faulty DAC](screenshots/dac-quarantined.jpg), and

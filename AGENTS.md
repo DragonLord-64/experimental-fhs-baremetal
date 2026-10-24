@@ -12,6 +12,9 @@ Never shut down, reboot, suspend, hibernate, halt, or power off this server, eve
 
 The user authorizes changes needed for tests on `dragonvm`: stop, remove, rebuild or recreate lab NetBox and its test data, install plugins, increase memory limits, and adjust supporting lab services and resources. Fix lab resource problems when encountered; do not leave them unresolved merely to preserve the current deployment. No further confirmation is needed for these lab operations. Preserve repository work and credentials; this authorization does not extend to production systems. Keep both host operating systems running under the server safety rule above.
 
+- Default integration target: the existing `fhs-test` Kubernetes cluster on `dragonvm`, orchestrated locally. Inspect its services first; always name context `fhs-test` explicitly because the default is `monitoring`. See [lab operations](ops/kubernetes/README.md).
+- Test the delivered [platform chart](platform/charts/fhs-platform/README.md) together with the current [native NetBox importers](playbooks/netbox/). Renders and separate Docker trials supplement this stack integration; they do not establish that the delivered chart works. Trial-specific cleanup instructions do not prohibit authorized lab testing. Do not create another cluster to avoid using the existing lab.
+
 ## Dragonvm wake protocol
 
 - If `dragonvm` becomes unreachable, send a Wake-on-LAN magic packet from the local orchestration server with `bash /home/dragonlord/wol.sh` before declaring the VM unavailable. The user authorizes this recovery step. Use the existing script's configured target; do not copy its MAC into the repository.
