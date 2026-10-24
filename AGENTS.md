@@ -2,7 +2,7 @@
 
 Start at [INDEX.md](INDEX.md). Keep notes short, linked, and grounded in source evidence. Follow the nearest applicable AGENTS.md.
 
-For implementation tasks across this repository, follow the four-stage workflow in [ops/AGENTS.md](ops/AGENTS.md). For automated runs, [ops/agent-pipeline](ops/agent-pipeline/README.md) owns transitions and starts fresh stage processes; no manager agent is needed. Interactive work may delegate the same stages to sub-agents.
+For implementation tasks across this repository, follow the implementation and user-review workflow in [ops/AGENTS.md](ops/AGENTS.md). For automated runs, [ops/agent-pipeline](ops/agent-pipeline/README.md) owns execution and configured checks; no manager or independent review agent is needed. Interactive work may delegate implementation when requested.
 
 ## Server safety
 
@@ -24,7 +24,7 @@ The user authorizes changes needed for tests on `dragonvm`: stop, remove, rebuil
 
 ## Repository boundaries
 
-- This is a private experimental repository. Push authorized experimental work only to `origin` at `DragonLord-64/experimental-fhs-baremetal`.
+- This is a private experimental repository. Standing order: once requested work is completed and appropriate checks pass, commit/merge and push it to `origin` at `DragonLord-64/experimental-fhs-baremetal` without asking again. Preserve unrelated user edits and credentials; the user provides review.
 - Never push to the official SKA repositories. Keep the upstream push URL disabled. The user reviews and transfers accepted changes separately.
 - Preserve source provenance and user edits. The initial source commit and snapshot-history limitation are documented in the test plan.
 - Do not commit credentials, private keys, or unsanitized sensitive captures.

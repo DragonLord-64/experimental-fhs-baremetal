@@ -1,10 +1,10 @@
 # Agent pipeline
 
-Local task runner. The script controls the stages; each stage starts a fresh Codex process.
+Local task runner. One implementation worker inspects, tests and implements; the user reviews the result.
 
-`screen + tests -> implement -> review -> configured checks -> done`
+`implement + tests -> configured checks -> done (user review pending)`
 
-Failed review goes to a fresh implementer with the original task, screening context and review findings. Blockers, invalid results, failed checks and retry limits stop the run. Nothing is committed, pushed or deployed by the runner.
+No independent review agent is launched. Blockers, invalid results, failed checks and launch limits stop the run. The runner does not itself commit, push or deploy; the caller publishes completed work under the standing private-repository instruction.
 
 ## Run
 
@@ -35,7 +35,7 @@ python3 ops/agent-pipeline/pipeline.py resume TASK
 python3 ops/agent-pipeline/pipeline.py cancel TASK
 ```
 
-Commands are queued; check `status` for acknowledgement. Pause interrupts the active process group and preserves working files, logs and a patch. Resume starts a fresh agent at the same stage. Redirect does the same, adding the correction to the next prompt; a redirected review returns to implementation. A paused task stays paused. Cancel stops the task without deleting changes. Never run these against unrelated processes.
+Commands are queued; check `status` for acknowledgement. Pause interrupts the active process group and preserves working files, logs and a patch. Resume starts a fresh agent at the same stage. Redirect does the same, adding the correction to the next prompt; legacy screening/review checkpoints resume as implementation. A paused task stays paused. Cancel stops the task without deleting changes. Never run these against unrelated processes.
 
 This version deliberately uses interrupt/checkpoint/restart. The installed CLI offers `codex queue`, but queued delivery is not treated as guaranteed live steering for `codex exec`. No terminal keystrokes are injected. An interruption can leave an external operation partially complete: inspect it before resuming.
 
@@ -47,9 +47,9 @@ Treat run files as sensitive: agent output may contain environment details. Do n
 
 ## Limits
 
-- Default: two review retries, eight total agent launches, one hour per stage/check. Pausing or redirecting consumes a new launch on resume.
-- Review uses Codex's read-only sandbox. Implementers use workspace-write with approval policy `never`; unavailable permissions become blockers rather than interactive prompts. The runner never bypasses the sandbox. This is process isolation, not a hostile-code security boundary.
-- Completion requires a valid review result, evidence, and successful configured checks. Review evidence is still agent judgment; configure checks that test the real requirement. Untracked files stay on disk and are listed, not included in Git patches.
+- Default: eight total agent launches, one hour per worker/check. Legacy `max_retries` config is accepted but no review retry gate remains. Pausing or redirecting consumes a new launch on resume.
+- The implementation worker uses workspace-write with approval policy `never`; unavailable permissions become blockers rather than interactive prompts. The runner never bypasses the sandbox. This is process isolation, not a hostile-code security boundary.
+- Completion requires a valid implementation result, evidence, and successful configured checks, then records `review_required: true`. The user reviews the change; configure checks that test the real requirement. Untracked files stay on disk and are listed, not included in Git patches.
 - Authentication, sandbox, network or usage failures stop the task. Restart as a new task with the previous evidence; stopped runs are immutable.
 - A killed controller cannot auto-recover. Status records the worker PID for diagnosis; verify it is alive. Do not resume by signalling a PID copied from old state.
 - Runtime cleanup/retention and CI/GitHub issue dispatch are not implemented.

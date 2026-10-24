@@ -19,3 +19,13 @@ The bounded real pipeline then used the explicit updated executable in an isolat
 Real-run evidence: `/tmp/fhs-real-e2e.3w6dfp/ops/agent-pipeline/runs/real-updated-codex`. Earlier blocked-run evidence: `/tmp/fhs-agent-pipeline-test.dyLkY1/ops/agent-pipeline/runs/{real-smoke,real-isolated-smoke}`. Raw logs are private and untracked; temporary paths are not durable archives. No existing checkout, services or Codex configuration were changed. Temporary fake-agent workspaces and monitor sessions were removed.
 
 Pin the absolute `codex` executable in automation as described in the [README](README.md). This smoke proves a small authenticated pipeline task on dragonvm; it does not validate Ansible roles or physical hardware.
+
+
+## 2026-10-24 — user review policy
+
+The user replaced independent agent review with one implementation pass and their
+own review. Twelve local fake-executable controller tests pass: one launch on the
+happy path, checks remain mandatory, legacy review checkpoints resume
+implementation, and pause/redirect/cancel/timeout/locking behavior is retained.
+This is controller behavior evidence, not a new authenticated model smoke run.
+Existing paused/blocked runs were not resumed.

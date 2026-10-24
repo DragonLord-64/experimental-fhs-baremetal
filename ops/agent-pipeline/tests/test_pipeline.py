@@ -36,7 +36,7 @@ root = pathlib.Path(__file__).parent
 if (root / 'slow').exists(): time.sleep(30)
 status = 'passed' if stage == 'review' else 'ready'
 if stage == 'review' and (root / 'reject').exists(): status = 'changes_required'
-if (root / 'bad').exists(): status = 'passed' if stage == 'screen' else status
+if (root / 'bad').exists(): status = 'passed'
 out = pathlib.Path(sys.argv[sys.argv.index('-o') + 1])
 out.write_text(json.dumps(dict(status=status, summary=stage, handoff='useful context', evidence=['observed fake test'])))
 ''')
@@ -77,18 +77,43 @@ out.write_text(json.dumps(dict(status=status, summary=stage, handoff='useful con
         self.start()
         state = self.wait(lambda s: s['status'] in pipeline.TERMINAL)
         self.assertEqual(state['status'], 'done', state)
-        self.assertEqual(state['attempt'], 3)
+        self.assertEqual(state['attempt'], 1)
+        self.assertTrue(state['review_required'])
+        self.assertEqual(state['stage'], 'implement')
         self.assertIn('verified', (self.run / 'verification.log').read_text())
-        self.assertEqual(len(list(self.run.glob('*.prompt.txt'))), 3)
+        self.assertEqual(len(list(self.run.glob('*.prompt.txt'))), 1)
         self.assertFalse((self.repo / 'PWNED').exists())
         self.assertFalse((self.repo / 'PWNED2').exists())
 
-    def test_review_retry_limit(self):
+    def test_no_review_worker_or_review_retry_gate(self):
         (self.repo / 'reject').touch()
         self.start()
-        state = self.wait(lambda s: s['status'] == 'blocked')
-        self.assertEqual(state['attempt'], 5)
-        self.assertEqual(state['reason'], 'Review retry limit reached')
+        state = self.wait(lambda s: s['status'] in pipeline.TERMINAL)
+        self.assertEqual(state['status'], 'done', state)
+        self.assertEqual(state['attempt'], 1)
+        self.assertFalse(list(self.run.glob('*-review.*')))
+        self.assertIn('user review pending', state['reason'])
+
+    def test_legacy_review_checkpoint_resumes_implementation(self):
+        (self.repo / 'slow').touch()
+        self.start()
+        self.wait(lambda s: s.get('agent_thread'))
+        self.cli('pause', self.id)
+        state = self.wait(lambda s: s['status'] == 'paused')
+        # Stop this owned worker, preserving the checkpoint, to emulate an upgrade.
+        os.kill(state['worker_pid'], signal.SIGTERM)
+        self.wait(lambda s: s['status'] == 'blocked')
+        state = json.loads((self.run / 'state.json').read_text())
+        state.update(status='paused', stage='review', handoff={'summary':'legacy findings'})
+        (self.run / 'state.json').write_text(json.dumps(state))
+        (self.repo / 'slow').unlink()
+        self.cli('resume', self.id)
+        self.cli('_run', self.id)
+        state = self.wait(lambda s: s['status'] in pipeline.TERMINAL)
+        self.assertEqual(state['status'], 'done', state)
+        self.assertEqual(state['stage'], 'implement')
+        self.assertEqual(state['attempt'], 2)
+        self.assertFalse(list(self.run.glob('*-review.prompt.txt')))
 
     def test_invalid_transition(self):
         (self.repo / 'bad').touch()
