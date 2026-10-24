@@ -3,7 +3,7 @@
 2026-10-21, implementation worker on dragonvm (hostname
 `dragon-lord-Virtual-Machine`, confirmed by supervisor bridge).
 
-- `python3 -m unittest discover -s platform/grafana_dashboards/tests -v`: five
+- `python3 -m unittest discover -s ops/dashboards/tests -v`: five
   passed. Covers deterministic generation, full/small inventory, missing-data
   structure, PSU mapping, both endpoint query inputs, URL encoding and source
   consolidation. These checks do not execute PromQL.
@@ -11,7 +11,7 @@
   `python3 -m unittest discover -s /home/dragon-lord/fhs-pipeline-inputs/dashboard-reference/prototype/monitoring/export-backed-dashboards/tests -p test_fhs_dashboard.py -v`
   and the same command with `-p test_switch_dashboard.py`. These validate references,
   not live implementation behavior.
-- `python3 -m py_compile platform/grafana_dashboards/live_validate.py`: passed.
+- `python3 -m py_compile ops/dashboards/live_validate.py`: passed.
 - Promtool fixtures are supplied in `tests/promql.test.json`; Promtool is absent
   on this worker's PATH. Docker socket read access was denied. No fixture pass
   is claimed.
@@ -35,7 +35,7 @@ live traffic behavior is proved by these emulated sources.
 
 - Six implementation tests passed after adding the LLDP opposite-endpoint link;
   generated JSON matches the generator. Fifteen unchanged reference tests passed.
-- `python3 -m py_compile platform/grafana_dashboards/live_validate.py` and
+- `python3 -m py_compile ops/dashboards/live_validate.py` and
   `git diff --check` passed. All 79 recorded input hashes still match.
 - Browser acceptance now checks rack-to-switch, both broken-link endpoints,
   destination selectors, jobs, datasource, instance selectors and time range.
@@ -78,7 +78,7 @@ live traffic behavior is proved by these emulated sources.
 - Defaults and checked-in layout now use VCCUnit1..4 / FSPUnit1..3: 16 FHS,
   seven switches and 12 mesh cells. Live assertions require 12 present FHS,
   four FSPUnit1 NoData and 56 LLDP entries. Alarm/link scenarios and UIDs remain.
-- `python3 -m unittest discover -s platform/grafana_dashboards/tests -v`:
+- `python3 -m unittest discover -s ops/dashboards/tests -v`:
   16 passed, including default CLI reproducibility, explicit 24/27 full-size
   coverage, reduced layout, browser guard, ownership and read-only diagnostic
   handling of a known UID timeout. Baseline reduced default failure is resolved.
@@ -144,13 +144,13 @@ Full navigation limits below remain open.
 
 Continued the interrupted source diff against
 `12c2063a532f246611aa55c74595efe069a8b90f`. All changes remain inside this
-folder. `python3 -m unittest discover -s platform/grafana_dashboards/tests -q`:
+folder. `python3 -m unittest discover -s ops/dashboards/tests -q`:
 46 passed, including deterministic generation, 116/16 disjoint partition,
 feed consumption/provenance, observed-only readings and offline patch guards.
 The old absent-rack assertion now counts 44 switches and separately checks
 116 fixture-labelled servers; no sensor assertions were removed.
 
-`python3 platform/grafana_dashboards/promql_tests.py > /tmp/fhs-promql.test.json`
+`python3 ops/dashboards/promql_tests.py > /tmp/fhs-promql.test.json`
 produces eight groups / 56 executable expression cases. Promtool is absent;
 these expressions have **not** been executed here. Python compilation and
 `git diff --check` passed. Supervisor must run `promtool test rules` on that
@@ -164,7 +164,7 @@ remote baseline immutability is unverified. No live acceptance claimed.
 The read-only fixture gate now compares all 16 actual hosts with observed-only
 status instead of requiring healthy coverage. It still requires all 116 visual
 hosts green and explicitly checks missing fspu1 / degraded fspu2-fhs1.
-`python3 -m unittest discover -s platform/grafana_dashboards/tests -v`:
+`python3 -m unittest discover -s ops/dashboards/tests -v`:
 47 passed, including incomplete actual coverage remaining unknown and rejection
 of changed actual/visual statuses. No live validation performed.
 
@@ -175,8 +175,8 @@ got ok 0. `visual_status()` now checks timestamps on each original raw selector
 before OR/reduction; provenance and explicit visual inventory filters remain.
 The existing regression and other tests are unchanged.
 
-- `python3 -m unittest discover -s platform/grafana_dashboards/tests -q`: 47 passed.
-- `python3 platform/grafana_dashboards/promql_tests.py > /tmp/fhs-visual-promql.test.json`
+- `python3 -m unittest discover -s ops/dashboards/tests -q`: 47 passed.
+- `python3 ops/dashboards/promql_tests.py > /tmp/fhs-visual-promql.test.json`
   followed by `/home/dragon-lord/fhs-grafana-visual-inputs-20261022/promtool test rules /tmp/fhs-visual-promql.test.json`:
   actual Promtool 3.15.0 SUCCESS, eight groups / 56 cases.
 - Repeated dashboard generation produced identical files; diff whitespace check

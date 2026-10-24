@@ -5,8 +5,8 @@ nine physical 42U rack elevations, 24×27 mesh, compact FHS components,
 32-port/four-interface switch, interface details, and VLAN allowance/routes.
 
 ```bash
-python3 platform/grafana_dashboards/generate.py
-python3 -m unittest discover -s platform/grafana_dashboards/tests -v
+python3 ops/dashboards/generate.py
+python3 -m unittest discover -s ops/dashboards/tests -v
 ```
 
 `exact.py` adapts the geometry in `references/`; its manifest records source
@@ -76,7 +76,7 @@ contract is not a claim of production compatibility.
 See [supervisor operations](SUPERVISOR.md) and [validation](VALIDATION.md).
 Imports use bounded ownership discovery and optimistic ID/version checks;
 foreign-folder conflicts fail closed. Credentials and browser sessions remain
-outside Git. Independent source/visual review precedes commit and push.
+outside Git. Check source/visual evidence before publishing; the user reviews completed work.
 
 ## Servers-only visual fixture
 
@@ -86,8 +86,8 @@ nonemulated FHS identities, validated against the 132-server inventory and
 display identities stay lowercase. Generate the status-only collector file:
 
 ```bash
-python3 platform/grafana_dashboards/visual_fixture.py --output platform/grafana_dashboards/visual-status.prom
-python3 platform/grafana_dashboards/generate.py
+python3 ops/dashboards/visual_fixture.py --output ops/dashboards/visual-status.prom
+python3 ops/dashboards/generate.py
 ```
 
 `fhs_visual_status{unit="FSPUnit4",fhs="FHS1",origin="visual_fixture"} 0`

@@ -2,7 +2,7 @@
 # Shared dragonvm / future CI entry point. Requires the isolated test toolchain.
 set -euo pipefail
 # Review note: give each run separate ownership, reports and Ansible state to avoid collisions.
-repo=$(cd "$(dirname "$0")/.." && pwd)
+repo=$(cd "$(dirname "$0")/../../.." && pwd)
 export FHS_MOLECULE_NAME="fhs-users-$(date +%s)-$(python3 -c 'import secrets; print(secrets.token_hex(4))')"
 export FHS_MOLECULE_IMAGE='ubuntu@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac'
 report="$repo/build/reports/molecule/$FHS_MOLECULE_NAME"
@@ -44,7 +44,7 @@ trap 'exit 143' TERM
     timeout --signal=TERM --kill-after=10s 180s docker pull "$FHS_MOLECULE_IMAGE"
     docker image inspect "$FHS_MOLECULE_IMAGE" --format '{{json .RepoDigests}}'
 } > "$report/versions.txt"
-cd "$repo/roles/manage_users"
+cd "$repo/ops/role-tests/manage_users"
 printf 'Evidence: %s\n' "$report"
 # Review note: bound the full lifecycle while pipefail preserves a failing Molecule exit status.
 timeout --signal=TERM --kill-after=30s 900s molecule test -s default 2>&1 | tee "$report/test.log"

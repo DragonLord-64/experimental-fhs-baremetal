@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
-# Review note: fail through the validated entry point instead of silently finding no scenarios.
-# Only manage_users has a validated end-to-end scenario at present.
+# Run Molecule tests for every role in the midcbf.fhs collection.
+# Activate the venv first:  source .venv/bin/activate
 set -euo pipefail
-exec "$(dirname "$0")/test-manage-users.sh" "$@"
+
+ROLES_DIR="$(cd "$(dirname "$0")/.." && pwd)/collections/ansible_collections/midcbf/fhs/roles"
+
+for role in "$ROLES_DIR"/*/; do
+  if [[ -d "$role/molecule" ]]; then
+    echo "=== molecule test: $(basename "$role") ==="
+    (cd "$role" && molecule test)
+  fi
+done

@@ -1,0 +1,73 @@
+{
+  "official_ref": "0658e93b7fa0ebbcdbcb85afcce99b1cbbc45bcd",
+  "private_before": "9b3d675",
+  "preserved_official_files": {
+    "roles/manage_users/molecule/default/molecule.yml": "d6aa38f92c432844f611e57910cf77487d304998d115eca5c1a8eff5869860c4",
+    "roles/manage_users/molecule/default/converge.yml": "7eab40934a41bbcf2504dba36244e6ea9fea58025c681847f6544128bf458111",
+    "roles/manage_users/molecule/default/verify.yml": "2e957f5d27048893dfdb369ed43ec8b325278c27f2feecd5219c3692242f60a7",
+    "scripts/molecule-test-all.sh": "d9cb74266b181a6f46f43909c9293c595abaf79211fcfd8ec3778aca0e7cc9bb"
+  },
+  "moved_immutable_files": [
+    {
+      "before": "platform/example_output/fhs-prometheus-sample.json",
+      "after": "ops/telemetry/captures/fhs-prometheus-sample.json",
+      "sha256": "a9c86f28870eb6786439a0441ffdcd30c07dc18afdf61b1b86785bc0bbc9d905"
+    },
+    {
+      "before": "platform/example_output/node-prometheus-sample.json",
+      "after": "ops/telemetry/captures/node-prometheus-sample.json",
+      "sha256": "8a1747b23db57ebffe7fb96500f11a443eddcf1252029eab39eefe3fc19ad6aa"
+    },
+    {
+      "before": "platform/example_output/switch-prometheus-sample.json",
+      "after": "ops/telemetry/captures/switch-prometheus-sample.json",
+      "sha256": "3bc7de31ce9b1b5ec6a529f9eaa572569fd314a0e7aede358a7f4a0c1a7292da"
+    },
+    {
+      "before": "platform/grafana_dashboards/PROVENANCE.json",
+      "after": "ops/dashboards/PROVENANCE.json",
+      "sha256": "23ddb2531b8ba3932834dc8e45f9782cf880212aa2293300685207a28a8f307a"
+    },
+    {
+      "before": "platform/grafana_dashboards/references/fhs.json",
+      "after": "ops/dashboards/references/fhs.json",
+      "sha256": "28fa256f2773a9e6218afe2f3dfd5d5779a967bc21f1ce6a41867f65e3a5d4b3"
+    },
+    {
+      "before": "platform/grafana_dashboards/references/interface.json",
+      "after": "ops/dashboards/references/interface.json",
+      "sha256": "f48f93831074159dc2dd018a2e2910f5af60f1b9ecd04e917021a9209e116495"
+    },
+    {
+      "before": "platform/grafana_dashboards/references/manifest.json",
+      "after": "ops/dashboards/references/manifest.json",
+      "sha256": "96333879e9d7f1cf9a45d889c50297bd0f206b2739f8c0fca1dc9d02d13936d0"
+    },
+    {
+      "before": "platform/grafana_dashboards/references/mesh.json",
+      "after": "ops/dashboards/references/mesh.json",
+      "sha256": "cbf1e2d50ba2ad697be5dba9a71062379296175359747472ccecab712ad8c403"
+    },
+    {
+      "before": "platform/grafana_dashboards/references/rack.json",
+      "after": "ops/dashboards/references/rack.json",
+      "sha256": "77a0fe997f0908e90013da206ce6c18feb7f5d347cd410990f9cfe852b20a61a"
+    },
+    {
+      "before": "platform/grafana_dashboards/references/switch.json",
+      "after": "ops/dashboards/references/switch.json",
+      "sha256": "c1220023920a23cf8b22f41cfee785bedf0fcf01dacf204adee791b625a5a442"
+    },
+    {
+      "before": "platform/grafana_dashboards/references/vlan.json",
+      "after": "ops/dashboards/references/vlan.json",
+      "sha256": "3e3c3627e97a83e4b265b236f0468059bcad8d61cad8b953a013e0f531dfb269"
+    }
+  ],
+  "preserved_official_modes": {
+    "roles/manage_users/molecule/default/molecule.yml": "100755",
+    "roles/manage_users/molecule/default/converge.yml": "100755",
+    "roles/manage_users/molecule/default/verify.yml": "100755",
+    "scripts/molecule-test-all.sh": "100755"
+  }
+}

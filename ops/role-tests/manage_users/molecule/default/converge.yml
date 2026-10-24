@@ -1,0 +1,14 @@
+---
+# Review note: exercise the existing manage_users role with controller-local synthetic keys.
+- name: Converge actual manage_users role
+  hosts: all
+  gather_facts: false
+  vars:
+    fhs_keys_dir: "{{ playbook_dir }}/fixtures"
+    vault_user_password_moleculeuser: '$6$rounds=656000$saltysalt$5IbeoxKbjI7g/8oIZjAdULp1WJ4hVTBNRGsTcSlYTOj4nKMfx1l8jH/zsfqHj6zE85cMzNxnEnGqkxbnSpwj/.'
+    # Review note: vary a real managed sudo policy without modifying production role tasks.
+    fhs_sudoers_content: "{{ '%sudo ALL=(ALL) ALL\n' if test_phase | default('fresh') == 'changed' else '%sudo ALL=(ALL) NOPASSWD:ALL\n' }}"
+  tasks:
+    - name: Apply actual role with synthetic fixtures
+      ansible.builtin.import_role:
+        name: manage_users

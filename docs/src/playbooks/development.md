@@ -74,8 +74,8 @@ with the parent device and must be backed up for a durable record.
 
 The common discovery YAML export/import boundary remains design work. Current
 entrypoints discover live facts and call native modules directly; this change
-does not introduce a general offline discovery framework. Synthetic CLI/API
-coverage is described in the [alignment checks](../../../ops/platform/inventory-alignment/README.md).
+does not introduce a general offline discovery framework. Validate hardware
+identities and selected discovery scopes before comparing and applying them.
 
 ## Switch POAP
 

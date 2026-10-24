@@ -33,7 +33,7 @@ minikube -p fhs-test kubectl -- --context=fhs-test get pods -A
 
 The modular platform is managed by [ops/platform](../platform/README.md). Separate isolated Bifrost checks are in [ops/provisioning](../provisioning/README.md). `scripts/deploy-bifrost-container.sh` expects the imported `bifrost-infra` source; its production launcher is not used by the isolated lab. Adapt its privileged containers, host networking, real inventory and DHCP settings before disposable VM use. Future Bifrost tests need an isolated provisioning network: do not expose DHCP/PXE to the real LAN. Kubernetes smoke checks do not validate provisioning or physical hardware.
 
-See [test environment plan](../../docs/test-environment-plan.md) for status and follow-up scope.
+See [test environment plan](../../wiki/test-environment-plan.md) for status and follow-up scope.
 
 2026-10-21: with the full platform installed, a disposable NetBox API object survived full `down`/`up` and was deleted afterward. The retained static storage and actual results are documented in [platform validation](../platform/VALIDATION.md).
 

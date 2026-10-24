@@ -5,9 +5,9 @@ plus this working-tree change. The pipeline supervisor executed the container
 commands through `.pipeline-bridge/`; the implementation worker did not create
 containers, change host accounts/services, commit, push or deploy.
 
-Command: `PATH=/tmp/fhs-molecule-venv/bin:$PATH bash scripts/test-manage-users.sh`.
+Command: `PATH=/tmp/fhs-molecule-venv/bin:$PATH bash ops/role-tests/manage_users/run.sh`.
 The supervisor first installed the pinned collections from
-`tests/molecule/requirements.yml` into `build/molecule-collections`.
+`ops/role-tests/dependencies/requirements.yml` into `build/molecule-collections`.
 
 Successful run: `fhs-users-1792652406-bbfeb95e`, exit 0. Artifacts:
 `build/reports/molecule/fhs-users-1792652406-bbfeb95e/`.
@@ -44,7 +44,7 @@ remain unchanged and unvalidated. See [instructions and limits](README.md).
 Container success does not validate Bifrost guest provisioning or real hardware.
 
 Review correction: the runner now pulls the pinned digest before image inspection,
-with a 180-second timeout. `bash -n scripts/test-manage-users.sh
+with a 180-second timeout. `bash -n ops/role-tests/manage_users/run.sh
 scripts/molecule-test-all.sh` and `git diff --check` passed. Supervisor request
 `validate_image_prerequisite_cycle_3` returned 0. Its prerequisite probe rejected
 image inspection until a real digest pull completed, then the full cycle passed
@@ -54,3 +54,12 @@ and container isolation. Its report directory records cleanup `exit=0` and an
 empty `remaining-containers.txt`. No shared images were removed. This checks
 missing-cache prerequisite ordering; the real pull used the cached digest, so
 an uncached image download was not observed.
+
+
+## 2026-10-24 relocation
+
+The same custom scenario and bounded runner moved under `ops/role-tests/`.
+The runner now selects that project and resolves the role from root `roles/`.
+A stub-CLI check verified project selection, role path and cleanup log; it is not
+a new Docker lifecycle run. The official legacy scenario remains separately at
+its original source path. The live results above retain their original scope.

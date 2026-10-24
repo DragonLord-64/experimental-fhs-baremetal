@@ -117,5 +117,5 @@ For dry-runs use `--dry-run=server --hide-secret`; plain renders can expose cred
 `faulty` (Faulty / quarantine, red) asset status. Native importers retain removed
 physical assets and journal replacement/removal on the parent device. History
 follows `netbox.changelogRetention` (default 90 days), so export/retain evidence
-outside NetBox for longer retention. Activation/config checks are distinct from
-[real importer acceptance](../../../ops/platform/inventory-alignment/README.md).
+outside NetBox for longer retention. Check plugin activation and then validate selected importer operations against
+a backed-up test inventory before using them on hardware.

@@ -2,12 +2,13 @@
 
 Keep reusable understanding beside its evidence, following DragonMind's linked-note approach.
 
-- [Test environment and workflow plan](../docs/test-environment-plan.md)
+- [Test environment and workflow plan](test-environment-plan.md)
 - [Decisions and open questions](decisions.md)
 - [Source map](sources.md)
+- [Shared source / experimental boundary](source-boundary.md)
 - [Resource layout and NetBox direction](resource-layout.md)
 - [VCC and FSP unit topology](unit-topology.md)
-- [manage_users container test](../roles/manage_users/molecule/default/README.md)
+- [manage_users container test](../ops/role-tests/manage_users/molecule/default/README.md)
 - [One-server logging fixture](../ops/platform/logging/README.md)
 - [Dated log](LOG.md)
 - [To-do](TODO.md)

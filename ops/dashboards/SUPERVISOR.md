@@ -7,7 +7,7 @@ Supply `GRAFANA_URL`, `GRAFANA_USER` and `GRAFANA_PASSWORD` privately.
 
 ```bash
 timeout --signal=TERM --kill-after=10 s 600 s /home/dragon-lord/fhs-docs-tools/bin/python \
-  platform/grafana_dashboards/live_validate.py --visual-only --import-owned \
+  ops/dashboards/live_validate.py --visual-only --import-owned \
   --output /tmp/fhs-grafana-visual
 ```
 
@@ -31,7 +31,7 @@ After source gates, supervised import/readback and scenario/query acceptance,
 run navigation separately against the already imported owned dashboards:
 
 ```bash
-/home/dragon-lord/fhs-docs-tools/bin/python platform/grafana_dashboards/live_validate.py \
+/home/dragon-lord/fhs-docs-tools/bin/python ops/dashboards/live_validate.py \
   --navigation-only --output /tmp/fhs-grafana-navigation
 ```
 
@@ -45,9 +45,9 @@ acceptance evidence. Title-rename acceptance remains separate.
 After independent source review and configured checks, generate query inputs:
 
 ```bash
-python3 platform/grafana_dashboards/promql_tests.py > /tmp/fhs-promql.test.json
+python3 ops/dashboards/promql_tests.py > /tmp/fhs-promql.test.json
 promtool test rules /tmp/fhs-promql.test.json
-python3 platform/grafana_dashboards/evidence_plan.py > /tmp/fhs-components.json
+python3 ops/dashboards/evidence_plan.py > /tmp/fhs-components.json
 ```
 
 Resolve `$job`, `$node_job`, `$instance`, `$node_instance` from actual datasource
@@ -98,7 +98,7 @@ After independent review, supervisor explicitly selects disposable context
 
 ```bash
 kubectl --context=fhs-test -n fhs-emulators get configmap monitoring-fixtures -o json > /tmp/fhs-fixture-before.json
-python3 platform/grafana_dashboards/visual_fixture.py --configmap-snapshot /tmp/fhs-fixture-before.json --output /tmp/fhs-visual-patch.json
+python3 ops/dashboards/visual_fixture.py --configmap-snapshot /tmp/fhs-fixture-before.json --output /tmp/fhs-visual-patch.json
 kubectl --context=fhs-test -n fhs-emulators patch configmap monitoring-fixtures --type=json --patch-file=/tmp/fhs-visual-patch.json
 ```
 
@@ -115,7 +115,7 @@ whole snapshot over intervening edits.
 Through a supervisor-verified tunnel to this lab Prometheus:
 
 ```bash
-python3 platform/grafana_dashboards/validate_visual_fixture.py --namespace fhs-test --prometheus-url http://127.0.0.1:9090 --job fhs-emulator
+python3 ops/dashboards/validate_visual_fixture.py --namespace fhs-test --prometheus-url http://127.0.0.1:9090 --job fhs-emulator
 ```
 
 This read-only hook checks exact feed identities/count/values and 132 status

@@ -7,16 +7,16 @@ no refs were changed and remote baseline state was not checked.
 
 ## Source and baseline
 
-- `platform/grafana_dashboards/generated/{rack,mesh,fhs,switch,interface,vlan}.json`:
+- `ops/dashboards/generated/{rack,mesh,fhs,switch,interface,vlan}.json`:
   six accepted native layouts, stable UIDs and navigation. Copy into the demo;
   preserve geometry and links. `native-layouts.json` freezes panel/Canvas geometry,
   titles, links and destination selector values from start, not query expressions.
-- `platform/grafana_dashboards/{generate,exact}.py`: native query helpers,
+- `ops/dashboards/{generate,exact}.py`: native query helpers,
   inventory, selectors, 9×42U placement, 24×27 mesh and 128 interface slots.
-- `platform/grafana_dashboards/{components,deployed-interfaces,visual-inventory}.json`:
+- `ops/dashboards/{components,deployed-interfaces,visual-inventory}.json`:
   component reading catalog, lab endpoint identities, 116-server visual partition.
   Runtime must use only files inside the delivered folder.
-- `platform/grafana_dashboards/README.md`: identity/provenance contract and
+- `ops/dashboards/README.md`: identity/provenance contract and
   missing numeric readings; `tests/test_refinements.py` covers independent
   parent/optic health and native directional rates. Existing source vocabulary
   includes `not deployed`; the requested demo spelling is `notdeployed`.
@@ -24,7 +24,7 @@ no refs were changed and remote baseline state was not checked.
 Baseline command (before adding tests):
 
 ```bash
-python3 -m unittest discover -s platform/grafana_dashboards/tests -v
+python3 -m unittest discover -s ops/dashboards/tests -v
 ```
 
 47 tests passed in 8.119s. These are offline source checks, not actual PromQL,

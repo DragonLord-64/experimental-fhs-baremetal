@@ -7,10 +7,10 @@ Run from the repository root on dragonvm or a future Docker-capable CI runner:
 ```sh
 python3 -m venv /tmp/fhs-molecule-venv
 . /tmp/fhs-molecule-venv/bin/activate
-pip install -r tests/molecule/requirements.txt
+pip install -r ops/role-tests/dependencies/requirements.txt
 ANSIBLE_LOCAL_TEMP=/tmp/fhs-molecule-galaxy ansible-galaxy collection install \
-  -r tests/molecule/requirements.yml -p build/molecule-collections
-scripts/test-manage-users.sh
+  -r ops/role-tests/dependencies/requirements.yml -p build/molecule-collections
+ops/role-tests/manage_users/run.sh
 ```
 
 Use Python 3.14 for the isolated controller toolchain. This does not replace the
@@ -20,8 +20,8 @@ script. The runner pulls that digest before inspecting it, including on a fresh
 Docker runner (three-minute pull timeout). Python is installed in the disposable
 container; the role installs sudo.
 APT package versions follow Ubuntu's archive, so the test is not an offline image.
-`scripts/molecule-test-all.sh` invokes the same entry point; other roles' preserved
-scenarios are not validated by this command.
+The upstream Molecule entrypoints remain at their original source paths and
+are separate legacy scenarios; this command validates only the custom lab scenario.
 
 The actual role discovers `fixtures/moleculeuser.pub` on the controller. The
 username comes from its filename, not `fhs_users` (currently unused by the role).

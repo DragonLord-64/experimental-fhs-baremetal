@@ -39,7 +39,7 @@ helm package platform/charts/elasticsearch-kibana \
 ```
 
 Dashboard archives are deterministic gzip copies of the six self-contained
-`platform/grafana_dashboards/generated/*.json` files (gzip mtime 0). No dashboard
+`ops/dashboards/generated/*.json` files (gzip mtime 0). No dashboard
 generator or source-tree access is needed at runtime. The Grafana init container
 unpacks them into an emptyDir and adjusts `/d/` navigation to the app prefix;
 queries and inventory are unchanged. Dashboard/model compatibility with real

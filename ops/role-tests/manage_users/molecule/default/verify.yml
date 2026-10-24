@@ -1,0 +1,12 @@
+---
+# Review note: assert resulting account state independently of Ansible changed counts; hide shadow data.
+- name: Verify resulting account state
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Assert passwd shadow groups keys ownership modes and valid sudo policy
+      ansible.builtin.script:
+        cmd: "verify_state.py {{ test_phase | default('fresh') }}"
+        executable: /usr/bin/python3
+      changed_when: false
+      no_log: true

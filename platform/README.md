@@ -1,7 +1,7 @@
 **Monitoring PSI MDA SKA Hardware**  
 ===================================================  
 
-Imported configuration from official development `87dc794`; these commands target the original cluster, not the private VM lab. Review values, storage, endpoints and credentials before use. For observed dragonvm behavior and separate VM overrides, see [lab deployment](../ops/platform/README.md) and [validation](../ops/platform/VALIDATION.md). NetBox is included in `platform/netbox.yaml`; its lab chart/version selection is documented there.
+Imported configuration from official development `87dc794`; these commands target the original cluster, not the private VM lab. Review values, storage, endpoints and credentials before use. NetBox is included in `platform/netbox.yaml`; its image build recipe ships with the chart.
 Build the [Inventory image](charts/fhs-platform/netbox-image/README.md) before
 installing those values. The canonical values enable Inventory `2.7.1`, serial/tag
 synchronization and Faulty / quarantine on NetBox `4.7.0`.

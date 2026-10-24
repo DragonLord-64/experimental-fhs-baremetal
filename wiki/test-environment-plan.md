@@ -42,7 +42,7 @@ Dashboard requirements are deferred. This records the proposed workflow only.
 
 ### Telemetry evidence
 
-Start by inspecting `platform/example_output`, which contains node, FHS, and switch samples. Coverage and suitability have not yet been verified.
+Start by inspecting `ops/telemetry/captures`, which contains node, FHS, and switch samples. Coverage and suitability have not yet been verified.
 
 Collect raw exporter output and a short Prometheus time series from representative servers and switches. Include device model, exporter version, units, and expected behavior. A single snapshot cannot validate rate calculations or historical panels. Sanitize identifying values consistently while preserving label relationships. Do not commit credentials.
 
@@ -53,11 +53,11 @@ Use those captures as repeatable fixtures, with additional cases for outages, mi
 - Budget VM memory alongside the platform before guest provisioning.
 - Choose the runner and pipeline configuration.
 - Map roles to container, VM, simulated-device, or physical-lab tests.
-- Extend selected monitoring checks with representative telemetry and expand the accepted [manage_users container test](../roles/manage_users/molecule/default/README.md) to other roles.
+- Extend selected monitoring checks with representative telemetry and expand the accepted [manage_users container test](../ops/role-tests/manage_users/molecule/default/README.md) to other roles.
 
 ## Role test findings
 
-The original inspection found an absent collection path, missing Molecule dependency and stale role imports. The integrated [manage_users scenario](../roles/manage_users/molecule/default/README.md) now has isolated dependencies and a shared runner; fresh state, unchanged rerun, changed sudo policy and observed drift repair passed. Other role scenarios and their upgrade behavior remain unvalidated. Existing root CI runs lint/docs. See [source map](../wiki/sources.md).
+The original inspection found an absent collection path, missing Molecule dependency and stale role imports. The integrated [manage_users scenario](../ops/role-tests/manage_users/molecule/default/README.md) now has isolated dependencies and a shared runner; fresh state, unchanged rerun, changed sudo policy and observed drift repair passed. Other role scenarios and their upgrade behavior remain unvalidated. Existing root CI runs lint/docs. See [source map](sources.md).
 
 | Role | Observed test concern |
 |---|---|
