@@ -46,6 +46,24 @@ The chart adjusts that launcher route to `<global.urlPrefix>/netbox/static`,
 matching NetBox's base path. Initialization and the other launcher settings are
 preserved; no separate values override is needed.
 
+NetBox web, worker and housekeeping share a `ReadWriteOnce` media PVC. Following
+the [upstream storage guidance](https://github.com/netbox-community/netbox-chart/blob/main/charts/netbox/README.md#persistent-storage-pitfalls),
+required pod affinity keeps these consumers on one node, selected by chart,
+release and component labels in the same namespace. No node name is fixed.
+
+For the existing `hw-management` deployment with the temporary web node selector,
+first complete the Helm upgrade with these affinity values, then remove that pin:
+
+```bash
+kubectl --context "$KUBE_CONTEXT" patch deployment fhs-netbox -n hw-management \
+  --type=merge -p '{"spec":{"template":{"spec":{"nodeSelector":{"kubernetes.io/hostname":null}}}}}'
+kubectl --context "$KUBE_CONTEXT" -n hw-management rollout status deployment/fhs-netbox
+kubectl --context "$KUBE_CONTEXT" -n hw-management get pods -o wide
+```
+
+Helm may retain the manual selector because it was absent from both release
+manifests. Confirm the media consumers share a node after the rollout.
+
 ## Login / verify
 
 NetBox and Grafana use `admin`; Kibana uses `elastic`. First install generates

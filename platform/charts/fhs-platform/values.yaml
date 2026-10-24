@@ -68,6 +68,25 @@ netbox:
     size: 1Gi
     annotations:
       helm.sh/resource-policy: keep
+  # Upstream's shared ReadWriteOnce media requires all consumers on one node.
+  # Match this release's media consumers; omitted namespaces means this namespace.
+  affinity: &netboxMediaAffinity
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: '{{ include "common.names.name" . }}'
+            app.kubernetes.io/instance: '{{ .Release.Name }}'
+          matchExpressions:
+          - key: app.kubernetes.io/component
+            operator: In
+            values:
+            - netbox
+            - worker
+            - housekeeping
+        topologyKey: kubernetes.io/hostname
+  housekeeping:
+    affinity: *netboxMediaAffinity
   extraEnvs:
   - name: GRANIAN_EXTRA_ARGS
     value: --host=0.0.0.0
@@ -81,6 +100,7 @@ netbox:
       cpu: '2'
       memory: 2048Mi
   worker:
+    affinity: *netboxMediaAffinity
     resources:
       requests:
         cpu: 100m

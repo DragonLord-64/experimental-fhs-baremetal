@@ -70,3 +70,14 @@ ran as UID/GID 1000 with all capabilities dropped, no new privileges, no network
 or host mounts, a read-only root and temporary `/tmp`. This check bypassed only
 the database initialization entrypoint; migrations, ingress/TLS and browser
 behavior remain unverified. The chart still runs that initialization entrypoint.
+
+The tenth test renders the web, worker and housekeeping consumers of NetBox's
+original `ReadWriteOnce` media PVC. All require the same hostname through chart,
+release and component labels in their own namespace, without fixed nodes. It
+also checks a different release/namespace/chart name, disabled worker and exclusion
+of Helm test pods and unrelated workloads. This test failed on missing affinity
+before implementation. These renders do not test multi-node scheduling or CSI
+attachment; no cluster deployment was performed for this change.
+2026-10-23: all ten umbrella tests passed with loopback permission, and both
+chart lints passed. The sandbox-only run passed nine tests; the mock API test
+could not bind its loopback socket.

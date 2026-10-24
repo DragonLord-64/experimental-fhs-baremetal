@@ -26,8 +26,8 @@ acceptance = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(acceptance)
 
 
-def render(chart=CHART, namespace=NS, prefix="/test", hostname=HOST, extra=()):
-    cmd = ["helm", "template", RELEASE, str(chart), "--namespace", namespace,
+def render(chart=CHART, namespace=NS, prefix="/test", hostname=HOST, extra=(), release=RELEASE):
+    cmd = ["helm", "template", release, str(chart), "--namespace", namespace,
            "--set-string", f"global.urlPrefix={prefix}", "--set-string", f"global.hostname={hostname}", *extra]
     result = subprocess.run(cmd, text=True, capture_output=True)
     if result.returncode:
@@ -155,6 +155,63 @@ class UmbrellaTest(unittest.TestCase):
             self.assertGreaterEqual(len(base64.b64decode(data[key])), 32)
         _, second = render()
         self.assertNotEqual(data["password"], next(o for o in second if o["kind"] == "Secret")["data"]["password"])
+
+    def test_netbox_media_consumers_require_the_same_node(self):
+        for release, namespace, worker_enabled, extra in (
+            (RELEASE, NS, True, ()),
+            ("another-release", "another-namespace", True,
+             ("--set-string", "netbox.nameOverride=another-netbox")),
+            (RELEASE, NS, False, ("--set", "netbox.worker.enabled=false")),
+        ):
+            with self.subTest(release=release, namespace=namespace, worker=worker_enabled):
+                _, objects = render(extra=extra, release=release, namespace=namespace)
+                claim = next(o for o in objects if o["kind"] == "PersistentVolumeClaim"
+                             and o["metadata"]["name"] == "fhs-netbox-media")
+                self.assertEqual(["ReadWriteOnce"], claim["spec"]["accessModes"])
+                workloads = {o["metadata"]["name"]: (o, p) for o, p in pod_specs(objects)}
+                web_labels = workloads["fhs-netbox"][0]["spec"]["template"]["metadata"]["labels"]
+                expected_selector = {key: web_labels[key] for key in (
+                    "app.kubernetes.io/name", "app.kubernetes.io/instance")}
+                self.assertEqual(release, expected_selector["app.kubernetes.io/instance"])
+                consumers = ["fhs-netbox", "fhs-netbox-housekeeping"]
+                if worker_enabled:
+                    consumers.append("fhs-netbox-worker")
+                else:
+                    self.assertNotIn("fhs-netbox-worker", workloads)
+                for name in consumers:
+                    with self.subTest(consumer=name):
+                        obj, pod = workloads[name]
+                        metadata = (obj["spec"]["jobTemplate"]["spec"]["template"]["metadata"]
+                                    if obj["kind"] == "CronJob" else obj["spec"]["template"]["metadata"])
+                        labels = metadata["labels"]
+                        self.assertEqual(expected_selector, {key: labels[key] for key in expected_selector})
+                        self.assertIn(labels["app.kubernetes.io/component"], ["netbox", "worker", "housekeeping"])
+                        media = next(v for v in pod["volumes"] if v["name"] == "media")
+                        self.assertEqual("fhs-netbox-media", media["persistentVolumeClaim"]["claimName"])
+                        mount = next(m for m in pod["containers"][0]["volumeMounts"] if m["name"] == "media")
+                        self.assertEqual("/opt/netbox/netbox/media", mount["mountPath"])
+                        self.assertFalse(pod.get("nodeName"), name)
+                        self.assertFalse(pod.get("nodeSelector"), name)
+                        terms = pod.get("affinity", {}).get("podAffinity", {}).get(
+                            "requiredDuringSchedulingIgnoredDuringExecution", [])
+                        self.assertEqual(1, len(terms), name)
+                        term = terms[0]
+                        self.assertEqual("kubernetes.io/hostname", term["topologyKey"])
+                        selector = term["labelSelector"]
+                        self.assertEqual(expected_selector, selector["matchLabels"])
+                        self.assertEqual([{"key": "app.kubernetes.io/component", "operator": "In",
+                                           "values": ["netbox", "worker", "housekeeping"]}],
+                                         selector["matchExpressions"])
+                        self.assertEqual([namespace], term.get("namespaces", [namespace]))
+                        self.assertNotIn("namespaceSelector", term)
+                test_pod = next(o for o in objects if o["kind"] == "Pod"
+                                and o["metadata"].get("annotations", {}).get("helm.sh/hook") == "test")
+                self.assertNotIn("app.kubernetes.io/component", test_pod["metadata"]["labels"])
+                for name, (_, pod) in workloads.items():
+                    if name not in consumers:
+                        affinity = pod.get("affinity") or {}
+                        self.assertFalse((affinity.get("podAffinity") or {}).get(
+                            "requiredDuringSchedulingIgnoredDuringExecution"), name)
 
     def test_shared_url_settings_nested_prefix_and_arbitrary_namespace(self):
         for raw_prefix in ("/test", "/review/team-a/", ""):
