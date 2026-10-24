@@ -1,0 +1,10 @@
+- name: Load system tasks
+  ansible.builtin.import_tasks: tasks/system.yml
+- name: Load components tasks
+  ansible.builtin.import_tasks: tasks/components.yml
+- name: Load fpga tasks
+  ansible.builtin.import_tasks: tasks/fpga.yml
+- name: Load compare tasks
+  ansible.builtin.import_tasks: tasks/compare.yml
+- name: Load apply tasks
+  ansible.builtin.import_tasks: tasks/apply.yml

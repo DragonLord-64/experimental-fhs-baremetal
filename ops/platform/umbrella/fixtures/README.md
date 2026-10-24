@@ -10,7 +10,9 @@ docker run --rm --pull=never --network=none --read-only \
 ```
 
 File SHA256: `cb611e3efb743f442a48d692196be3498c3505cd8a79d53b716815aabe5fa111`.
-Refresh the fixture and image assertion together when changing the image pin.
+The delivered Inventory image extends this exact base without changing the launcher.
+The regression checks the build recipe and selected image. Refresh the fixture
+and assertion together when changing the base or modifying its launcher.
 
 The regression executes rendered chart commands and this launcher, replacing
 only the image entrypoint and Granian with local capture stubs. It checks the

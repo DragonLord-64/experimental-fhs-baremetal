@@ -4,7 +4,8 @@ Disposable synthetic inventory, separate from `fhs-test`. NetBox `4.7.0` and
 [NetBox Inventory](https://github.com/ArnesSI/netbox-inventory) `2.7.1` (MIT).
 Base, PostgreSQL and Valkey images are pinned by digest. No real inventory is imported.
 
-Copy this folder to `~/fhs-netbox-inventory-trial-20261023` on dragonvm, then run there:
+Run from this folder in a repository checkout (the shared image build context
+is `platform/netbox-image`):
 
 ```sh
 python3 prepare.py              # private .env and credentials.json, created once
@@ -36,8 +37,9 @@ fixtures remain. Trial cleanup leaves the separate minikube cluster and paused
 pipelines untouched. This is a cleanup boundary, not a restriction on authorized
 `fhs-test` integration testing; see [lab test authority](../../../AGENTS.md#lab-test-authority).
 
-Spare-parts and plugin integration work is [deferred](../../../wiki/decisions.md#confirmed-with-the-user--2026-10-23).
-This standalone trial does not validate the delivered platform chart or native importers.
+Plugin image/configuration now share the delivered chart source.
+This earlier standalone trial does not validate the delivered platform chart or
+native importers; use [alignment acceptance](../inventory-alignment/README.md).
 
 Actual synthetic trial: [assets](screenshots/assets-overview.jpg),
 [faulty DAC](screenshots/dac-quarantined.jpg), and

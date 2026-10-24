@@ -66,6 +66,7 @@
     ansible.builtin.set_fact:
       desired_nic_cards: '{{ nic_discovery.cards }}'
       nic_discovery_warnings: '{{ nic_discovery.warnings }}'
+      nic_scan_complete: '{{ nic_discovery.warnings | length == 0 and nic_card_identity_probes.results | rejectattr("rc", "equalto", 0) | list | length == 0 and nic_driver_probes.results | rejectattr("rc", "equalto", 0) | list | length == 0 }}'
   - name: Report skipped or uncertain NIC discovery
     ansible.builtin.debug:
       msg:

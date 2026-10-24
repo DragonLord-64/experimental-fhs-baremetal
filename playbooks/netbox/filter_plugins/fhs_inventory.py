@@ -10,9 +10,17 @@ def first(text, pattern):
 
 def cards(text, index_pattern, serial_pattern, part_pattern, version_pattern, firmware_pattern, pci_map):
     headings = list(re.finditer(serial_pattern, text, re.MULTILINE))
+    indices = list(re.finditer(index_pattern, text, re.MULTILINE))
+    # Count raw SDK index labels too: a malformed index must not disappear just
+    # because the configured numeric pattern could not recognize it.
+    index_labels = list(re.finditer(r'^\s*Index\s*:', text, re.MULTILINE))
+    if len(indices) != len(headings) or len(index_labels) > len(indices):
+        raise AnsibleFilterError('Incomplete FPGA inventory; every Index record needs one recognized serial and index')
     result = []
     for pos, heading in enumerate(headings):
         block = text[heading.start():headings[pos + 1].start() if pos + 1 < len(headings) else len(text)]
+        if len(list(re.finditer(index_pattern, block, re.MULTILINE))) != 1:
+            raise AnsibleFilterError('Incomplete FPGA inventory; every serial needs exactly one Index record')
         index = first(block, index_pattern)
         part = first(block, part_pattern)
         firmware = first(block, firmware_pattern)
@@ -29,7 +37,7 @@ def cards(text, index_pattern, serial_pattern, part_pattern, version_pattern, fi
     if len({c['card_index'] for c in result}) != len(result):
         raise AnsibleFilterError('Duplicate FPGA card index')
     warnings = ['SDK reports repeated serials for distinct card indices; preserving reported values and using module bays for identity'] if len({c['serial'] for c in result}) != len(result) else []
-    return {'cards': result, 'warnings': warnings}
+    return {'cards': result, 'warnings': warnings, 'complete': not warnings}
 
 
 def modules(records, interface_type):

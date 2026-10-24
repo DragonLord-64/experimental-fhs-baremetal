@@ -5,7 +5,9 @@ Requires Helm 3, Kubernetes >=1.25, existing ingress class `nginx` and storage
 classes `nfss1` / `bds1`. Dependencies and six dashboards are included.
 
 One release installs NetBox, PostgreSQL, Valkey, Prometheus, Telegraf, Grafana
-and Elasticsearch/Kibana. No dependency download or development tools are needed.
+and Elasticsearch/Kibana. Chart dependencies are bundled. Build/load or publish
+the [NetBox Inventory image](netbox-image/README.md) before installation; its
+Docker build sources are included in this folder.
 
 ## Install / upgrade
 
@@ -21,10 +23,24 @@ helm upgrade --install fhs-platform ./fhs-platform \
   --set-string global.urlPrefix=/test
 ```
 
+The existing user deployment profile is release `mid-cbf-hw`, namespace
+`hw-management`, prefix `/mid-cbf-hw`. Preserve its private extra values:
+
+```bash
+helm upgrade --install mid-cbf-hw ./fhs-platform \
+  --kube-context "$KUBE_CONTEXT" --namespace hw-management \
+  -f site-values.yaml --set-string global.urlPrefix=/mid-cbf-hw \
+  --wait --wait-for-jobs --timeout 20m
+```
+
+Use that profile only for the intended existing deployment. The candidate
+example above remains separate. Back up NetBox PostgreSQL before plugin
+activation or migrations; keep the existing release credentials and data.
+
 Run the same command after updating this folder or adding `-f site-values.yaml`.
 Keep the same release name, namespace, credentials and volumes on upgrades.
 
-- `--namespace`: candidate namespace; never use the existing stack's namespace.
+- `--namespace`: use an unused namespace for a candidate; preserve the existing one for an upgrade.
 - `global.urlPrefix`: `/test`, `/review/team-a`, or another unused prefix.
 - `global.hostname`: defaults to `rmdskadevdu011.mda.ca`.
 - `global.ingressClassName`, `global.scheme`, `global.tlsSecretName`: optional overrides.
@@ -94,3 +110,12 @@ cluster RBAC, StorageClass, explicit PV, LoadBalancer, host mounts or privileged
 Workloads still consume shared capacity, PVCs allocate storage/PVs, ingress loads
 new routes, and scrapes add load. Offline checks cannot prove zero cluster impact.
 For dry-runs use `--dry-run=server --hide-secret`; plain renders can expose credentials.
+
+## Inventory lifecycle
+
+`netbox_inventory` is enabled with serial/tag synchronization and the extra
+`faulty` (Faulty / quarantine, red) asset status. Native importers retain removed
+physical assets and journal replacement/removal on the parent device. History
+follows `netbox.changelogRetention` (default 90 days), so export/retain evidence
+outside NetBox for longer retention. Activation/config checks are distinct from
+[real importer acceptance](../../../ops/platform/inventory-alignment/README.md).

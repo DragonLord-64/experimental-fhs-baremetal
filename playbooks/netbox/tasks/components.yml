@@ -361,3 +361,8 @@
       components: '{{ discovered_components }}'
       missing_part_numbers: '{{ discovered_components | selectattr(''part'', ''equalto'', '''') | map(attribute=''name'') | list }}'
       missing_serial_numbers: '{{ discovered_components | selectattr(''serial'', ''equalto'', '''') | map(attribute=''name'') | list }}'
+
+- name: Mark successful complete component scope without missing identities
+  tags: [ddr, nvme, compare, apply]
+  ansible.builtin.set_fact:
+    components_scan_complete: '{{ memory_probe.rc | default(1) == 0 and nvme_probe.rc | default(1) == 0 and memory_probe.stdout | default("") is search("Memory Device") and not (memory_probe.stdout | default("") is search("(?mi)^\\s*(Size|Type):\\s*(Unknown|Not Specified)")) and discovered_components | selectattr("kind", "in", ["DDR5", "NVMe"]) | selectattr("serial", "equalto", "") | list | length == 0 and discovered_components | selectattr("kind", "in", ["DDR5", "NVMe"]) | selectattr("part", "equalto", "") | list | length == 0 }}'

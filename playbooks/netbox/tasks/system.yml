@@ -34,6 +34,9 @@
       selected_primary_ipv4: ''
       ip_ownership: []
       mac_ownership: []
+      fpga_scan_complete: false
+      nic_scan_complete: false
+      components_scan_complete: false
       desired_fpga_cards: []
       discovered_bittware:
         cards: []

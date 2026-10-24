@@ -11,9 +11,15 @@
 
 ## Confirmed with the user — 2026-10-23
 
-- Focus on testing the current [native NetBox discovery/import and export playbooks](../docs/src/playbooks/development.md) with the [delivered platform chart](../platform/charts/fhs-platform/README.md) in the existing `fhs-test` lab on `dragonvm`; see [lab test authority](../AGENTS.md#lab-test-authority). Full chart/importer integration remains to be verified.
-- Defer spare-parts work and NetBox Inventory server-plugin integration until the user resumes that scope. The [separate plugin trial](../ops/platform/inventory-trial/README.md) is evidence for its bounded asset tests, not chart/importer integration.
-- The [`netbox.netbox` Ansible collection](../playbooks/netbox/requirements.yml) runs on the control machine and supports native NetBox API objects. It is distinct from the trial's NetBox Inventory server extension; current playbooks do not require that extension.
+- Focus on testing the current [native NetBox discovery/import and export playbooks](../docs/src/playbooks/development.md) with the [delivered platform chart](../platform/charts/fhs-platform/README.md) in the existing `fhs-test` lab on `dragonvm`; see [lab test authority](../AGENTS.md#lab-test-authority). The [2026-10-24 alignment validation](../ops/platform/inventory-alignment/VALIDATION.md) records subsequent integration evidence and its limits.
+- Spare-parts and Inventory integration were deferred at this point; the user resumed that scope on 2026-10-24. The [separate plugin trial](../ops/platform/inventory-trial/README.md) remains evidence for its bounded asset tests.
+- The [`netbox.netbox` Ansible collection](../playbooks/netbox/requirements.yml) runs on the control machine and supports native NetBox API objects. It is distinct from the trial's NetBox Inventory server extension; the aligned importer now requires that extension for physical assets.
+
+## Confirmed with the user — 2026-10-24
+
+- Align the tested plugin, main deployment and importers; retain physical assets by serial across installed-record removal/replacement. Chassis identity follows serial, not hostname. Complete, explicitly selected discovery scopes may reconcile absence; partial or failed scans preserve records.
+- Use one public [NetBox importer](../playbooks/netbox/netbox_import.yml) for Linux/FHS and Nexus, with internal family tasks and a compatibility Nexus wrapper. Never run server discovery on a switch.
+- Keep manual DAC stock/quarantine tracking available without inventing cable endpoints. Asset status/history and installed topology serve different purposes; change-log retention defaults to 90 days.
 
 ## Proposed, not implemented
 

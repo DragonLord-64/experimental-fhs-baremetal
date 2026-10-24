@@ -52,7 +52,12 @@ cachingDatabase:
   username: ""
 changelogRetention: 90
 clusterDomain: cluster.local
-command: []
+command:
+  - /opt/netbox/docker-entrypoint.sh
+  - /bin/bash
+  - -c
+  - >-
+    exec /bin/bash <(sed 's|--static-path-route "/static"|--static-path-route "/{{ trimAll "/" .Values.basePath }}/static"|' /opt/netbox/launch-netbox.sh)
 common:
   exampleValue: common-chart
   global:
@@ -121,7 +126,9 @@ extraEnvs:
     value: --host=0.0.0.0
 extraVolumeMounts: []
 extraVolumes: []
-fieldChoices: {}
+fieldChoices:
+  netbox_inventory.Asset.status+:
+    - [faulty, Faulty / quarantine, red]
 fileUploadMaxMemorySize: 2621440
 fullnameOverride: ""
 global:
@@ -190,12 +197,12 @@ httpRoute:
   hostnames: []
   parentRefs: []
 image:
+  registry: ""
+  repository: fhs/netbox-inventory
+  tag: 4.7.0-2.7.1
   digest: ""
   pullPolicy: IfNotPresent
-  pullSecrets: []
-  registry: ghcr.io
-  repository: netbox-community/netbox
-  tag: ""
+
 ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /static/$1
@@ -295,8 +302,11 @@ persistence:
   size: 1Gi
   storageClass: ""
   subPath: ""
-plugins: []
-pluginsConfig: {}
+plugins:
+  - netbox_inventory
+pluginsConfig:
+  netbox_inventory:
+    sync_hardware_serial_asset_tag: true
 podAnnotations: {}
 podLabels: {}
 podSecurityContext:

@@ -2,8 +2,10 @@
 fullnameOverride: netbox
 basePath: netbox/
 image:
-  tag: v4.7.0
-  digest: sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba
+  registry: ""
+  repository: fhs/netbox-inventory
+  tag: 4.7.0-2.7.1
+  digest: ""
 postgresql:
   enabled: false
 valkey:

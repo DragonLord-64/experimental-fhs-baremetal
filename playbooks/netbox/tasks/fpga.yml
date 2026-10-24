@@ -45,8 +45,8 @@
   - name: Require usable card output
     ansible.builtin.assert:
       that:
-      - discovered_bittware.cards | length > 0
-      fail_msg: No complete FPGA cards parsed; check SDK output and configured patterns.
+      - discovered_bittware.cards | length > 0 or (bootstrap_fpga_complete | default(false) | bool and bootstrap_fpga_empty_pattern | default("") | length > 0 and _bittware_raw.stdout is search(bootstrap_fpga_empty_pattern))
+      fail_msg: No complete FPGA cards parsed; check SDK output and patterns. An intentional complete empty scan needs an explicit bootstrap_fpga_empty_pattern matching the SDK empty report.
   - name: Report SDK identity caveats without exposing identifiers
     ansible.builtin.debug:
       msg: '{{ discovered_bittware.warnings }}'
@@ -62,3 +62,8 @@
     ansible.builtin.set_fact:
       desired_fpga_cards: '{{ (bootstrap_fpga_cards | default([]) + discovered_bittware.cards | default([])) | fhs_fpga_modules(bootstrap_fpga_interface_type)
         }}'
+
+- name: Mark explicitly selected successful FPGA discovery scope
+  tags: [fpga, compare, apply]
+  ansible.builtin.set_fact:
+    fpga_scan_complete: '{{ bootstrap_bittware_enabled | default(false) | bool and _bittware_raw.rc | default(1) == 0 and discovered_bittware.complete | default(false) | bool and (discovered_bittware.cards | length > 0 or (bootstrap_fpga_empty_pattern | default("") | length > 0 and _bittware_raw.stdout | default("") is search(bootstrap_fpga_empty_pattern))) }}'

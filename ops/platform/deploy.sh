@@ -7,6 +7,7 @@ h() { "$helm_bin" --kube-context fhs-test -n fhs-platform "$@"; }
 case ${1:-deploy} in
   deploy)
     if (( $# > 2 )) || [[ -n ${2:-} && ${2:-} != --with-bifrost ]]; then echo "Unknown deployment option" >&2; exit 2; fi
+    bash "$root/platform/netbox-image/build.sh" --lab
     python3 "$root/ops/platform/prepare.py"
     h upgrade --install netbox-postgresql oci://registry-1.docker.io/bitnamicharts/postgresql --version 18.8.13 -f "$root/platform/netbox-postgresql.yaml" -f "$root/ops/platform/dragonvm/postgresql.yaml" --wait --timeout 8m
     h upgrade --install netbox-valkey oci://registry-1.docker.io/bitnamicharts/valkey --version 6.2.16 -f "$root/platform/netbox-valkey.yaml" -f "$root/ops/platform/dragonvm/valkey.yaml" --wait --timeout 8m

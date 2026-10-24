@@ -21,8 +21,8 @@ services:
     cpus: 0.25
     command: [valkey-server, --maxmemory, 64mb, --maxmemory-policy, allkeys-lru]
   netbox:
-    build: .
-    image: fhs-netbox-inventory-trial:4.7.0-2.7.1
+    build: ../../../platform/netbox-image
+    image: fhs/netbox-inventory:4.7.0-2.7.1
     env_file: .env
     mem_limit: 2560m
     cpus: 2

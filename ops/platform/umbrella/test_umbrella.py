@@ -273,9 +273,11 @@ class UmbrellaTest(unittest.TestCase):
                 _, objects = render(prefix=raw_prefix)
                 pod = next(p for o, p in pod_specs(objects) if o["metadata"]["name"] == "fhs-netbox")
                 container = pod["containers"][0]
-                self.assertTrue(container["image"].endswith(
-                    "@sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba"),
-                    "Refresh the launcher fixture/provenance when changing the pinned image")
+                self.assertEqual("fhs/netbox-inventory:4.7.0-2.7.1", container["image"])
+                recipe=(CHART / "netbox-image/Dockerfile").read_text()
+                self.assertIn("FROM ghcr.io/netbox-community/netbox@sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba",recipe)
+                self.assertNotIn("launch-netbox.sh",recipe,
+                    "Refresh launcher fixture/provenance if the image recipe changes it")
                 launched = netbox_launch(container)
                 args = launched["args"]
                 expected = raw_prefix.rstrip("/") + "/netbox/static"

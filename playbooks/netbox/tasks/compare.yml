@@ -8,15 +8,27 @@
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   block:
-  - name: Read existing device
-    ansible.builtin.uri:
-      url: '{{ netbox_url }}/api/dcim/devices/?name={{ facts.hostname | urlencode }}'
-      headers:
-        Authorization: '{{ netbox_auth }}'
-      return_content: true
-    register: existing_device
+  - name: Resolve physical chassis identity before comparing network ownership
+    fhs_inventory_sync:
+      netbox_url: '{{ netbox_url }}'
+      netbox_token: '{{ netbox_token }}'
+      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+      device: '{{ facts.hostname }}'
+      mode: resolve
+      serial: '{{ bootstrap_chassis_serial | default(facts.product_serial | default("")) }}'
+    register: resolved_identity
+    until: resolved_identity is succeeded or not (resolved_identity | fhs_netbox_transient)
+    retries: '{{ netbox_api_retries }}'
+    delay: '{{ netbox_api_retry_delay }}'
     check_mode: false
     no_log: true
+  - name: Retain resolved device for preview and metadata preservation
+    ansible.builtin.set_fact:
+      existing_device:
+        json:
+          count: '{{ 1 if resolved_identity.device else 0 }}'
+          results: '{{ [resolved_identity.device] if resolved_identity.device else [] }}'
+      desired_device_id: '{{ resolved_identity.device.id | default(-1) }}'
   - name: Read existing custom field definitions without changing their types
     ansible.builtin.uri:
       url: '{{ netbox_url }}/api/extras/custom-fields/?limit=1000'
@@ -61,7 +73,7 @@
         address spaces.
     vars:
       fleet_macs: '{{ ansible_play_hosts | map(''extract'', hostvars, ''discovered_interfaces'') | flatten | map(attribute=''mac'') | reject(''equalto'',
-        '''') | reject(''equalto'', ''00:00:00:00:00:00'') | list }}'
+        '''') | map(''lower'') | reject(''equalto'', ''00:00:00:00:00:00'') | reject(''equalto'', ''00:00:00:00'') | reject(''equalto'', ''ee:ee:ee:ee:ee:ee'') | list }}'
       fleet_hostnames: '{{ ansible_play_hosts | map(''extract'', hostvars, [''ansible_facts'', ''hostname'']) | list }}'
       fleet_ips: '{{ (ansible_play_hosts | map(''extract'', hostvars, ''discovered_interfaces'') | flatten | map(attribute=''addresses'') | flatten | map(attribute=''address'')
         | list) + (ansible_play_hosts | map(''extract'', hostvars) | selectattr(''bmc_address'', ''defined'') | map(attribute=''bmc_address'') | list) }}'
@@ -84,7 +96,7 @@
         address: '{{ item.item.1.address }}'
         interface: '{{ item.item.0.name }}'
         count: '{{ item.json.count }}'
-        device_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.name'', default='''') | list }}'
+        device_ids: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.id'', default=0) | list }}'
         interface_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.name'', default='''') | list }}'
     loop: '{{ ip_owners.results }}'
     no_log: true
@@ -92,7 +104,7 @@
     ansible.builtin.assert:
       that:
       - item.count <= 1
-      - item.device_names | reject('equalto', facts.hostname) | list | length == 0
+      - item.device_ids | reject('equalto', desired_device_id) | list | length == 0
       - item.interface_names | reject('equalto', item.interface) | list | length == 0
       fail_msg: An IP is ambiguous or already belongs to another interface/device; review the conflict instead of automatically moving it.
     loop: '{{ ip_ownership }}'
@@ -105,7 +117,7 @@
         Authorization: '{{ netbox_auth }}'
       return_content: true
     loop: '{{ discovered_interfaces }}'
-    when: item.mac | length > 0 and item.mac != '00:00:00:00:00:00'
+    when: item.mac | lower not in ['', '00:00:00:00:00:00', '00:00:00:00', 'ee:ee:ee:ee:ee:ee']
     register: mac_owners
     check_mode: false
     no_log: true
@@ -116,7 +128,7 @@
       ownership:
         interface: '{{ item.item.name }}'
         count: '{{ item.json.count }}'
-        device_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.name'', default='''') | list }}'
+        device_ids: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.id'', default=0) | list }}'
         interface_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.name'', default='''') | list }}'
     loop: '{{ mac_owners.results | selectattr(''json'', ''defined'') | list }}'
     no_log: true
@@ -124,7 +136,7 @@
     ansible.builtin.assert:
       that:
       - item.count <= 1
-      - item.device_names | reject('equalto', facts.hostname) | list | length == 0
+      - item.device_ids | reject('equalto', desired_device_id) | list | length == 0
       - item.interface_names | reject('equalto', item.interface) | list | length == 0
       fail_msg: A MAC is ambiguous or belongs to another interface/device; review before moving it.
     loop: '{{ mac_ownership }}'
@@ -138,7 +150,7 @@
       fail_msg: This NetBox device has simulated hardware. Use a separate real-server record or explicitly review the simulated fields first.
   - name: Read existing interfaces addresses and components for preview
     ansible.builtin.uri:
-      url: '{{ netbox_url }}/api/{{ item }}/?device={{ facts.hostname | urlencode }}&limit=1000'
+      url: '{{ netbox_url }}/api/{{ item }}/?device_id={{ desired_device_id }}&limit=1000'
       headers:
         Authorization: '{{ netbox_auth }}'
       return_content: true

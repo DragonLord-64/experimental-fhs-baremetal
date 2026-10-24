@@ -19,9 +19,19 @@ credentials:
 netbox:
   fullnameOverride: fhs-netbox
   basePath: netbox/
+  plugins: [netbox_inventory]
+  pluginsConfig:
+    netbox_inventory:
+      sync_hardware_serial_asset_tag: true
+  fieldChoices:
+    netbox_inventory.Asset.status+:
+    - [faulty, Faulty / quarantine, red]
   image:
-    tag: v4.7.0
-    digest: sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba
+    registry: ""
+    repository: fhs/netbox-inventory
+    tag: 4.7.0-2.7.1
+    digest: ""
+    pullPolicy: IfNotPresent
   # The pinned launcher hardcodes /static; align it with BASE_PATH without
   # bypassing initialization or replacing its other Granian settings.
   command:

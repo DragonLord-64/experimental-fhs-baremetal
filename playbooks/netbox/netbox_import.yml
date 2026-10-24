@@ -1,5 +1,25 @@
-- name: Discover servers and bootstrap NetBox directly
+- name: Route selected Linux servers and Nexus switches
   hosts: all
+  gather_facts: false
+  connection: local
+  any_errors_fatal: true
+  vars:
+    fhs_is_nexus: '{{ "nexus" in group_names or "device_roles_nexus-switch" in group_names or "device_roles_nexus_switch" in group_names or ansible_network_os | default("") in ["cisco.nxos.nxos", "nxos"] }}'
+  tasks:
+  - name: Reject unsupported network operating systems before discovery
+    tags: [always]
+    ansible.builtin.assert:
+      that:
+      - ansible_network_os | default('') in ['', 'cisco.nxos.nxos', 'nxos']
+      fail_msg: This importer supports Linux servers and Cisco NX-OS; select a supported host scope.
+  - name: Group each selected host by discovery family
+    tags: [always]
+    ansible.builtin.group_by:
+      key: '{{ "fhs_import_nexus" if fhs_is_nexus | bool else "fhs_import_linux" }}'
+    when: not (fhs_import_nexus_only | default(false) | bool) or fhs_is_nexus | bool
+
+- name: Import Linux server inventory
+  hosts: fhs_import_linux
   gather_facts: false
   any_errors_fatal: true
   vars_files:
@@ -36,8 +56,8 @@
     facts: '{{ hostvars[inventory_hostname].ansible_facts }}'
     netbox_site: '{{ server_info.site | default(bootstrap_site | default(''MDA'')) }}'
     netbox_role: '{{ server_info.role | default(bootstrap_role | default(''FPGA_HOST_SERVER'')) }}'
-    netbox_manufacturer: '{{ bootstrap_manufacturer | default(''BittWare'') | trim }}'
-    netbox_device_type: '{{ bootstrap_device_type | default(''TeraBox1501b'') }}'
+    netbox_manufacturer: '{{ bootstrap_manufacturer | default(facts.system_vendor | default("Unknown")) | trim }}'
+    netbox_device_type: '{{ bootstrap_device_type | default(facts.product_name | default("")) | trim }}'
     netbox_auth: '{{ (''Bearer '' if netbox_token.startswith(''nbt_'') else ''Token '') ~ netbox_token }}'
     bootstrap_bittware_pci_list_argv:
     - lspci
@@ -70,13 +90,36 @@
       netbox_token: '{{ netbox_token }}'
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
   tasks:
-  - name: Load system tasks
-    ansible.builtin.import_tasks: tasks/system.yml
-  - name: Load components tasks
-    ansible.builtin.import_tasks: tasks/components.yml
-  - name: Load fpga tasks
-    ansible.builtin.import_tasks: tasks/fpga.yml
-  - name: Load compare tasks
-    ansible.builtin.import_tasks: tasks/compare.yml
-  - name: Load apply tasks
-    ansible.builtin.import_tasks: tasks/apply.yml
+  - name: Load Linux inventory tasks
+    tags: [always]
+    ansible.builtin.include_tasks: tasks/import_linux.yml
+
+- name: Import Nexus inventory
+  hosts: fhs_import_nexus
+  gather_facts: false
+  any_errors_fatal: true
+  connection: ansible.netcommon.network_cli
+  vars_files:
+  - '{{ netbox_credentials_file | default(''/provision/files.d/credentials/netbox.yml'') }}'
+  vars:
+    ansible_network_os: cisco.nxos.nxos
+    nexus_site: '{{ bootstrap_site | default(''Bootstrap Lab'') }}'
+    nexus_role: '{{ bootstrap_role | default(''Network switch'') }}'
+    nexus_commands:
+    - show inventory all | json
+    - show version | json
+    - show interface transceiver | json
+    nexus_epld_command: show version module 1 epld
+    netbox_validate_certs_default: false
+    netbox_api_retries: 3
+    netbox_api_retry_delay: 5
+    netbox_api_loop_pause: 1
+  module_defaults:
+    group/netbox.netbox.netbox:
+      netbox_url: '{{ netbox_url }}'
+      netbox_token: '{{ netbox_token }}'
+      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+  tasks:
+  - name: Load Nexus inventory tasks
+    tags: [always]
+    ansible.builtin.include_tasks: tasks/import_nexus.yml

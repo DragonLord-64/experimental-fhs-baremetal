@@ -13,6 +13,7 @@ Keep reusable understanding beside its evidence, following DragonMind's linked-n
 - [To-do](TODO.md)
 - [Persistent VM lab and access](../ops/kubernetes/README.md)
 - [Platform deployment and validation](../ops/platform/README.md)
+- [NetBox Inventory/importer alignment](../ops/platform/inventory-alignment/README.md)
 - [Isolated provisioning checks](../ops/provisioning/README.md)
 
 Future notes can cover telemetry contracts, dashboard verification, provisioning tests, and lab procedures as those subjects are investigated.
