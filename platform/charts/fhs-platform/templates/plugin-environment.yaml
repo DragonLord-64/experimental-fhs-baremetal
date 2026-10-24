@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fhs-netbox-plugin-environment
+  namespace: {{ .Release.Namespace }}
+data:
+  PYTHONPATH: /opt/netbox/plugin-packages

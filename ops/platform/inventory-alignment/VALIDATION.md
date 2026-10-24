@@ -8,8 +8,10 @@ No physical server/switch or production inventory was contacted.
 
 Built the shared pinned NetBox `4.7.0` / MIT Inventory `2.7.1` image and loaded
 `fhs/netbox-inventory:4.7.0-2.7.1` into existing minikube `fhs-test`.
-The image is not published to an external registry. Portable users must build
-and load/publish it as documented in [image instructions](../../../platform/charts/fhs-platform/netbox-image/README.md).
+That prebuilt image is not published to an external registry. The subsequent
+startup-install change below supersedes the portable chart's build prerequisite;
+the [prebuilt recipe](../../../platform/charts/fhs-platform/netbox-image/README.md)
+remains available for legacy/offline use.
 
 - Main legacy release `netbox`, namespace `fhs-platform`: backed up PostgreSQL,
   Secrets and Helm configuration privately, then upgraded only NetBox with
@@ -96,3 +98,36 @@ log, `asset-regression-final.json`). Existing lab services were inspected before
 execution. No cluster recreation, production inventory or physical hardware
 access occurred. Fake local commands exercise collection/task wiring, not actual
 IPMI access or physical firmware behavior.
+
+
+## Automatic plugin installation — 2026-10-24
+
+User reported hardware `ImagePullBackOff`, then requested a simpler plugin-only
+installation. The previous custom image was not published; target pod Events
+were not supplied, so that target-side cause remains unconfirmed. The portable
+chart now uses the pinned public NetBox image and installs Inventory `2.7.1`
+automatically into non-root per-pod volumes, with wheel hash verification.
+A matching prebuilt installation skips downloading. Pods need PyPI HTTPS access
+when the selected image does not contain the package.
+
+Actual existing `fhs-test` lab evidence:
+
+- A UID-1000, read-only-root probe installed the pinned wheel on the stock image.
+- Upgraded only scoped release `fhs-inventory-alignment`, revision 3. Web and
+  worker Ready on the public image; Inventory `2.7.1`, sync enabled, management
+  commands work without extra environment arguments. Housekeeping configuration
+  was rendered/checked; no housekeeping job was executed.
+- Replaced the owned web pod; the new UID reinstalled the package automatically.
+  Nine devices and 48 assets remained before/after; web/worker restart counts zero.
+- API status and login plus four referenced JS/CSS assets returned HTTP 200 at
+  `/alignment/netbox/`. The legacy main instance remains Ready with 186 devices;
+  it was not upgraded or reset by this test.
+- Four installer regressions, ten umbrella tests, six source-boundary tests,
+  three legacy/deployment tests and chart lint pass. Tests verify package failure
+  stops startup, all consumers load the package, optional prebuilt mode skips
+  network installation, and initialization/static serving are preserved.
+
+Private runtime evidence remains under
+`/home/dragon-lord/fhs-inventory-alignment-20261024/runtime/`, including
+`startup-install-validation.json`. Owned probe pod removed. No hardware cluster
+was changed; the user must copy the updated chart and upgrade the existing release.

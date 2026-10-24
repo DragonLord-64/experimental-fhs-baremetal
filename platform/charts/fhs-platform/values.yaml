@@ -26,19 +26,67 @@ netbox:
   fieldChoices:
     netbox_inventory.Asset.status+:
     - [faulty, Faulty / quarantine, red]
+  # Public image; the pinned plugin is installed into per-pod writable volumes.
   image:
-    registry: ""
-    repository: fhs/netbox-inventory
-    tag: 4.7.0-2.7.1
-    digest: ""
+    registry: ghcr.io
+    repository: netbox-community/netbox
+    tag: v4.7.0
+    digest: sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba
     pullPolicy: IfNotPresent
+  initContainers: &inventoryPluginInit
+  - name: install-inventory-plugin
+    image: '{{ include "netbox.image" . }}'
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -ec
+    - |
+      export TMPDIR=/plugin-packages/.tmp
+      mkdir -p "$TMPDIR"
+      if ! /opt/netbox/venv/bin/python -c 'from importlib.metadata import version; assert version("netbox-inventory") == "2.7.1"' 2>/dev/null; then
+        printf '%s\n' 'netbox-inventory==2.7.1 --hash=sha256:7bc88a3b84aa77557a237039c6a5e75f58edb0b854bf782d98955695e921f717' > /plugin-packages/requirements.txt
+        /usr/local/bin/uv pip install --no-cache --no-deps --require-hashes --python /opt/netbox/venv/bin/python --target /plugin-packages --requirement /plugin-packages/requirements.txt
+      fi
+      cp -R /opt/netbox/netbox/static/. /plugin-static/
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+    resources:
+      requests: {cpu: 25m, memory: 64Mi}
+      limits: {cpu: '1', memory: 256Mi}
+    volumeMounts:
+    - name: inventory-plugin-packages
+      mountPath: /plugin-packages
+    - name: inventory-plugin-static
+      mountPath: /plugin-static
+  # Also expose the package path to kubectl exec / management commands.
+  extraEnvVarsCM: fhs-netbox-plugin-environment
+  extraVolumes: &inventoryPluginVolumes
+  - name: inventory-plugin-packages
+    emptyDir: {}
+  - name: inventory-plugin-static
+    emptyDir: {}
+  extraVolumeMounts: &inventoryPluginMounts
+  - name: inventory-plugin-packages
+    mountPath: /opt/netbox/plugin-packages
+    readOnly: true
+  - name: inventory-plugin-static
+    mountPath: /opt/netbox/netbox/static
   # The pinned launcher hardcodes /static; align it with BASE_PATH without
   # bypassing initialization or replacing its other Granian settings.
   command:
+  - /usr/bin/env
+  - PYTHONPATH=/opt/netbox/plugin-packages
   - /opt/netbox/docker-entrypoint.sh
   - /bin/bash
-  - -c
+  - -ec
   - >-
+    /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py collectstatic --no-input;
     exec /bin/bash <(sed 's|--static-path-route "/static"|--static-path-route "{{ include "fhs-platform.prefix" . }}/netbox/static"|' /opt/netbox/launch-netbox.sh)
   postgresql:
     enabled: false
@@ -97,6 +145,11 @@ netbox:
         topologyKey: kubernetes.io/hostname
   housekeeping:
     affinity: *netboxMediaAffinity
+    initContainers: *inventoryPluginInit
+    extraEnvVarsCM: fhs-netbox-plugin-environment
+    extraVolumes: *inventoryPluginVolumes
+    extraVolumeMounts: *inventoryPluginMounts
+    command: [/usr/bin/env, PYTHONPATH=/opt/netbox/plugin-packages, /opt/netbox/venv/bin/python, /opt/netbox/netbox/manage.py, housekeeping]
   extraEnvs:
   - name: GRANIAN_EXTRA_ARGS
     value: --host=0.0.0.0
@@ -111,6 +164,11 @@ netbox:
       memory: 2048Mi
   worker:
     affinity: *netboxMediaAffinity
+    initContainers: *inventoryPluginInit
+    extraEnvVarsCM: fhs-netbox-plugin-environment
+    extraVolumes: *inventoryPluginVolumes
+    extraVolumeMounts: *inventoryPluginMounts
+    command: [/usr/bin/env, PYTHONPATH=/opt/netbox/plugin-packages, /opt/netbox/venv/bin/python, /opt/netbox/netbox/manage.py, rqworker]
     resources:
       requests:
         cpu: 100m

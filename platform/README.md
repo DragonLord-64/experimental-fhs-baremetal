@@ -6,10 +6,11 @@ Build the [Inventory image](charts/fhs-platform/netbox-image/README.md) before
 installing those values. The canonical values enable Inventory `2.7.1`, serial/tag
 synchronization and Faulty / quarantine on NetBox `4.7.0`.
 
-For a separate candidate namespace with one Helm install/upgrade, copy the
-self-contained [FHS platform chart](charts/fhs-platform/README.md). It includes
-NetBox, the monitoring/logging services and six runtime dashboards; the legacy
-commands below remain separate releases.
+For one Helm install/upgrade, copy the self-contained
+[FHS platform chart](charts/fhs-platform/README.md). It automatically installs
+Inventory on the public NetBox image, with no custom image registry. It includes
+the monitoring/logging services and six runtime dashboards; the legacy separate
+release values above use the optional prebuilt image.
 
 **Objective**  
 Deploy a complete monitoring stack (Prometheus, Telegraf, Elasticsearch‑Kibana, Filebeat) on a Kubernetes cluster.

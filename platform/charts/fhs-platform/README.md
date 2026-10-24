@@ -5,9 +5,14 @@ Requires Helm 3, Kubernetes >=1.25, existing ingress class `nginx` and storage
 classes `nfss1` / `bds1`. Dependencies and six dashboards are included.
 
 One release installs NetBox, PostgreSQL, Valkey, Prometheus, Telegraf, Grafana
-and Elasticsearch/Kibana. Chart dependencies are bundled. Build/load or publish
-the [NetBox Inventory image](netbox-image/README.md) before installation; its
-Docker build sources are included in this folder.
+and Elasticsearch/Kibana. Chart dependencies are bundled. NetBox uses the public
+upstream image; startup installs pinned Inventory `2.7.1` automatically for web,
+worker and housekeeping. No custom image build or registry is required.
+
+Pods need HTTPS access to PyPI at startup. Installation verifies the wheel hash
+and runs as UID 1000 in per-pod writable volumes. Plugin installation is repeated
+when a pod is replaced; database records remain in PostgreSQL. A matching
+[prebuilt image](netbox-image/README.md) skips the download for offline use.
 
 ## Install / upgrade
 
@@ -39,6 +44,13 @@ activation or migrations; keep the existing release credentials and data.
 
 Run the same command after updating this folder or adding `-f site-values.yaml`.
 Keep the same release name, namespace, credentials and volumes on upgrades.
+When updating from the earlier local-image version, remove any private
+`netbox.image` overrides pointing to `fhs/netbox-inventory`; use the public image
+settings shipped in this folder. Do not reset unrelated site values.
+
+If startup fails, inspect the NetBox pod Events and the
+`install-inventory-plugin` init-container log. `ImagePullBackOff` is an image
+retrieval failure; a package-download failure appears in that init-container log.
 
 - `--namespace`: use an unused namespace for a candidate; preserve the existing one for an upgrade.
 - `global.urlPrefix`: `/test`, `/review/team-a`, or another unused prefix.

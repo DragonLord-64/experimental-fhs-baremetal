@@ -1,8 +1,12 @@
-# NetBox Inventory image
+# Optional prebuilt NetBox Inventory image
 
-NetBox `4.7.0` (base digest in Dockerfile), MIT `netbox-inventory==2.7.1`.
-Plugin installation and static collection happen at build time. Web, worker and
-housekeeping use the same image. No runtime pip command is needed.
+The umbrella chart installs MIT Inventory `2.7.1` automatically on the public
+NetBox `4.7.0` image. Normal chart installation needs no image build or registry.
+
+This optional recipe installs the same plugin and collects static files at build
+time. A matching prebuilt version skips the chart's startup download; use it for
+offline clusters or the legacy standalone values. The base digest is pinned in
+the Dockerfile. Web, worker and housekeeping use the same selected image.
 
 From the copied `fhs-platform` folder:
 

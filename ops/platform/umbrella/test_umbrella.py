@@ -44,7 +44,7 @@ def pod_specs(objects):
 
 
 def netbox_launch(container):
-    """Execute the rendered launch command with only entrypoint/Granian stubbed.
+    """Execute the rendered launch command with entrypoint/Django/Granian stubbed.
 
     The pinned image's actual launcher is a fixture: unlike a manifest-only
     assertion, this catches its hardcoded /static route overriding BASE_PATH.
@@ -54,7 +54,8 @@ def netbox_launch(container):
     launcher = "/opt/netbox/launch-netbox.sh"
     command = container.get("command") or [entrypoint]
     args = container.get("args") or ([] if container.get("command") else [launcher])
-    if command[0] != entrypoint:
+    startup_install = command[:2] == ["/usr/bin/env", "PYTHONPATH=/opt/netbox/plugin-packages"]
+    if (command[2] if startup_install else command[0]) != entrypoint:
         raise AssertionError("NetBox's initialization entrypoint must still run")
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
@@ -65,6 +66,10 @@ def netbox_launch(container):
         local_launcher = tmp / "launch-netbox.sh"
         shutil.copyfile(Path(__file__).with_name("fixtures") / "launch-netbox.sh", local_launcher)
         local_launcher.chmod(0o700)
+        collected = tmp / "static-collected"
+        python = tmp / "python"
+        python.write_text('#!/bin/sh\n[ "$1" = /opt/netbox/netbox/manage.py ] && [ "$2" = collectstatic ] && [ "$3" = --no-input ] || exit 2\nprintf collected > "'+str(collected)+'"\n')
+        python.chmod(0o700)
         granian = tmp / "granian"
         granian.write_text(
             "#!/usr/bin/env python3\nimport json, os, sys\n"
@@ -72,7 +77,7 @@ def netbox_launch(container):
             "'workers': os.environ.get('GRANIAN_WORKERS')}))\n"
         )
         granian.chmod(0o700)
-        argv = [a.replace(entrypoint, str(local_entrypoint)).replace(launcher, str(local_launcher))
+        argv = [a.replace(entrypoint, str(local_entrypoint)).replace(launcher, str(local_launcher)).replace("/opt/netbox/venv/bin/python", str(python))
                 for a in command + args]
         env = {k:v for k,v in os.environ.items() if not k.startswith("GRANIAN_")}
         env["PATH"] = str(tmp) + os.pathsep + env.get("PATH", os.defpath)
@@ -80,6 +85,8 @@ def netbox_launch(container):
         result = subprocess.run(argv, env=env, capture_output=True, text=True, check=True, timeout=10)
         if not marker.exists():
             raise AssertionError("NetBox initialization entrypoint did not execute")
+        if startup_install and not collected.exists():
+            raise AssertionError("Plugin static collection did not execute")
         return json.loads(result.stdout)
 
 
@@ -273,7 +280,7 @@ class UmbrellaTest(unittest.TestCase):
                 _, objects = render(prefix=raw_prefix)
                 pod = next(p for o, p in pod_specs(objects) if o["metadata"]["name"] == "fhs-netbox")
                 container = pod["containers"][0]
-                self.assertEqual("fhs/netbox-inventory:4.7.0-2.7.1", container["image"])
+                self.assertEqual("ghcr.io/netbox-community/netbox@sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba", container["image"])
                 recipe=(CHART / "netbox-image/Dockerfile").read_text()
                 self.assertIn("FROM ghcr.io/netbox-community/netbox@sha256:fa7ffa268c39fb258bed80bd256360a525f1a129ee4ee06298f10d6708578eba",recipe)
                 self.assertNotIn("launch-netbox.sh",recipe,

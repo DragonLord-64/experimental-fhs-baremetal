@@ -1,8 +1,9 @@
 # Inventory alignment checks
 
 Pinned NetBox `4.7.0` + MIT Inventory `2.7.1`; shared image/configuration in the
-[portable chart](../../../platform/charts/fhs-platform/README.md). The lab
-[deployment entrypoint](../deploy.sh) builds/loads it before Helm installation.
+[portable chart](../../../platform/charts/fhs-platform/README.md). The chart uses
+the public base image and installs the pinned plugin at startup; the legacy lab
+[deployment entrypoint](../deploy.sh) uses the optional prebuilt image.
 Never use the default Kubernetes context (`monitoring`) for these tests.
 
 ```bash
@@ -65,3 +66,7 @@ NetBox collection and `pynetbox` from the importer requirements. Only fake local
 IPMI/DMI commands are executed. The run retains unique `SYN-FRU-*` objects and a
 sanitized last-task log beside the report. It does not establish physical BMC
 access or firmware behavior.
+
+`test_startup_plugin.py` checks all three consumers, non-root package volumes,
+pinned hash enforcement, offline prebuilt detection and installation failure.
+The launcher regression also verifies static collection before serving.
