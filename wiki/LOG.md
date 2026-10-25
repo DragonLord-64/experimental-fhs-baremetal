@@ -285,3 +285,13 @@ SDK settings from target inventory with importer precedence. It sets venv PATH,
 BWSDK_ROOT and locale after switching to the tooling user; unresolved users are
 reported rather than silently probing as root. Static card/QSFP invocation
 checks and Ansible syntax validation on dragonvm passed; hardware not contacted.
+
+### 2026-10-25 — Reference command and connection coverage review
+
+Reviewed the standalone capture against importer probes and tool/Cisco command
+references. Added exact memory/BIOS/nproc probes, port-specific PCI/VPD, decoded
+and hex optical EEPROM, detailed LLDP, USB tree and explicit FPGA PCI mappings.
+Capture honors target server-info path, BMC channel and command PATH. User scoped
+connections to LLDP; PDU ports, VLANs and additional network discovery are out
+of scope. Static fixtures passed; Ansible syntax checked before the final scope
+trim. Physical hardware was not contacted.

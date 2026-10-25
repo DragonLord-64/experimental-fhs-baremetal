@@ -9,7 +9,7 @@
     capture_dir: '{{ playbook_dir }}/raw-reference'
     sdk_venv: ''
     sdk_root: ''
-    bmc_channels: '1'
+    bmc_channels: ''
     switch_commands:
     - show inventory all
     - show inventory all | json
@@ -28,8 +28,9 @@
     - show lldp neighbors detail | json
     - show ip interface brief vrf all
     - show ipv6 interface brief vrf all
-    - show vrf
-    - show port-channel summary
+    - show interface description
+    - show interface capabilities
+    - show interface transceiver details | json
     sdk_user: ''
   tasks:
   - name: Create private controller capture directory
@@ -65,6 +66,7 @@
     register: linux_facts
     failed_when: false
     ignore_unreachable: true
+    check_mode: false
   - name: Run embedded read-only collector (missing tools remain in report)
     ansible.builtin.command:
       argv:
@@ -74,16 +76,17 @@
         | default(''/opt/venvs/fhs''))), true) }}'
       - '{{ reference_sdk_root | default(bootstrap_bittware_sdk_root | default(fpga_bittware_sdk_root | default(bwsdk_root_path
         | default(''/usr/share/bittware-sdk''))), true) }}'
-      - '{{ reference_bmc_channels }}'
+      - '{{ reference_bmc_channels | default(bmc_lan_channel | default(''1''), true) | string }}'
       - '{{ reference_sdk_user | default(bootstrap_bittware_user | default(fpga_bittware_user | default(gitlab_runner_user
         | default(ansible_user | default('''')))), true) }}'
       - '{{ hardware_command_path | default(''/usr/sbin:/usr/bin:/sbin:/bin'') }}'
+      - '{{ server_info_path | default(''/etc/server-info.yaml'') }}'
       stdin: |
         import datetime, glob, json, os, pathlib, re, subprocess, sys, time
         report = {'captured_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
                   'hostname': os.uname().nodename, 'commands': [], 'files': []}
         env = dict(os.environ, LC_ALL='C', LANG='C')
-        env['PATH'] = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+        env['PATH'] = sys.argv[5]
         def run(argv, sdk=False):
             if sdk:
                 if not sys.argv[4]:
@@ -96,7 +99,7 @@
                         'LC_ALL=C', 'LANG=C'] + argv
             started = time.monotonic()
             try:
-                p = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                p = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    timeout=90, env=env)
                 row = dict(argv=argv, rc=p.returncode, stdout=p.stdout.decode('utf-8', 'replace'),
                            stderr=p.stderr.decode('utf-8', 'replace'))
@@ -116,19 +119,21 @@
                 report['files'].append(dict(path=path, error=str(e)))
 
         for argv in [
-            ['hostnamectl'], ['hostname', '-f'], ['uname', '-a'], ['lscpu'],
+            ['hostnamectl'], ['hostname', '-f'], ['uname', '-a'], ['lscpu'], ['nproc'],
             ['ipmitool', '-V'], ['ipmitool', 'fru'], ['ipmitool', 'mc', 'info'],
             ['ipmitool', 'sdr', 'elist'], ['dmidecode', '--version'], ['dmidecode'],
-            ['lspci', '--version'], ['lspci', '-D', '-nn'], ['lspci', '-D', '-vv'],
-            ['lsusb'], ['lsblk', '--json', '-O'], ['nvme', 'version'], ['nvme', 'list', '-o', 'json'],
+            ['dmidecode', '--type', 'memory'], ['dmidecode', '--type', 'bios'],
+            ['lspci', '--version'], ['lspci', '-D', '-nn'], ['lspci', '-D', '-vv'], ['lspci', '-D', '-nn', '-k'],
+            ['lsusb'], ['lsusb', '-t'], ['lsblk', '--json', '-O'], ['nvme', 'version'], ['nvme', 'list', '-o', 'json'],
             ['ip', '-details', '-json', 'link', 'show'], ['ip', '-json', 'address', 'show'],
-            ['ip', '-json', 'route', 'show', 'table', 'all'], ['ip', '-6', '-json', 'route', 'show', 'table', 'all'],
             ['lldpcli', '-v'], ['lldpcli', '-f', 'json', 'show', 'neighbors'],
-            ['lldpcli', '-f', 'json', 'show', 'interfaces'], ['ethtool', '--version']]:
+            ['lldpcli', '-f', 'json', 'show', 'interfaces'],
+            ['lldpcli', '-f', 'json', 'show', 'neighbors', 'details'],
+            ['ethtool', '--version']]:
             run(argv)
         for channel in sys.argv[3].split(','):
             run(['ipmitool', 'lan', 'print', channel])
-        for path in ['/etc/server-info.yaml', '/etc/os-release', '/proc/meminfo']:
+        for path in [sys.argv[6], '/etc/os-release', '/proc/meminfo']:
             read(path)
         for iface_path in sorted(glob.glob('/sys/class/net/*')):
             iface = os.path.basename(iface_path)
@@ -137,8 +142,12 @@
             for suffix in ['device', 'device/physfn']:
                 path = iface_path+'/'+suffix
                 report['files'].append(dict(path=path, symlink=os.path.realpath(path), exists=os.path.exists(path)))
+            pci = os.path.basename(os.path.realpath(iface_path+'/device'))
+            if re.fullmatch(r'[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]', pci):
+                run(['lspci', '-vv', '-s', pci])
             for flags in [[], ['-i'], ['-P'], ['-m']]:
                 run(['ethtool']+flags+[iface])
+            run(['ethtool', '-m', iface, 'hex', 'on'])
         # Controller identity and namespace details are separate raw samples.
         for dev in sorted(glob.glob('/sys/class/nvme/nvme[0-9]*')):
             name = os.path.basename(dev)
@@ -160,11 +169,13 @@
     changed_when: false
     failed_when: false
     ignore_unreachable: true
+    check_mode: false
   - name: Save unmodified collector output and invocation result on controller
     ansible.builtin.copy:
       dest: '{{ reference_dir }}/{{ inventory_hostname }}.json'
       content: '{{ {''schema_version'': 1, ''host'': inventory_hostname, ''ansible_facts_result'': linux_facts,
-        ''collector'': linux_capture} | to_nice_json }}'
+        ''collector'': linux_capture, ''explicit_fpga_pci_map'': bootstrap_bittware_pci_map | default({})} | to_nice_json
+        }}'
       mode: '0600'
     delegate_to: localhost
     become: false
@@ -183,6 +194,7 @@
     vars:
       ansible_command_timeout: 90
     ignore_unreachable: true
+    check_mode: false
   - name: Save command responses and errors on controller
     ansible.builtin.copy:
       dest: '{{ reference_dir }}/{{ inventory_hostname }}.json'

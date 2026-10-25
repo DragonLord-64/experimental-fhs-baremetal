@@ -271,9 +271,31 @@ Review the files before sharing: they contain real serials, addresses, network
 neighbors, server-info and host facts, which can include environment details.
 
 Linux captures FRU, DMI, BMC channels, PCI/VPD, USB, CPU/memory, block devices,
-NVMe controller/namespace identity, OS/server-info, interface MAC/IP/routes,
+NVMe controller/namespace identity, OS/server-info, interface MAC/IP,
 ethtool driver/link/permanent MAC/EEPROM, LLDP, and BittWare USB card/QSFP output.
 NX-OS captures inventory, versions/EPLD, modules/environment, interfaces,
-transceivers, LLDP, VRFs, IP addresses and port channels. Unsupported variants
+transceivers, LLDP and IP addresses. Unsupported variants
 remain visible as errors. These captures are discovery evidence, not inventory
 updates or proof of historical hardware replacements.
+
+Reference coverage (raw samples; importer support is described separately above):
+
+| Target | Device, module and connection evidence |
+|---|---|
+| Linux FHS | FRU system/board/PSU fields; full and importer-specific BIOS/memory DMI; NVMe controller/namespace identity; PCI IDs/VPD/drivers; interface PCI paths and physical port names; SDK card/port reports and explicit FPGA PCI map |
+| Linux networking | Current/permanent MAC, IP/prefix, MTU and link attributes; LLDP details; decoded and hex module EEPROM, including reported cable type/length |
+| NX-OS | Module/PSU/fan inventory, interface names/descriptions/MAC/status/capabilities, transceiver identity/diagnostics, IP addresses and LLDP peers |
+
+The configured `server_info_path`, `bmc_lan_channel` and `hardware_command_path`
+are honored. Set `bmc_channels` to a comma-separated list to sample additional
+known LAN channels. Server-info retains rack/role metadata when present.
+Connections use LLDP. PDU outlets and switch VLANs are outside this capture's
+scope. FPGA USB indices still need matching evidence or an explicit map to
+associate them with PCI functions; the capture retains that map when configured.
+
+Syntax references: [Cisco NX-OS interface commands](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/sw/7-x/command_references/show_commands/b_N9K_Show_Commands_703i5x/b_N9K_Show_Commands_703i5x_chapter_01001.html),
+[IPMI commands](https://github.com/ipmitool/ipmitool/blob/master/doc/ipmitool.1.in),
+[LLDP commands](https://github.com/lldpd/lldpd/blob/master/src/client/lldpcli.8.in),
+and [NVMe identify namespace](https://github.com/linux-nvme/nvme-cli/blob/master/Documentation/nvme-id-ns.txt).
+Actual switch release, driver and hardware support is established by the returned
+capture, including any command errors.
