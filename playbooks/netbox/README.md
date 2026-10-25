@@ -61,24 +61,25 @@ Failed reads and missing/duplicate record IDs do not supply FRU identity fallbac
 
 | NetBox destination | Discovery |
 |---|---|
-| Device serial / chassis asset | `bootstrap_chassis_serial`, selected FRU Chassis Serial, selected FRU Product Serial |
+| Device serial / asset identifier | Explicit serial override, otherwise selected FRU **Product Serial** (`SYS1391`, etc.); no chassis/board/Linux fallback |
 | Device type manufacturer | `bootstrap_manufacturer`, selected FRU Product Manufacturer; `NA` for a new serial-only device |
-| Device type model | `bootstrap_device_type`, usable FRU Product Name, Product Part Number, Chassis Part Number; `Unknown` for a new serial-only device |
+| Device type model | Explicit model override, otherwise FRU Product Part Number; `Unknown` for a new serial-only device |
 | `product_*` device fields | Selected FRU Product fields; serial/version remain product identity |
 | `motherboard_*` device fields | Selected FRU Board Mfg/Product/Serial, part number and manufacture date |
 | Motherboard inventory item / asset | Only with observed board manufacturer, model and serial; board model identifies its type; part number is set only when observed |
-| `chassis_part_number`, `chassis_type` | Selected FRU Chassis Part Number/Type |
+| `chassis_serial`, `chassis_part_number`, `chassis_type` | FRU enclosure properties; never the server identifier |
+| `manufacture_date` | FRU Product Name, retained as reported (`14-MAY-2025`); separate from motherboard manufacture date |
 | `hardware_identity_sources` | Per-field source, including FRU ID and label |
 | `fru_inventory` | Records keyed by FRU ID, with description and fields including additional product/board metadata |
 
 Empty values and OEM placeholders are omitted. Date-shaped strings are retained
-as observations but cannot identify a model. The selected FRU Product Serial is
-the device fallback when Chassis Serial is unavailable; Board Serial never
-identifies the device. FRU Product Version is separate from BIOS
+as observations but cannot identify a model. The selected FRU Product Serial identifies the server. Chassis Serial is
+enclosure metadata and Board Serial identifies the motherboard component. Product
+Name holds the server manufacturing date, not the device model. FRU Product Version is separate from BIOS
 (`dmidecode --type bios`) and BMC firmware (`ipmitool mc info`).
 
 Missing FRU data is normal. New optional fields stay empty; existing fields,
-provenance, FRU records and assets survive partial reads. A missing chassis
+provenance, FRU records and assets survive partial reads. A missing product
 serial permits hostname-based device updates without creating/reassigning an
 asset; it cannot establish a rename. A valid FRU serial is sufficient to create
 a device: missing manufacturer/model use `NA` / `Unknown` because NetBox requires
@@ -170,8 +171,10 @@ establishes discovery success or a database cable count.
 ## Optional server placement and power
 
 The importer reads `/etc/server-info.yaml` without rewriting it (`server_info_path`
-can select another file). Fields are optional; role is assigned only when
-provided. Supported placement/power keys include:
+can select another file). It supplies supplemental information not reported by
+hardware, including placement, role and PDU assignments. Fields are optional;
+role is assigned only when provided. Additional keys are retained by the metadata
+reader; only explicitly mapped keys are applied to NetBox. Supported placement/power keys include:
 
 ```yaml
 site: Example Site
@@ -212,7 +215,7 @@ Values below are recorded when available; missing observations preserve records.
 | Placement | Server-info site, location, rack, explicit role; rack unit/face and explicit PDU inlet mapping |
 | OS/resources | Distribution/version, architecture, logical CPUs, RAM MiB; common eligible whole-disk capacity GiB |
 | Firmware | BIOS version and BMC firmware revision |
-| FRU | Product serial/name/part/version/manufacturer; board serial/model/part/vendor/date; chassis part/type; all FRU records/extras and identity provenance |
+| FRU | Product serial/name/manufacture date/part/version/manufacturer; board serial/model/part/vendor/date; chassis serial/part/type; all FRU records/extras and identity provenance |
 | DIMMs | Populated DDR5 detection, locator/bank/handle for naming, part and serial |
 | NVMe | Physical-drive serial/model and an observed namespace path; serial deduplication |
 | FPGA cards | SDK index, serial, part, board version, BMC firmware; explicitly supplied PCI endpoints and observed port names |

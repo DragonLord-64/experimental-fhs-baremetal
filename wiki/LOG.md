@@ -295,3 +295,15 @@ Capture honors target server-info path, BMC channel and command PATH. User scope
 connections to LLDP; PDU ports, VLANs and additional network discovery are out
 of scope. Static fixtures passed; Ansible syntax checked before the final scope
 trim. Physical hardware was not contacted.
+
+### 2026-10-25 — Product serial identifies the server
+
+Reviewed corrected upstream reference at `a41dc8f`. Changed FRU identity to use
+Product Serial (SYS number) only, apart from existing explicit serial overrides.
+Chassis Serial is retained as `chassis_serial`; Product Name is retained as the
+reported `manufacture_date` and no longer participates in model selection.
+Product Part Number supplies the model; Board fields identify the motherboard.
+Server-info remains optional supplemental placement/role/PDU metadata.
+Corrected sys1392 now includes LLDP and FPGA/QSFP output. Five FPGA connector
+serials have opposite-suffix switch counterparts; no automatic suffix matching
+was added in this change. No tests or hardware commands run, per user instruction.

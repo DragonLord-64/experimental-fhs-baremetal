@@ -220,10 +220,10 @@ def fru_identity(probe, overrides=None, fru_id='0'):
         return (fields.get(label, ''), 'ipmitool fru ID ' + str(fru_id) + ': ' + label)
 
     choose('serial', [(overrides.get('serial'), 'bootstrap_chassis_serial'),
-        fru('Chassis Serial'), fru('Product Serial')])
+        fru('Product Serial')])
     choose('manufacturer', [(overrides.get('manufacturer'), 'bootstrap_manufacturer'),
         fru('Product Manufacturer')])
-    choose('model', [(overrides.get('model'), 'bootstrap_device_type'), fru('Product Part Number'), fru('Chassis Part Number'), fru('Product Name')], model=True)
+    choose('model', [(overrides.get('model'), 'bootstrap_device_type'), fru('Product Part Number')], model=True)
     mappings = {
         'motherboard_manufacturer': 'Board Mfg',
         'motherboard_model': 'Board Product',
@@ -233,6 +233,8 @@ def fru_identity(probe, overrides=None, fru_id='0'):
         'product_serial': 'Product Serial',
         'product_manufacturer': 'Product Manufacturer',
         'product_name': 'Product Name',
+        'manufacture_date': 'Product Name',
+        'chassis_serial': 'Chassis Serial',
         'product_part_number': 'Product Part Number',
         'product_version': 'Product Version',
         'chassis_part_number': 'Chassis Part Number',
