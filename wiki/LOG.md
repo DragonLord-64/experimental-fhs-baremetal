@@ -165,3 +165,13 @@ Append completed events here; keep proposed work in the plan.
   runtime device facts and routing stay in the playbooks. Six routing checks,
   seven synthetic task checks and both playbook syntax checks passed. No live
   inventory or chart changes were needed for this configuration refactor.
+
+## 2026-10-25 — queued discovery completion
+
+- Queued `netbox-discovery-completion-20261025` with the user-approved
+  [QSFP/topology/placement scope](../ops/platform/inventory-alignment/tasks/discovery-completion.md)
+  and [issue #16](https://github.com/DragonLord-64/experimental-fhs-baremetal/issues/16).
+  Seven original user screenshots are retained unchanged in ignored private
+  pipeline evidence with SHA-256 provenance. Sanitized representative fixtures
+  and full chart/importer/plugin acceptance are required; implementation has not
+  started. Task source/link checks passed.
