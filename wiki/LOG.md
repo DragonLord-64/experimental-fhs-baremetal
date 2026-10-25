@@ -86,3 +86,5 @@ Append completed events here; keep proposed work in the plan.
 - Aligned the [platform install/upgrade README](../platform/charts/fhs-platform/README.md) with official SKA `development2` at `7b0a306` (`mid-cbf-hw`, `hw-management`, `/mid-cbf-hw`). Retained the experimental public-image/automatic Inventory installation path and portable validation guidance; no workloads or values changed. Six source-boundary checks and `git diff --check` passed.
 
 - Shortened the [platform README](../platform/charts/fhs-platform/README.md) to high-level installation, update, verification and access commands at the user's request. Six source-boundary checks and whitespace validation passed; no runtime configuration changed.
+
+- Restored the [platform chart README](../platform/charts/fhs-platform/README.md) byte-for-byte from official SKA `development2` `7b0a306`, as requested, superseding the earlier adaptations and shortening. Verified source byte equality and whitespace; no deployment configuration changed.
