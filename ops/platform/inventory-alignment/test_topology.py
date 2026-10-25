@@ -36,10 +36,15 @@ class Topology(unittest.TestCase):
         self.assertEqual(result['plan'][0]['after']['a_terminations'][0]['object_id'], 3)
     def test_suffix_mismatch_preserved(self):
         self.assertEqual(self.run_sync(self.observations('DAC-2'))['plan'], [])
-    def test_breakout_duplicate_unresolved(self):
+    def test_breakout_lanes_share_one_physical_cable(self):
         observations = self.observations()
-        observations[0]['serials'].append(dict(port='Ethernet1/2', serial='DAC-1', kind='nexus'))
-        self.assertEqual(self.run_sync(observations)['plan'], [])
+        Fake.interfaces['switch'][0]['name'] = 'Ethernet1/1/1'
+        Fake.interfaces['switch'][1]['name'] = 'Ethernet1/1/2'
+        observations[0]['serials'][0]['port'] = 'Ethernet1/1/1'
+        observations[0]['serials'].append(dict(port='Ethernet1/1/2', serial='DAC-1', kind='nexus'))
+        plan = self.run_sync(observations)['plan']
+        self.assertEqual(len(plan), 1)
+        self.assertEqual(len(plan[0]['after']['b_terminations']), 2)
     def test_occupied_endpoint_preserved(self):
         Fake.interfaces['host'][0]['cable'] = dict(id=99)
         self.assertEqual(self.run_sync(self.observations())['plan'], [])
@@ -47,15 +52,21 @@ class Topology(unittest.TestCase):
         observations = self.observations()
         observations[1]['neighbors'] = [dict(local='C0-QSFP0', remote='switch', port='Ethernet1/2')]
         self.assertEqual(self.run_sync(observations)['plan'], [])
-    def test_source_fpga_display(self):
+    def test_unidentified_fpga_serial_cannot_classify_a_dac(self):
         data = filters.topology_linux('host', {}, [], [dict(rc=0, item=dict(card_index=0),
-            stdout='QSFP Information (USB:0)\n  QSFP0:\n     vendor_serial_number : C2504136692-2\n  QSFP1:\n     vendor_serial_number : C2630967601-1\n')])
-        self.assertEqual(data['serials'][0], dict(port='C0-QSFP0', serial='C2504136692-2', kind='fpga'))
+            stdout='QSFP0:\n vendor_serial_number : SYN-CABLE-2\n')])
+        self.assertEqual(data['serials'], [])
+        self.assertEqual(data['ports'][0]['serial'], 'SYN-CABLE-2')
     def test_lldp_json(self):
         import json
         data = filters.topology_linux('host', dict(rc=0, stdout=json.dumps(dict(lldp=dict(interface=dict(
             eth0=dict(chassis={'switch': {}}, port=dict(id=dict(type='ifname', value='Ethernet1/1')))))))), [], [])
         self.assertEqual(data['neighbors'][0]['remote'], 'switch')
+
+    def test_empty_lldp_reports_preservation(self):
+        data = filters.topology_linux('host', dict(rc=0, stdout='{}'), [], [])
+        self.assertEqual(data['neighbors'], [])
+        self.assertIn('no neighbors', data['omissions'][0])
 
     def test_nexus_wrapped_lldp_schema_and_management_port(self):
         data = filters.topology_nexus('switch', {'__readonly__': {'TABLE_nbor_detail': {'ROW_nbor_detail': [

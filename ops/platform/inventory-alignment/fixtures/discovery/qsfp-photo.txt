@@ -1,0 +1,37 @@
+QSFP Information (USB:0)
+
+  QSFP0:
+     qsfp_type : QSFP-DD
+     connecter : Reserved
+     cable_length : 1
+     vendor_name : FS
+     vendor_oui : [100, 157, 153]
+     vendor_partnumber : QDD-400G-PC01
+     vendor_rev : 00
+     vendor_serial_number : SYN-CABLE-B-2
+     vendor_date : 260826
+     supply_voltage : 0.0
+     temperature : 0.0
+     sep : 83
+     technology : 0
+     techstr : 850nm VCSEL
+     power_class : 1
+     max_power : 0.25 Watts
+     length : 130
+     Present : Present
+     Interrupt : Unasserted
+     Low Power : Unasserted
+     Reset : Unasserted
+
+  QSFP1:
+     qsfp_type : QSFP-DD
+     connecter : Reserved
+     cable_length : 1
+     vendor_name : FS
+     vendor_oui : [100, 157, 153]
+     vendor_partnumber : QDD-400G-PC01
+     vendor_rev : 00
+     vendor_serial_number : SYN-CABLE-C-1
+     vendor_date : 260826
+     supply_voltage : 0.0
+     temperature : 0.0

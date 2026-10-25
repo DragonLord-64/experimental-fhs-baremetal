@@ -6,9 +6,46 @@
   ansible.builtin.import_tasks: tasks/fpga.yml
 - name: Load compare tasks
   ansible.builtin.import_tasks: tasks/compare.yml
+- name: Validate explicit power and existing rack placement before inventory writes
+  tags: [compare, apply]
+  delegate_to: localhost
+  become: false
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  fhs_placement_sync:
+    netbox_url: '{{ netbox_url }}'
+    netbox_token: '{{ netbox_token }}'
+    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+    device: '{{ facts.hostname }}'
+    serial: '{{ system_identity.identity.serial | default(bootstrap_chassis_serial | default("")) }}'
+    metadata: '{{ server_info }}'
+    manufacturer: '{{ netbox_manufacturer }}'
+    model: '{{ netbox_device_type }}'
+    default_face: '{{ netbox_rack_face_default }}'
+    preview: true
+  when: '"facts" not in ansible_run_tags'
 - name: Load apply tasks
   ansible.builtin.import_tasks: tasks/apply.yml
   when: netbox_manufacturer | length > 0 and netbox_device_type | length > 0
 - name: Discover Linux topology
   ansible.builtin.import_tasks: topology_linux.yml
   when: bootstrap_topology_enabled | default(true) | bool
+
+- name: Reconcile only explicit server placement and independent power inlets
+  tags: [compare, apply]
+  delegate_to: localhost
+  become: false
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  fhs_placement_sync:
+    netbox_url: '{{ netbox_url }}'
+    netbox_token: '{{ netbox_token }}'
+    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+    device: '{{ facts.hostname }}'
+    serial: '{{ system_identity.identity.serial | default(bootstrap_chassis_serial | default("")) }}'
+    metadata: '{{ server_info }}'
+    manufacturer: '{{ netbox_manufacturer }}'
+    model: '{{ netbox_device_type }}'
+    default_face: '{{ netbox_rack_face_default }}'
+    preview: '{{ ansible_check_mode or "compare" in ansible_run_tags }}'
+  when: '"facts" not in ansible_run_tags and (netbox_manufacturer | length > 0 and netbox_device_type | length > 0)'

@@ -72,6 +72,26 @@ only; a standalone DAC asset may also be managed manually. See the
 [importer topology options](../../../playbooks/netbox/README.md).
 The importer refuses to install a `faulty` asset until explicitly reviewed.
 
+Optional `/etc/server-info.yaml` keys `rack_unit` and `power_ports` add native
+placement and independent server inlet-to-PDU-outlet cables. Keep existing
+site/role/location/rack fields. See the [metadata schema](../../../playbooks/netbox/README.md#optional-server-placement-and-power).
+Missing new metadata preserves existing records; identities and occupied
+terminations must be resolved before apply.
+
+```bash
+ansible-playbook -i <PRIVATE_INVENTORY> playbooks/netbox/netbox_import.yml \
+  --limit <HOST_OR_GROUP> --tags compare
+ansible-playbook -i <PRIVATE_INVENTORY> playbooks/netbox/netbox_import.yml \
+  --limit <HOST_OR_GROUP> --tags apply
+```
+
+Both use the default protected credentials file
+`/provision/files.d/credentials/mid-cbf-hw-netbox.yml`; override
+`netbox_credentials_file` when needed. SDK discovery uses the configured
+BittWare venv/root/account and never installs packages. Dynamic QSFP ports retain
+empty interfaces; only verified FPGA DAC identities supplement LLDP.
+
+
 REST operations span requests and are not one database transaction. On failure,
 inspect the parent journal and retained assets before retrying. NetBox change-log
 retention follows platform configuration (default 90 days); journals are retained

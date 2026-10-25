@@ -1,11 +1,12 @@
 # Shared import/export settings. Override per run with -e key=value.
-netbox_credentials_file: /provision/files.d/credentials/netbox.yml
+netbox_credentials_file: /provision/files.d/credentials/mid-cbf-hw-netbox.yml
 netbox_validate_certs_default: false
 hardware_command_path: '{{ ''/opt/netbox-demo/bin:/usr/sbin:/usr/bin:/sbin:/bin'' if hardware_simulation
   | default(false) | bool else ''/usr/sbin:/usr/bin:/sbin:/bin'' }}'
 bootstrap_bittware_enabled: true
-bootstrap_bittware_venv: /opt/venvs/fhs
-bootstrap_bittware_sdk_root: /usr/share/bittware-sdk
+bootstrap_bittware_venv: '{{ bittware_sdk_venv | default(gitlab_runner_venv_path | default("/opt/venvs/fhs")) }}'
+bootstrap_bittware_sdk_root: '{{ fpga_bittware_sdk_root | default(bwsdk_root_path | default("/usr/share/bittware-sdk")) }}'
+bootstrap_bittware_user: '{{ fpga_bittware_user | default(gitlab_runner_user | default(ansible_user | default(ansible_facts.user_id))) }}'
 bootstrap_bittware_card_list_argv:
 - bw_card_list
 - -v
@@ -94,3 +95,15 @@ bootstrap_bittware_qsfp_argv:
 nexus_lldp_command: show lldp neighbors detail | json
 netbox_site: '{{ server_info.site | default(bootstrap_site | default(''MDA'')) }}'
 netbox_role: '{{ server_info.role | default(bootstrap_role | default(''FPGA_HOST_SERVER'')) }}'
+
+# Explicit verified endpoint pairs only; no automatic stripping of serial suffixes.
+# Each pair requires vendor, part, host_serial, switch_serial, evidence.
+bootstrap_dac_endpoint_pairs: []
+
+# NetBox requires a face for newly positioned devices; retain existing face.
+netbox_rack_face_default: front
+
+server_info_path: /etc/server-info.yaml
+
+# Opt-in controller evidence only; directory must already exist with mode 0700.
+bootstrap_discovery_capture_dir: ""

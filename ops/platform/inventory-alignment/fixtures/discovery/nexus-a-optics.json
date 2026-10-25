@@ -1,0 +1,40 @@
+{
+  "TABLE_interface": {
+    "ROW_interface": [
+      {
+        "interface": "Ethernet1/1/1",
+        "sfp": "present",
+        "name": "FS",
+        "partnum": "QDD-400G-PC01",
+        "serialnum": "SYN-CABLE-B-2",
+        "type": "QSFP-DD",
+        "rev": "00",
+        "cable_length": "1"
+      },
+      {
+        "interface": "Ethernet1/1/2",
+        "sfp": "present",
+        "name": "FS",
+        "partnum": "QDD-400G-PC01",
+        "serialnum": "SYN-CABLE-B-2",
+        "type": "QSFP-DD",
+        "rev": "00",
+        "cable_length": "1"
+      },
+      {
+        "interface": "Ethernet1/5/1",
+        "sfp": "present",
+        "name": "FS",
+        "partnum": "QDD-400G-PC01",
+        "serialnum": "SYN-CABLE-C",
+        "type": "QSFP-DD",
+        "rev": "00",
+        "cable_length": "1"
+      },
+      {
+        "interface": "Ethernet1/10",
+        "sfp": "not present"
+      }
+    ]
+  }
+}

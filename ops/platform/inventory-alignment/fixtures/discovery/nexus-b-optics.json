@@ -1,0 +1,10 @@
+{
+  "TABLE_interface": {
+    "ROW_interface": [
+      {
+        "interface": "Ethernet1/10",
+        "sfp": "not present"
+      }
+    ]
+  }
+}

@@ -38,6 +38,15 @@ The tracked development configuration uses a Vault-encrypted bearer token and di
 
 Inventory output can contain secrets. Keep it outside Git and build artifacts. Config context does not override every Ansible variable source; confirm resolved precedence. The inventory does not create `fhs_nodes` automatically.
 
+Discovery imports native rack positions, interfaces and network/power cables;
+Inventory assets retain physical identity and module metadata. Optional server
+`rack_unit` and independent `power_ports` mappings are documented in the
+[importer schema](../../../playbooks/netbox/README.md#optional-server-placement-and-power).
+Use the unified importer's compare/apply workflow before polling the updated
+inventory. Neither Topology Views filters nor an Inventory API prerequisite
+failure establish a physical connection.
+
+
 ## Inventory consumers
 
 ```{mermaid}

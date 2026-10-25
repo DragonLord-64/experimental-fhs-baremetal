@@ -1,0 +1,28 @@
+- name: Retain raw observations only in an explicitly selected private controller directory
+  tags: [always]
+  when: bootstrap_discovery_capture_dir | default('') | length > 0 and not ansible_check_mode
+  vars:
+    capture_repository_root: '{{ playbook_dir | dirname | dirname | realpath }}'
+  delegate_to: localhost
+  become: false
+  block:
+  - name: Inspect protected capture destination without creating it
+    ansible.builtin.stat:
+      path: '{{ bootstrap_discovery_capture_dir }}'
+    register: capture_destination
+  - name: Require an existing private directory outside the repository
+    ansible.builtin.assert:
+      that:
+      - bootstrap_discovery_capture_dir is match('^/')
+      - capture_destination.stat.isdir | default(false)
+      - capture_destination.stat.mode | default('') == '0700'
+      - not capture_destination.stat.islnk | default(false)
+      - (bootstrap_discovery_capture_dir | realpath) != capture_repository_root
+      - not (bootstrap_discovery_capture_dir | realpath).startswith(capture_repository_root ~ '/')
+      fail_msg: Capture destination must be an existing mode-0700 private controller directory outside the playbook tree.
+  - name: Write raw probe evidence without credentials
+    ansible.builtin.copy:
+      dest: '{{ bootstrap_discovery_capture_dir }}/{{ inventory_hostname | hash("sha256") }}.json'
+      mode: '0600'
+      content: '{{ {"host": inventory_hostname, "captured_utc": now(utc=true).isoformat(), "source": "FHS read-only discovery", "probes": discovery_raw_captures} | to_nice_json }}'
+    no_log: true

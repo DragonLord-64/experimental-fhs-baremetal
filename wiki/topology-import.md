@@ -39,3 +39,17 @@ Reports and logs remain private on dragonvm in
 hit the chart rollout's expired port-forward; reconnecting after readiness fixed
 it. Physical switch/FPGA/NIC discovery is not established by synthetic fixtures.
 See [test entrypoints](../ops/platform/inventory-alignment/README.md#lldp-and-dac-topology).
+
+## Completion update — 2026-10-25
+
+[The discovery extension](../playbooks/netbox/README.md#topology) now preserves
+observed empty QSFP interfaces and module metadata, groups repeated breakout
+lanes by physical connector and resolves verified LLDP aliases/MACs. Full DAC
+serials remain preferred; differing endpoint serials require an explicit
+vendor/part/full-serial pair with evidence rather than suffix stripping.
+Optional server metadata adds rack-unit placement and independent PDU mappings.
+
+[Focused native acceptance](../ops/platform/inventory-alignment/VALIDATION.md#discovery-completion--accepted-2026-10-25)
+passed with screenshot-derived sanitized fixtures on the retained chart.
+This supersedes the earlier duplicate-breakout limitation above; physical
+hardware behavior remains unverified.

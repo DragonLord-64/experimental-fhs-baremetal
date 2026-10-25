@@ -63,10 +63,6 @@ def synchronize(params,check):
     for card in cards:
         module_type=sync.ensure('dcim/module-types/',{'manufacturer_id':maker['id'],'model':card['part']},
                                 {'manufacturer':maker['id'],'model':card['part'],'part_number':card['part']},card['part']+' module type')
-        for port in range(3) if kind=='FPGA' and len(card['interfaces'])==3 else []:
-            name=f'C{{module}}-QSFP{port}'
-            sync.ensure('dcim/interface-templates/',{'module_type_id':module_type['id'],'name':name},
-                        {'module_type':module_type['id'],'name':name,'type':card['interfaces'][port]['type']},card['part']+' '+name+' template')
         bay=sync.ensure('dcim/module-bays/',{'device_id':device_id,'name':card['bay']},
                         {'device':device_id,'name':card['bay'],'position':card['position']},params['device']+' '+card['bay'])
         field_map=[('fpga_bmc_firmware','bmc_firmware'),('fpga_board_version','version'),('pci_endpoints','pci_endpoints')] if kind=='FPGA' else [('nic_driver','driver'),('nic_firmware','firmware'),('nic_functions','functions'),('pci_endpoints','pci_endpoints')]

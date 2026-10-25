@@ -17,20 +17,14 @@
   failed_when: false
   become: true
   tags: [always]
-- name: Read FPGA DAC serials over USB without register writes
-  ansible.builtin.command:
-    argv: '{{ bootstrap_bittware_qsfp_argv | default(["bw_qsfp_info"]) + ["-c", item.card_index | string, "-i", "USB", "display"] }}'
-  environment:
-    BWSDK_ROOT: '{{ bootstrap_bittware_sdk_root }}'
-    PATH: '{{ bootstrap_bittware_venv }}/bin:{{ hardware_command_path }}'
-    LC_ALL: C
-  loop: '{{ discovered_bittware.cards | default([]) }}'
-  register: topology_fpga_eeprom
-  check_mode: false
-  changed_when: false
-  failed_when: false
-  tags: [always]
 - name: Keep Linux topology observations for controller reconciliation
   ansible.builtin.set_fact:
-    fhs_topology: '{{ facts.hostname | fhs_topology_linux(topology_lldp, topology_nic_eeprom.results | default([]), topology_fpga_eeprom.results | default([])) }}'
+    fhs_topology: '{{ facts.hostname | fhs_topology_linux(topology_lldp, topology_nic_eeprom.results | default([]), topology_fpga_eeprom.results | default([]), {"aliases": [inventory_hostname, ansible_host | default(inventory_hostname)], "macs": facts | dict2items | selectattr("value", "mapping") | selectattr("value.macaddress", "defined") | map(attribute="value.macaddress") | list}) }}'
   tags: [always]
+- name: Retain optional protected Linux probe evidence
+  ansible.builtin.import_tasks: capture.yml
+  vars:
+    discovery_raw_captures:
+      sdk: '{{ _bittware_raw | default({}) }}'
+      lldp: '{{ topology_lldp }}'
+      nic_eeprom: '{{ topology_nic_eeprom.results | default([]) }}'

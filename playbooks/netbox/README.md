@@ -67,27 +67,91 @@ ports, or write FPGA registers. Override `bootstrap_lldp_argv`,
 `bootstrap_bittware_qsfp_argv`, or `nexus_lldp_command` for local tool paths.
 `bootstrap_topology_enabled: false` skips collection.
 
-LLDP resolves exact imported device/interface names or a unique interface MAC.
-DAC matching uses the complete, case-sensitive EEPROM serial, including any
-`-1`/`-2` suffix. Only a unique switch/host pair qualifies. FPGA ports are the
-existing `C<card index>-QSFP<port>` interfaces; switch ports come from the
-transceiver report. Duplicate breakout serials, mismatched suffixes, absent
-remote devices/interfaces and conflicting observations remain unresolved.
-Existing cables are preserved; repeated observations of the same pair do not
-create another cable. Review `topology_result.omissions` after each run.
+LLDP resolves observed device/interface names, verified hostname/access aliases
+and unique interface MACs, including dotted-MAC PortIDs and existing peers outside
+the selected scope. Missing/ambiguous peers are reported; their hardware is not
+invented. Fiber and ordinary network connections use LLDP.
 
-`--tags facts` collects without contacting NetBox for topology; `--tags compare`
-and `--check` preview cable additions without writing. Other specific tags also
-preview; cable writes require the default run or `--tags apply`. Limit the
-inventory to the switches and servers being examined; both ends must already exist in NetBox or
-be imported in the same run. No claim is made that optional probes discover
-hardware that their installed tools cannot read.
+SDK reads use `bittware_sdk_venv`, `fpga_bittware_sdk_root` and
+`fpga_bittware_user` through shared discovery defaults. The GitLab runner venv/root
+variables are fallbacks when configured. Override `bootstrap_bittware_*` only
+when discovery needs a different environment. The collector checks installed
+entrypoints, their Python dependencies and USB enumeration under that user;
+installation remains in the provisioning role. It never runs pip or changes
+firmware/ports. Review environment/USB failures before retrying.
 
-Source example: upstream `dc08629`,
-`playbooks/development/topology-discover-strategy.md`. Its differing endpoint
-suffixes and repeated breakout serials are deliberately not treated as exact
-matches. Optical module serials do not establish cable identity.
+FPGA interfaces come from actual QSFP headings, including Removed ports, rather
+than a fixed count. Interface `fhs_port_observation` keeps observed presence and
+fields separately from module identity. Populated pluggables retain vendor,
+part/model, serial, revision, date, cable length and other reported fields in
+native Inventory items/assets and `fhs_module_observation`; missing fields do not
+clear known metadata. A clipped report does not imply absence. Existing module
+replacement conflicts require review.
 
-Hardware assets remain managed by `netbox_inventory`; topology writes native
-NetBox interfaces and cables consumed by `netbox_topology_views`. It does not
-create duplicate plugin-specific graph records or infer missing hardware.
+FPGA DAC matching prefers complete serials, including suffixes, and the verified
+FS vendor/part identities listed in the parser. The SDK VCSEL field alone cannot
+classify a DAC. Repeated switch lane rows on one physical connector create one
+native cable with multiple lane terminations; their shared transceiver module
+records the connector association. No internal lane wiring is inferred.
+Optical module serials never identify fiber cables.
+
+There is no automatic suffix stripping. An exceptional verified endpoint pair
+can be supplied in `bootstrap_dac_endpoint_pairs` with `vendor`, `part`,
+`host_serial`, `switch_serial` and `evidence` (all nonempty strings). Both full
+serials must resolve to one FPGA connector and one switch connector. Conflicting
+rules, multiple physical connectors and occupied terminations are refused.
+Existing cables are never moved. Review `topology_result.omissions` and
+`topology_result.diagnostics`; repeated unchanged apply creates nothing.
+
+`--tags facts` collects without topology API calls; `--tags compare` and `--check`
+preview NetBox changes. Cable writes require the default run or `--tags apply`.
+The credentials default is
+`/provision/files.d/credentials/mid-cbf-hw-netbox.yml` for all entrypoints.
+
+For private raw evidence, optionally set `bootstrap_discovery_capture_dir` to an
+existing controller directory outside the repository with mode `0700`. Per-host
+JSON files use mode `0600`, include source/time and raw probe output, and contain
+no NetBox authentication. Check mode does not write captures. Keep these files
+out of Git and public artifacts; each new capture replaces that host's file, so
+use a separate directory per run. Parsed diagnostics are not raw captures.
+
+See [fixture provenance and limits](../../ops/platform/inventory-alignment/fixtures/discovery/README.md)
+and the [controller acceptance](../../ops/platform/inventory-alignment/README.md#discovery-completion).
+Hardware assets use `netbox_inventory`; connections use native NetBox interfaces
+and cables consumed by Topology Views. An Inventory API 404 indicates a plugin
+prerequisite; an undrawn Topology Views page needs filters/search. Neither alone
+establishes discovery success or a database cable count.
+
+## Optional server placement and power
+
+The importer reads `/etc/server-info.yaml` without rewriting it (`server_info_path`
+can select another file). Existing files still require site, role, location and
+rack. New keys are optional:
+
+```yaml
+site: Example Site
+role: FPGA_HOST_SERVER
+location: Example Room
+rack: Rack01
+rack_unit: 12
+power_ports:
+  - name: PSU1
+    pdu_serial: SYN-PDU-A
+    pdu_port: "12"
+  - name: PSU2
+    pdu_serial: SYN-PDU-B
+    pdu_port: "8"
+```
+
+`rack_unit` is a positive integer fitting the device type and rack. Existing
+rack/position conflicts and overlapping devices are refused. An existing face is
+retained; new positions use `netbox_rack_face_default: front`, as NetBox requires a
+face. No new face/tenant/purpose metadata is collected.
+
+Each inlet resolves its own PDU by exact serial and an existing native outlet by
+exact name on that PDU. Names/serials must be nonempty strings; quote numeric
+outlets. Missing/ambiguous identities, duplicate mappings and occupied
+terminations fail before these placement/power writes. There is no PDU discovery
+or control. Omitted new keys preserve existing placement/power records; an empty
+power list does not remove cables. Run compare, inspect diagnostics, then apply
+using the same selected scope.

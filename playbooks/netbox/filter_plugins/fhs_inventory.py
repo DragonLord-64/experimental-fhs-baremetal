@@ -49,7 +49,7 @@ def modules(records, interface_type):
         if not record.get('part') or not record.get('serial'):
             raise AnsibleFilterError('FPGA module needs a discovered part and serial')
         result.append(dict(record, bay='FPGA CARD '+str(index), position=str(index),
-                           interfaces=[dict(name=f'C{index}-QSFP{port}', type=interface_type) for port in range(3)]))
+                           interfaces=record.get('interfaces', [])))
     if len({r['bay'] for r in result}) != len(result):
         raise AnsibleFilterError('FPGA module bays collide')
     return result

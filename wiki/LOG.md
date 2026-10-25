@@ -182,6 +182,18 @@ Append completed events here; keep proposed work in the plan.
   as future ideas only. Neither is implemented or approved for implementation;
   pipeline behavior is unchanged. Documentation source/link checks passed.
 
+## 2026-10-25 — discovery implementation prepared for controller checks
+
+- Prepared dynamic QSFP/module metadata, verified FPGA DAC grouping, LLDP identity
+  resolution and optional rack-unit/independent power-inlet reconciliation.
+  [Operator schema](../playbooks/netbox/README.md#optional-server-placement-and-power).
+- Read official `development2` `4533a85` and all seven private images; all original
+  image SHA-256 hashes match the preserved index. Published only
+  [sanitized representative fixtures](../ops/platform/inventory-alignment/fixtures/discovery/README.md).
+- Added the [controller acceptance entrypoint](../ops/platform/inventory-alignment/acceptance_discovery.py).
+  [Acceptance remains pending](../ops/platform/inventory-alignment/VALIDATION.md#discovery-completion--controller-pending);
+  no worker deployment, controller checks, publication or hardware success.
+
 ## 2026-10-25 — focused task creation and acceptance
 
 - Recorded the user's feedback in [task creation guidance](task-creation.md):
@@ -191,3 +203,24 @@ Append completed events here; keep proposed work in the plan.
 - Redirected the existing NetBox discovery task to finish its implementation
   with focused tests, preserving its feature scope and partial work. Controller
   acknowledgement was observed; native acceptance remains pending.
+
+## 2026-10-25 — discovery focused controller handoff
+
+- Narrowed the existing [native discovery harness](../ops/platform/inventory-alignment/discovery_native.py)
+  to the supervisor's requested checks, retaining seven LLDP links, QSFP/DAC,
+  existing cables, idempotence, placement/power and authenticated plugin evidence.
+  Successful empty LLDP reads now explicitly report connection preservation.
+- Re-fetched official `development2`: still `4533a85`. Controller acceptance
+  remains pending; no worker deployment, publication or physical hardware claim.
+- Evidence/documentation checks: seven original SHA-256 hashes match; 19 local
+  documentation link targets exist. These checks cover provenance/docs only;
+  runtime acceptance is reserved for the controller.
+
+## 2026-10-25 — focused discovery acceptance completed
+
+- Completed the queued discovery changes after the user's focused-test redirect.
+  Corrected fixture variable precedence and Ansible-tagged rack-unit validation
+  exposed by native acceptance. [Observed results](../ops/platform/inventory-alignment/VALIDATION.md#discovery-completion--accepted-2026-10-25):
+  focused fixtures/syntax and 50 native report assertions passed on the retained
+  chart, including seven LLDP links, two DACs, Inventory metadata, Topology Views,
+  rack placement and both PDU cables. Hardware reads remain unverified.

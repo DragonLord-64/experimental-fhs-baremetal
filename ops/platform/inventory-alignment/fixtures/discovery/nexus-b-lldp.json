@@ -1,0 +1,28 @@
+{
+  "__readonly__": {
+    "TABLE_nbor_detail": {
+      "ROW_nbor_detail": [
+        {
+          "sys_name": "SYN-MGMT",
+          "l_port_id": "mgmt0",
+          "port_id": "gigabitEthernet 1/0/9"
+        },
+        {
+          "sys_name": "SYN-HOST-C",
+          "l_port_id": "Eth1/31",
+          "port_id": "0200.0000.0003"
+        },
+        {
+          "sys_name": "SYN-HOST-D",
+          "l_port_id": "Eth1/32",
+          "port_id": "0200.0000.0004"
+        },
+        {
+          "sys_name": "SYN-MGMT",
+          "l_port_id": "Eth1/33",
+          "port_id": "ten-gigabitEthernet 1/0/27"
+        }
+      ]
+    }
+  }
+}

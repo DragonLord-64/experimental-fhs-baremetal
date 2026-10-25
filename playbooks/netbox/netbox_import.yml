@@ -86,6 +86,7 @@
       netbox_token: '{{ netbox_token }}'
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
       observations: '{{ topology_observations }}'
+      endpoint_pairs: '{{ bootstrap_dac_endpoint_pairs }}'
       preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or ("all" not in ansible_run_tags and "apply" not in ansible_run_tags) }}'
     register: topology_result
     when: '"facts" not in ansible_run_tags and topology_observations | length > 0'

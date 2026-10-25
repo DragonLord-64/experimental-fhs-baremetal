@@ -31,3 +31,20 @@ scope and tests; they were not silently copied during Inventory alignment:
 Raw inventory/archive captures were not copied. Official upstream remains
 fetch-only here with push URL `/dev/null`. The user transfers accepted private
 changes to the official repository separately.
+
+## Discovery completion source review — 2026-10-25
+
+Read current official `development2` at
+`4533a85b2a39c2b3d3142479e0d63ec8355e599a` from a temporary fetch-only
+copy; the private repository upstream push URL remains `/dev/null`.
+Preserved shared importer defaults and corrected the credentials default to
+`/provision/files.d/credentials/mid-cbf-hw-netbox.yml`.
+
+Read SDK venv installation tasks, setup-host and runner defaults/conventions,
+plus official `playbooks/development/output-samples.md` and
+`topology-discover-strategy.md`. Discovery reuses the configured venv/root/user;
+it does not install the SDK. The official examples provide Removed ports,
+repeated breakout serials and differing full endpoint serials, not a generally
+safe suffix rule. [Sanitized fixtures](fixtures/discovery/README.md) distinguish
+photographed fields from supplemental synthetic JSON reports. No unrelated
+role changes or official history were merged.

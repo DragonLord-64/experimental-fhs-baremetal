@@ -90,3 +90,41 @@ Retains two uniquely named `SYN-TOPO-*` devices and their imported cable.
 connection appears in the authenticated Topology Views graph; its login session
 is rolled back. Both plugins must be active. Hardware commands use synthetic
 read-only executables; physical LLDP/EEPROM access remains unverified.
+
+## Discovery completion
+
+[Issue #16](https://github.com/DragonLord-64/experimental-fhs-baremetal/issues/16).
+The controller runs one entrypoint; implementation workers do not run it:
+
+```bash
+python3 ops/platform/inventory-alignment/acceptance_discovery.py --dragonvm \
+  --report /tmp/fhs-discovery-completion-acceptance.json
+```
+
+It inspects preserved services/pipeline processes first, then uses retained
+release `fhs-inventory-alignment` on explicit context `fhs-test`. No cluster
+creation, deployment or lifecycle tests are included. Missing chart/services,
+plugins, credentials, dependencies or skipped fixtures fail explicitly. Existing
+protected credentials are consumed in memory; a temporary loopback forward is
+closed afterward. Source transfer excludes private original images and runs.
+
+The harness runs real Ansible syntax/routing and focused discovery contracts,
+then the actual Nexus tasks through a synthetic NX-OS command boundary, SDK
+collector tasks with synthetic installed tools, and native importer API checks.
+It requires all seven representative LLDP links, dynamic/Removed QSFP ports,
+Inventory metadata/assets, one physical cable for repeated breakout lanes,
+exact/explicit DAC identities, conflict preservation, partial/failed reads,
+read-only modes, rack placement and distinct-PDU inlet cables. Native failure
+coverage is limited to invalid placement, a missing PDU and an occupied outlet;
+local contracts retain the identity/schema cases. SDK native coverage verifies
+the configured tools, environment and effective user without repeating a failure
+matrix. Authenticated
+Topology Views must contain each imported native network cable; the Inventory
+asset page and identity must work. Repeated apply must be unchanged.
+
+A pass requires every stage, not just unit tests or cable count. Reports publish
+selected synthetic assertions; mode-0700 evidence directories retain private
+logs and fixture data. Synthetic objects remain for review under a unique
+`SYN-DISC-*` prefix. This does not establish physical hardware behavior.
+See [fixture provenance](fixtures/discovery/README.md) and
+[validation status](VALIDATION.md#discovery-completion--controller-pending).

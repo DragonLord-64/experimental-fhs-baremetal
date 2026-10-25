@@ -63,8 +63,6 @@ def nexus_inventory(outputs):
                 skipped.append(interface + ': no part number; no module created')
                 continue
             description = clean(item.get('type'))
-            if re.search(r'(?i)(?:\bDAC\b|\bCR\d*\b|copper|twinax|CU\d)', description + ' ' + part + ' ' + clean(item.get('cisco_product_id'))):
-                description += '; DAC local end only; remote termination not discovered'
             module = dict(bay=bay, model=part, part=part,
                           manufacturer=clean(item.get('name')) or 'Unknown',
                           serial=clean(item.get('serialnum') or item.get('vendor_serial_no')),

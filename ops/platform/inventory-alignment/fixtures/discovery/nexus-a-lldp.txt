@@ -1,0 +1,9 @@
+SYN-NEXUS-A# show lldp neighbors
+Capability codes:
+  (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+  (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+Device ID            Local Intf      Hold-time  Capability  Port ID
+SYN-MGMT             mgmt0           120        BR          gigabitEthernet 1/0/11
+SYN-HOST-A           Eth1/30         120        R           0200.0000.0001
+SYN-HOST-B           Eth1/32         120        S           0200.0000.0002
+Total entries displayed: 3

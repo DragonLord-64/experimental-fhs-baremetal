@@ -345,7 +345,7 @@
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
   throttle: 1
-- name: Preview or apply FPGA modules and their three interfaces
+- name: Preview or apply FPGA modules and observed interfaces
   tags:
   - fpga
   - compare

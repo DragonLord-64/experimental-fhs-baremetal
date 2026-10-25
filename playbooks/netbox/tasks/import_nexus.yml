@@ -193,3 +193,10 @@
   - bootstrap_topology_enabled | default(true) | bool
   - topology_nexus_lldp.failed | default(false) | bool or topology_nexus_lldp.stdout | default([]) | length == 0
   tags: [always]
+- name: Retain optional protected Nexus probe evidence
+  ansible.builtin.import_tasks: capture.yml
+  vars:
+    discovery_raw_captures:
+      commands: '{{ nexus_commands }}'
+      inventory: '{{ discovered.stdout }}'
+      lldp: '{{ topology_nexus_lldp.stdout | default([]) }}'

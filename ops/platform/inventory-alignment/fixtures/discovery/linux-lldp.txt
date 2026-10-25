@@ -1,0 +1,22 @@
+$ ssh SYN-ACCESS-A
+ubuntu@SYN-HOST-A:~$ sudo lldpcli show neighbors
+-------------------------------------------------------------------------------
+LLDP neighbors:
+-------------------------------------------------------------------------------
+Interface:    enp1s0np0, via: LLDP, RID: 1, Time: 0 day, 10:18:17
+  Chassis:
+    ChassisID:    mac 02:00:00:00:10:01
+    SysName:      SYN-NEXUS-A
+    SysDescr:     Cisco Nexus Operating System (NX-OS) Software 10.5(5)
+    MgmtIP:       192.0.2.51
+    MgmtIface:    83886080
+    Capability:   Bridge, on
+    Capability:   Router, on
+  Port:
+    PortID:       ifname Ethernet1/30
+    PortDescr:    Ethernet1/30
+    TTL:          120
+  Unknown TLVs:
+    TLV:          OUI: 00,80,C2, SubType: 7, Len: 5 01,00,00,00,00
+-------------------------------------------------------------------------------
+Interface:    enp2s0f0, via: LLDP, RID: 2, Time: 0 day, 10:18:16

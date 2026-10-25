@@ -1,0 +1,10 @@
+IA-860M SYN-CARD-0
+ Index : 0
+ Part Number : IA-860m-S-F391E2C-0-S0-X-30-2U-0-E-9
+ Version : 3.2.0.0.0
+ BMC Version : 1.1.2-3
+IA-860M SYN-CARD-1
+ Index : 1
+ Part Number : IA-860m-S-F391E2C-0-S0-X-30-2U-0-E-9
+ Version : 3.2.0.0.0
+ BMC Version : 1.1.2-3

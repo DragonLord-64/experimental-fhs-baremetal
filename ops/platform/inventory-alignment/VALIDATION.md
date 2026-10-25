@@ -131,3 +131,64 @@ Private runtime evidence remains under
 `/home/dragon-lord/fhs-inventory-alignment-20261024/runtime/`, including
 `startup-install-validation.json`. Owned probe pod removed. No hardware cluster
 was changed; the user must copy the updated chart and upgrade the existing release.
+
+## Discovery completion — controller pending
+
+2026-10-25: implementation and the unified controller harness are prepared.
+The worker read all seven originals and verified all seven image SHA-256 hashes
+against the private manifest. This focused evidence-integrity check is outside
+the controller's uploaded/sanitized fixture boundary. Current official source
+was read at `4533a85`; preserved `dragonvm` services were inspected read-only on
+explicit context `fhs-test`, with the alignment web/worker/databases Running.
+
+Neither configured controller command was run by the implementation worker.
+No syntax, fixture, native API or plugin acceptance pass is claimed for this
+change yet. The [controller entrypoint](acceptance_discovery.py) must pass before
+completion; a missing prerequisite or native-model failure must remain a failure.
+No deployment, publication, controller mutation or physical hardware test was
+performed. Existing validation entries above describe earlier changes only.
+
+The continuation narrowed the existing native harness to the supervisor's
+focused scope: seven LLDP rows through Nexus tasks, actual SDK task environment,
+QSFP metadata/empty ports, exact and explicitly verified DAC endpoints, repeated
+breakout observations, existing-cable preservation, partial/failed reads,
+idempotence, read-only routes, rack placement and two independent PSU mappings.
+It retains representative native invalid/occupied checks and authenticated plugin
+assertions; no new framework or asset lifecycle suite was added.
+`wiki/task-creation.md` was absent when requested in this worker checkout; the
+supervisor correction supplied in the task was read and followed directly.
+
+Continuation evidence checks: all seven original image hashes match the private
+manifest; 19 local documentation link targets across the importer, operator
+guides, harness README, provenance and fixture README exist. These checks cover
+private evidence integrity and documentation, outside controller runtime checks.
+The fresh fetch-only official source check confirms `4533a85` remains current.
+No configured acceptance command or additional runtime suite was executed.
+
+## Discovery completion — accepted 2026-10-25
+
+Supervisor recovery completed the same task after controller acceptance exposed
+two issues: scenario variables lost precedence to shared defaults, and the
+metadata filter rejected Ansible-tagged integer rack units. The fixture now uses
+operator-equivalent extra-vars; validation accepts integer subclasses but rejects
+booleans. The targeted nine-test discovery suite passed after that correction.
+
+The same focused controller entrypoint passed on existing `fhs-test`, retained
+release `fhs-inventory-alignment` revision 4, fixture `SYN-DISC-c4f3c69c`:
+
+- Real Ansible routing/discovery fixtures and importer syntax passed.
+- 50 report assertions passed: seven LLDP cables, dynamic populated/Removed
+  QSFPs, SDK venv/root/user, metadata and Inventory assets, breakout associations,
+  exact and explicitly verified endpoint-pair DACs, conflict preservation,
+  partial/failed reads and unchanged repeated apply.
+- Native rack-unit placement and PSU1/PSU2 cables to distinct PDUs passed,
+  including representative invalid/occupied checks and missing-data preservation.
+- All nine native network cables appeared in authenticated Topology Views;
+  Inventory asset page passed. Inventory 2.7.1 and Topology Views 5.0.0 active.
+  PVC bindings and protected credentials were unchanged.
+
+Sanitized report: ignored pipeline `runs/netbox-discovery-completion-20261025/acceptance-final.json`.
+Private detailed evidence remains on dragonvm at
+`/tmp/fhs-discovery-completion-0gnix1wk/`. No physical device was contacted;
+plugin pages use Django Client, not browser visual QA. Prior failed reports and
+controller logs remain preserved. No claim of physical hardware discovery.

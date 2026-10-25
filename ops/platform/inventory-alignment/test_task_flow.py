@@ -125,9 +125,18 @@ class TaskFlowTest(unittest.TestCase):
         defaults=dict(yaml.safe_load((SOURCE/'defaults.yml').read_text()),
                       **yaml.safe_load((SOURCE/'netbox_import.yml').read_text())[1]['vars'])
         selected={key:value for key,value in defaults.items() if key.startswith('bootstrap_bittware_') or key=='bootstrap_fpga_interface_type'}
+        import getpass
+        binary = self.folder/'sdk-venv/bin'; binary.mkdir(parents=True, exist_ok=True)
+        python = binary/'python3'
+        if not python.exists(): python.symlink_to(sys.executable)
+        for name, output in [('bw_card_list', raw), ('bw_qsfp_info', 'QSFP0:\n Present : Removed')]:
+            tool = binary/name
+            tool.write_text('#!'+sys.executable+'\nimport sys\nprint("help" if "--help" in sys.argv else '+repr(output)+')\n')
+            tool.chmod(0o700)
         selected.update(bootstrap_bittware_enabled=True,bootstrap_fpga_complete=True,
-            bootstrap_bittware_card_list_argv=[sys.executable,'-c','print('+repr(raw)+')'],
-            bootstrap_bittware_sdk_root='/tmp',bootstrap_bittware_venv='/tmp',hardware_command_path='/usr/bin',
+            bootstrap_bittware_card_list_argv=['bw_card_list','-v','-i','USB'], bootstrap_bittware_qsfp_argv=['bw_qsfp_info'],
+            bootstrap_bittware_user=getpass.getuser(),
+            bootstrap_bittware_sdk_root=str(self.folder),bootstrap_bittware_venv=str(binary.parent),hardware_command_path='/usr/bin',
             facts=dict(self.vars['facts'],hostname='old-server'))
         return selected
 
@@ -137,7 +146,7 @@ class TaskFlowTest(unittest.TestCase):
         old=self.api.add(MODULES,device=self.device['id'],module_bay=bay['id'],module_type=999,serial='KEEP-ME')
         asset=self.api.add(ASSETS,serial='KEEP-ME',module_type=999,module=old['id'],status='used')
         apply=yaml.safe_load((SOURCE/'tasks/apply.yml').read_text())
-        sync=next(task for task in apply if task['name']=='Preview or apply FPGA modules and their three interfaces')
+        sync=next(task for task in apply if task['name']=='Preview or apply FPGA modules and observed interfaces')
         output=self.run_tasks([{'ansible.builtin.import_tasks':str(SOURCE/'tasks/fpga.yml')},sync],self.fpga_vars(raw),success=False)
         self.assertIn('Incomplete FPGA inventory',output)
         self.assertEqual(old,self.api.tables[MODULES][old['id']]);self.assertEqual(asset,self.api.tables[ASSETS][asset['id']])
@@ -149,7 +158,7 @@ class TaskFlowTest(unittest.TestCase):
         old=self.api.add(MODULES,device=self.device['id'],module_bay=bay['id'],module_type=999,serial='REMOVE-ME')
         asset=self.api.add(ASSETS,serial='REMOVE-ME',module_type=999,module=old['id'],status='used')
         apply=yaml.safe_load((SOURCE/'tasks/apply.yml').read_text())
-        sync=next(task for task in apply if task['name']=='Preview or apply FPGA modules and their three interfaces')
+        sync=next(task for task in apply if task['name']=='Preview or apply FPGA modules and observed interfaces')
         variables=self.fpga_vars('No cards detected');variables['bootstrap_fpga_empty_pattern']='^No cards detected$'
         self.run_tasks([{'ansible.builtin.import_tasks':str(SOURCE/'tasks/fpga.yml')},sync],variables)
         self.assertNotIn(old['id'],self.api.tables[MODULES]);self.assertIsNone(self.api.tables[ASSETS][asset['id']]['module'])
