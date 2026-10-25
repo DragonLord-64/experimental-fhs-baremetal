@@ -237,3 +237,18 @@ Append completed events here; keep proposed work in the plan.
 - [Validation](../ops/platform/inventory-alignment/VALIDATION.md#hardware-corrections-and-host-isolation--2026-10-25):
   49 focused tests, real Ansible syntax, 20 native FRU and 69 importer assertions
   passed against the retained chart on `fhs-test`. Physical hardware unverified.
+
+
+## 2026-10-25 — one FRU device identity source
+
+- User-directed policy: explicit identity overrides precede the selected IPMI
+  FRU. Linux DMI/sysfs no longer supplies device/product/motherboard identity.
+  Device serial prefers FRU Chassis Serial, then Product Serial; never Board Serial.
+  This supersedes the prior bootstrap-fallback precedence.
+- A valid serial creates a device even without manufacturer/model (`NA` /
+  `Unknown`). Missing observations preserve known values; DIMM/NVMe discovery
+  retains its existing sources. Compare, placement and apply share normalized
+  identity without separate bootstrap fallbacks.
+- [Validation](../ops/platform/inventory-alignment/VALIDATION.md#fru-identity-and-serial-only-creation--2026-10-25):
+  50 focused tests, real Ansible syntax, 21 native FRU and 69 native importer
+  assertions passed on the retained chart. Physical hardware remains unverified.

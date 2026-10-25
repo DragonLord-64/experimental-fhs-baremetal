@@ -170,9 +170,9 @@ def identity_model(value):
     return value
 
 
-def fru_identity(probe, facts=None, overrides=None, chassis_probe=None, fru_id='0'):
-    """Keep FRUs separate; only the explicitly selected system FRU fills DMI gaps."""
-    facts = facts or {}; overrides = overrides or {}; chassis_probe = chassis_probe or {}
+def fru_identity(probe, overrides=None, fru_id='0'):
+    """Normalize device identity from explicit overrides and one selected FRU."""
+    overrides = overrides or {}
     records = []; current = None; warnings = []
     if probe.get('rc', 1) == 0:
         for line in probe.get('stdout', '').replace('\r', '').splitlines():
@@ -219,29 +219,28 @@ def fru_identity(probe, facts=None, overrides=None, chassis_probe=None, fru_id='
             return ('', '')
         return (fields.get(label, ''), 'ipmitool fru ID ' + str(fru_id) + ': ' + label)
 
-    choose('serial', [(chassis_probe.get('stdout') if chassis_probe.get('rc', 1) == 0 else facts.get('chassis_serial'), 'Linux DMI chassis_serial'), fru('Chassis Serial'), (overrides.get('serial'), 'bootstrap_chassis_serial')])
-    choose('manufacturer', [(facts.get('system_vendor'), 'Linux DMI system_vendor'), fru('Product Manufacturer'), (overrides.get('manufacturer'), 'bootstrap_manufacturer')])
-    choose('model', [(facts.get('product_name'), 'Linux DMI product_name'), fru('Product Name'),
-        fru('Product Part Number'), fru('Chassis Part Number'), (overrides.get('model'), 'bootstrap_device_type')], model=True)
-    for key, fallback in overrides.items():
-        if identity.get(key) and identity_value(fallback) and identity[key] != identity_value(fallback):
-            warnings.append('Hardware ' + key + ' differs from bootstrap fallback; hardware observation selected')
+    choose('serial', [(overrides.get('serial'), 'bootstrap_chassis_serial'),
+        fru('Chassis Serial'), fru('Product Serial')])
+    choose('manufacturer', [(overrides.get('manufacturer'), 'bootstrap_manufacturer'),
+        fru('Product Manufacturer')])
+    choose('model', [(overrides.get('model'), 'bootstrap_device_type'), fru('Product Name'),
+        fru('Product Part Number'), fru('Chassis Part Number')], model=True)
     mappings = {
-        'motherboard_manufacturer': ('board_vendor', 'Board Mfg'),
-        'motherboard_model': ('board_name', 'Board Product'),
-        'motherboard_serial': ('board_serial', 'Board Serial'),
-        'motherboard_part_number': ('', 'Board Part Number'),
-        'motherboard_manufacture_date': ('', 'Board Mfg Date'),
-        'product_serial': ('product_serial', 'Product Serial'),
-        'product_manufacturer': ('system_vendor', 'Product Manufacturer'),
-        'product_name': ('product_name', 'Product Name'),
-        'product_part_number': ('', 'Product Part Number'),
-        'product_version': ('product_version', 'Product Version'),
-        'chassis_part_number': ('', 'Chassis Part Number'),
-        'chassis_type': ('', 'Chassis Type'),
+        'motherboard_manufacturer': 'Board Mfg',
+        'motherboard_model': 'Board Product',
+        'motherboard_serial': 'Board Serial',
+        'motherboard_part_number': 'Board Part Number',
+        'motherboard_manufacture_date': 'Board Mfg Date',
+        'product_serial': 'Product Serial',
+        'product_manufacturer': 'Product Manufacturer',
+        'product_name': 'Product Name',
+        'product_part_number': 'Product Part Number',
+        'product_version': 'Product Version',
+        'chassis_part_number': 'Chassis Part Number',
+        'chassis_type': 'Chassis Type',
     }
-    for target, (fact, label) in mappings.items():
-        choose(target, [(facts.get(fact), 'Linux DMI ' + fact), fru(label)], destination=hardware)
+    for target, label in mappings.items():
+        choose(target, [fru(label)], destination=hardware)
     components = []
     if all(hardware.get(k) for k in ('motherboard_serial', 'motherboard_manufacturer', 'motherboard_model')) and identity_model(hardware['motherboard_model']):
         components.append(dict(name='Motherboard', kind='Motherboard',

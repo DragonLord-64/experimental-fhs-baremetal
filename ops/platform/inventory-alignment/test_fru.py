@@ -19,7 +19,7 @@ def discover(text=None, **kwargs):
 
 class FruParsingTest(unittest.TestCase):
     def test_separate_chassis_board_and_product_with_sources(self):
-        result = discover(facts=dict(system_vendor='To Be Filled By O.E.M.', product_name='Default string'))
+        result = discover()
         self.assertEqual(dict(serial='SYN-CHASSIS-001', manufacturer='BittWare', model='SYN-SERVER-PART'), result['identity'])
         self.assertEqual('SYN-PRODUCT-001', result['hardware_fields']['product_serial'])
         self.assertEqual('SYN-BOARD-001', result['hardware_fields']['motherboard_serial'])
@@ -34,19 +34,17 @@ class FruParsingTest(unittest.TestCase):
         self.assertEqual(2, len(result['records']))
         self.assertEqual('SYN-PSU-001', result['records'][1]['fields']['Product Serial'])
 
-    def test_hardware_precedes_bootstrap_fallbacks(self):
-        facts = dict(system_vendor='DMI vendor', product_name='DMI model', product_serial='DMI product',
-                     board_vendor='DMI board vendor', board_name='DMI board', board_serial='DMI board serial')
-        result = discover(facts=facts, chassis_probe=dict(rc=0, stdout='DMI chassis\n'))
-        self.assertEqual(dict(serial='DMI chassis', manufacturer='DMI vendor', model='DMI model'), result['identity'])
-        self.assertEqual('DMI product', result['hardware_fields']['product_serial'])
-        self.assertEqual('DMI board serial', result['components'][0]['serial'])
-        result = discover(facts=facts, overrides=dict(serial='Override chassis', manufacturer='Override vendor', model='Override model'))
-        self.assertEqual(dict(serial='SYN-CHASSIS-001', manufacturer='DMI vendor', model='DMI model'), result['identity'])
-        self.assertEqual('ipmitool fru ID 0: Chassis Serial', result['sources']['serial'])
-        self.assertEqual(3, len([w for w in result['warnings'] if 'bootstrap fallback' in w]))
-        result = discover('', overrides=dict(serial='Fallback', manufacturer='Vendor', model='Model'))
-        self.assertEqual(dict(serial='Fallback', manufacturer='Vendor', model='Model'), result['identity'])
+    def test_explicit_overrides_precede_fru(self):
+        result = discover(overrides=dict(serial='Override chassis', manufacturer='Override vendor', model='Override model'))
+        self.assertEqual(dict(serial='Override chassis', manufacturer='Override vendor', model='Override model'), result['identity'])
+        self.assertEqual('bootstrap_chassis_serial', result['sources']['serial'])
+        self.assertEqual('SYN-PRODUCT-001', result['hardware_fields']['product_serial'])
+
+    def test_product_serial_is_fallback_within_selected_fru_only(self):
+        text = 'FRU Device Description : System (ID 0)\n Product Serial : SYN-PRODUCT\n Board Serial : SYN-BOARD\n'
+        self.assertEqual('SYN-PRODUCT', discover(text)['identity']['serial'])
+        self.assertEqual('ipmitool fru ID 0: Product Serial', discover(text)['sources']['serial'])
+        self.assertNotIn('serial', discover(text.replace(' Product Serial : SYN-PRODUCT\n', ''))['identity'])
 
     def test_missing_failed_and_partial_output_are_optional(self):
         for probe in (dict(rc=127), dict(rc=1, stdout=FIXTURE.read_text()), dict(msg='permission denied'), dict(rc=0, stdout='')):
@@ -56,14 +54,14 @@ class FruParsingTest(unittest.TestCase):
                 self.assertEqual({}, result['hardware_fields'])
                 self.assertEqual([], result['components'])
         result = discover('FRU Device Description : Builtin FRU Device (ID 0)\n Board Serial : SYN-BOARD\n Product Serial : SYN-PRODUCT\n')
-        self.assertEqual({}, result['identity'])
+        self.assertEqual({'serial': 'SYN-PRODUCT'}, result['identity'])
         self.assertEqual([], result['components'])
         self.assertEqual('SYN-BOARD', result['hardware_fields']['motherboard_serial'])
 
     def test_placeholders_dates_and_no_cross_component_serial_fallback(self):
         for placeholder in ('To be filled by OEM', 'To Be Filled By O.E.M.', 'Default string', 'Unknown', '00000000'):
             result = discover('FRU Device Description : Builtin FRU Device (ID 0)\n Chassis Serial : '+placeholder+'\n Product Serial : SYN-PRODUCT\n Board Serial : SYN-BOARD\n')
-            self.assertNotIn('serial', result['identity'])
+            self.assertEqual('SYN-PRODUCT', result['identity']['serial'])
         for date in ('09-MAY-2025', '2025-05-09', '09/05/2025'):
             self.assertEqual({}, discover(f'FRU Device Description : Builtin FRU Device (ID 0)\n Product Name : {date}\n Chassis Part Number : {date}\n')['identity'])
 
@@ -71,12 +69,12 @@ class FruParsingTest(unittest.TestCase):
         self.assertEqual({}, discover(fru_id='99')['identity'])
         selected = discover(fru_id='3')
         self.assertEqual('SYN-PSU-MODEL', selected['identity']['model'])
-        self.assertNotIn('serial', selected['identity'])
+        self.assertEqual('SYN-PSU-001', selected['identity']['serial'])
         self.assertEqual([], selected['components'])
         duplicate = FIXTURE.read_text() + '\nFRU Device Description : Duplicate (ID 0)\n Chassis Serial : SYN-OTHER\n'
         self.assertEqual({}, discover(duplicate)['identity'])
         conflict = FIXTURE.read_text().replace(' Board Mfg Date', ' Chassis Serial : SYN-CONFLICT\n Board Mfg Date')
-        self.assertNotIn('serial', discover(conflict)['identity'])
+        self.assertEqual('SYN-PRODUCT-001', discover(conflict)['identity']['serial'])
 
     def test_partial_metadata_merge_preserves_previous_fields_and_other_frus(self):
         previous = filters.identity_metadata(discover())
@@ -226,6 +224,8 @@ class FruTaskTest(unittest.TestCase):
             script = folder / command
             script.write_text('#!' + sys.executable + '\nprint(' + repr(output) + ')\n')
             script.chmod(0o700)
+        marker = folder / 'dmi-read'
+        (folder / 'cat').write_text('#!' + sys.executable + '\nfrom pathlib import Path\nPath(' + repr(str(marker)) + ').touch()\n')
         tasks = [{'ansible.builtin.import_tasks': str(SOURCE / 'tasks/identity.yml')},
                  {'ansible.builtin.assert': {'that': [
                      'system_identity.identity.serial == "SYN-CHASSIS-001"',
@@ -234,11 +234,12 @@ class FruTaskTest(unittest.TestCase):
                      'discovered_components[0].serial == "SYN-BOARD-001"',
                      'not components_scan_complete']}}]
         variables = dict(hardware_simulation=True, bootstrap_chassis_serial="", hardware_command_path=str(folder),
-                         facts=dict(hostname='synthetic', system_vendor='To be filled by OEM'), components_scan_complete=False)
+                         facts=dict(hostname='synthetic', system_vendor='IGNORED-DMI', product_name='IGNORED-DMI', product_serial='IGNORED-DMI', board_serial='IGNORED-DMI'), components_scan_complete=False)
         self.run_tasks(tasks, variables, check=True)
         (folder / 'ipmitool').write_text('#!' + sys.executable + '\nimport sys\nsys.exit(1)\n')
         tasks[1]['ansible.builtin.assert']['that'] = ['system_identity.identity == {}', 'discovered_components == []', 'hardware_fields == {}']
         self.run_tasks(tasks, variables, check=True)
+        self.assertFalse(marker.exists(), 'Device identity must not read Linux DMI files')
         (folder / 'ipmitool').unlink()  # Missing binary also remains optional.
         self.run_tasks(tasks, variables, check=True)
         self.assertEqual([], self.api.writes)

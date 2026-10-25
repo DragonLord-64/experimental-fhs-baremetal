@@ -112,14 +112,12 @@ def main():
         check('changed=0' in output, 'Repeated full native task import is idempotent')
         # Correct manufacturer, then model, while retaining the same physical asset.
         corrected = full.replace('BittWare', 'SYN-Observed-Vendor')
-        variables.update(bootstrap_manufacturer='Stale vendor', bootstrap_device_type='Stale model',
-                         bootstrap_chassis_serial='Stale serial')
         run(corrected)
         updated = rows('dcim/devices/', name=prefix)[0]
         chassis_asset = rows('plugins/inventory/assets/', device_id=did)[0]
         check(updated['id'] == did and updated['device_type']['model'] == prefix + '-SERVER-PART'
               and updated['device_type']['manufacturer']['name'] == 'SYN-Observed-Vendor',
-              'Hardware manufacturer/model correct existing device despite stale bootstrap fallbacks')
+              'FRU manufacturer/model correct existing device')
         check(chassis_asset['id'] == assets[prefix + '-CHASSIS-001']
               and chassis_asset['device_type']['id'] == updated['device_type']['id'],
               'Real Inventory plugin retains asset ID and corrects its type with device')
@@ -129,8 +127,6 @@ def main():
         check(rows('dcim/devices/', name=prefix)[0]['device_type']['model'] == prefix + '-CORRECTED-PART'
               and rows('plugins/inventory/assets/', device_id=did)[0]['id'] == chassis_asset['id'],
               'Observed model correction also retains the same chassis asset')
-        for key in ('bootstrap_manufacturer', 'bootstrap_device_type', 'bootstrap_chassis_serial'):
-            variables.pop(key)
         # Return to the original observations before partial-read preservation checks.
         run(full)
         variables['hardware_fields'] = {}; variables['resource_fields'] = {}
@@ -152,16 +148,28 @@ def main():
               'Partial/failed/missing FRU preserves installed motherboard and asset IDs')
         variables['facts']['hostname'] = prefix + '-NO-TYPE'
         output = run()
-        check(not rows('dcim/devices/', name=variables['facts']['hostname']) and 'No manufacturer/model available' in output,
+        check(not rows('dcim/devices/', name=variables['facts']['hostname']) and 'No usable FRU serial' in output,
               'No IPMI or usable type reports and skips new device without failing')
-        # A new host can have a verified type but no available serial or IPMI.
-        variables.update(bootstrap_manufacturer='BittWare', bootstrap_device_type=prefix + '-SERVER-PART')
-        variables['facts']['hostname'] = prefix + '-NO-IPMI'
-        run()
-        unknown = rows('dcim/devices/', name=variables['facts']['hostname'])[0]
-        check(not unknown['serial'] and not unknown['custom_fields']['product_serial'] and
-              not unknown['custom_fields']['motherboard_serial'], 'New no-IPMI device leaves undiscovered identities empty')
-        check(not rows('plugins/inventory/assets/', device_id=unknown['id']), 'No serial means no invented chassis asset')
+        # A serial alone must be sufficient, even with misleading Linux DMI facts.
+        variables['facts'].update(system_vendor='IGNORED-DMI', product_name='IGNORED-DMI', product_serial='IGNORED-DMI')
+        variables['facts']['hostname'] = prefix + '-SERIAL-ONLY'
+        serial_only = 'FRU Device Description : System (ID 0)\n Product Serial : ' + prefix + '-MINIMAL\n'
+        run(serial_only)
+        minimal = rows('dcim/devices/', name=variables['facts']['hostname'])[0]
+        check(minimal['serial'] == prefix + '-MINIMAL' and minimal['device_type']['model'] == 'Unknown'
+              and minimal['device_type']['manufacturer']['name'] == 'NA',
+              'FRU serial alone creates device with NA manufacturer and Unknown type; DMI ignored')
+        check('changed=0' in run(serial_only), 'Serial-only device import is idempotent')
+        variables.update(bootstrap_manufacturer='SYN-Override-Vendor', bootstrap_device_type=prefix + '-OVERRIDE',
+                         bootstrap_chassis_serial=prefix + '-OVERRIDE-SERIAL')
+        variables['facts']['hostname'] = prefix + '-OVERRIDE-HOST'
+        run('FRU Device Description : System (ID 0)\n Chassis Serial : ' + prefix + '-IGNORED\n'
+            ' Product Manufacturer : FRU vendor\n Product Name : FRU model\n')
+        explicit = rows('dcim/devices/', name=variables['facts']['hostname'])[0]
+        check(explicit['serial'] == prefix + '-OVERRIDE-SERIAL'
+              and explicit['device_type']['manufacturer']['name'] == 'SYN-Override-Vendor'
+              and explicit['device_type']['model'] == prefix + '-OVERRIDE',
+              'Explicit identity overrides take precedence over FRU and DMI')
     report = dict(synthetic_only=True, run=prefix, checks=checks, checks_passed=len(checks),
                   device_id=did, motherboard_id=board['id'], status=status)
     Path(args.report).write_text(json.dumps(report, indent=2) + '\n')

@@ -174,7 +174,7 @@
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
       device: '{{ facts.hostname }}'
       mode: device
-      serial: '{{ system_identity.identity.serial | default(bootstrap_chassis_serial | default("")) }}'
+      serial: '{{ system_identity.identity.serial | default("") }}'
       allow_missing_serial: true
       manufacturer: '{{ netbox_manufacturer }}'
       model: '{{ netbox_device_type }}'

@@ -13,9 +13,9 @@ per run with `-e netbox_credentials_file=/private/netbox.yml`.
 
 ## Linux system identity
 
-`netbox_import.yml` reads Linux facts, `/sys/class/dmi/id/chassis_serial` and local
-`ipmitool fru` over the configured connection. Discovery uses the same privilege
-settings as BIOS/BMC reads. No IPMI network credentials are added or tool installed.
+`netbox_import.yml` reads device identity from local `ipmitool fru` over the
+configured connection. Linux DMI facts and sysfs are not identity sources.
+Discovery uses the same privilege settings as BIOS/BMC reads. No IPMI network credentials are added or tool installed.
 `facts`, `compare` and check mode keep these probes read-only.
 
 `system_fru_id` selects the system record (default `0`; older
@@ -25,30 +25,32 @@ Failed reads and missing/duplicate record IDs do not supply FRU identity fallbac
 
 | NetBox destination | Discovery |
 |---|---|
-| Device serial / chassis asset | DMI chassis serial, selected FRU Chassis Serial, `bootstrap_chassis_serial` fallback |
-| Device type manufacturer | DMI system vendor, FRU Product Manufacturer, `bootstrap_manufacturer` fallback |
-| Device type model | DMI product name, usable FRU Product Name, Product Part Number, Chassis Part Number, `bootstrap_device_type` fallback |
-| `product_*` device fields | DMI product fields where available, otherwise corresponding FRU fields; serial/version remain product identity |
-| `motherboard_*` device fields | DMI board vendor/name/serial, otherwise FRU Board Mfg/Product/Serial; FRU part number and manufacture date |
+| Device serial / chassis asset | `bootstrap_chassis_serial`, selected FRU Chassis Serial, selected FRU Product Serial |
+| Device type manufacturer | `bootstrap_manufacturer`, selected FRU Product Manufacturer; `NA` for a new serial-only device |
+| Device type model | `bootstrap_device_type`, usable FRU Product Name, Product Part Number, Chassis Part Number; `Unknown` for a new serial-only device |
+| `product_*` device fields | Selected FRU Product fields; serial/version remain product identity |
+| `motherboard_*` device fields | Selected FRU Board Mfg/Product/Serial, part number and manufacture date |
 | Motherboard inventory item / asset | Only with observed board manufacturer, model and serial; board model identifies its type; part number is set only when observed |
 | `chassis_part_number`, `chassis_type` | Selected FRU Chassis Part Number/Type |
 | `hardware_identity_sources` | Per-field source, including FRU ID and label |
 | `fru_inventory` | Records keyed by FRU ID, with description and fields including additional product/board metadata |
 
 Empty values and OEM placeholders are omitted. Date-shaped strings are retained
-as observations but cannot identify a model. Board and product serials never
-substitute for a chassis serial. FRU Product Version is separate from BIOS
+as observations but cannot identify a model. The selected FRU Product Serial is
+the device fallback when Chassis Serial is unavailable; Board Serial never
+identifies the device. FRU Product Version is separate from BIOS
 (`dmidecode --type bios`) and BMC firmware (`ipmitool mc info`).
 
 Missing FRU data is normal. New optional fields stay empty; existing fields,
 provenance, FRU records and assets survive partial reads. A missing chassis
 serial permits hostname-based device updates without creating/reassigning an
-asset; it cannot establish a rename. NetBox requires a device type: new devices
-without manufacturer/model are reported and skipped until verified overrides
-are supplied. Valid hardware manufacturer/model correct the existing device and
-linked chassis asset type; the asset ID, tag and history are preserved. Changes
-are journalled with discovery sources. Hardware observations precede bootstrap
-fallbacks; disagreements are reported. Device updates use the ensured type ID.
+asset; it cannot establish a rename. A valid FRU serial is sufficient to create
+a device: missing manufacturer/model use `NA` / `Unknown` because NetBox requires
+a type. Existing manufacturer/model are retained when FRU omits them. Valid FRU
+manufacturer/model correct the existing device and linked chassis asset type; the asset ID, tag and history are preserved. Changes
+are journalled with discovery sources. Explicit `bootstrap_chassis_serial`,
+`bootstrap_manufacturer` and `bootstrap_device_type` override FRU values in the
+same normalization step. Device updates use the ensured type ID.
 Conflicting chassis serial ownership, ambiguous assets and quarantine still
 require review. A changed serial alone cannot distinguish a data correction
 from a replacement; it does not silently rewrite the previous physical asset.
@@ -59,7 +61,8 @@ failure for the run when a host fails; inspect its recap before rerunning.
 
 FRU discovery never enables absence removal. Motherboard reconciliation always
 uses an incomplete scope; DDR5/NVMe, FPGA, NIC and Nexus completeness rules remain
-separate. Keep discovery output private because it contains hardware identifiers.
+separate. DIMM/NVMe component discovery keeps its existing Linux/tool sources.
+Keep discovery output private because it contains hardware identifiers.
 
 ## Topology
 

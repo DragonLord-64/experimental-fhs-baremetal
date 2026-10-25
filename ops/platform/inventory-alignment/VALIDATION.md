@@ -218,3 +218,30 @@ explicitly skipped native Ansible; the remote focused run had no skips.
 
 Physical hardware remains unverified. Conflicting serial identity, ambiguous
 asset ownership and quarantine still require review for the affected host.
+
+
+## FRU identity and serial-only creation — 2026-10-25
+
+Retained delivered chart release/namespace `fhs-inventory-alignment`, explicit
+context `fhs-test`; NetBox `4.7.0`, Inventory `2.7.1`. Services and pipeline state
+inspected first; no deployment changes or physical hardware access.
+
+- 50 focused tests passed without skips: `test_fru`, `test_importer`,
+  `test_routing`, `test_task_flow`; real Ansible syntax check passed.
+- `acceptance_fru.py`: 21 native assertions passed. A selected FRU Product Serial
+  alone creates a device with manufacturer `NA` and model `Unknown`; a repeated
+  import is unchanged. Valid but misleading DMI identity is ignored. Explicit
+  serial/manufacturer/model overrides beat FRU observations. Partial/failed FRU
+  reads preserve existing data and type corrections retain chassis asset IDs.
+- `acceptance.py`: 69 native importer lifecycle assertions passed, including
+  actual compare tasks consuming normalized identity before a chassis rename.
+- The FRU task fixture verifies that no Linux chassis-serial file is read.
+  DIMM/NVMe component sources and completeness rules are unchanged.
+
+Final native evidence on dragonvm:
+`/tmp/fhs-fru-identity.RhffvA2H/{acceptance_fru,acceptance}.json`.
+Local logs: `/tmp/fhs-fru-identity-acceptance-final.log` (focused tests/syntax),
+`/tmp/fhs-fru-identity-native-final.log` (native acceptance).
+The native fixtures were corrected to remove obsolete fallback cleanup and give
+an override host independent hardware identifiers. No acceptance was claimed for
+those incomplete attempts. Physical hardware remains unverified.
