@@ -172,3 +172,24 @@
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
+- name: Read existing switch LLDP neighbors
+  cisco.nxos.nxos_command:
+    commands: '{{ nexus_lldp_command | default("show lldp neighbors detail | json") }}'
+  register: topology_nexus_lldp
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  tags: [always]
+  when: bootstrap_topology_enabled | default(true) | bool
+- name: Keep switch topology observations for controller reconciliation
+  ansible.builtin.set_fact:
+    fhs_topology: '{{ switch.name | fhs_topology_nexus(topology_nexus_lldp.stdout[0] | default("{}"), discovered.stdout[2]) }}'
+  tags: [always]
+  when: bootstrap_topology_enabled | default(true) | bool
+- name: Retain unavailable switch LLDP evidence
+  ansible.builtin.set_fact:
+    fhs_topology: '{{ fhs_topology | combine({"omissions": fhs_topology.omissions + ["Switch LLDP command failed or returned no output"]}) }}'
+  when:
+  - bootstrap_topology_enabled | default(true) | bool
+  - topology_nexus_lldp.failed | default(false) | bool or topology_nexus_lldp.stdout | default([]) | length == 0
+  tags: [always]

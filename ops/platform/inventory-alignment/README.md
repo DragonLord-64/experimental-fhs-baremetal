@@ -70,3 +70,23 @@ access or firmware behavior.
 `test_startup_plugin.py` checks all three consumers, non-root package volumes,
 pinned hash enforcement, offline prebuilt detection and installation failure.
 The launcher regression also verifies static collection before serving.
+
+## LLDP and DAC topology
+
+[Issue #15](https://github.com/DragonLord-64/experimental-fhs-baremetal/issues/15).
+`test_topology.py` covers exact serials, duplicate breakout reports, occupied
+ports, contradictory LLDP/serial evidence, Linux JSON shapes and Nexus LLDP/MAC
+resolution. Run the native collector/module check against the same isolated
+chart instance:
+
+```bash
+python3 ops/platform/inventory-alignment/acceptance_topology.py \
+  --credentials /private/alignment.json --report /tmp/topology-acceptance.json
+```
+
+Retains two uniquely named `SYN-TOPO-*` devices and their imported cable.
+`probe_topology.py` runs in that NetBox's Django shell with
+`FHS_TOPOLOGY_PREFIX` set to the report's prefix. It checks that the imported
+connection appears in the authenticated Topology Views graph; its login session
+is rolled back. Both plugins must be active. Hardware commands use synthetic
+read-only executables; physical LLDP/EEPROM access remains unverified.

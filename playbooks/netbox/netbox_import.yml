@@ -123,3 +123,34 @@
   - name: Load Nexus inventory tasks
     tags: [always]
     ansible.builtin.include_tasks: tasks/import_nexus.yml
+
+- name: Reconcile topology after all selected device inventories
+  hosts: fhs_import_linux:fhs_import_nexus
+  run_once: true
+  gather_facts: false
+  connection: local
+  become: false
+  vars_files:
+  - '{{ netbox_credentials_file | default(''/provision/files.d/credentials/netbox.yml'') }}'
+  tasks:
+  - name: Collect only this run's selected topology observations
+    ansible.builtin.set_fact:
+      topology_observations: '{{ (groups.fhs_import_linux | default([]) + groups.fhs_import_nexus | default([])) | map("extract", hostvars) | selectattr("fhs_topology", "defined") | map(attribute="fhs_topology") | list }}'
+    tags: [always]
+  - name: Reconcile exact observed endpoints without moving existing cables
+    delegate_to: localhost
+    vars:
+      ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    fhs_topology_sync:
+      netbox_url: '{{ netbox_url }}'
+      netbox_token: '{{ netbox_token }}'
+      validate_certs: '{{ netbox_validate_certs | default(false) | bool }}'
+      observations: '{{ topology_observations }}'
+      preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or ("all" not in ansible_run_tags and "apply" not in ansible_run_tags) }}'
+    register: topology_result
+    when: '"facts" not in ansible_run_tags and topology_observations | length > 0'
+    tags: [always]
+  - name: Report topology candidates and unresolved evidence
+    ansible.builtin.debug:
+      var: topology_result
+    tags: [always]

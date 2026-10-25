@@ -66,8 +66,10 @@ items are preserved. A complete empty section differs from unavailable data.
 Module removal detaches uncabled interfaces first, preserving their IDs. Cabled
 interfaces or other module-owned components refuse removal pending review; the
 journal records the cabled refusal. Prior cabling is never treated as newly
-verified or copied to a replacement. Transceivers/DACs have only observed local
-ends; a standalone DAC asset may be managed manually without a native Cable.
+verified or copied to a replacement. Topology discovery joins observed LLDP peers
+and exact DAC serial matches after all selected devices are imported. Unresolved local transceivers remain inventory
+only; a standalone DAC asset may also be managed manually. See the
+[importer topology options](../../../playbooks/netbox/README.md).
 The importer refuses to install a `faulty` asset until explicitly reviewed.
 
 REST operations span requests and are not one database transaction. On failure,

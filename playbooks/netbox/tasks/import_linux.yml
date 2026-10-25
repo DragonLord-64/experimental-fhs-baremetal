@@ -9,3 +9,6 @@
 - name: Load apply tasks
   ansible.builtin.import_tasks: tasks/apply.yml
   when: netbox_manufacturer | length > 0 and netbox_device_type | length > 0
+- name: Discover Linux topology
+  ansible.builtin.import_tasks: topology_linux.yml
+  when: bootstrap_topology_enabled | default(true) | bool

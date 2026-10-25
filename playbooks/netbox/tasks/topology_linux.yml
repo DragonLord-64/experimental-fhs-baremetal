@@ -1,0 +1,36 @@
+- name: Read existing LLDP neighbors without changing daemon configuration
+  ansible.builtin.command:
+    argv: '{{ bootstrap_lldp_argv | default(["lldpcli", "-f", "json", "show", "neighbors"]) }}'
+  register: topology_lldp
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [always]
+- name: Read physical NIC cable EEPROM
+  ansible.builtin.command:
+    argv: '{{ bootstrap_nic_ethtool_argv + ["-m", item.interface] }}'
+  loop: '{{ nic_ports | default([]) }}'
+  register: topology_nic_eeprom
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [always]
+- name: Read FPGA DAC serials over USB without register writes
+  ansible.builtin.command:
+    argv: '{{ bootstrap_bittware_qsfp_argv | default(["bw_qsfp_info"]) + ["-c", item.card_index | string, "-i", "USB", "display"] }}'
+  environment:
+    BWSDK_ROOT: '{{ bootstrap_bittware_sdk_root }}'
+    PATH: '{{ bootstrap_bittware_venv }}/bin:{{ hardware_command_path }}'
+    LC_ALL: C
+  loop: '{{ discovered_bittware.cards | default([]) }}'
+  register: topology_fpga_eeprom
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  tags: [always]
+- name: Keep Linux topology observations for controller reconciliation
+  ansible.builtin.set_fact:
+    fhs_topology: '{{ facts.hostname | fhs_topology_linux(topology_lldp, topology_nic_eeprom.results | default([]), topology_fpga_eeprom.results | default([])) }}'
+  tags: [always]

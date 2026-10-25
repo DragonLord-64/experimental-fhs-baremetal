@@ -46,3 +46,42 @@ serial in the chassis field are not silently rewritten.
 FRU discovery never enables absence removal. Motherboard reconciliation always
 uses an incomplete scope; DDR5/NVMe, FPGA, NIC and Nexus completeness rules remain
 separate. Keep discovery output private because it contains hardware identifiers.
+
+## Topology
+
+`netbox_import.yml` routes selected Linux and NX-OS hosts, imports their inventory,
+then reconciles topology once all selected inventories exist. Nexus model and
+serial come from the chassis report. Unsupported network operating systems fail
+before discovery.
+
+Topology discovery is read-only: existing `lldpcli -f json show neighbors`,
+`ethtool -m <physical NIC>`, `bw_qsfp_info -c <card index> -i USB display`, and
+`show lldp neighbors detail | json`. It does not install or enable LLDP, change
+ports, or write FPGA registers. Override `bootstrap_lldp_argv`,
+`bootstrap_bittware_qsfp_argv`, or `nexus_lldp_command` for local tool paths.
+`bootstrap_topology_enabled: false` skips collection.
+
+LLDP resolves exact imported device/interface names or a unique interface MAC.
+DAC matching uses the complete, case-sensitive EEPROM serial, including any
+`-1`/`-2` suffix. Only a unique switch/host pair qualifies. FPGA ports are the
+existing `C<card index>-QSFP<port>` interfaces; switch ports come from the
+transceiver report. Duplicate breakout serials, mismatched suffixes, absent
+remote devices/interfaces and conflicting observations remain unresolved.
+Existing cables are preserved; repeated observations of the same pair do not
+create another cable. Review `topology_result.omissions` after each run.
+
+`--tags facts` collects without contacting NetBox for topology; `--tags compare`
+and `--check` preview cable additions without writing. Other specific tags also
+preview; cable writes require the default run or `--tags apply`. Limit the
+inventory to the switches and servers being examined; both ends must already exist in NetBox or
+be imported in the same run. No claim is made that optional probes discover
+hardware that their installed tools cannot read.
+
+Source example: upstream `dc08629`,
+`playbooks/development/topology-discover-strategy.md`. Its differing endpoint
+suffixes and repeated breakout serials are deliberately not treated as exact
+matches. Optical module serials do not establish cable identity.
+
+Hardware assets remain managed by `netbox_inventory`; topology writes native
+NetBox interfaces and cables consumed by `netbox_topology_views`. It does not
+create duplicate plugin-specific graph records or infer missing hardware.

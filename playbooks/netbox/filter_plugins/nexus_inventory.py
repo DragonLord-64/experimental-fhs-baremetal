@@ -33,8 +33,8 @@ def nexus_inventory(outputs):
         model, serial = clean(chassis.get('productid')), clean(chassis.get('serialnum'))
         os_version = clean(version.get('nxos_ver_str') or version.get('kickstart_ver_str'))
         hostname = clean(version.get('host_name'))
-        if model != 'N9K-C9332D-GX2B' or not all((serial, hostname, os_version)):
-            raise ValueError('Expected N9K-C9332D-GX2B with serial, hostname and NX-OS version')
+        if not all((model, serial, hostname, os_version)):
+            raise ValueError('Expected chassis model, serial, hostname and NX-OS version')
         modules, bays, fans, skipped = [], set(), set(), []
         for item in items:
             name = clean(item.get('name'))

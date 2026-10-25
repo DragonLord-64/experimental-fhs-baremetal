@@ -73,6 +73,8 @@ class ActionModule(ActionBase):
             self._task.connection, v.get('netbox_url'), v.get('netbox_api_retries'))
         return dict(changed=False, msg=message, _ansible_verbose_always=True)
 ''')
+        (self.folder / 'action_plugins/fhs_topology_sync.py').write_text(
+            'from ansible.plugins.action import ActionBase\nclass ActionModule(ActionBase):\n    def run(self, tmp=None, task_vars=None):\n        return dict(changed=False, plan=[], omissions=[])\n')
         # Transport loading remains part of Ansible scheduling. Its real network
         # handshake is outside a routing unit test; substitute only that driver.
         plugins = self.folder / 'collections/ansible_collections/ansible/netcommon/plugins/connection'

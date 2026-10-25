@@ -122,3 +122,11 @@ Append completed events here; keep proposed work in the plan.
 - Role playbook syntax and the delegated synthetic-package fixture passed (API
   key, password, failure cleanup and check mode). Live Elasticsearch and device
   journal ingestion were not exercised; ansible-lint was unavailable.
+
+## 2026-10-25 — LLDP and FPGA DAC import
+
+- Extended the [unified NetBox importer](../playbooks/netbox/README.md#topology)
+  with LLDP and exact DAC serial reconciliation, preserving occupied/ambiguous
+  endpoints. Native cables appeared in Topology Views with Inventory active.
+  [Evidence and limits](topology-import.md): 64 importer tests, two syntax checks,
+  native topology acceptance and 69 existing asset checks passed in the lab.
