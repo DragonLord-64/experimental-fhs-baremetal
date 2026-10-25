@@ -1,7 +1,10 @@
-- name: Ensure minimal NetBox prerequisites
+- name: Add discovered placement and metadata fields
   tags:
   - apply
-  when: not ansible_check_mode
+  when:
+  - not ansible_check_mode
+  - fhs_stage == "servers"
+  - '"compare" not in ansible_run_tags and "facts" not in ansible_run_tags'
   throttle: 1
   delegate_to: localhost
   connection: local
@@ -9,15 +12,6 @@
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   block:
-  - name: Ensure site
-    netbox.netbox.netbox_site:
-      data:
-        name: '{{ netbox_site }}'
-        slug: '{{ netbox_site | lower | regex_replace(''[^a-z0-9]+'', ''-'') | trim(''-'') }}'
-    register: netbox_write_result
-    until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
-    retries: '{{ netbox_api_retries }}'
-    delay: '{{ netbox_api_retry_delay }}'
   - name: Ensure rack location within the site
     netbox.netbox.netbox_location:
       data:
@@ -36,47 +30,13 @@
       data:
         name: '{{ server_info.rack }}'
         site: '{{ netbox_site }}'
-        location: '{{ ensured_location.location.id }}'
+        location: '{{ ensured_location.location.id if server_info.location is defined else omit }}'
       query_params:
       - name
       - site
     register: ensured_rack
     when: server_info.rack is defined
     until: ensured_rack is succeeded or not (ensured_rack | fhs_netbox_transient)
-    retries: '{{ netbox_api_retries }}'
-    delay: '{{ netbox_api_retry_delay }}'
-  - name: Ensure server role
-    netbox.netbox.netbox_device_role:
-      data:
-        name: '{{ netbox_role }}'
-        slug: '{{ netbox_role | lower | regex_replace(''[^a-z0-9]+'', ''-'') | trim(''-'') }}'
-        color: 2196f3
-    register: role_output
-    until: role_output is succeeded or not (role_output | fhs_netbox_transient)
-    retries: '{{ netbox_api_retries }}'
-    delay: '{{ netbox_api_retry_delay }}'
-  - name: Ensure reported server manufacturer and keep its ID
-    register: server_manufacturers
-    until: server_manufacturers is succeeded or not (server_manufacturers | fhs_netbox_transient)
-    retries: '{{ netbox_api_retries }}'
-    delay: '{{ netbox_api_retry_delay }}'
-    fhs_manufacturers:
-      netbox_url: '{{ netbox_url }}'
-      netbox_token: '{{ netbox_token }}'
-      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-      names:
-      - '{{ netbox_manufacturer }}'
-  - name: Ensure discovered server type
-    fhs_inventory_sync:
-      netbox_url: '{{ netbox_url }}'
-      netbox_token: '{{ netbox_token }}'
-      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-      device: '{{ facts.hostname }}'
-      mode: type
-      manufacturer: '{{ netbox_manufacturer }}'
-      model: '{{ netbox_device_type }}'
-    register: ensured_server_type
-    until: ensured_server_type is succeeded or not (ensured_server_type | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
   - name: Ensure OS version field
@@ -98,21 +58,7 @@
         type: text
         object_types:
         - dcim.device
-    loop:
-    - bios_version
-    - bmc_firmware
-    - motherboard_part_number
-    - motherboard_serial
-    - motherboard_manufacturer
-    - motherboard_model
-    - motherboard_manufacture_date
-    - product_serial
-    - product_manufacturer
-    - product_name
-    - product_part_number
-    - product_version
-    - chassis_part_number
-    - chassis_type
+    loop: '{{ hardware_fields.keys() | list | difference(["hardware_identity_sources", "fru_inventory"]) }}'
     loop_control:
       pause: '{{ netbox_api_loop_pause }}'
     register: netbox_write_result
@@ -124,8 +70,9 @@
       data:
         name: '{{ item }}'
         type: json
-        object_types: [dcim.device]
-    loop: [hardware_identity_sources, fru_inventory]
+        object_types:
+        - dcim.device
+    loop: '{{ ["hardware_identity_sources", "fru_inventory"] | intersect(hardware_fields.keys() | list) }}'
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -141,7 +88,9 @@
     loop_control:
       loop_var: resource_definition
       pause: '{{ netbox_api_loop_pause }}'
-    when: resource_definition.key not in resource_field_types
+    when:
+    - resource_definition.key not in resource_field_types
+    - resource_definition.key in resource_fields
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -160,55 +109,39 @@
 - name: Apply discovered server inventory to NetBox
   tags:
   - apply
-  when: not ansible_check_mode
+  when:
+  - not ansible_check_mode
+  - '"compare" not in ansible_run_tags and "facts" not in ansible_run_tags'
   delegate_to: localhost
   connection: local
   become: false
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   block:
-  - name: Reconcile physical chassis serial before hostname metadata
-    fhs_inventory_sync:
-      netbox_url: '{{ netbox_url }}'
-      netbox_token: '{{ netbox_token }}'
-      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-      device: '{{ facts.hostname }}'
-      mode: device
-      serial: '{{ system_identity.identity.serial | default("") }}'
-      allow_missing_serial: true
-      manufacturer: '{{ netbox_manufacturer }}'
-      model: '{{ netbox_device_type }}'
-      site: '{{ netbox_site }}'
-      role: '{{ netbox_role }}'
-      identity_sources: '{{ system_identity.sources | default({}) }}'
-    register: netbox_write_result
-    until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
-    retries: '{{ netbox_api_retries }}'
-    delay: '{{ netbox_api_retry_delay }}'
-
   - name: Ensure server device
     netbox.netbox.netbox_device:
       data:
         name: '{{ facts.hostname }}'
-        site: '{{ netbox_site }}'
+        site: '{{ server_info.site | default(bootstrap_site | default(omit)) }}'
         rack: '{{ ensured_rack.rack.id if server_info.rack is defined else omit }}'
         location: '{{ ensured_location.location.id if server_info.location is defined else omit }}'
-        device_role: '{{ role_output.device_role.id }}'
-        device_type: '{{ ensured_server_type.device_type.id }}'
         status: active
-        custom_fields: '{{ {''os_version'': facts.distribution ~ '' '' ~ facts.distribution_version} | combine(hardware_fields) | combine(netbox_resource_fields)
-          }}'
-        tags: '{{ ((existing_device.json.results | first | default({})).tags | default([]) | map(attribute=''name'') | list + [''simulated-hardware''])
-          | unique if hardware_simulation | default(false) | bool else omit }}'
-        description: '{{ ''Ubuntu test container: hardware fields are SIMULATED fixtures.'' if hardware_simulation | default(false) | bool else omit }}'
+        custom_fields: '{{ {''os_version'': facts.distribution ~ '' '' ~ facts.distribution_version} | combine(hardware_fields)
+          | combine(netbox_resource_fields) }}'
+        tags: '{{ ((existing_device.json.results | first | default({})).tags | default([]) | map(attribute=''name'') | list
+          + [''simulated-hardware'']) | unique if hardware_simulation | default(false) | bool else omit }}'
+        description: '{{ ''Ubuntu test container: hardware fields are SIMULATED fixtures.'' if hardware_simulation | default(false)
+          | bool else omit }}'
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
+    when:
+    - fhs_stage == "servers"
   - name: Ensure discovered interfaces
     netbox.netbox.netbox_device_interface:
       data:
-        device: '{{ facts.hostname }}'
+        device: '{{ fhs_netbox_name | default(facts.hostname) }}'
         name: '{{ item.name }}'
         type: '{{ ''virtual'' if item.name == ''lo'' else ''other'' }}'
         mtu: '{{ item.mtu }}'
@@ -220,18 +153,22 @@
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
+    when:
+    - fhs_stage == "interfaces"
   - name: Ensure MAC objects (NetBox 4.2+)
     netbox.netbox.netbox_mac_address:
       data:
         mac_address: '{{ item.mac }}'
         assigned_object:
-          device: '{{ facts.hostname }}'
+          device: '{{ fhs_netbox_name | default(facts.hostname) }}'
           name: '{{ item.name }}'
     loop: '{{ discovered_interfaces }}'
     loop_control:
       label: '{{ item.name }}'
       pause: '{{ netbox_api_loop_pause }}'
-    when: item.mac | lower not in ['', '00:00:00:00:00:00', '00:00:00:00', 'ee:ee:ee:ee:ee:ee']
+    when:
+    - item.mac | lower not in ['', '00:00:00:00:00:00', '00:00:00:00', 'ee:ee:ee:ee:ee:ee']
+    - fhs_stage == "interfaces"
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -239,14 +176,16 @@
   - name: Set interface primary MACs
     netbox.netbox.netbox_device_interface:
       data:
-        device: '{{ facts.hostname }}'
+        device: '{{ fhs_netbox_name | default(facts.hostname) }}'
         name: '{{ item.name }}'
         primary_mac_address: '{{ item.mac }}'
     loop: '{{ discovered_interfaces }}'
     loop_control:
       label: '{{ item.name }}'
       pause: '{{ netbox_api_loop_pause }}'
-    when: item.mac | lower not in ['', '00:00:00:00:00:00', '00:00:00:00', 'ee:ee:ee:ee:ee:ee']
+    when:
+    - item.mac | lower not in ['', '00:00:00:00:00:00', '00:00:00:00', 'ee:ee:ee:ee:ee:ee']
+    - fhs_stage == "interfaces"
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -254,11 +193,11 @@
   - name: Ensure discovered IPv4 and IPv6 addresses
     netbox.netbox.netbox_ip_address:
       query_params:
-        - address
+      - address
       data:
         address: '{{ item.1.address }}/{{ item.1.prefix }}'
         assigned_object:
-          device: '{{ facts.hostname }}'
+          device: '{{ fhs_netbox_name | default(facts.hostname) }}'
           name: '{{ item.0.name }}'
         status: active
     loop: '{{ discovered_interfaces | subelements(''addresses'') }}'
@@ -269,57 +208,33 @@
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
+    when:
+    - fhs_stage == "ips"
   - name: Assign discovered management primary IPv4 after address creation
     netbox.netbox.netbox_device:
       data:
         name: '{{ facts.hostname }}'
         primary_ip4:
           address: '{{ selected_primary_ipv4.address }}/{{ selected_primary_ipv4.prefix }}'
-    when: selected_primary_ipv4.address is defined
+    when:
+    - selected_primary_ipv4.address is defined
+    - fhs_stage == "ips"
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
-  - name: Reconcile observed motherboard without authorizing absence removal
-    fhs_inventory_sync:
-      netbox_url: '{{ netbox_url }}'
-      netbox_token: '{{ netbox_token }}'
-      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-      device: '{{ facts.hostname }}'
-      mode: components
-      manufacturer: '{{ system_identity.components[0].manufacturer }}'
-      items: '{{ system_identity.components }}'
-      complete: false
-    when: system_identity is defined and system_identity.components | length > 0
-    register: netbox_write_result
-    until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
-    retries: '{{ netbox_api_retries }}'
-    delay: '{{ netbox_api_retry_delay }}'
-  - name: Reconcile serial-bearing DDR5 and NVMe assets
-    fhs_inventory_sync:
-      netbox_url: '{{ netbox_url }}'
-      netbox_token: '{{ netbox_token }}'
-      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-      device: '{{ facts.hostname }}'
-      mode: components
-      manufacturer: '{{ bootstrap_component_manufacturer | default("Unknown") }}'
-      items: '{{ discovered_components | selectattr("kind", "in", ["DDR5", "NVMe"]) | rejectattr("serial", "equalto", "") | rejectattr("part", "equalto", "") | list }}'
-      complete: '{{ bootstrap_components_complete | default(false) | bool and components_scan_complete | default(false) | bool }}'
-      scope: '{{ bootstrap_component_scope | default([]) | intersect(["DDR5", "NVMe"]) }}'
-    register: netbox_write_result
-    until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
-    retries: '{{ netbox_api_retries }}'
-    delay: '{{ netbox_api_retry_delay }}'
-
   - name: Ensure motherboard BMC interface
     netbox.netbox.netbox_device_interface:
       data:
-        device: '{{ facts.hostname }}'
+        device: '{{ fhs_netbox_name | default(facts.hostname) }}'
         name: bmc
         type: other
         mgmt_only: true
-        description: '{{ ''SIMULATED motherboard BMC management'' if hardware_simulation | default(false) | bool else ''Motherboard BMC management'' }}'
-    when: bmc_address is defined
+        description: '{{ ''SIMULATED motherboard BMC management'' if hardware_simulation | default(false) | bool else ''Motherboard
+          BMC management'' }}'
+    when:
+    - bmc_address is defined
+    - fhs_stage == "interfaces"
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -329,10 +244,12 @@
       data:
         address: '{{ bmc_address }}/32'
         assigned_object:
-          device: '{{ facts.hostname }}'
+          device: '{{ fhs_netbox_name | default(facts.hostname) }}'
           name: bmc
         status: active
-    when: bmc_address is defined
+    when:
+    - bmc_address is defined
+    - fhs_stage == "ips"
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -342,71 +259,11 @@
       data:
         name: '{{ facts.hostname }}'
         oob_ip: '{{ bmc_address }}/32'
-    when: bmc_address is defined
+    when:
+    - bmc_address is defined
+    - fhs_stage == "interfaces"
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
   throttle: 1
-- name: Preview or apply FPGA modules and observed interfaces
-  tags:
-  - fpga
-  - compare
-  - apply
-  delegate_to: localhost
-  connection: local
-  become: false
-  throttle: 1
-  vars:
-    ansible_python_interpreter: '{{ ansible_playbook_python }}'
-  fhs_fpga_sync:
-    netbox_url: '{{ netbox_url }}'
-    netbox_token: '{{ netbox_token }}'
-    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-    device: '{{ facts.hostname }}'
-    cards: '{{ desired_fpga_cards | default([]) }}'
-    complete: '{{ bootstrap_fpga_complete | default(false) | bool and fpga_scan_complete | default(false) | bool }}'
-    preview: '{{ ansible_check_mode or ''compare'' in ansible_run_tags or ''facts'' in ansible_run_tags }}'
-  register: fpga_plan
-  until: fpga_plan is succeeded or not (fpga_plan | fhs_netbox_transient)
-  retries: '{{ netbox_api_retries }}'
-  delay: '{{ netbox_api_retry_delay }}'
-- name: Show FPGA module plan
-  tags:
-  - fpga
-  - compare
-  - apply
-  ansible.builtin.debug:
-    var: fpga_plan.plan
-- name: Preview or apply physical NIC modules with adopted server interfaces
-  tags:
-  - nic
-  - compare
-  - apply
-  delegate_to: localhost
-  connection: local
-  become: false
-  throttle: 1
-  vars:
-    ansible_python_interpreter: '{{ ansible_playbook_python }}'
-  fhs_fpga_sync:
-    netbox_url: '{{ netbox_url }}'
-    netbox_token: '{{ netbox_token }}'
-    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-    device: '{{ facts.hostname }}'
-    cards: '{{ desired_nic_cards | default([]) }}'
-    kind: NIC
-    complete: '{{ bootstrap_nic_complete | default(false) | bool and nic_scan_complete | default(false) | bool }}'
-    manufacturer: '{{ bootstrap_nic_manufacturer }}'
-    preview: '{{ ansible_check_mode or ''compare'' in ansible_run_tags or ''facts'' in ansible_run_tags }}'
-  register: nic_plan
-  until: nic_plan is succeeded or not (nic_plan | fhs_netbox_transient)
-  retries: '{{ netbox_api_retries }}'
-  delay: '{{ netbox_api_retry_delay }}'
-- name: Show physical NIC module plan
-  tags:
-  - nic
-  - compare
-  - apply
-  ansible.builtin.debug:
-    var: nic_plan.plan

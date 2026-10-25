@@ -13,7 +13,7 @@
       netbox_url: '{{ netbox_url }}'
       netbox_token: '{{ netbox_token }}'
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-      device: '{{ facts.hostname }}'
+      device: '{{ fhs_netbox_name | default(facts.hostname) }}'
       mode: resolve
       serial: '{{ system_identity.identity.serial | default("") }}'
       allow_missing_serial: true
@@ -32,13 +32,17 @@
       desired_device_id: '{{ resolved_identity.device.id | default(-1) }}'
   - name: Resolve device type from FRU identity existing values or placeholders
     ansible.builtin.set_fact:
-      netbox_manufacturer: '{{ netbox_manufacturer or resolved_identity.device.device_type.manufacturer.name | default("NA" if system_identity.identity.serial | default("") else "") }}'
-      netbox_device_type: '{{ netbox_device_type or resolved_identity.device.device_type.model | default("Unknown" if system_identity.identity.serial | default("") else "") }}'
-      hardware_fields: '{{ hardware_fields | combine(system_identity | fhs_identity_metadata(resolved_identity.device.custom_fields | default({}))) }}'
+      netbox_manufacturer: '{{ netbox_manufacturer or resolved_identity.device.device_type.manufacturer.name | default("NA"
+        if system_identity.identity.serial | default("") else "") }}'
+      netbox_device_type: '{{ netbox_device_type or resolved_identity.device.device_type.model | default("Unknown" if system_identity.identity.serial
+        | default("") else "") }}'
+      hardware_fields: '{{ hardware_fields | combine(system_identity | fhs_identity_metadata(resolved_identity.device.custom_fields
+        | default({}))) }}'
     when: system_identity is defined
   - name: Report new devices without required NetBox type information
     ansible.builtin.debug:
-      msg: No usable FRU serial or device type available; apply is skipped. Supply bootstrap_chassis_serial to override device identity. Optional identity fields remain empty.
+      msg: No usable FRU serial or device type available; apply is skipped. Supply bootstrap_chassis_serial to override device
+        identity. Optional identity fields remain empty.
     when: netbox_manufacturer | length == 0 or netbox_device_type | length == 0
   - name: Read existing custom field definitions without changing their types
     ansible.builtin.uri:
@@ -49,30 +53,39 @@
     register: existing_resource_definitions
     check_mode: false
     no_log: true
+    when:
+    - fhs_stage | default("all") in ["servers", "all"]
   - name: Remember existing resource field types
     ansible.builtin.set_fact:
-      resource_field_types: '{{ resource_field_types | combine({definition.name: definition.type.value | default(definition.type)}) }}'
-    loop: '{{ existing_resource_definitions.json.results }}'
+      resource_field_types: '{{ resource_field_types | combine({definition.name: definition.type.value | default(definition.type)})
+        }}'
+    loop: '{{ existing_resource_definitions.json.results | default([]) }}'
     loop_control:
       loop_var: definition
-    when: definition.name in resource_field_definitions
+    when:
+    - definition.name in resource_field_definitions
+    - fhs_stage | default("all") in ["servers", "all"]
     no_log: true
   - name: Adapt measured resource values to existing field types
     ansible.builtin.set_fact:
       netbox_resource_fields: '{{ netbox_resource_fields | combine({resource.key: stored_value}) }}'
     vars:
       field_type: '{{ resource_field_types[resource.key] | default(resource_field_definitions[resource.key]) }}'
-      stored_value: '{{ resource.value | string if field_type in [''text'', ''longtext''] else (resource.value | float if field_type == ''decimal'' else
-        resource.value | int) }}'
+      stored_value: '{{ resource.value | string if field_type in [''text'', ''longtext''] else (resource.value | float if
+        field_type == ''decimal'' else resource.value | int) }}'
     loop: '{{ resource_fields | dict2items }}'
     loop_control:
       loop_var: resource
-    when: (resource.key == 'cpu_arch' and field_type in ['text', 'longtext']) or (resource.key != 'cpu_arch' and field_type in ['integer', 'decimal', 'text',
-      'longtext'])
+    when:
+    - (resource.key == 'cpu_arch' and field_type in ['text', 'longtext']) or (resource.key != 'cpu_arch' and field_type in
+      ['integer', 'decimal', 'text', 'longtext'])
+    - fhs_stage | default("all") in ["servers", "all"]
   - name: Report unavailable or incompatible optional resource fields
     ansible.builtin.debug:
-      msg: 'Omitted resource fields preserve existing values: {{ resource_field_definitions.keys() | list | difference(netbox_resource_fields.keys() | list)
-        }}'
+      msg: 'Omitted resource fields preserve existing values: {{ resource_field_definitions.keys() | list | difference(netbox_resource_fields.keys()
+        | list) }}'
+    when:
+    - fhs_stage | default("all") in ["servers", "all"]
   - name: Reject ambiguous device names and duplicate discovery identities
     ansible.builtin.assert:
       that:
@@ -80,25 +93,29 @@
       - fleet_hostnames | length == fleet_hostnames | unique | length
       - fleet_ips | length == fleet_ips | unique | length
       - fleet_macs | length == fleet_macs | unique | length
-      fail_msg: Duplicate device names, addresses, or shared MACs need review before any NetBox writes. Use a separate VRF/site-aware design for overlapping
-        address spaces.
+      fail_msg: Duplicate device names, addresses, or shared MACs need review before any NetBox writes. Use a separate VRF/site-aware
+        design for overlapping address spaces.
     vars:
-      fleet_macs: '{{ ansible_play_hosts | map(''extract'', hostvars, ''discovered_interfaces'') | flatten | map(attribute=''mac'') | reject(''equalto'',
-        '''') | map(''lower'') | reject(''equalto'', ''00:00:00:00:00:00'') | reject(''equalto'', ''00:00:00:00'') | reject(''equalto'', ''ee:ee:ee:ee:ee:ee'') | list }}'
+      fleet_macs: '{{ ansible_play_hosts | map(''extract'', hostvars, ''discovered_interfaces'') | flatten | map(attribute=''mac'')
+        | reject(''equalto'', '''') | map(''lower'') | reject(''equalto'', ''00:00:00:00:00:00'') | reject(''equalto'', ''00:00:00:00'')
+        | reject(''equalto'', ''ee:ee:ee:ee:ee:ee'') | list }}'
       fleet_hostnames: '{{ ansible_play_hosts | map(''extract'', hostvars, [''ansible_facts'', ''hostname'']) | list }}'
-      fleet_ips: '{{ (ansible_play_hosts | map(''extract'', hostvars, ''discovered_interfaces'') | flatten | map(attribute=''addresses'') | flatten | map(attribute=''address'')
-        | list) + (ansible_play_hosts | map(''extract'', hostvars) | selectattr(''bmc_address'', ''defined'') | map(attribute=''bmc_address'') | list) }}'
+      fleet_ips: '{{ (ansible_play_hosts | map(''extract'', hostvars, ''discovered_interfaces'') | flatten | map(attribute=''addresses'')
+        | flatten | map(attribute=''address'') | list) + (ansible_play_hosts | map(''extract'', hostvars) | selectattr(''bmc_address'',
+        ''defined'') | map(attribute=''bmc_address'') | list) }}'
   - name: Read ownership of desired IP addresses
     ansible.builtin.uri:
       url: '{{ netbox_url }}/api/ipam/ip-addresses/?address={{ (item.1.address ~ ''/'' ~ item.1.prefix) | urlencode }}'
       headers:
         Authorization: '{{ netbox_auth }}'
       return_content: true
-    loop: '{{ (discovered_interfaces | subelements(''addresses'')) + ([[{''name'': ''bmc''}, {''address'': bmc_address, ''prefix'': 32}]] if bmc_address
-      is defined else []) }}'
+    loop: '{{ (discovered_interfaces | subelements(''addresses'')) + ([[{''name'': ''bmc''}, {''address'': bmc_address, ''prefix'':
+      32}]] if bmc_address is defined else []) }}'
     register: ip_owners
     check_mode: false
     no_log: true
+    when:
+    - fhs_stage | default("all") in ["ips", "all"]
   - name: Retain only nonsecret IP ownership details
     ansible.builtin.set_fact:
       ip_ownership: '{{ ip_ownership + [ownership] }}'
@@ -107,20 +124,27 @@
         address: '{{ item.item.1.address }}'
         interface: '{{ item.item.0.name }}'
         count: '{{ item.json.count }}'
-        device_ids: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.id'', default=0) | list }}'
-        interface_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.name'', default='''') | list }}'
-    loop: '{{ ip_owners.results }}'
+        device_ids: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.id'',
+          default=0) | list }}'
+        interface_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.name'',
+          default='''') | list }}'
+    loop: '{{ ip_owners.results | default([]) }}'
     no_log: true
+    when:
+    - fhs_stage | default("all") in ["ips", "all"]
   - name: Stop before reassigning IPs belonging to other interfaces
     ansible.builtin.assert:
       that:
       - item.count <= 1
       - item.device_ids | reject('equalto', desired_device_id) | list | length == 0
       - item.interface_names | reject('equalto', item.interface) | list | length == 0
-      fail_msg: An IP is ambiguous or already belongs to another interface/device; review the conflict instead of automatically moving it.
+      fail_msg: An IP is ambiguous or already belongs to another interface/device; review the conflict instead of automatically
+        moving it.
     loop: '{{ ip_ownership }}'
     loop_control:
       label: '{{ item.interface }}: {{ item.address }}'
+    when:
+    - fhs_stage | default("all") in ["ips", "all"]
   - name: Read ownership of desired MAC addresses
     ansible.builtin.uri:
       url: '{{ netbox_url }}/api/dcim/mac-addresses/?mac_address={{ item.mac | urlencode }}'
@@ -128,7 +152,9 @@
         Authorization: '{{ netbox_auth }}'
       return_content: true
     loop: '{{ discovered_interfaces }}'
-    when: item.mac | lower not in ['', '00:00:00:00:00:00', '00:00:00:00', 'ee:ee:ee:ee:ee:ee']
+    when:
+    - item.mac | lower not in ['', '00:00:00:00:00:00', '00:00:00:00', 'ee:ee:ee:ee:ee:ee']
+    - fhs_stage | default("all") in ["interfaces", "all"]
     register: mac_owners
     check_mode: false
     no_log: true
@@ -139,10 +165,14 @@
       ownership:
         interface: '{{ item.item.name }}'
         count: '{{ item.json.count }}'
-        device_ids: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.id'', default=0) | list }}'
-        interface_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.name'', default='''') | list }}'
-    loop: '{{ mac_owners.results | selectattr(''json'', ''defined'') | list }}'
+        device_ids: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.device.id'',
+          default=0) | list }}'
+        interface_names: '{{ item.json.results | selectattr(''assigned_object'') | map(attribute=''assigned_object.name'',
+          default='''') | list }}'
+    loop: '{{ mac_owners.results | default([]) | selectattr(''json'', ''defined'') | list }}'
     no_log: true
+    when:
+    - fhs_stage | default("all") in ["interfaces", "all"]
   - name: Stop before reassigning MACs belonging to other interfaces
     ansible.builtin.assert:
       that:
@@ -153,12 +183,15 @@
     loop: '{{ mac_ownership }}'
     loop_control:
       label: '{{ item.interface }}'
+    when:
+    - fhs_stage | default("all") in ["interfaces", "all"]
   - name: Refuse to treat previously simulated hardware as real inventory
     ansible.builtin.assert:
       that:
-      - hardware_simulation | default(false) | bool or 'simulated-hardware' not in ((existing_device.json.results | first | default({})).tags | default([])
-        | map(attribute='name') | list)
-      fail_msg: This NetBox device has simulated hardware. Use a separate real-server record or explicitly review the simulated fields first.
+      - hardware_simulation | default(false) | bool or 'simulated-hardware' not in ((existing_device.json.results | first
+        | default({})).tags | default([]) | map(attribute='name') | list)
+      fail_msg: This NetBox device has simulated hardware. Use a separate real-server record or explicitly review the simulated
+        fields first.
   - name: Read existing interfaces addresses and components for preview
     ansible.builtin.uri:
       url: '{{ netbox_url }}/api/{{ item }}/?device_id={{ desired_device_id }}&limit=1000'
@@ -187,11 +220,13 @@
         desired_resource_fields: '{{ netbox_resource_fields }}'
         desired_hardware_fields: '{{ hardware_fields }}'
         desired_components: '{{ discovered_components }}'
-        current_primary_ipv4: '{{ (existing_device.json.results | first | default({})).primary_ip4.address | default(''not set'') }}'
-        desired_primary_ipv4: '{{ (selected_primary_ipv4.address ~ ''/'' ~ selected_primary_ipv4.prefix) if selected_primary_ipv4.address is defined else
-          ''unavailable; preserve existing'' }}'
+        current_primary_ipv4: '{{ (existing_device.json.results | first | default({})).primary_ip4.address | default(''not
+          set'') }}'
+        desired_primary_ipv4: '{{ (selected_primary_ipv4.address ~ ''/'' ~ selected_primary_ipv4.prefix) if selected_primary_ipv4.address
+          is defined else ''unavailable; preserve existing'' }}'
         desired_bmc_address: '{{ bmc_address | default(''unavailable; omit'') }}'
         simulation: '{{ hardware_simulation | default(false) | bool }}'
         current_devices: '{{ existing_device.json.results }}'
-        current_network: '{{ existing_network.results | default([]) | selectattr(''json'', ''defined'') | map(attribute=''json.results'') | list }}'
+        current_network: '{{ existing_network.results | default([]) | selectattr(''json'', ''defined'') | map(attribute=''json.results'')
+          | list }}'
     when: ansible_check_mode or 'compare' in ansible_run_tags

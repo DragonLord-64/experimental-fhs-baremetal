@@ -1,0 +1,34 @@
+- name: Read BMC interface identity
+  ansible.builtin.import_tasks: bmc_metadata.yml
+  when: bmc_info_probe is not defined
+- name: Discover NICs when not already collected
+  ansible.builtin.import_tasks: nic.yml
+  when: not fhs_cards_collected | default(false)
+- name: Discover FPGA ports when not already collected
+  ansible.builtin.import_tasks: fpga.yml
+  when: not fhs_cards_collected | default(false)
+- name: Check interface ownership
+  ansible.builtin.import_tasks: compare.yml
+- name: Write interfaces and MACs
+  ansible.builtin.import_tasks: apply.yml
+- name: Associate NIC interfaces
+  ansible.builtin.import_tasks: nic_apply.yml
+- name: Associate FPGA interfaces
+  ansible.builtin.import_tasks: fpga_apply.yml
+- name: Remember collected cards
+  ansible.builtin.set_fact:
+    fhs_cards_collected: true
+- name: Read port observations once
+  ansible.builtin.import_tasks: topology_linux.yml
+  when: fhs_topology is not defined
+- name: Associate observed pluggables without cabling
+  delegate_to: localhost
+  become: false
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  fhs_topology_sync:
+    netbox_url: '{{ netbox_url }}'
+    netbox_token: '{{ netbox_token }}'
+    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+    observations: '{{ [fhs_topology | combine({"neighbors": [], "serials": []})] }}'
+    preview: '{{ ansible_check_mode or "compare" in ansible_run_tags }}'

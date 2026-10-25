@@ -19,9 +19,9 @@
       system_identity: '{{ fru_probe | fhs_fru_identity(identity_overrides, system_fru_id | default(motherboard_fru_id | default("0"))) }}'
     vars:
       identity_overrides:
-        serial: '{{ bootstrap_chassis_serial | default("") }}'
-        manufacturer: '{{ bootstrap_manufacturer | default("") }}'
-        model: '{{ bootstrap_device_type | default("") }}'
+        serial: '{{ bootstrap_chassis_serial | default(server_info.serial | default("")) }}'
+        manufacturer: '{{ bootstrap_manufacturer | default(server_info.manufacturer | default("")) }}'
+        model: '{{ bootstrap_device_type | default(server_info.part_number | default(server_info.model | default(""))) }}'
   - name: Retain discovered identity fields and motherboard component
     ansible.builtin.set_fact:
       hardware_fields: '{{ hardware_fields | combine(system_identity | fhs_identity_metadata) }}'

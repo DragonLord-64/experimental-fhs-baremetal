@@ -1,0 +1,9 @@
+- name: Read BMC management address
+  ansible.builtin.import_tasks: bmc_metadata.yml
+  when: bmc_info_probe is not defined
+- name: Select primary address
+  ansible.builtin.import_tasks: primary_ip.yml
+- name: Check address ownership
+  ansible.builtin.import_tasks: compare.yml
+- name: Write IP addresses
+  ansible.builtin.import_tasks: apply.yml

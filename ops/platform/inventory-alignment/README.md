@@ -1,5 +1,12 @@
 # Inventory alignment checks
 
+Current staged importer checks: small static fixtures (`test_importer.py`,
+`test_fru.py`) and the actual stage commands in the [importer README](../../../playbooks/netbox/README.md#import-stages).
+Use synthetic inventory against the existing chart, then inspect Inventory assets
+and Topology Views. The older acceptance programs below describe the previous
+removal/refusal policy; they are historical, not acceptance for the current
+preserve-unobserved policy. See the [current result](VALIDATION.md#incremental-tagged-import--2026-10-25).
+
 Pinned NetBox `4.7.0` + MIT Inventory `2.7.1`; shared image/configuration in the
 [portable chart](../../../platform/charts/fhs-platform/README.md). The chart uses
 the public base image and installs the pinned plugin at startup; the legacy lab

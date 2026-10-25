@@ -94,6 +94,8 @@ class OptionalImportTest(unittest.TestCase):
     def params_for_device(self, **options):
         dtype = self.api.add('dcim/device-types/', manufacturer=self.maker['id'], model='Chassis')
         self.api.tables['dcim/devices/'][self.device['id']]['device_type'] = dtype['id']
+        site=self.api.add('dcim/sites/',name='MDA',slug='mda')
+        self.api.tables['dcim/devices/'][self.device['id']]['site'] = site['id']
         return dict(self.params, mode='device', serial='', manufacturer='BittWare', model='Chassis', allow_missing_serial=True, **options)
 
     def test_absent_serial_preserves_known_chassis_and_asset(self):
@@ -136,15 +138,17 @@ class OptionalImportTest(unittest.TestCase):
         self.assertEqual(dtype['id'], self.api.rows('dcim/devices/')[0]['device_type'])
         self.assertEqual([], inventory.synchronize(corrected, False))
 
-    def test_duplicate_chassis_assets_refuse_before_mutation(self):
+    def test_type_correction_uses_assigned_asset_without_creating_duplicates(self):
         params = self.params_for_device()
         inventory.synchronize(dict(params, serial='CHASSIS-001'), False)
-        other = self.api.add('dcim/device-types/', manufacturer=self.maker['id'], model='Observed chassis')
-        self.api.add(ASSETS, serial='CHASSIS-001', device_type=other['id'], status='stored')
-        self.api.writes.clear()
-        with self.assertRaisesRegex(ValueError, 'Conflicting chassis assets'):
-            inventory.synchronize(dict(params, model='Observed chassis'), False)
-        self.assertEqual([], self.api.writes)
+        assigned=self.api.rows(ASSETS)[0]['id']
+        other=self.api.add('dcim/device-types/',manufacturer=self.maker['id'],model='Observed chassis')
+        self.api.add(ASSETS,serial='CHASSIS-001',device_type=other['id'],status='stored')
+        inventory.synchronize(dict(params,model='Observed chassis'),False)
+        self.assertEqual(2,len(self.api.rows(ASSETS)))
+        self.assertIsNone(self.api.tables[ASSETS][assigned]['device'])
+        selected=next(a for a in self.api.rows(ASSETS) if a['device_type']==other['id'])
+        self.assertEqual(self.device['id'],selected['device'])
 
     def test_missing_observation_does_not_adopt_placeholder_serial(self):
         params = self.params_for_device()
@@ -152,17 +156,11 @@ class OptionalImportTest(unittest.TestCase):
         self.assertEqual([], inventory.synchronize(params, False))
         self.assertEqual([], self.api.rows(ASSETS))
 
-    def test_new_device_without_serial_has_no_fabricated_asset(self):
+    def test_new_device_without_serial_has_no_fabricated_device_or_asset(self):
         params = self.params_for_device(device='NEW-SYNTHETIC')
-        self.api.add('dcim/sites/', name='Synthetic')
-        self.api.add('dcim/device-roles/', name='Server')
-        params.update(site='Synthetic', role='Server')
-        inventory.synchronize(params, False)
-        new = next(d for d in self.api.rows('dcim/devices/') if d['name'] == params['device'])
-        self.assertFalse(new.get('serial'))
-        self.assertEqual([], self.api.rows(ASSETS))
-        self.api.writes.clear()
-        self.assertEqual([], inventory.synchronize(params, False))
+        self.assertEqual([],inventory.synchronize(params,False))
+        self.assertFalse(any(d['name']=='NEW-SYNTHETIC' for d in self.api.rows('dcim/devices/')))
+        self.assertEqual([],self.api.rows(ASSETS))
 
     def test_board_model_and_observed_part_are_distinct_and_missing_part_preserves_known(self):
         raw = FIXTURE.read_text().replace(' Board Serial', ' Board Part Number : SYN-BOARD-PART\n Board Serial')
@@ -190,7 +188,9 @@ class OptionalImportTest(unittest.TestCase):
         self.assertEqual('CHASSIS-001', self.api.rows('dcim/devices/')[0]['serial'])
         original = copy.deepcopy(self.api.rows(ASSETS))
         inventory.synchronize(dict(params, items=[]), False)
-        self.assertEqual([board], self.api.rows('dcim/inventory-items/'))
+        self.assertIn(board, self.api.rows('dcim/inventory-items/'))
+        self.assertEqual(2,len(self.api.rows('dcim/inventory-items/')))
+        self.assertEqual('SYN-PSU-001',result['components'][1]['serial'])
         self.assertEqual(original, self.api.rows(ASSETS))
         self.api.writes.clear()
         self.assertEqual([], inventory.synchronize(params, False))
@@ -209,7 +209,7 @@ class FruTaskTest(unittest.TestCase):
                              description='FHS managed Motherboard')
         asset = self.api.add(ASSETS, serial='SYN-BOARD', inventoryitem_type=999,
                              inventoryitem=board['id'], status='used')
-        task = next(t for parent in yaml.safe_load((SOURCE / 'tasks/apply.yml').read_text())
+        task = next(t for parent in yaml.safe_load((SOURCE / 'tasks/items_apply.yml').read_text())
                     for t in parent.get('block', []) if t.get('name') == 'Reconcile serial-bearing DDR5 and NVMe assets')
         self.run_tasks([task], dict(facts=dict(self.vars['facts'], hostname='old-server'),
             bootstrap_components_complete=True, components_scan_complete=True,

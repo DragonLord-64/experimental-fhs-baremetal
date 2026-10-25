@@ -24,7 +24,7 @@ def cards(text, index_pattern, serial_pattern, part_pattern, version_pattern, fi
         index = first(block, index_pattern)
         part = first(block, part_pattern)
         firmware = first(block, firmware_pattern)
-        missing = [name for name, valid in [('Index', index.isdigit()), ('Part Number', bool(part)), ('BMC Version', bool(firmware))] if not valid]
+        missing = [name for name, valid in [('Index', index.isdigit()), ('Part Number', bool(part))] if not valid]
         if missing:
             raise AnsibleFilterError('Incomplete FPGA card record '+str(pos + 1)+'; missing or unmatched fields: '+', '.join(missing)+'; check configured output patterns')
         endpoints = pci_map.get(index, pci_map.get(int(index), []))
@@ -223,8 +223,7 @@ def fru_identity(probe, overrides=None, fru_id='0'):
         fru('Chassis Serial'), fru('Product Serial')])
     choose('manufacturer', [(overrides.get('manufacturer'), 'bootstrap_manufacturer'),
         fru('Product Manufacturer')])
-    choose('model', [(overrides.get('model'), 'bootstrap_device_type'), fru('Product Name'),
-        fru('Product Part Number'), fru('Chassis Part Number')], model=True)
+    choose('model', [(overrides.get('model'), 'bootstrap_device_type'), fru('Product Part Number'), fru('Chassis Part Number'), fru('Product Name')], model=True)
     mappings = {
         'motherboard_manufacturer': 'Board Mfg',
         'motherboard_model': 'Board Product',
@@ -246,6 +245,15 @@ def fru_identity(probe, overrides=None, fru_id='0'):
         components.append(dict(name='Motherboard', kind='Motherboard',
             model=hardware['motherboard_model'], part=hardware.get('motherboard_part_number', ''),
             serial=hardware['motherboard_serial'], manufacturer=hardware['motherboard_manufacturer']))
+    for psu in records:
+        if psu['id'] == str(fru_id) or not re.search(r'(?i)power supply|\bpsu\b', psu['description']): continue
+        fields_psu = psu['fields']
+        serial_psu = fields_psu.get('Product Serial')
+        if serial_psu and 'Product Serial' not in psu.get('ambiguous', []):
+            components.append(dict(name='PSU FRU '+psu['id'],kind='PSU',serial=serial_psu,
+                manufacturer=fields_psu.get('Product Manufacturer') or 'NA',
+                model=identity_model(fields_psu.get('Product Part Number')) or identity_model(fields_psu.get('Product Name')) or 'Unknown',
+                part=fields_psu.get('Product Part Number','')))
     return dict(identity=identity, hardware_fields=hardware, sources=sources,
                 records=records, components=components, warnings=warnings)
 

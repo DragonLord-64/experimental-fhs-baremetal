@@ -23,6 +23,20 @@ ROOT = Path(__file__).resolve().parents[3]
 SOURCE = ROOT / 'playbooks/netbox'
 
 
+def stage_task(filename, name):
+    aliases = {'Reconcile physical chassis serial before hostname metadata': 'Create or update discovered chassis immediately'}
+    target = aliases.get(name, name)
+    def walk(tasks):
+        for task in tasks:
+            yield task
+            yield from walk(task.get('block', []))
+    paths = [SOURCE/'tasks'/filename] + sorted((SOURCE/'tasks').glob('*.yml'))
+    for path in paths:
+        for task in walk(yaml.safe_load(path.read_text()) or []):
+            if task.get('name') == target: return task
+    raise AssertionError('Task missing: '+target)
+
+
 class TaskFlowTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -140,28 +154,28 @@ class TaskFlowTest(unittest.TestCase):
             facts=dict(self.vars['facts'],hostname='old-server'))
         return selected
 
-    def test_partial_sdk_record_aborts_before_absence_reconciliation(self):
+    def test_partial_sdk_record_reports_and_preserves_inventory(self):
         raw='IA-860M FPGA-0\n Index : 0\n Part Number : IA-860M\n BMC Version : 1\n Board missing serial\n Index : 1\n Part Number : IA-860M\n BMC Version : 1\n'
         bay=self.api.add('dcim/module-bays/',device=self.device['id'],name='FPGA CARD 1',position='1')
         old=self.api.add(MODULES,device=self.device['id'],module_bay=bay['id'],module_type=999,serial='KEEP-ME')
         asset=self.api.add(ASSETS,serial='KEEP-ME',module_type=999,module=old['id'],status='used')
         apply=yaml.safe_load((SOURCE/'tasks/apply.yml').read_text())
-        sync=next(task for task in apply if task['name']=='Preview or apply FPGA modules and observed interfaces')
-        output=self.run_tasks([{'ansible.builtin.import_tasks':str(SOURCE/'tasks/fpga.yml')},sync],self.fpga_vars(raw),success=False)
+        sync=stage_task('fpga_apply.yml','Preview or apply FPGA modules and observed interfaces')
+        output=self.run_tasks([{'ansible.builtin.import_tasks':str(SOURCE/'tasks/fpga.yml')},sync],self.fpga_vars(raw))
         self.assertIn('Incomplete FPGA inventory',output)
         self.assertEqual(old,self.api.tables[MODULES][old['id']]);self.assertEqual(asset,self.api.tables[ASSETS][asset['id']])
         self.assertEqual([],self.api.writes)
 
-    def test_successful_empty_sdk_scope_reconciles_absence(self):
+    def test_successful_empty_sdk_scope_preserves_absence(self):
         self.api.tables['dcim/devices/'][self.device['id']]['name']='old-server'
         bay=self.api.add('dcim/module-bays/',device=self.device['id'],name='FPGA CARD 1',position='1')
         old=self.api.add(MODULES,device=self.device['id'],module_bay=bay['id'],module_type=999,serial='REMOVE-ME')
         asset=self.api.add(ASSETS,serial='REMOVE-ME',module_type=999,module=old['id'],status='used')
         apply=yaml.safe_load((SOURCE/'tasks/apply.yml').read_text())
-        sync=next(task for task in apply if task['name']=='Preview or apply FPGA modules and observed interfaces')
+        sync=stage_task('fpga_apply.yml','Preview or apply FPGA modules and observed interfaces')
         variables=self.fpga_vars('No cards detected');variables['bootstrap_fpga_empty_pattern']='^No cards detected$'
         self.run_tasks([{'ansible.builtin.import_tasks':str(SOURCE/'tasks/fpga.yml')},sync],variables)
-        self.assertNotIn(old['id'],self.api.tables[MODULES]);self.assertIsNone(self.api.tables[ASSETS][asset['id']]['module'])
+        self.assertIn(old['id'],self.api.tables[MODULES]);self.assertEqual(old['id'],self.api.tables[ASSETS][asset['id']]['module'])
 
     def test_reconciliation_tasks_retry_transient_gateway_failure(self):
         cases=[('apply.yml','Reconcile physical chassis serial before hostname metadata'),
@@ -172,7 +186,7 @@ class TaskFlowTest(unittest.TestCase):
             with self.subTest(task=name):
                 self.api.tables['dcim/devices/'][self.device['id']]['name']='old-server'
                 tasks=yaml.safe_load((SOURCE/'tasks'/filename).read_text())
-                task=next(child for parent in tasks for child in parent.get('block',[]) if child.get('name')==name)
+                task=stage_task(filename,name)
                 variables=dict(facts=dict(self.vars['facts'],hostname='old-server'),bootstrap_component_manufacturer='BittWare',
                     switch=dict(name='old-server',serial='CHASSIS-001',model='Chassis',modules=[],omissions=[],bays=[]),nexus_site='Synthetic',nexus_role='Server')
                 # Cisco task deliberately uses its actual manufacturer argument.
@@ -186,7 +200,7 @@ class TaskFlowTest(unittest.TestCase):
 
     def test_retry_budget_zero_and_permanent_errors_do_not_loop(self):
         tasks=yaml.safe_load((SOURCE/'tasks/apply.yml').read_text())
-        task=next(child for parent in tasks for child in parent.get('block',[]) if child.get('name')=='Reconcile physical chassis serial before hostname metadata')
+        task=stage_task('device_apply.yml','Create or update discovered chassis immediately')
         self.failures=1
         output=self.run_tasks([task],dict(netbox_api_retries=0),success=False)
         self.assertNotIn('RETRYING',output)

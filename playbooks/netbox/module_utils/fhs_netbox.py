@@ -59,6 +59,8 @@ class Sync:
     def ensure(self,path,key,data,label):
         old=self.find(path,**key)
         changed={k:v for k,v in data.items() if (scalar(old.get(k)) if old else None)!=v}
+        if 'tags' in data and old and sorted(scalar(t) for t in old.get('tags',[])) == sorted(data['tags']):
+            changed.pop('tags',None)
         if 'custom_fields' in data and old:
             merged=dict(old.get('custom_fields') or {},**data['custom_fields'])
             changed.pop('custom_fields',None)
@@ -114,65 +116,40 @@ def physical_device(sync, name, serial, allow_missing=False):
     if by_serial and by_name and by_serial['id']!=by_name['id']:
         raise ValueError('Hostname and chassis serial identify different devices')
     device=by_serial or by_name
-    if device and device.get('serial') and device['serial']!=serial:
-        raise ValueError('Chassis serial differs; review physical device replacement explicitly')
     return device
 
 
-def asset_candidate(sync, kind, type_id, serial, hardware_id=None):
-    """Serial identity within the actual hardware type; never rewrite an asset."""
-    serial=physical_serial(serial)
-    matches=sync.list(ASSETS,serial=serial,**{kind+'_type_id':type_id})
-    # Verify response identity too: an unsupported/ignored filter must not move assets.
-    matches=[a for a in matches if a.get('serial')==serial and scalar(a.get(kind+'_type'))==type_id]
-    if len(matches)>1: raise ValueError('Ambiguous asset serial/type identity')
-    asset=matches[0] if matches else None
+def observed_installation(sync, kind, path, key, data, type_id, label):
+    """Apply observed identity in place; retain prior physical assets as stored."""
+    old = sync.find(path, **key)
+    serial = physical_serial(data['serial'])
+    assigned = sync.find(ASSETS, **{kind+'_id': old['id']}) if old else None
+    matches = [a for a in sync.list(ASSETS, serial=serial)
+               if a.get('serial') == serial and a.get(kind+'_type')]
+    exact = [a for a in matches if scalar(a.get(kind+'_type')) == type_id]
+    asset = assigned if assigned and assigned.get('serial') == serial and (scalar(assigned.get(kind+'_type')) == type_id or not exact) else None
+    if not asset:
+        choices = exact or matches
+        if len(choices) > 1: raise ValueError('Ambiguous observed asset serial: '+serial)
+        asset = choices[0] if choices else None
+    changed_identity = old and (old.get('serial') != serial or
+        (kind != 'inventoryitem' and scalar(old.get(kind+'_type')) != type_id))
+    did = old['id'] if kind == 'device' and old else data.get('device')
+    if changed_identity and did:
+        sync.journal(did,label,old.get('serial'),serial,'observed',new_type=type_id)
+    for previous in {a['id']: a for a in (assigned, asset) if a}.values():
+        if scalar(previous.get(kind)) and (previous != asset or
+            scalar(previous.get(kind)) != (old['id'] if old else None) or changed_identity or
+            scalar(previous.get(kind+'_type')) != type_id):
+            sync.ensure(ASSETS, {'id': previous['id']}, {kind: None, 'status': 'stored'}, label+' previous assignment')
     if asset:
-        if scalar(asset.get('status'))=='faulty': raise ValueError('Quarantined asset requires explicit review before installation')
-        if scalar(asset.get(kind)) not in (None,hardware_id): raise ValueError('Asset is already assigned to different hardware')
-    if hardware_id and hardware_id>0:
-        assigned=sync.find(ASSETS,**{kind+'_id':hardware_id})
-        if assigned and (not asset or assigned['id']!=asset['id']):
-            raise ValueError('Installed hardware asset conflicts with observed serial/type')
-    return asset
-
-
-def ensure_asset(sync, kind, type_id, serial, hardware, label):
-    asset=asset_candidate(sync,kind,type_id,serial,hardware['id'])
-    # Preserve an existing tag. On adoption an observed tag is authoritative only
-    # when creating a previously untracked asset; never clear/overwrite it.
-    if asset and (hardware.get('asset_tag') or None) not in (None,asset.get('asset_tag')):
-        raise ValueError('Hardware and asset tags conflict; review before assignment')
-    key={'serial':serial,kind+'_type_id':type_id}
-    data={'serial':serial,kind+'_type':type_id,kind:hardware['id']}
-    if not asset: data.update(status='used',asset_tag=hardware.get('asset_tag') or None)
-    return sync.ensure(ASSETS,key,data,label+' asset')
-
-
-def retire_module(sync, device_id, bay, module, new_serial=None):
-    """Keep physical assets and interface objects; cabled replacement needs review."""
-    serial=physical_serial(module.get('serial'))
-    interfaces=sync.list('dcim/interfaces/',device_id=device_id,module_id=module['id'])
-    cabled=[i['name'] for i in interfaces if i.get('cable')]
-    if cabled:
-        sync.journal(device_id,bay,serial,new_serial,'refused',cabling='unverified',interfaces=cabled)
-        raise ValueError('Cabled module interfaces require explicit cabling review and disconnection before replacement/removal')
-    # Refuse cascade loss of other module-owned components; this importer only
-    # knows how to preserve interfaces and must not erase nested hardware.
-    for endpoint in ('inventory-items','module-bays','power-ports','power-outlets','console-ports','console-server-ports','front-ports','rear-ports'):
-        children=sync.list('dcim/'+endpoint+'/',device_id=device_id)
-        if any(scalar(c.get('module'))==module['id'] or (c.get('component_type')=='dcim.module' and c.get('component_id')==module['id']) for c in children):
-            sync.journal(device_id,bay,serial,new_serial,'refused',cabling='unverified',cascade=endpoint)
-            raise ValueError('Module has '+endpoint+'; review cascade before removal')
-    ensure_asset(sync,'module',scalar(module['module_type']),serial,module,bay)
-    sync.journal(device_id,bay,serial,new_serial,'started',cabling='unverified; no connected cable observed',module_id=module['id'])
-    try:
-        for interface in interfaces:
-            sync.ensure('dcim/interfaces/',{'device_id':device_id,'name':interface['name']},
-                        {'module':None},interface['name']+' detached')
-        sync.delete('dcim/modules/',module,bay+' installation')
-        # Real plugin delete signal returns the assigned asset to stored.
-    except Exception:
-        sync.journal(device_id,bay,serial,new_serial,'failed',cabling='unverified; inspect partial operation')
-        raise
-    sync.journal(device_id,bay,serial,new_serial,'removed',cabling='unverified; no cable copied',interfaces=[i['id'] for i in interfaces])
+        sync.ensure(ASSETS, {'id': asset['id']}, {kind+'_type': type_id}, label+' observed asset type')
+    data = dict(data)
+    if assigned and assigned != asset: data['asset_tag'] = (asset or {}).get('asset_tag') or None
+    elif asset and (asset.get('asset_tag') or None): data['asset_tag'] = asset['asset_tag']
+    installed = sync.ensure(path, key, data, label)
+    asset_key = {'id': asset['id']} if asset else {'serial': serial, kind+'_type_id': type_id}
+    values = {'serial': serial, kind+'_type': type_id, kind: installed['id'], 'status': 'used'}
+    if not asset: values['asset_tag'] = installed.get('asset_tag') or None
+    sync.ensure(ASSETS, asset_key, values, label+' asset')
+    return installed

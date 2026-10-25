@@ -1,0 +1,27 @@
+- name: Discover NICs when not already collected
+  ansible.builtin.import_tasks: nic.yml
+  when: not fhs_cards_collected | default(false)
+- name: Discover FPGA ports when not already collected
+  ansible.builtin.import_tasks: fpga.yml
+  when: not fhs_cards_collected | default(false)
+- name: Read network cables and pluggables
+  ansible.builtin.import_tasks: topology_linux.yml
+  when: fhs_topology is not defined
+- name: Apply explicit power inlet cables
+  tags:
+  - cables
+  delegate_to: localhost
+  become: false
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  fhs_placement_sync:
+    netbox_url: '{{ netbox_url }}'
+    netbox_token: '{{ netbox_token }}'
+    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+    device: '{{ fhs_netbox_name }}'
+    serial: '{{ system_identity.identity.serial | default("") }}'
+    metadata: '{{ server_info }}'
+    manufacturer: '{{ netbox_manufacturer }}'
+    model: '{{ netbox_device_type }}'
+    default_face: '{{ netbox_rack_face_default }}'
+    preview: '{{ ansible_check_mode or "compare" in ansible_run_tags }}'

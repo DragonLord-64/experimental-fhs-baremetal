@@ -104,8 +104,17 @@ def topology_linux(name, lldp, eeprom, fpga, identity=None):
     for probe in eeprom:
         if probe.get('rc', 1):
             result['omissions'].append('Cable EEPROM probe failed: ' + str(probe.get('item', {})))
+    nic_ports = []
+    for probe in eeprom:
+        if probe.get('rc',1): continue
+        fields = dict(re.findall(r'^\s*([^:\n]+?)\s*:[ \t]*(.*?)\s*$',probe.get('stdout',''),re.M))
+        vendor = fields.get('Vendor name',''); part_number = fields.get('Vendor PN',''); serial = fields.get('Vendor SN','')
+        local = probe.get('item',{}).get('interface')
+        if local and (vendor or part_number or serial):
+            nic_ports.append(dict(name=local,connector=local,vendor=vendor,part=part_number,serial=serial,
+                present=True,metadata=fields,source='ethtool module EEPROM',dac=False))
     parsed = qsfp_ports(fpga)
-    result.update(ports=parsed['ports'])
+    result.update(ports=nic_ports + parsed['ports'])
     result['omissions'].extend(parsed['omissions']); result['diagnostics'].extend(parsed['diagnostics'])
     for p in parsed['ports']:
         result['interfaces'].append(p['name'])
@@ -157,7 +166,13 @@ def observed_modules(records, probes, interface_type):
                                 if p['card_index'] == r.get('card_index', r.get('index'))]) for r in records]
 
 
+def pluggable_items(observation):
+    return [dict(name=p.get('connector',p['name'])+' transceiver',kind='QSFP',
+                 serial=p['serial'],part=p['part'],model=p['part'],manufacturer=p.get('vendor') or 'NA')
+            for p in observation.get('ports',[]) if p.get('present') is not False and p.get('serial') and p.get('part')]
+
+
 class FilterModule:
     def filters(self):
         return dict(fhs_topology_linux=topology_linux, fhs_topology_nexus=topology_nexus,
-                    fhs_qsfp_ports=qsfp_ports, fhs_observed_fpga_ports=observed_modules)
+                    fhs_qsfp_ports=qsfp_ports, fhs_observed_fpga_ports=observed_modules, fhs_pluggable_items=pluggable_items)

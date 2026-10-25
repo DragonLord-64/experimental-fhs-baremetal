@@ -53,7 +53,7 @@ netbox_api_retries: 3
 netbox_api_retry_delay: 5
 netbox_api_loop_pause: 1
 nexus_site: '{{ bootstrap_site | default(''Bootstrap Lab'') }}'
-nexus_role: '{{ bootstrap_role | default(''Network switch'') }}'
+nexus_role: '{{ bootstrap_role | default('''') }}'
 nexus_commands:
 - show inventory all | json
 - show version | json
@@ -94,7 +94,7 @@ bootstrap_bittware_qsfp_argv:
 - bw_qsfp_info
 nexus_lldp_command: show lldp neighbors detail | json
 netbox_site: '{{ server_info.site | default(bootstrap_site | default(''MDA'')) }}'
-netbox_role: '{{ server_info.role | default(bootstrap_role | default(''FPGA_HOST_SERVER'')) }}'
+netbox_role: '{{ server_info.role | default(bootstrap_role | default('''')) }}'
 
 # Explicit verified endpoint pairs only; no automatic stripping of serial suffixes.
 # Each pair requires vendor, part, host_serial, switch_serial, evidence.

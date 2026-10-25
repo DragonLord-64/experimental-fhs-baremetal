@@ -23,8 +23,8 @@ def nexus_inventory(outputs):
         inventory, version, optics = [json.loads(v) if isinstance(v, str) else v for v in outputs]
         if not all(isinstance(v, dict) for v in (inventory, version, optics)):
             raise ValueError('Expected three JSON objects')
-        if 'TABLE_inv' not in inventory or 'TABLE_interface' not in optics:
-            raise ValueError('Missing inventory/transceiver table; check NX-OS command output')
+        if 'TABLE_inv' not in inventory:
+            raise ValueError('Missing chassis inventory table; check NX-OS command output')
         items = rows(inventory, 'TABLE_inv', 'ROW_inv')
         chassis = [v for v in items if clean(v.get('name')).lower() == 'chassis']
         if len(chassis) != 1:
@@ -33,8 +33,8 @@ def nexus_inventory(outputs):
         model, serial = clean(chassis.get('productid')), clean(chassis.get('serialnum'))
         os_version = clean(version.get('nxos_ver_str') or version.get('kickstart_ver_str'))
         hostname = clean(version.get('host_name'))
-        if not all((model, serial, hostname, os_version)):
-            raise ValueError('Expected chassis model, serial, hostname and NX-OS version')
+        if not all((serial, hostname)):
+            raise ValueError('Expected chassis serial and hostname')
         modules, bays, fans, skipped = [], set(), set(), []
         for item in items:
             name = clean(item.get('name'))
@@ -74,7 +74,8 @@ def nexus_inventory(outputs):
                 modules.append(module)
         if len({v['bay'] for v in modules}) != len(modules):
             raise ValueError('Duplicate module bays in inventory')
-        fields = dict(os_version=os_version, operating_system='Cisco NX-OS')
+        fields = dict(operating_system='Cisco NX-OS')
+        if os_version: fields['os_version'] = os_version
         bios = clean(version.get('bios_ver_str'))
         if bios:
             fields['bios_version'] = bios

@@ -2,7 +2,7 @@
 """Serial-safe chassis, component and Nexus asset reconciliation."""
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.fhs_netbox import (Sync, scalar, ensure_manufacturers,
-    physical_serial, physical_device, asset_candidate, ensure_asset, retire_module, ASSETS)
+    physical_serial, physical_device, observed_installation)
 import hashlib
 import re
 
@@ -37,140 +37,67 @@ def synchronize(params,check):
     mode=params['mode']; name=params['device']
     if mode=='device':
         serial=str(params.get('serial') or '').strip()
-        optional=params.get('allow_missing_serial',False)
-        if serial or not optional: serial=physical_serial(serial)
-        maker=sync.find('dcim/manufacturers/',name=params['manufacturer'])
-        if not maker: raise ValueError('Create manufacturer before chassis reconciliation')
-        dtype=sync.find('dcim/device-types/',manufacturer_id=maker['id'],model=params['model'])
-        if not dtype: raise ValueError('Create device type before chassis reconciliation')
-        device=physical_device(sync,name,serial,optional)
-        # Type is observed metadata, not a reason to reject the same chassis.
-        # Preflight all ownership before changing either device or linked asset.
-        observed_serial = serial or (device.get('serial') if device else '')
-        assigned = sync.find(ASSETS,device_id=device['id']) if device else None
-        candidates = [a for a in sync.list(ASSETS,serial=observed_serial)
-                      if a.get('serial') == observed_serial and scalar(a.get('device_type'))]
-        if len(candidates)>1 or (assigned and candidates and assigned['id']!=candidates[0]['id']):
-            raise ValueError('Conflicting chassis assets; review duplicate serial ownership')
-        asset = assigned or (candidates[0] if candidates else None)
-        if asset:
-            if asset.get('serial') != observed_serial or scalar(asset.get('device')) not in (None, device['id'] if device else None):
-                raise ValueError('Chassis asset identity conflicts with observed hardware')
-            if scalar(asset.get('status')) == 'faulty':
-                raise ValueError('Quarantined asset requires explicit review before installation')
-            if device and (device.get('asset_tag') or None) not in (None,asset.get('asset_tag')):
-                raise ValueError('Hardware and asset tags conflict; review before assignment')
-        correcting = device and scalar(device['device_type']) != dtype['id']
-        asset_correcting = asset and scalar(asset.get('device_type')) != dtype['id']
-        if correcting or asset_correcting:
-            if device:
-                sync.journal(device['id'],'chassis identity',observed_serial,observed_serial,'started',
-                             old_type=scalar(device['device_type']),new_type=dtype['id'],
-                             manufacturer=params['manufacturer'],model=params['model'],
-                             sources=params.get('identity_sources',{}))
-            if asset and scalar(asset.get('device')):
-                sync.ensure(ASSETS,{'id':asset['id']},{'device':None,'status':'stored'},name+' asset detached for type correction')
-            if asset_correcting:
-                sync.ensure(ASSETS,{'id':asset['id']},{'device_type':dtype['id']},name+' asset type correction')
+        device=physical_device(sync,name,serial,params.get('allow_missing_serial',False))
+        if not device and not serial: return sync.plan
+        previous=(device or {}).get('device_type') or {}
+        if not isinstance(previous,dict): previous={}
+        manufacturer=params.get('manufacturer') or (previous.get('manufacturer') or {}).get('name') or 'NA'
+        model=params.get('model') or previous.get('model') or 'Unknown'
+        ensure_manufacturers(sync,[manufacturer])
+        dtype=server_type(sync,manufacturer,model)
         data={'name':name,'device_type':dtype['id']}
-        if serial: data['serial']=serial
-        if not device:
-            site=sync.find('dcim/sites/',name=params['site'])
-            role=sync.find('dcim/device-roles/',name=params['role'])
-            if not site or not role: raise ValueError('Create site and role before chassis reconciliation')
-            data.update(site=site['id'],role=role['id'],status='active')
+        old_site=(device or {}).get('site') or {}
+        if not isinstance(old_site,dict): old_site=sync.find('dcim/sites/',id=old_site) or {}
+        site_name=params.get('site') or old_site.get('name') or 'MDA'
+        site=sync.ensure('dcim/sites/',{'name':site_name},{'name':site_name,'slug':re.sub('[^a-z0-9]+','-',site_name.lower()).strip('-')},site_name)
+        data['site']=site['id']
+        role_name=params.get('role') or (None if device else 'Unassigned')
+        if role_name:
+            role=sync.ensure('dcim/device-roles/',{'name':role_name},
+                {'name':role_name,'slug':re.sub('[^a-z0-9]+','-',role_name.lower()).strip('-')},role_name)
+            data['role']=role['id']
+        if not device: data['status']='active'
+        if params.get('category'):
+            tag=params['category']
+            record=sync.ensure('extras/tags/',{'slug':tag},{'name':tag,'slug':tag},tag)
+            data['tags']=[scalar(t) for t in (device or {}).get('tags',[]) if scalar(t)!=record['id']]+[record['id']]
         key={'id':device['id']} if device else {'name':name}
-        device=sync.ensure('dcim/devices/',key,data,name+' chassis')
-        if asset:
-            sync.ensure(ASSETS,{'id':asset['id']},{'device':device['id'],'device_type':dtype['id'],'status':'used'},name+' asset')
-        elif serial:
-            ensure_asset(sync,'device',dtype['id'],serial,device,name)
-        if correcting or asset_correcting:
-            sync.journal(device['id'],'chassis identity',observed_serial,observed_serial,'corrected',
-                         new_type=dtype['id'],sources=params.get('identity_sources',{}))
+        installed_serial=serial
+        if not installed_serial and device:
+            try: installed_serial=physical_serial(device.get('serial'))
+            except ValueError: pass
+        if installed_serial:
+            data['serial']=installed_serial
+            observed_installation(sync,'device','dcim/devices/',key,data,dtype['id'],name)
+        elif device:
+            sync.ensure('dcim/devices/',key,data,name)
+        else:
+            raise ValueError('No device serial; chassis not created')
         return sync.plan
     device=sync.find('dcim/devices/',name=name)
-    if not device: raise ValueError('Create parent device before asset reconciliation')
-    did=device['id']; items=params.get('items',[])
-    names=[v.get('bay') if mode=='nexus' else v.get('name') for v in items]
-    serials=[physical_serial(v.get('serial')) for v in items]
-    if len(names)!=len(set(names)) or len(serials)!=len(set(serials)):
-        raise ValueError('Duplicate component bay/name or serial; preserve inventory')
-    if mode=='nexus':
-        for item in items:
-            maker=ensure_manufacturers(sync,[item['manufacturer']])[item['manufacturer']]
-            mtype=sync.ensure('dcim/module-types/',{'manufacturer_id':maker['id'],'model':item['model']},
-                {'manufacturer':maker['id'],'model':item['model'],'part_number':item['model']},item['model']+' type')
+    if not device: raise ValueError('Create parent device before importing components')
+    did=device['id']
+    for item in params.get('items',[]):
+        if not item.get('serial'): continue
+        maker_name=item.get('manufacturer') or params.get('manufacturer') or 'NA'
+        maker=ensure_manufacturers(sync,[maker_name])[maker_name]
+        model=item.get('model') or item.get('part') or 'Unknown'
+        if mode=='nexus':
+            dtype=sync.ensure('dcim/module-types/',{'manufacturer_id':maker['id'],'model':model},
+                {'manufacturer':maker['id'],'model':model,'part_number':item.get('part') or model},model)
             bay=sync.ensure('dcim/module-bays/',{'device_id':did,'name':item['bay']},
                 {'device':did,'name':item['bay']},item['bay'])
             key={'device_id':did,'module_bay_id':bay['id']}
-            old=sync.find('dcim/modules/',**key); serial=physical_serial(item['serial'])
-            asset_candidate(sync,'module',mtype['id'],serial,old['id'] if old and old.get('serial')==serial else None)
-            replacement=old and old.get('serial')!=serial
-            previous=old.get('serial') if replacement else None
-            if replacement: retire_module(sync,did,item['bay'],old,serial)
-            try:
-                installed=sync.ensure('dcim/modules/',key,
-                    {'device':did,'module_bay':bay['id'],'module_type':mtype['id'],'serial':serial,'status':'active',
-                     'description':item.get('description','')},item['bay']+' module')
-                ensure_asset(sync,'module',mtype['id'],serial,installed,item['bay'])
-                if replacement: sync.journal(did,item['bay'],previous,serial,'installed',cabling='unverified; no cable copied')
-            except Exception:
-                if replacement: sync.journal(did,item['bay'],previous,serial,'failed',cabling='unverified; inspect partial installation')
-                raise
-        # Only exact caller-supplied bays may reconcile absence, never every bay.
-        if params.get('complete'):
-            for bay_name in params.get('scope',[]):
-                if bay_name in names: continue
-                bay=sync.find('dcim/module-bays/',device_id=did,name=bay_name)
-                old=sync.find('dcim/modules/',device_id=did,module_bay_id=bay['id']) if bay else None
-                if old: retire_module(sync,did,bay_name,old)
-        return sync.plan
-    maker=ensure_manufacturers(sync,[params['manufacturer']])[params['manufacturer']]
-    for item in items:
-        item_maker=item.get('manufacturer') or params['manufacturer']
-        maker=ensure_manufacturers(sync,[item_maker])[item_maker]
-        serial=physical_serial(item['serial']); model=str(item.get('model') or item.get('part') or '').strip()
-        part=str(item.get('part') or '').strip()
-        if not model: raise ValueError('Component model/part missing; preserve existing inventory')
-        kind=item.get('kind','Component')
-        itype=item_type(sync,maker['id'],model,part)
-        key={'device_id':did,'name':item['name']}
-        old=sync.find('dcim/inventory-items/',**key)
-        asset_candidate(sync,'inventoryitem',itype['id'],serial,old['id'] if old and old.get('serial')==serial else None)
-        replacement=old and old.get('serial')!=serial
-        previous=old.get('serial') if replacement else None
-        if replacement:
-            old_serial=physical_serial(old.get('serial'))
-            assigned=sync.find('plugins/inventory/assets/',inventoryitem_id=old['id'])
-            if not assigned:
-                old_type=item_type(sync,scalar(old.get('manufacturer')) or maker['id'],old.get('part_id',''))
-                ensure_asset(sync,'inventoryitem',old_type['id'],old_serial,old,item['name'])
-            if any(scalar(v.get('parent'))==old['id'] for v in sync.list('dcim/inventory-items/',device_id=did)):
-                raise ValueError('Component has child inventory; review before replacement')
-            sync.journal(did,item['name'],old_serial,serial,'started',cabling='not mapped')
-            sync.delete('dcim/inventory-items/',old,item['name']+' installation')
-        try:
-            data={'device':did,'name':item['name'],'manufacturer':maker['id'],'serial':serial,
-                  'description':old.get('description') if old and not replacement and old.get('description') else 'FHS managed '+kind}
-            if part: data['part_id']=part
-            installed=sync.ensure('dcim/inventory-items/',key,data,item['name']+' component')
-            ensure_asset(sync,'inventoryitem',itype['id'],serial,installed,item['name'])
-            if replacement: sync.journal(did,item['name'],previous,serial,'installed',cabling='not mapped')
-        except Exception:
-            if replacement: sync.journal(did,item['name'],previous,serial,'failed',cabling='not mapped; inspect partial installation')
-            raise
-    if params.get('complete'):
-        for old in sync.list('dcim/inventory-items/',device_id=did):
-            if old['name'] in names or old.get('description') not in ['FHS managed '+kind for kind in params.get('scope',[])]: continue
-            physical_serial(old.get('serial'))
-            assigned=sync.find('plugins/inventory/assets/',inventoryitem_id=old['id'])
-            if not assigned: raise ValueError('Untracked old component needs asset adoption before removal')
-            if any(scalar(v.get('parent'))==old['id'] for v in sync.list('dcim/inventory-items/',device_id=did)):
-                raise ValueError('Component has child inventory; review before removal')
-            sync.journal(did,old['name'],old['serial'],None,'started',cabling='not mapped')
-            sync.delete('dcim/inventory-items/',old,old['name']+' installation')
-            sync.journal(did,old['name'],old['serial'],None,'removed',cabling='not mapped')
+            data={'device':did,'module_bay':bay['id'],'module_type':dtype['id'],'serial':item['serial'],'status':'active'}
+            if item.get('description'): data['description']=item['description']
+            observed_installation(sync,'module','dcim/modules/',key,data,dtype['id'],item['bay'])
+        else:
+            dtype=item_type(sync,maker['id'],model,item.get('part'))
+            key={'device_id':did,'name':item['name']}
+            data={'device':did,'name':item['name'],'manufacturer':maker['id'],'serial':item['serial']}
+            if item.get('part'): data['part_id']=item['part']
+            observed_installation(sync,'inventoryitem','dcim/inventory-items/',key,data,dtype['id'],item['name'])
+    # An absent observation is never a removal request, including legacy complete flags.
     return sync.plan
 
 
@@ -183,7 +110,7 @@ def main():
         serial=dict(default=''),manufacturer=dict(default='Unknown'),model=dict(default=''),
         site=dict(default=''),role=dict(default=''),items=dict(type='list',elements='dict',default=[]),
         complete=dict(type='bool',default=False),scope=dict(type='list',elements='str',default=[]),
-        identity_sources=dict(type='dict',default={}),
+        identity_sources=dict(type='dict',default={}),category=dict(default=''),
         preview=dict(type='bool',default=False)),supports_check_mode=True)
     try:
         if module.params['mode']=='type':

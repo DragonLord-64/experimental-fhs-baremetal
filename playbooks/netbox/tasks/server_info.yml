@@ -20,13 +20,13 @@
     ansible.builtin.set_fact:
       server_info: '{{ server_info_contents.content | b64decode | from_yaml }}'
     when: server_info_file.stat.exists
-  - name: Require existing metadata files to retain the site role location and rack schema
-    ansible.builtin.assert:
-      that:
-      - server_info is mapping
-      - (['site', 'role', 'rack', 'location'] | difference(server_info.keys())) | length == 0
-      fail_msg: Existing server-info files must contain site, role, location and rack.
-    when: server_info_file.stat.exists
   - name: Validate and normalize optional placement and power metadata
     ansible.builtin.set_fact:
       server_info: '{{ server_info | fhs_server_metadata }}'
+  rescue:
+  - name: Ignore invalid optional server metadata after reporting it
+    ansible.builtin.debug:
+      msg: '{{ ansible_failed_result.msg }}'
+  - name: Continue with FRU identity
+    ansible.builtin.set_fact:
+      server_info: {}

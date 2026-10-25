@@ -188,20 +188,22 @@ class LifecycleTest(unittest.TestCase):
         self.run_import([self.card('FPGA-NEW')])
         self.assertEqual(ids,{v['id'] for v in self.api.rows('dcim/interfaces/')})
 
-    def test_cabled_replacement_refuses_before_deleting_hardware(self):
+    def test_observed_replacement_keeps_cabled_interface_and_history(self):
         old,asset=self.installed()
-        self.api.add('dcim/interfaces/',device=self.device['id'],name='C1-QSFP0',module=old['id'],cable=999)
-        with self.assertRaisesRegex(ValueError,'cabling review'): self.run_import([self.card('FPGA-NEW')])
-        self.assertIn(old['id'],self.api.tables[MODULES])
-        self.assertEqual(asset,self.api.tables[ASSETS][asset['id']])
-        self.assertIn('refused',json.dumps(self.api.rows(JOURNAL)))
+        port=self.api.add('dcim/interfaces/',device=self.device['id'],name='C1-QSFP0',module=old['id'],cable=999)
+        self.run_import([self.card('FPGA-NEW')])
+        self.assertEqual('FPGA-NEW',self.api.tables[MODULES][old['id']]['serial'])
+        self.assertEqual(999,self.api.tables['dcim/interfaces/'][port['id']]['cable'])
+        self.assertEqual('stored',self.api.tables[ASSETS][asset['id']]['status'])
+        self.assertFalse(any(w[0]=='DELETE' for w in self.api.writes))
 
-    def test_assigned_spare_identity_refuses_before_old_module_deletion(self):
+    def test_observed_spare_assignment_moves_without_deleting_installations(self):
         old,asset=self.installed()
-        self.api.add(ASSETS,serial='FPGA-NEW',module_type=self.module_type['id'],module=999,status='used')
-        with self.assertRaisesRegex(ValueError,'already assigned'): self.run_import([self.card('FPGA-NEW')])
-        self.assertIn(old['id'],self.api.tables[MODULES])
-        self.assertEqual(asset,self.api.tables[ASSETS][asset['id']])
+        spare=self.api.add(ASSETS,serial='FPGA-NEW',module_type=self.module_type['id'],module=999,status='used')
+        self.run_import([self.card('FPGA-NEW')])
+        self.assertEqual(old['id'],self.api.tables[ASSETS][spare['id']]['module'])
+        self.assertIsNone(self.api.tables[ASSETS][asset['id']]['module'])
+        self.assertFalse(any(w[0]=='DELETE' for w in self.api.writes))
 
     def test_preview_does_not_write_to_api(self):
         importer.synchronize(dict(self.params, cards=[self.card()]), True)
@@ -217,15 +219,15 @@ class LifecycleTest(unittest.TestCase):
         self.assertEqual('FPGA-OLD', assets[0]['serial'])
         self.assertEqual(self.api.rows(MODULES)[0]['id'], scalar(assets[0]['module']))
 
-    def test_replacement_preserves_old_asset_serial_and_deletes_installed_record(self):
+    def test_replacement_preserves_old_asset_serial_and_installation_id(self):
         module, asset = self.installed()
         self.run_import([self.card('FPGA-NEW')])
         old_asset = self.api.tables[ASSETS][asset['id']]
         self.assertEqual('FPGA-OLD', old_asset['serial'], 'Never patch a different physical serial onto installed hardware')
         self.assertIsNone(old_asset['module'])
         self.assertEqual('stored', scalar(old_asset['status']))
-        self.assertNotIn(module['id'], self.api.tables[MODULES])
-        self.assertNotEqual(module['id'], self.api.rows(MODULES)[0]['id'])
+        self.assertIn(module['id'], self.api.tables[MODULES])
+        self.assertEqual(module['id'], self.api.rows(MODULES)[0]['id'])
         self.assertEqual(['FPGA-NEW', 'FPGA-OLD'], sorted(a['serial'] for a in self.api.rows(ASSETS)))
         self.assertTrue(any(h['id'] == asset['id'] and h['serial'] == 'FPGA-OLD' for h in self.api.history))
 
@@ -239,15 +241,15 @@ class LifecycleTest(unittest.TestCase):
             self.assertIn(value, text)
         self.assertTrue(any(scalar(e.get('assigned_object_id')) == self.device['id'] for e in entries))
 
-    def test_explicit_complete_empty_fpga_scan_removes_only_fpga_installations(self):
+    def test_even_complete_empty_scan_preserves_installations(self):
         module, asset = self.installed()
         nic_bay = self.api.add('dcim/module-bays/', device=self.device['id'], name='NIC slot 1', position='N1')
         nic = self.api.add(MODULES, device=self.device['id'], module_bay=nic_bay['id'], module_type=self.module_type['id'], serial='NIC-001', status='active')
         self.run_import([], complete=True)
-        self.assertNotIn(module['id'], self.api.tables[MODULES], 'Successful explicitly scoped empty scan must reconcile absence')
+        self.assertIn(module['id'], self.api.tables[MODULES], 'Absence must never remove hardware')
         self.assertIn(nic['id'], self.api.tables[MODULES], 'FPGA scan cannot remove NIC inventory')
         self.assertEqual('FPGA-OLD', self.api.tables[ASSETS][asset['id']]['serial'])
-        self.assertIsNone(self.api.tables[ASSETS][asset['id']]['module'])
+        self.assertEqual(module['id'],self.api.tables[ASSETS][asset['id']]['module'])
 
 
 if __name__ == '__main__':
@@ -302,7 +304,7 @@ class GeneralInventoryTest(unittest.TestCase):
         inventory.synchronize(dict(params,items=[],complete=True,scope=['NVMe']),False)
         self.assertEqual(1,len(self.api.rows('dcim/inventory-items/')))
         inventory.synchronize(dict(params,items=[],complete=True,scope=['DDR5']),False)
-        self.assertEqual([],self.api.rows('dcim/inventory-items/'))
+        self.assertEqual(1,len(self.api.rows('dcim/inventory-items/')))
         self.assertEqual(2,len(self.api.rows(ASSETS)))
 
     def test_nexus_exact_bay_scope_preserves_other_bays(self):
@@ -312,8 +314,8 @@ class GeneralInventoryTest(unittest.TestCase):
         inventory.synchronize(params,False)
         inventory.synchronize(dict(params,items=[],complete=True,scope=['Ethernet1/1']),False)
         self.assertIn(old['id'],self.api.tables[MODULES])
-        self.assertEqual(1,len(self.api.rows(MODULES)))
-        self.assertIsNone(next(a for a in self.api.rows(ASSETS) if a['serial']=='QSFP-OLD')['module'])
+        self.assertEqual(2,len(self.api.rows(MODULES)))
+        self.assertIsNotNone(next(a for a in self.api.rows(ASSETS) if a['serial']=='QSFP-OLD')['module'])
 
 
 class FpgaParserTest(unittest.TestCase):

@@ -1,0 +1,13 @@
+- name: Write observed motherboard
+  ansible.builtin.import_tasks: items_apply.yml
+- name: Discover and write components
+  ansible.builtin.import_tasks: components.yml
+- name: Discover and write FPGA cards
+  ansible.builtin.import_tasks: fpga.yml
+- name: Remember collected cards
+  ansible.builtin.set_fact:
+    fhs_cards_collected: true
+- name: Read observed pluggables
+  ansible.builtin.import_tasks: topology_linux.yml
+- name: Write observed pluggables
+  ansible.builtin.import_tasks: pluggables_apply.yml

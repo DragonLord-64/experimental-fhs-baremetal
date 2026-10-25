@@ -1,51 +1,116 @@
-- name: Load system tasks
-  ansible.builtin.import_tasks: tasks/system.yml
-- name: Load components tasks
-  ansible.builtin.import_tasks: tasks/components.yml
-- name: Load fpga tasks
-  ansible.builtin.import_tasks: tasks/fpga.yml
-- name: Load compare tasks
-  ansible.builtin.import_tasks: tasks/compare.yml
-- name: Validate explicit power and existing rack placement before inventory writes
-  tags: [compare, apply]
+- name: Read identity and host facts
+  ansible.builtin.include_tasks:
+    file: system.yml
+    apply:
+      tags:
+      - always
+  tags:
+  - always
+- name: Servers stage
+  ansible.builtin.include_tasks:
+    file: device_apply.yml
+    apply:
+      tags:
+      - servers
+  tags:
+  - servers
+  - apply
+  - compare
+- name: Find existing parent without creating it
+  tags:
+  - always
   delegate_to: localhost
+  connection: local
   become: false
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
-  fhs_placement_sync:
+  fhs_inventory_sync:
     netbox_url: '{{ netbox_url }}'
     netbox_token: '{{ netbox_token }}'
     validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+    mode: resolve
     device: '{{ facts.hostname }}'
     serial: '{{ system_identity.identity.serial | default("") }}'
-    metadata: '{{ server_info }}'
-    manufacturer: '{{ netbox_manufacturer }}'
-    model: '{{ netbox_device_type }}'
-    default_face: '{{ netbox_rack_face_default }}'
-    preview: true
-  when: '"facts" not in ansible_run_tags'
-- name: Load apply tasks
-  ansible.builtin.import_tasks: tasks/apply.yml
-  when: netbox_manufacturer | length > 0 and netbox_device_type | length > 0
-- name: Discover Linux topology
-  ansible.builtin.import_tasks: topology_linux.yml
-  when: bootstrap_topology_enabled | default(true) | bool
-
-- name: Reconcile only explicit server placement and independent power inlets
-  tags: [compare, apply]
-  delegate_to: localhost
-  become: false
+    allow_missing_serial: true
+  register: fhs_parent
+  check_mode: false
+- name: Use resolved parent name
+  ansible.builtin.set_fact:
+    fhs_netbox_name: '{{ fhs_parent.device.name | default(facts.hostname) }}'
+  tags:
+  - always
+- name: Report missing parent
+  ansible.builtin.debug:
+    msg: Parent device absent; run --tags servers first. Component, interface, IP and cable stages are skipped for this host.
+  when: not fhs_parent.device
+  tags:
+  - always
+- name: Modules stage
+  ansible.builtin.include_tasks:
+    file: module_stage.yml
+    apply:
+      tags:
+      - modules
+  tags:
+  - modules
+  - apply
+  - compare
+  when: fhs_parent.device is not none
   vars:
-    ansible_python_interpreter: '{{ ansible_playbook_python }}'
-  fhs_placement_sync:
-    netbox_url: '{{ netbox_url }}'
-    netbox_token: '{{ netbox_token }}'
-    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
-    device: '{{ facts.hostname }}'
-    serial: '{{ system_identity.identity.serial | default("") }}'
-    metadata: '{{ server_info }}'
-    manufacturer: '{{ netbox_manufacturer }}'
-    model: '{{ netbox_device_type }}'
-    default_face: '{{ netbox_rack_face_default }}'
-    preview: '{{ ansible_check_mode or "compare" in ansible_run_tags }}'
-  when: '"facts" not in ansible_run_tags and (netbox_manufacturer | length > 0 and netbox_device_type | length > 0)'
+    fhs_write_modules: true
+    fhs_write_interfaces: false
+- name: Servers stage
+  ansible.builtin.include_tasks:
+    file: server_stage.yml
+    apply:
+      tags:
+      - servers
+  tags:
+  - servers
+  - apply
+  - compare
+  when: fhs_parent.device is not none
+  vars:
+    fhs_stage: servers
+- name: Interfaces stage
+  ansible.builtin.include_tasks:
+    file: interface_stage.yml
+    apply:
+      tags:
+      - interfaces
+  tags:
+  - interfaces
+  - apply
+  - compare
+  when: fhs_parent.device is not none
+  vars:
+    fhs_stage: interfaces
+    fhs_write_modules: false
+    fhs_write_interfaces: true
+- name: Ips stage
+  ansible.builtin.include_tasks:
+    file: ip_stage.yml
+    apply:
+      tags:
+      - ips
+  tags:
+  - ips
+  - apply
+  - compare
+  when: fhs_parent.device is not none
+  vars:
+    fhs_stage: ips
+- name: Cables stage
+  ansible.builtin.include_tasks:
+    file: cable_stage.yml
+    apply:
+      tags:
+      - cables
+  tags:
+  - cables
+  - apply
+  - compare
+  when: fhs_parent.device is not none
+  vars:
+    fhs_write_modules: false
+    fhs_write_interfaces: false

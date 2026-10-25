@@ -1,0 +1,60 @@
+- name: Discover motherboard and BMC
+  tags:
+  - bmc
+  - compare
+  - apply
+  become: '{{ not (hardware_simulation | default(false) | bool) }}'
+  environment:
+    PATH: '{{ hardware_command_path }}'
+    LC_ALL: C
+    LANG: C
+  block:
+  - name: Read BMC firmware information
+    ansible.builtin.command:
+      argv:
+      - ipmitool
+      - mc
+      - info
+    register: bmc_info_probe
+    changed_when: false
+    failed_when: false
+    check_mode: false
+  - name: Read BMC management LAN channel
+    ansible.builtin.command:
+      argv:
+      - ipmitool
+      - lan
+      - print
+      - '{{ bmc_lan_channel | default(''1'') }}'
+    register: bmc_lan_probe
+    changed_when: false
+    failed_when: false
+    check_mode: false
+  - name: Record available BMC firmware from management controller only
+    ansible.builtin.set_fact:
+      hardware_fields: '{{ hardware_fields | combine({"bmc_firmware": bmc_firmware}) }}'
+    vars:
+      bmc_firmware: '{{ (bmc_info_probe.stdout | default("")) | regex_findall("(?m)^Firmware Revision\\s*:\\s*(.+)$") | first
+        | default("") | trim }}'
+    when: bmc_info_probe.rc | default(1) == 0 and bmc_firmware | lower not in unavailable_values
+  - name: Record available BMC address
+    ansible.builtin.set_fact:
+      bmc_address: '{{ discovered_bmc_address }}'
+    vars:
+      discovered_bmc_address: '{{ (bmc_lan_probe.stdout | default('''')) | regex_findall(''(?m)^IP Address\s*:\s*([0-9.]+)\s*$'')
+        | first | default('''') }}'
+    when: bmc_lan_probe.rc == 0 and discovered_bmc_address | length > 0 and discovered_bmc_address != '0.0.0.0'
+  - name: Show BMC discovery and explicitly report unavailable fields
+    ansible.builtin.debug:
+      msg:
+        simulation: '{{ hardware_simulation | default(false) | bool }}'
+        motherboard_and_firmware: '{{ hardware_fields }}'
+        bmc_address: '{{ bmc_address | default(''unavailable; existing value preserved'') }}'
+        unavailable_probes: '{{ [bmc_info_probe, bmc_lan_probe] | rejectattr(''rc'', ''equalto'', 0) | map(attribute=''msg'',
+          default=''IPMI read failed'') | list }}'
+        unavailable_fields: '{{ [''bmc_firmware'', ''motherboard_part_number'', ''motherboard_serial''] | difference(hardware_fields.keys()
+          | list) }}'
+  rescue:
+  - name: Report incomplete optional discovery
+    ansible.builtin.debug:
+      msg: '{{ ansible_failed_result.msg | default("Optional discovery unavailable; previous inventory retained") }}'

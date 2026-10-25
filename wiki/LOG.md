@@ -252,3 +252,20 @@ Append completed events here; keep proposed work in the plan.
 - [Validation](../ops/platform/inventory-alignment/VALIDATION.md#fru-identity-and-serial-only-creation--2026-10-25):
   50 focused tests, real Ansible syntax, 21 native FRU and 69 native importer
   assertions passed on the retained chart. Physical hardware remains unverified.
+
+
+## 2026-10-25 — incremental import stages
+
+- Added `servers`, `modules`, `interfaces`, `ips`, `cables`; default/`apply` runs
+  all. Later stages skip missing parents. Chassis writes precede optional probes;
+  component writes follow discovery. Roles default to Unassigned; category tags
+  keep grouping independent of role and actual FRU part/model.
+- Removed absence-removal paths and staging-type preflight. Observed component
+  updates preserve installed IDs/cables and retain old assets as stored history.
+  FRU PSUs and serial-bearing QSFPs are inventory items; module-only runs do not
+  explicitly create interfaces. Captured NIC EEPROM metadata is retained.
+- [Validation](../ops/platform/inventory-alignment/VALIDATION.md#incremental-tagged-import--2026-10-25):
+  fast static data checks, eight live scenario checks, authenticated
+  Inventory asset and Topology Views graph. Physical hardware remains unverified.
+- Automatic approval blocked destructive cable-conflict replacement and removal
+  of IP/MAC ownership safeguards; existing network conflicts remain reported.

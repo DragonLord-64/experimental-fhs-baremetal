@@ -4,7 +4,7 @@ from collections import defaultdict
 import json
 import re
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.fhs_netbox import Sync, scalar, ensure_manufacturers, ensure_asset
+from ansible.module_utils.fhs_netbox import Sync, scalar
 
 
 def mac(value):

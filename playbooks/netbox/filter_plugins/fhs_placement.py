@@ -7,8 +7,8 @@ def server_metadata(value):
     if not isinstance(value, dict): raise AnsibleFilterError('server-info must be a mapping')
     value = dict(value)
     for key in ('site', 'role', 'location', 'rack'):
-        if value and (not isinstance(value.get(key), str) or not value[key].strip()):
-            raise AnsibleFilterError('server-info requires nonempty site, role, location and rack strings')
+        if key in value and (not isinstance(value.get(key), str) or not value[key].strip()):
+            raise AnsibleFilterError('server-info placement fields must be nonempty strings when provided')
         if key in value: value[key] = value[key].strip()
     if 'rack_unit' in value:
         unit = value['rack_unit']

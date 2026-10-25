@@ -4,7 +4,7 @@ NetBox owns device, interface, address and selected configuration facts. Protect
 
 ## Polling NetBox for Inventory
 
-`inventory/dev_env/netbox-inv.yml` uses `netbox.netbox.nb_inventory`. It enables interfaces, IP addresses, config context, flattened custom fields and extra variables. It selects active devices with primary IPs, groups by device role and adds `teraboxes` for role slug `fpga-host-server`.
+`inventory/dev_env/netbox-inv.yml` uses `netbox.netbox.nb_inventory`. It enables interfaces, IP addresses, config context, flattened custom fields and extra variables. It selects active devices with primary IPs, groups by device role and adds `teraboxes` / `nexus` from the `fpga-host-server` / `nexus-switch` category tags (legacy role grouping remains supported).
 
 A minimal private configuration is:
 

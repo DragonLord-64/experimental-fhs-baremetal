@@ -1,0 +1,6 @@
+- name: Read server telemetry
+  ansible.builtin.import_tasks: server_metadata.yml
+- name: Resolve server metadata fields
+  ansible.builtin.import_tasks: compare.yml
+- name: Write server telemetry and placement
+  ansible.builtin.import_tasks: apply.yml

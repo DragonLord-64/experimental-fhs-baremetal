@@ -1,0 +1,23 @@
+- name: Select discovered management primary IPv4
+  tags:
+  - compare
+  - apply
+  block:
+  - name: Select requested IPv4 or the first eligible LAN IPv4 without requiring a default route
+    ansible.builtin.set_fact:
+      selected_primary_ipv4: '{{ primary_candidates | first | default({}) }}'
+    vars:
+      all_ipv4: '{{ discovered_interfaces | rejectattr(''management_only'') | map(attribute=''addresses'') | flatten | rejectattr(''address'',
+        ''search'', '':'') | rejectattr(''address'', ''match'', ''^(127\.|169\.254\.|0\.)'') | list }}'
+      lan_ipv4: '{{ discovered_interfaces | selectattr(''lan_eligible'') | map(attribute=''addresses'') | flatten | rejectattr(''address'',
+        ''search'', '':'') | rejectattr(''address'', ''match'', ''^(127\.|169\.254\.|0\.)'') | list }}'
+      primary_candidates: '{{ (all_ipv4 | selectattr(''address'', ''equalto'', bootstrap_primary_ipv4) | list) if bootstrap_primary_ipv4
+        is defined else lan_ipv4 }}'
+  - name: Report unavailable primary IPv4 selection
+    ansible.builtin.debug:
+      msg: Requested/first-LAN primary IPv4 was not discovered; existing NetBox primary IPv4 will be preserved.
+    when: selected_primary_ipv4.address is not defined
+  rescue:
+  - name: Report incomplete optional discovery
+    ansible.builtin.debug:
+      msg: '{{ ansible_failed_result.msg | default("Optional discovery unavailable; previous inventory retained") }}'

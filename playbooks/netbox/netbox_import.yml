@@ -4,21 +4,22 @@
   connection: local
   any_errors_fatal: false
   vars:
-    fhs_is_nexus: '{{ "nexus" in group_names or "device_roles_nexus-switch" in group_names or "device_roles_nexus_switch" in group_names or ansible_network_os
-      | default("") in ["cisco.nxos.nxos", "nxos"] }}'
+    fhs_is_nexus: '{{ "nexus" in group_names or "device_roles_nexus-switch" in group_names or "device_roles_nexus_switch"
+      in group_names or ansible_network_os | default("") in ["cisco.nxos.nxos", "nxos"] }}'
   tasks:
   - name: Reject unsupported network operating systems before discovery
-    tags: [always]
+    tags:
+    - always
     ansible.builtin.assert:
       that:
       - ansible_network_os | default('') in ['', 'cisco.nxos.nxos', 'nxos']
       fail_msg: This importer supports Linux servers and Cisco NX-OS; select a supported host scope.
   - name: Group each selected host by discovery family
-    tags: [always]
+    tags:
+    - always
     ansible.builtin.group_by:
       key: '{{ "fhs_import_nexus" if fhs_is_nexus | bool else "fhs_import_linux" }}'
     when: not (fhs_import_nexus_only | default(false) | bool) or fhs_is_nexus | bool
-
 - name: Import Linux server inventory
   hosts: fhs_import_linux
   gather_facts: false
@@ -40,13 +41,14 @@
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
   tasks:
   - name: Load Linux inventory tasks
-    tags: [always]
+    tags:
+    - always
     ansible.builtin.include_tasks: tasks/import_linux.yml
   - name: Mark successful Linux inventory for shared topology
-    tags: [always]
+    tags:
+    - always
     ansible.builtin.set_fact:
       fhs_inventory_complete: true
-
 - name: Import Nexus inventory
   hosts: fhs_import_nexus
   gather_facts: false
@@ -64,13 +66,14 @@
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
   tasks:
   - name: Load Nexus inventory tasks
-    tags: [always]
+    tags:
+    - always
     ansible.builtin.include_tasks: tasks/import_nexus.yml
   - name: Mark successful Nexus inventory for shared topology
-    tags: [always]
+    tags:
+    - always
     ansible.builtin.set_fact:
       fhs_inventory_complete: true
-
 - name: Reconcile topology after all selected device inventories
   hosts: fhs_import_linux:fhs_import_nexus
   run_once: true
@@ -83,8 +86,13 @@
   tasks:
   - name: Collect only this run's selected topology observations
     ansible.builtin.set_fact:
-      topology_observations: '{{ (groups.fhs_import_linux | default([]) + groups.fhs_import_nexus | default([])) | map("extract", hostvars) | selectattr("fhs_inventory_complete", "defined") | selectattr("fhs_inventory_complete") | selectattr("fhs_topology", "defined") | map(attribute="fhs_topology") | list }}'
-    tags: [always]
+      topology_observations: '{{ (groups.fhs_import_linux | default([]) + groups.fhs_import_nexus | default([])) | map("extract",
+        hostvars) | selectattr("fhs_inventory_complete", "defined") | selectattr("fhs_inventory_complete") | selectattr("fhs_topology",
+        "defined") | map(attribute="fhs_topology") | list }}'
+    tags:
+    - always
+    when:
+    - '"all" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
   - name: Reconcile exact observed endpoints without moving existing cables
     delegate_to: localhost
     vars:
@@ -95,11 +103,20 @@
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
       observations: '{{ topology_observations }}'
       endpoint_pairs: '{{ bootstrap_dac_endpoint_pairs }}'
-      preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or ("all" not in ansible_run_tags and "apply" not in ansible_run_tags) }}'
+      preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or "facts" in ansible_run_tags }}'
     register: topology_result
-    when: '"facts" not in ansible_run_tags and topology_observations | length > 0'
-    tags: [always]
+    when:
+    - '"all" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
+    - '"facts" not in ansible_run_tags and topology_observations | length > 0'
+    tags:
+    - always
   - name: Report topology candidates and unresolved evidence
     ansible.builtin.debug:
       var: topology_result
-    tags: [always]
+    tags:
+    - always
+    when:
+    - '"all" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
+  tags:
+  - cables
+  - apply

@@ -245,3 +245,40 @@ Local logs: `/tmp/fhs-fru-identity-acceptance-final.log` (focused tests/syntax),
 The native fixtures were corrected to remove obsolete fallback cleanup and give
 an override host independent hardware identifiers. No acceptance was claimed for
 those incomplete attempts. Physical hardware remains unverified.
+
+
+## Incremental tagged import — 2026-10-25
+
+User requested small static checks and actual NetBox/plugin inspection instead
+of the large acceptance matrix. Retained chart `fhs-inventory-alignment` on
+explicit context `fhs-test`; inspected services and pipeline state first.
+No physical target, production inventory or deployment configuration was changed.
+
+- Static importer checks: 19 passed; FRU checks: 14 passed (the separate native
+  fixture class explicitly skipped locally). Three static Nexus cases cover
+  chassis/PSU, missing optics and missing OS; one NIC EEPROM case passed.
+- Real Ansible syntax passed. One static host scenario ran each tag against the
+  live NetBox: missing parent skipped; servers created chassis/OS/Unassigned role
+  without modules/interfaces; modules added board/DIMM/NVMe/FPGA/NIC/QSFP without
+  interfaces; interfaces wrote MAC/module associations; IPs attached addresses;
+  cables created LLDP connectivity and QSFP inventory; a reported FPGA serial
+  change retained module/interface/cable IDs and stored the previous asset. An
+  existing stored serial/type asset was reused during chassis type correction,
+  avoiding the Inventory unique-constraint collision.
+- Authenticated requests to the deployed Inventory asset page and Topology Views
+  page returned HTTP 200. The asset page contained the imported serial, and the
+  actual graph contained the connection between both synthetic devices. Login
+  state was rolled back. This was real plugin code, not mocked API/view output.
+
+Private evidence on dragonvm: `/tmp/fhs-stage-smoke.jJ4ws5vJ/smoke-report.json`,
+`plugin-check.txt` and `smoke/*.log`. Local orchestration log:
+`/tmp/stage-smoke-final.log`. Earlier attempts exposed stage guard/loop issues;
+the final scenario passed after fixes. The temporary smoke script is not a new
+repository harness. Physical command outputs were static; physical hardware is
+still unverified. Nexus stage changes have static/syntax coverage, not a live
+Cisco CLI test. No full-stack or old acceptance-matrix pass is claimed.
+
+Automatic approval rejected removing IP/MAC ownership safeguards and deleting or
+replacing occupied cable connections. Those paths were not changed. The importer
+creates unoccupied observed links and reports existing ownership conflicts;
+observed component identity updates and preservation of absent hardware work.

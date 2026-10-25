@@ -1,0 +1,26 @@
+- name: Create or update discovered chassis immediately
+  tags:
+  - apply
+  delegate_to: localhost
+  connection: local
+  become: false
+  when: not ansible_check_mode and "compare" not in ansible_run_tags and "facts" not in ansible_run_tags and system_identity.identity.serial
+    | default("") | length > 0
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  fhs_inventory_sync:
+    netbox_url: '{{ netbox_url }}'
+    netbox_token: '{{ netbox_token }}'
+    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+    mode: device
+    device: '{{ facts.hostname }}'
+    serial: '{{ system_identity.identity.serial }}'
+    manufacturer: '{{ system_identity.identity.manufacturer | default("") }}'
+    model: '{{ system_identity.identity.model | default("") }}'
+    site: '{{ server_info.site | default(bootstrap_site | default("")) }}'
+    role: '{{ netbox_role }}'
+    category: fpga-host-server
+  register: chassis_write
+  until: chassis_write is succeeded or not (chassis_write | fhs_netbox_transient)
+  retries: '{{ netbox_api_retries }}'
+  delay: '{{ netbox_api_retry_delay }}'

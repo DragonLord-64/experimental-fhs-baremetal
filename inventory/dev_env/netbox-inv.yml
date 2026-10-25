@@ -23,7 +23,8 @@ group_by:
   - device_roles
 # Add this block at the bottom of your NetBox inventory file
 groups:
-  teraboxes: "device_role.slug == 'fpga-host-server'"
+  teraboxes: "'fpga-host-server' in (tags | map(attribute='slug') | list) or device_role.slug == 'fpga-host-server'"
+  nexus: "'nexus-switch' in (tags | map(attribute='slug') | list) or device_role.slug == 'nexus-switch'"
 
 # For access, required to have an access token set up for the user.
 token:

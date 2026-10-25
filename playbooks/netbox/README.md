@@ -11,6 +11,42 @@ holds SDK/NIC discovery, topology commands, API retries, certificate validation,
 site/role defaults and Bifrost export settings. Override it
 per run with `-e netbox_credentials_file=/private/netbox.yml`.
 
+## Import stages
+
+```bash
+ansible-playbook -i INVENTORY playbooks/netbox/netbox_import.yml --tags servers
+ansible-playbook -i INVENTORY playbooks/netbox/netbox_import.yml --tags modules
+ansible-playbook -i INVENTORY playbooks/netbox/netbox_import.yml --tags interfaces
+ansible-playbook -i INVENTORY playbooks/netbox/netbox_import.yml --tags ips
+ansible-playbook -i INVENTORY playbooks/netbox/netbox_import.yml --tags cables
+```
+
+No tags (or `--tags apply`) runs all stages. Combine stages with commas.
+`--check` / `--tags compare` previews existing-parent changes without writes.
+
+| Stage | Writes |
+|---|---|
+| `servers` | Chassis immediately after FRU identity, then OS, firmware, resources and available rack/location |
+| `modules` | Observed motherboard/FRU PSUs, DIMMs, physical NVMe drives, FPGA/NIC cards, QSFPs and switch modules |
+| `interfaces` | Host/switch interfaces, MACs and observed card associations |
+| `ips` | Host addresses, primary IPv4 and available BMC out-of-band address |
+| `cables` | LLDP/DAC connections, QSFP metadata/assets and explicit server-info power mappings |
+
+Later stages find the existing parent and skip it with a message if absent;
+they do not create server records. NetBox may instantiate components already
+defined in a module-type template. Physical cards and inventory items update in
+place. Previous assets remain stored history when a different serial is observed.
+Unobserved hardware is never removed, including with legacy `*_complete` flags.
+
+Servers are tagged `fpga-host-server`, switches `nexus-switch`. Actual FRU part
+numbers identify server models. New roles use `Unassigned` unless supplied through
+`server-info` or `bootstrap_role`; missing role data preserves an existing role.
+Partial server-info files are accepted. Explicit serial/manufacturer/part-number
+metadata and bootstrap overrides take precedence over FRU values.
+
+Occupied cable endpoints and conflicting IP/MAC ownership are reported and
+preserved. Observed connections are created on unoccupied endpoints.
+
 ## Linux system identity
 
 `netbox_import.yml` reads device identity from local `ipmitool fru` over the
@@ -51,17 +87,16 @@ manufacturer/model correct the existing device and linked chassis asset type; th
 are journalled with discovery sources. Explicit `bootstrap_chassis_serial`,
 `bootstrap_manufacturer` and `bootstrap_device_type` override FRU values in the
 same normalization step. Device updates use the ensured type ID.
-Conflicting chassis serial ownership, ambiguous assets and quarantine still
-require review. A changed serial alone cannot distinguish a data correction
-from a replacement; it does not silently rewrite the previous physical asset.
+Unambiguous hardware observations update installed serial/type values while
+preserving record IDs, interfaces and cabling. Previous physical assets remain
+in history; ambiguous duplicate device identities still require resolution.
 
 A failed host stops its own import; other hosts and discovery families continue.
 Only completed host imports contribute to shared topology. Ansible still returns
 failure for the run when a host fails; inspect its recap before rerunning.
 
-FRU discovery never enables absence removal. Motherboard reconciliation always
-uses an incomplete scope; DDR5/NVMe, FPGA, NIC and Nexus completeness rules remain
-separate. DIMM/NVMe component discovery keeps its existing Linux/tool sources.
+Discovery never enables absence removal. Legacy completeness flags do not
+remove any installation. DIMM/NVMe component discovery keeps its existing Linux/tool sources.
 Keep discovery output private because it contains hardware identifiers.
 
 ## Topology
@@ -96,8 +131,7 @@ than a fixed count. Interface `fhs_port_observation` keeps observed presence and
 fields separately from module identity. Populated pluggables retain vendor,
 part/model, serial, revision, date, cable length and other reported fields in
 native Inventory items/assets and `fhs_module_observation`; missing fields do not
-clear known metadata. A clipped report does not imply absence. Existing module
-replacement conflicts require review.
+clear known metadata. A clipped report does not imply absence. Observed module identity changes update the installed record in place.
 
 FPGA DAC matching prefers complete serials, including suffixes, and the verified
 FS vendor/part identities listed in the parser. The SDK VCSEL field alone cannot
@@ -115,7 +149,7 @@ Existing cables are never moved. Review `topology_result.omissions` and
 `topology_result.diagnostics`; repeated unchanged apply creates nothing.
 
 `--tags facts` collects without topology API calls; `--tags compare` and `--check`
-preview NetBox changes. Cable writes require the default run or `--tags apply`.
+preview NetBox changes. Cable writes require the default run, `--tags apply` or `--tags cables`.
 The credentials default is
 `/provision/files.d/credentials/mid-cbf-hw-netbox.yml` for all entrypoints.
 
@@ -136,8 +170,8 @@ establishes discovery success or a database cable count.
 ## Optional server placement and power
 
 The importer reads `/etc/server-info.yaml` without rewriting it (`server_info_path`
-can select another file). Existing files still require site, role, location and
-rack. New keys are optional:
+can select another file). Fields are optional; role is assigned only when
+provided. Supported placement/power keys include:
 
 ```yaml
 site: Example Site
@@ -166,3 +200,40 @@ terminations fail before these placement/power writes. There is no PDU discovery
 or control. Omitted new keys preserve existing placement/power records; an empty
 power list does not remove cables. Run compare, inspect diagnostics, then apply
 using the same selected scope.
+
+
+## Collected information
+
+Values below are recorded when available; missing observations preserve records.
+
+| TeraBox / FPGA host | Information |
+|---|---|
+| Chassis | Hostname; override/FRU serial; manufacturer; actual FRU part/model; category tag |
+| Placement | Server-info site, location, rack, explicit role; rack unit/face and explicit PDU inlet mapping |
+| OS/resources | Distribution/version, architecture, logical CPUs, RAM MiB; common eligible whole-disk capacity GiB |
+| Firmware | BIOS version and BMC firmware revision |
+| FRU | Product serial/name/part/version/manufacturer; board serial/model/part/vendor/date; chassis part/type; all FRU records/extras and identity provenance |
+| DIMMs | Populated DDR5 detection, locator/bank/handle for naming, part and serial |
+| NVMe | Physical-drive serial/model and an observed namespace path; serial deduplication |
+| FPGA cards | SDK index, serial, part, board version, BMC firmware; explicitly supplied PCI endpoints and observed port names |
+| NIC cards | VPD part/serial; PCI functions; interface names; driver/version; firmware; physical-port name; speed/duplex/link state |
+| PSUs | Additional PSU FRU serial, manufacturer, part/model when reported |
+| QSFPs | Connector, presence, vendor, part, serial and all reported EEPROM fields such as revision/date/length |
+| Interfaces | Names, MAC/primary MAC, MTU, module associations, BMC management interface |
+| Addresses | IPv4/IPv6 prefixes, selected primary IPv4, BMC out-of-band IPv4 |
+| Cables | LLDP endpoints/identifiers; verified DAC serial evidence and endpoint-pair mappings; native network cables and explicit PDU cables |
+
+| Cisco Nexus | Information |
+|---|---|
+| Chassis | Hostname, chassis serial, Cisco product ID/model, category tag; configured site/role |
+| Software/firmware | NX-OS or kickstart version, BIOS version, optional EPLD report |
+| PSUs/fans | Reported bays, product IDs, serials, descriptions and observed fan count |
+| Transceivers | Vendor, product/part ID, serial, type, connector/lane names, presence and all scalar transceiver fields |
+| Interfaces | Observed LLDP/transceiver interface names, connector/module associations, breakout lanes |
+| Cables | LLDP local/remote endpoints and chassis identifiers; exact/verified FPGA DAC matches; native cable connections |
+
+Per-DIMM capacity/vendor and per-NVMe capacity/firmware are not currently retained
+as individual component fields. The Nexus path does not currently import switch
+interface MAC/IP addresses; it preserves existing addresses. Optical serials
+alone never identify a fiber cable. Incomplete observations are reported rather
+than creating a guessed peer or removing a missing component.
