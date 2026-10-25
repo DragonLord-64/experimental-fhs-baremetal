@@ -18,7 +18,7 @@ dependencies:
   version: 13.2.7
   repository: https://grafana-community.github.io/helm-charts
 - name: elasticsearch-kibana
-  version: 0.5.1
+  version: 0.5.2
   repository: file://../elasticsearch-kibana
-digest: sha256:5de5af908db9ab629f3a6c7373926a4e682f88bf4f4012707e8bf2789b595c4b
+digest: sha256:b81542b4b7a268c2af0302fe6025517e075f1cf959e3baf480a26e06af7af327
 generated: '2026-10-23T20:56:55.706099+00:00'

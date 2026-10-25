@@ -1,0 +1,58 @@
+{{- if .Values.landing.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-hw-landing
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: {{ .Release.Name }}-hw-landing}
+  template:
+    metadata:
+      labels: {app: {{ .Release.Name }}-hw-landing}
+      annotations:
+        checksum/page: {{ include (print $.Template.BasePath "/landing-content.yaml") . | sha256sum }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {fsGroup: 101}
+      containers:
+      - name: web
+        image: {{ .Values.landing.image | quote }}
+        command: [nginx, '-g', 'daemon off;']
+        ports: [{name: http, containerPort: 8080}]
+        securityContext:
+          runAsUser: 101
+          runAsGroup: 101
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 10m, memory: 16Mi}
+          limits: {cpu: 100m, memory: 64Mi}
+        readinessProbe: {httpGet: {path: /healthz, port: http}}
+        volumeMounts:
+        - {name: content, mountPath: /usr/share/nginx/html, readOnly: true}
+        - {name: config, mountPath: /etc/nginx/conf.d, readOnly: true}
+        - {name: cache, mountPath: /var/cache/nginx}
+        - {name: run, mountPath: /var/run}
+      volumes:
+      - name: content
+        configMap:
+          name: {{ .Release.Name }}-hw-landing
+          items: [{key: index.html, path: index.html}]
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-hw-landing
+          items: [{key: default.conf, path: default.conf}]
+      - {name: cache, emptyDir: {}}
+      - {name: run, emptyDir: {}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-hw-landing
+spec:
+  selector: {app: {{ .Release.Name }}-hw-landing}
+  ports: [{name: http, port: 8080, targetPort: http}]
+{{- end }}

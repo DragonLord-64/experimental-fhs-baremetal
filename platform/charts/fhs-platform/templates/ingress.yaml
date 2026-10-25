@@ -35,3 +35,12 @@ spec:
               service:
                 name: {{ include "elastic-small.name" . }}-kibana
                 port: {number: 5601}
+
+          {{- if .Values.landing.enabled }}
+          - path: {{ printf "%s/" (include "fhs-platform.prefix" .) | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-hw-landing
+                port: {name: http}
+          {{- end }}

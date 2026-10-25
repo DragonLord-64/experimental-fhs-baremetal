@@ -1,0 +1,20 @@
+{
+  "scope": "Offline rendered Deployment/StatefulSet pod templates only; no live UIDs or volumes checked",
+  "baseline": "8fe1d1788ff87def0824e5dfa9115a02aa3cebeb",
+  "changed": [
+    "fhs-netbox",
+    "fhs-netbox-worker",
+    "fhs-prometheus"
+  ],
+  "added": [
+    "discovery-hw-landing"
+  ],
+  "unchanged": [
+    "discovery-elastic",
+    "discovery-elastic-kibana",
+    "fhs-grafana",
+    "fhs-postgresql",
+    "fhs-telegraf",
+    "fhs-valkey-primary"
+  ]
+}

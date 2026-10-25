@@ -1,0 +1,2 @@
+netbox-inventory==2.7.1 --hash=sha256:7bc88a3b84aa77557a237039c6a5e75f58edb0b854bf782d98955695e921f717
+netbox-plugin-prometheus-sd==2.2.0 --hash=sha256:14e7b8f64a499b5cb3c5e86db459f85c4a1ce3f8b1e26589f15826194a39bb1c

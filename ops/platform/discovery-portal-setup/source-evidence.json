@@ -1,0 +1,20 @@
+{
+  "captured_at": "2026-10-25T02:13:09.663786+00:00",
+  "archives": [
+    {
+      "source": "private",
+      "revision": "8fe1d1788ff87def0824e5dfa9115a02aa3cebeb",
+      "archive": "private-platform.tar",
+      "sha256": "73893efd655af16572fccdf7f99be8a2c22cabffe2d737da3ed4c4887894d8fb",
+      "bytes": 798720
+    },
+    {
+      "source": "official",
+      "revision": "7b0a306b091306534eef9dfa5872e23547387d7e",
+      "archive": "official-platform.tar",
+      "sha256": "e4f3abbe540d3515629274040c4bf7b8a9f5c8ce5b4dcf1e9f3a4a27ec31f8f1",
+      "bytes": 798720
+    }
+  ],
+  "scope": "Committed chart source only; no site values or credentials"
+}

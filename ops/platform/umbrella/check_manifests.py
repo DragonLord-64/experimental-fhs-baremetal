@@ -40,7 +40,9 @@ def check(paths, namespace, hostname, prefix="/test"):
             for path in rule.get('http', {}).get('paths', []):
                 route = path['path'].rstrip('/')
                 routes.add(route)
-                if route not in expected_routes:
+                if route == prefix and path['backend']['service']['name'].endswith('-hw-landing'):
+                    pass  # Only the bundled landing service may serve the prefix root.
+                elif route not in expected_routes:
                     errors.append(f'{label}: non-candidate route {route}')
                 if path.get('pathType') != 'Prefix':
                     errors.append(f'{label}: route is not Prefix')

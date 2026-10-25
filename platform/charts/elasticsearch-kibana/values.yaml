@@ -44,3 +44,11 @@ kibana:
 # Optional publisher bootstrap; existingSecret must also contain filebeat-password.
 filebeat:
   enabled: false
+# Separate from filebeat.enabled, which only provisions the limited writer account.
+# Runs Filebeat setup and exits. Never installs or runs a collector.
+filebeatSetup:
+  enabled: false
+  image: docker.elastic.co/beats/filebeat:9.5.5
+  # Existing ILM policies are preserved; change retention explicitly through ES
+  # for an existing policy after reviewing its users.
+  retention: 30d

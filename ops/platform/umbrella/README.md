@@ -29,7 +29,7 @@ using the cached pinned Grafana image verified `gzip`, `sed`, `wget`, `basename`
 and prefix substitution as UID 472, with no network, host mounts or writable root.
 
 Dependencies retain upstream archives; `Chart.yaml` / `Chart.lock` pin sources
-and versions. The local Elasticsearch/Kibana 0.5.1 adds opt-in shared URL helpers;
+and versions. The local Elasticsearch/Kibana 0.5.2 adds opt-in shared URL helpers;
 its default standalone paths remain unchanged. The archive inside the umbrella
 must be repackaged after source changes:
 

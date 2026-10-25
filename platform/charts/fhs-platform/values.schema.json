@@ -37,6 +37,40 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "discovery": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "secretKey": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "refreshInterval": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*(s|m)$"
+            },
+            "nodeTag": {
+              "type": "string",
+              "pattern": "^[a-z0-9_-]+$"
+            },
+            "fhsTag": {
+              "type": "string",
+              "pattern": "^[a-z0-9_-]+$"
+            },
+            "selector": {
+              "enum": [
+                "customField",
+                "tags"
+              ]
+            },
+            "customField": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          }
         }
       }
     },
@@ -48,6 +82,22 @@
         },
         "netboxEmail": {
           "type": "string"
+        }
+      }
+    },
+    "landing": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "image"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

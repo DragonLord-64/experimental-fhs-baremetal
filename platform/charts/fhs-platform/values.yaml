@@ -6,6 +6,16 @@ global:
   ingressClassName: nginx
   tlsSecretName: ''
   ingressAnnotations: {}
+  discovery:
+    # Opt in after provisioning the read-only token and migrating static jobs.
+    enabled: false
+    secretKey: token
+    refreshInterval: 30s
+    # Device multi-select custom field; tags remain an alternative.
+    selector: customField
+    customField: prometheus_exporters
+    nodeTag: node-exporter
+    fhsTag: fhs-exporter
 credentials:
   # Default: generate fhs-platform-credentials once and preserve it on upgrades.
   # Set create=false only after supplying that Secret in the candidate namespace.
@@ -19,7 +29,7 @@ credentials:
 netbox:
   fullnameOverride: fhs-netbox
   basePath: netbox/
-  plugins: [netbox_inventory]
+  plugins: [netbox_inventory, netbox_prometheus_sd]
   pluginsConfig:
     netbox_inventory:
       sync_hardware_serial_asset_tag: true
@@ -46,6 +56,10 @@ netbox:
       if ! /opt/netbox/venv/bin/python -c 'from importlib.metadata import version; assert version("netbox-inventory") == "2.7.1"' 2>/dev/null; then
         printf '%s\n' 'netbox-inventory==2.7.1 --hash=sha256:7bc88a3b84aa77557a237039c6a5e75f58edb0b854bf782d98955695e921f717' > /plugin-packages/requirements.txt
         /usr/local/bin/uv pip install --no-cache --no-deps --require-hashes --python /opt/netbox/venv/bin/python --target /plugin-packages --requirement /plugin-packages/requirements.txt
+      fi
+      if ! /opt/netbox/venv/bin/python -c 'from importlib.metadata import version; assert version("netbox-plugin-prometheus-sd") == "2.2.0"' 2>/dev/null; then
+        printf '%s\n' 'netbox-plugin-prometheus-sd==2.2.0 --hash=sha256:14e7b8f64a499b5cb3c5e86db459f85c4a1ce3f8b1e26589f15826194a39bb1c' > /plugin-packages/discovery.txt
+        /usr/local/bin/uv pip install --no-cache --no-deps --require-hashes --python /opt/netbox/venv/bin/python --target /plugin-packages --requirement /plugin-packages/discovery.txt
       fi
       cp -R /opt/netbox/netbox/static/. /plugin-static/
     securityContext:
@@ -193,6 +207,9 @@ netbox:
       - '{{ .Values.global.hostname }}'
       - localhost
       - 127.0.0.1
+      - fhs-netbox
+      - 'fhs-netbox.{{ .Release.Namespace }}.svc'
+      - 'fhs-netbox.{{ .Release.Namespace }}.svc.cluster.local'
       CSRF_TRUSTED_ORIGINS:
       - '{{ include "fhs-platform.origin" . }}'
       SESSION_COOKIE_NAME: '{{ include "fhs-platform.cookie" . }}_netbox'
@@ -253,7 +270,14 @@ valkey:
       limits:
         cpu: 500m
         memory: 256Mi
+landing:
+  enabled: true
+  image: docker.io/library/nginx:1.28.0-alpine
 prometheus:
+  extraScrapeConfigs: |
+    {{- if .Values.global.discovery.enabled }}
+    {{ include "fhs-platform.discovery" . }}
+    {{- end }}
   server:
     persistentVolume:
       enabled: true
@@ -263,6 +287,12 @@ prometheus:
       - ReadWriteOnce
       annotations:
         helm.sh/resource-policy: keep
+    extraSecretMounts:
+    - name: netbox-discovery
+      secretName: fhs-netbox-discovery
+      mountPath: /etc/netbox-discovery
+      readOnly: true
+      optional: true
     retention: 15d
     resources:
       requests:
@@ -387,7 +417,7 @@ prometheus:
     enabled: false
   configmapReload:
     prometheus:
-      enabled: false
+      enabled: true
   rbac:
     create: false
 telegraf:
@@ -611,4 +641,6 @@ logging:
     ingress:
       enabled: false
   filebeat:
+    enabled: true
+  filebeatSetup:
     enabled: true

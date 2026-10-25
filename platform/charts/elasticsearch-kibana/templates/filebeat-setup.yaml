@@ -1,0 +1,97 @@
+{{- if .Values.filebeatSetup.enabled }}
+{{- if not .Values.kibana.enabled }}{{ fail "filebeatSetup requires kibana.enabled for the data view" }}{{ end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "elastic-small.name" . }}-filebeat-setup
+data:
+  filebeat.yml: |
+    # Setup only: no inputs, autodiscover or monitoring publisher.
+    filebeat.inputs: []
+    monitoring.enabled: false
+    logging.level: error
+    logging.to_files: false
+    output.elasticsearch:
+      hosts: ['http://{{ include "elastic-small.name" . }}:9200']
+      username: elastic
+      password: '${ELASTIC_PASSWORD}'
+    setup.template.overwrite: false
+    setup.ilm.enabled: true
+    setup.ilm.overwrite: false
+    setup.ilm.policy_name: filebeat
+    setup.ilm.policy_file: /config/policy.json
+  policy.json: |
+    {"policy":{"phases":{"hot":{"actions":{"rollover":{"max_age":"1d","max_primary_shard_size":"50gb"}}},"delete":{"min_age":{{ .Values.filebeatSetup.retention | quote }},"actions":{"delete":{}}}}}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "elastic-small.name" . }}-filebeat-setup-{{ .Release.Revision }}
+spec:
+  activeDeadlineSeconds: 900
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext: {runAsUser: 1000, runAsGroup: 0, fsGroup: 0}
+      initContainers:
+      - name: wait-for-services
+        image: {{ include "elastic-small.esImage" . | quote }}
+        env:
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: elastic-password}
+        command: [/bin/bash, -ec]
+        args:
+        - |
+          for attempt in $(seq 1 100); do
+            if curl --fail --silent --connect-timeout 2 --max-time 5 --user "elastic:${ELASTIC_PASSWORD}" 'http://{{ include "elastic-small.name" . }}:9200/_cluster/health?wait_for_status=yellow&timeout=2s' >/dev/null &&
+               curl --fail --silent --connect-timeout 2 --max-time 5 --user "elastic:${ELASTIC_PASSWORD}" 'http://{{ include "elastic-small.name" . }}-kibana:5601{{ include "elastic-small.basePath" . }}/api/status' >/dev/null; then exit 0; fi
+            sleep 5
+          done
+          echo 'Setup services unavailable'; exit 1
+        resources:
+          requests: {cpu: 25m, memory: 64Mi}
+          limits: {cpu: 250m, memory: 256Mi}
+      - name: filebeat-setup
+        image: {{ .Values.filebeatSetup.image | quote }}
+        env:
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: elastic-password}
+        command: [/usr/share/filebeat/filebeat]
+        args: [setup, --index-management, --pipelines, --modules, system, '-M', 'system.syslog.enabled=true', '-M', 'system.auth.enabled=true', --strict.perms=false, '-c', /config/filebeat.yml, '-E', path.data=/tmp/filebeat-data, '-E', path.logs=/tmp/filebeat-logs]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 100m, memory: 128Mi}
+          limits: {cpu: 500m, memory: 512Mi}
+        volumeMounts:
+        - {name: config, mountPath: /config, readOnly: true}
+        - {name: tmp, mountPath: /tmp}
+      containers:
+      - name: kibana-data-view
+        image: {{ include "elastic-small.esImage" . | quote }}
+        env:
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: {{ include "elastic-small.secret" . }}, key: elastic-password}
+        command: [/bin/bash, -ec]
+        args:
+        - |
+          url='http://{{ include "elastic-small.name" . }}-kibana:5601{{ include "elastic-small.basePath" . }}/api/data_views/data_view'
+          code=$(curl --silent --connect-timeout 2 --max-time 20 --user "elastic:${ELASTIC_PASSWORD}" -o /tmp/view.json -w '%{http_code}' "$url/fhs-filebeat")
+          if [ "$code" = 200 ]; then exit 0; fi
+          [ "$code" = 404 ] || { echo 'Data view lookup failed'; exit 1; }
+          curl --fail --silent --connect-timeout 2 --max-time 20 --user "elastic:${ELASTIC_PASSWORD}" -H 'kbn-xsrf: setup' -H 'Content-Type: application/json' -X POST "$url" --data-binary '{"data_view":{"id":"fhs-filebeat","title":"filebeat-*","name":"Hardware logs","timeFieldName":"@timestamp"},"override":false}' >/dev/null
+        resources:
+          requests: {cpu: 25m, memory: 64Mi}
+          limits: {cpu: 250m, memory: 256Mi}
+      volumes:
+      - name: config
+        configMap: {name: {{ include "elastic-small.name" . }}-filebeat-setup}
+      - {name: tmp, emptyDir: {}}
+{{- end }}

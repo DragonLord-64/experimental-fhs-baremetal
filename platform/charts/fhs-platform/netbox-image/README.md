@@ -1,9 +1,9 @@
 # Optional prebuilt NetBox Inventory image
 
-The umbrella chart installs MIT Inventory `2.7.1` automatically on the public
+The umbrella chart installs MIT Inventory `2.7.1` and Prometheus SD `2.2.0` automatically on the public
 NetBox `4.7.0` image. Normal chart installation needs no image build or registry.
 
-This optional recipe installs the same plugin and collects static files at build
+This optional recipe installs both pinned plugins and collects static files at build
 time. A matching prebuilt version skips the chart's startup download; use it for
 offline clusters or the legacy standalone values. The base digest is pinned in
 the Dockerfile. Web, worker and housekeeping use the same selected image.

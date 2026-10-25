@@ -1,0 +1,37 @@
+{{- if .Values.landing.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-hw-landing
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_tokens off;
+      location = /healthz { access_log off; return 200 'ok'; }
+      location = {{ include "fhs-platform.prefix" . }}/ { default_type text/html; root /usr/share/nginx/html; try_files /index.html =404; }
+      {{- if include "fhs-platform.prefix" . }}
+      location = {{ include "fhs-platform.prefix" . }} { return 302 {{ include "fhs-platform.prefix" . }}/; }
+      {{- end }}
+      location / { return 404; }
+    }
+  index.html: |
+    <!doctype html>
+    <html lang="en"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HW management</title>
+    <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { max-width: 64rem; margin: auto; padding: 2rem 1rem; line-height: 1.6; }
+    nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
+    article { border: 1px solid currentColor; border-radius: .5rem; padding: 1.5rem; }
+    a { color: inherit; text-underline-offset: .2em; }
+    a:focus-visible { outline: 3px solid currentColor; outline-offset: .3rem; }
+    </style></head><body><main><h1>HW management</h1>
+    <p>Hardware inventory, metrics and logs. Sign in at each application with your existing credentials.</p>
+    <nav aria-label="Hardware applications">
+    <article><h2><a href="{{ include "fhs-platform.prefix" . }}/netbox/">NetBox</a></h2><p>Hardware inventory, device details and asset history.</p></article>
+    <article><h2><a href="{{ include "fhs-platform.prefix" . }}/grafana/">Grafana</a></h2><p>Monitoring dashboards and hardware metrics.</p></article>
+    <article><h2><a href="{{ include "fhs-platform.prefix" . }}/mid-cbf-kibana/">Kibana</a></h2><p>Search and explore logs in Elasticsearch.</p></article>
+    </nav></main></body></html>
+{{- end }}

@@ -81,7 +81,11 @@ class SourceBoundaryTest(unittest.TestCase):
             args = json.loads(capture.read_text()); context = Path(args[-1])
             self.assertTrue(context.resolve().is_relative_to(root / 'platform'))
             self.assertTrue((context / 'Dockerfile').is_file())
-            self.assertIn('netbox-inventory==2.7.1', (context / 'Dockerfile').read_text())
+            self.assertIn('COPY requirements.txt /tmp/plugins.txt', (context / 'Dockerfile').read_text())
+            requirements = (context / 'requirements.txt').read_text()
+            self.assertIn('netbox-inventory==2.7.1 --hash=sha256:', requirements)
+            self.assertIn('netbox-plugin-prometheus-sd==2.2.0 --hash=sha256:', requirements)
+            self.assertIn('--require-hashes -r /tmp/plugins.txt', (context / 'Dockerfile').read_text())
 
     def test_moved_role_runner_selects_lab_project_and_shared_role(self):
         with tempfile.TemporaryDirectory() as temporary:
