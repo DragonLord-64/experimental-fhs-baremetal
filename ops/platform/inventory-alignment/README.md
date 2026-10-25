@@ -46,9 +46,11 @@ See [screen/baseline](HANDOFF.md), [official source review](UPSTREAM.md) and
 
 ## Optional IPMI FRU
 
-`test_fru.py` covers distinct identities, source precedence, placeholders/date
-models, missing/failed/partial records, selected/multiple FRUs and asset
-preservation. Its native task checks use fake local commands and synthetic REST.
+`test_fru.py` covers distinct identities, hardware before bootstrap fallbacks,
+placeholders/date models, missing/failed/partial records, selected/multiple FRUs,
+vendor-scoped types and corrections retaining chassis asset IDs.
+The native FRU task checks use fake local commands and synthetic REST.
+`test_routing.py` verifies that a failed host does not abort other hosts/families.
 `fixtures/fru.txt` follows a user-supplied FRU photo's field structure; serials,
 product part number and extra metadata are synthetic. Manufacturer and board
 model names retain the distinct system/board vendors. The private image is not
@@ -63,7 +65,9 @@ python3 ops/platform/inventory-alignment/acceptance_fru.py \
 
 Use the same dependencies/private URL-token JSON as `acceptance.py`, plus the
 NetBox collection and `pynetbox` from the importer requirements. Only fake local
-IPMI/DMI commands are executed. The run retains unique `SYN-FRU-*` objects and a
+IPMI/DMI commands are executed. Native acceptance also corrects manufacturer and
+model with stale bootstrap fallbacks, then checks repeat-import stability and
+retained chassis asset IDs. The run retains unique `SYN-FRU-*` objects and a
 sanitized last-task log beside the report. It does not establish physical BMC
 access or firmware behavior.
 

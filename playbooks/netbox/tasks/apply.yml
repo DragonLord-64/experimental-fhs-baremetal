@@ -67,14 +67,16 @@
       names:
       - '{{ netbox_manufacturer }}'
   - name: Ensure discovered server type
-    netbox.netbox.netbox_device_type:
-      data:
-        manufacturer: '{{ server_manufacturers.manufacturers[netbox_manufacturer] }}'
-        model: '{{ netbox_device_type }}'
-        slug: '{{ netbox_device_type | lower | regex_replace(''[^a-z0-9]+'', ''-'') | trim(''-'') }}'
-        u_height: 0
-    register: netbox_write_result
-    until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
+    fhs_inventory_sync:
+      netbox_url: '{{ netbox_url }}'
+      netbox_token: '{{ netbox_token }}'
+      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+      device: '{{ facts.hostname }}'
+      mode: type
+      manufacturer: '{{ netbox_manufacturer }}'
+      model: '{{ netbox_device_type }}'
+    register: ensured_server_type
+    until: ensured_server_type is succeeded or not (ensured_server_type | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
   - name: Ensure OS version field
@@ -178,6 +180,7 @@
       model: '{{ netbox_device_type }}'
       site: '{{ netbox_site }}'
       role: '{{ netbox_role }}'
+      identity_sources: '{{ system_identity.sources | default({}) }}'
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'
@@ -191,7 +194,7 @@
         rack: '{{ ensured_rack.rack.id if server_info.rack is defined else omit }}'
         location: '{{ ensured_location.location.id if server_info.location is defined else omit }}'
         device_role: '{{ role_output.device_role.id }}'
-        device_type: '{{ netbox_device_type }}'
+        device_type: '{{ ensured_server_type.device_type.id }}'
         status: active
         custom_fields: '{{ {''os_version'': facts.distribution ~ '' '' ~ facts.distribution_version} | combine(hardware_fields) | combine(netbox_resource_fields)
           }}'

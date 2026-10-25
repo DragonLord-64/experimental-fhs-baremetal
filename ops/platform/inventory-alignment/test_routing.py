@@ -114,6 +114,23 @@ class ActionModule(ActionBase):
             self.assertEqual('https://routing.invalid', actual[host][2], 'Credentials override must reach both paths')
             self.assertEqual('3', actual[host][3], 'Shared API retry default must reach both paths')
 
+    def test_host_failure_does_not_abort_other_hosts_or_next_family(self):
+        inventory = yaml.safe_load((self.folder / 'inventory.yml').read_text())
+        inventory['all']['hosts']['linux-b'] = {}
+        (self.folder / 'inventory.yml').write_text(yaml.safe_dump(inventory))
+        tasks = [dict(name='Missing required hardware on one host',
+                      **{'ansible.builtin.fail': {'msg': 'Synthetic missing identity'},
+                         'when': 'inventory_hostname == "linux-a"', 'tags': ['always']})]
+        tasks += yaml.safe_load((self.folder / 'tasks/import_linux.yml').read_text())
+        (self.folder / 'tasks/import_linux.yml').write_text(yaml.safe_dump(tasks))
+        result = subprocess.run([*self.command, '-i', str(self.folder / 'inventory.yml'),
+            str(self.folder / 'netbox_import.yml'), '-e', '@' + str(self.folder / 'vars.json')],
+            cwd=self.folder, env=self.env, text=True, capture_output=True, timeout=30)
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn('FHS_ROUTING|linux|linux-b|', result.stdout)
+        self.assertIn('FHS_ROUTING|nexus|nexus-var|', result.stdout)
+        self.assertNotIn('FHS_ROUTING|linux|linux-a|', result.stdout)
+
     def test_shared_credentials_default_reaches_both_families(self):
         defaults = yaml.safe_load((self.folder / 'defaults.yml').read_text())
         defaults['netbox_credentials_file'] = str(self.folder / 'credentials.yml')

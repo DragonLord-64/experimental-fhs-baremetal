@@ -219,13 +219,13 @@ def fru_identity(probe, facts=None, overrides=None, chassis_probe=None, fru_id='
             return ('', '')
         return (fields.get(label, ''), 'ipmitool fru ID ' + str(fru_id) + ': ' + label)
 
-    choose('serial', [(overrides.get('serial'), 'bootstrap_chassis_serial'),
-        (chassis_probe.get('stdout') if chassis_probe.get('rc', 1) == 0 else facts.get('chassis_serial'), 'Linux DMI chassis_serial'), fru('Chassis Serial')])
-    choose('manufacturer', [(overrides.get('manufacturer'), 'bootstrap_manufacturer'),
-        (facts.get('system_vendor'), 'Linux DMI system_vendor'), fru('Product Manufacturer')])
-    choose('model', [(overrides.get('model'), 'bootstrap_device_type'),
-        (facts.get('product_name'), 'Linux DMI product_name'), fru('Product Name'),
-        fru('Product Part Number'), fru('Chassis Part Number')], model=True)
+    choose('serial', [(chassis_probe.get('stdout') if chassis_probe.get('rc', 1) == 0 else facts.get('chassis_serial'), 'Linux DMI chassis_serial'), fru('Chassis Serial'), (overrides.get('serial'), 'bootstrap_chassis_serial')])
+    choose('manufacturer', [(facts.get('system_vendor'), 'Linux DMI system_vendor'), fru('Product Manufacturer'), (overrides.get('manufacturer'), 'bootstrap_manufacturer')])
+    choose('model', [(facts.get('product_name'), 'Linux DMI product_name'), fru('Product Name'),
+        fru('Product Part Number'), fru('Chassis Part Number'), (overrides.get('model'), 'bootstrap_device_type')], model=True)
+    for key, fallback in overrides.items():
+        if identity.get(key) and identity_value(fallback) and identity[key] != identity_value(fallback):
+            warnings.append('Hardware ' + key + ' differs from bootstrap fallback; hardware observation selected')
     mappings = {
         'motherboard_manufacturer': ('board_vendor', 'Board Mfg'),
         'motherboard_model': ('board_name', 'Board Product'),

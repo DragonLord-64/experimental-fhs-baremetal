@@ -110,6 +110,29 @@ def main():
         check(set(assets) == {prefix + '-CHASSIS-001', prefix + '-BOARD-001'}, 'Only chassis and motherboard have physical assets')
         output = run(full)
         check('changed=0' in output, 'Repeated full native task import is idempotent')
+        # Correct manufacturer, then model, while retaining the same physical asset.
+        corrected = full.replace('BittWare', 'SYN-Observed-Vendor')
+        variables.update(bootstrap_manufacturer='Stale vendor', bootstrap_device_type='Stale model',
+                         bootstrap_chassis_serial='Stale serial')
+        run(corrected)
+        updated = rows('dcim/devices/', name=prefix)[0]
+        chassis_asset = rows('plugins/inventory/assets/', device_id=did)[0]
+        check(updated['id'] == did and updated['device_type']['model'] == prefix + '-SERVER-PART'
+              and updated['device_type']['manufacturer']['name'] == 'SYN-Observed-Vendor',
+              'Hardware manufacturer/model correct existing device despite stale bootstrap fallbacks')
+        check(chassis_asset['id'] == assets[prefix + '-CHASSIS-001']
+              and chassis_asset['device_type']['id'] == updated['device_type']['id'],
+              'Real Inventory plugin retains asset ID and corrects its type with device')
+        check('changed=0' in run(corrected), 'Corrected native import is idempotent')
+        corrected = corrected.replace(prefix + '-SERVER-PART', prefix + '-CORRECTED-PART')
+        run(corrected)
+        check(rows('dcim/devices/', name=prefix)[0]['device_type']['model'] == prefix + '-CORRECTED-PART'
+              and rows('plugins/inventory/assets/', device_id=did)[0]['id'] == chassis_asset['id'],
+              'Observed model correction also retains the same chassis asset')
+        for key in ('bootstrap_manufacturer', 'bootstrap_device_type', 'bootstrap_chassis_serial'):
+            variables.pop(key)
+        # Return to the original observations before partial-read preservation checks.
+        run(full)
         variables['hardware_fields'] = {}; variables['resource_fields'] = {}
         run('FRU Device Description : Builtin FRU Device (ID 0)\n Product Version : 2\n')
         partial = rows('dcim/devices/', name=prefix)[0]['custom_fields']

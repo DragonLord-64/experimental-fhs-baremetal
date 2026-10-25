@@ -224,3 +224,16 @@ Append completed events here; keep proposed work in the plan.
   focused fixtures/syntax and 50 native report assertions passed on the retained
   chart, including seven LLDP links, two DACs, Inventory metadata, Topology Views,
   rack placement and both PDU cables. Hardware reads remain unverified.
+
+
+## 2026-10-25 — hardware type corrections and host isolation
+
+- Hardware manufacturer/model observations now correct NetBox device and linked
+  chassis asset types while retaining asset IDs/tags/history. Bootstrap identity
+  values are fallbacks; type resolution uses manufacturer/model and numeric IDs.
+- Import failures stop the affected host while other hosts/families continue;
+  failed imports do not contribute shared topology observations. Missing optional
+  observations preserve known data; ambiguous serial ownership still needs review.
+- [Validation](../ops/platform/inventory-alignment/VALIDATION.md#hardware-corrections-and-host-isolation--2026-10-25):
+  49 focused tests, real Ansible syntax, 20 native FRU and 69 importer assertions
+  passed against the retained chart on `fhs-test`. Physical hardware unverified.

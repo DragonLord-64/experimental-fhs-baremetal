@@ -34,7 +34,7 @@ class FruParsingTest(unittest.TestCase):
         self.assertEqual(2, len(result['records']))
         self.assertEqual('SYN-PSU-001', result['records'][1]['fields']['Product Serial'])
 
-    def test_valid_dmi_then_explicit_overrides_take_precedence(self):
+    def test_hardware_precedes_bootstrap_fallbacks(self):
         facts = dict(system_vendor='DMI vendor', product_name='DMI model', product_serial='DMI product',
                      board_vendor='DMI board vendor', board_name='DMI board', board_serial='DMI board serial')
         result = discover(facts=facts, chassis_probe=dict(rc=0, stdout='DMI chassis\n'))
@@ -42,8 +42,11 @@ class FruParsingTest(unittest.TestCase):
         self.assertEqual('DMI product', result['hardware_fields']['product_serial'])
         self.assertEqual('DMI board serial', result['components'][0]['serial'])
         result = discover(facts=facts, overrides=dict(serial='Override chassis', manufacturer='Override vendor', model='Override model'))
-        self.assertEqual(dict(serial='Override chassis', manufacturer='Override vendor', model='Override model'), result['identity'])
-        self.assertEqual('bootstrap_chassis_serial', result['sources']['serial'])
+        self.assertEqual(dict(serial='SYN-CHASSIS-001', manufacturer='DMI vendor', model='DMI model'), result['identity'])
+        self.assertEqual('ipmitool fru ID 0: Chassis Serial', result['sources']['serial'])
+        self.assertEqual(3, len([w for w in result['warnings'] if 'bootstrap fallback' in w]))
+        result = discover('', overrides=dict(serial='Fallback', manufacturer='Vendor', model='Model'))
+        self.assertEqual(dict(serial='Fallback', manufacturer='Vendor', model='Model'), result['identity'])
 
     def test_missing_failed_and_partial_output_are_optional(self):
         for probe in (dict(rc=127), dict(rc=1, stdout=FIXTURE.read_text()), dict(msg='permission denied'), dict(rc=0, stdout='')):
@@ -104,6 +107,52 @@ class OptionalImportTest(unittest.TestCase):
         self.assertEqual('CHASSIS-001', self.api.rows('dcim/devices/')[0]['serial'])
         self.assertEqual(original, self.api.rows(ASSETS))
         self.assertEqual([], self.api.writes)
+
+    def test_type_creation_is_scoped_to_vendor_and_preserves_existing_templates(self):
+        from test_importer import shared
+        sync = shared.Sync(self.params, False)
+        old = self.api.add('dcim/device-types/', manufacturer=self.maker['id'], model='Chassis', u_height=4)
+        self.assertEqual(old, inventory.server_type(sync, 'BittWare', 'Chassis'))
+        self.api.add('dcim/manufacturers/', name='Observed vendor', slug='observed-vendor')
+        new = inventory.server_type(sync, 'Observed vendor', 'Chassis')
+        self.assertNotEqual(old['id'], new['id'])
+        self.assertEqual(4, self.api.tables['dcim/device-types/'][old['id']]['u_height'])
+        self.assertEqual(new, inventory.server_type(sync, 'Observed vendor', 'Chassis'))
+
+    def test_type_correction_keeps_asset_identity_and_is_idempotent(self):
+        params = self.params_for_device()
+        inventory.synchronize(dict(params, serial='CHASSIS-001'), False)
+        asset = self.api.rows(ASSETS)[0]
+        aid = asset['id']
+        asset['asset_tag'] = 'MANUAL-TAG'
+        self.api.tables['dcim/devices/'][self.device['id']]['asset_tag'] = 'MANUAL-TAG'
+        dtype = self.api.add('dcim/device-types/', manufacturer=self.maker['id'], model='Observed chassis')
+        corrected = dict(params, model='Observed chassis')
+        before = copy.deepcopy(self.api.tables)
+        self.assertTrue(inventory.synchronize(corrected, True))
+        self.assertEqual(before, self.api.tables)
+        inventory.synchronize(corrected, False)
+        self.assertEqual([aid], [a['id'] for a in self.api.rows(ASSETS)])
+        self.assertEqual(dtype['id'], self.api.rows(ASSETS)[0]['device_type'])
+        self.assertEqual('MANUAL-TAG', self.api.rows(ASSETS)[0]['asset_tag'])
+        self.assertEqual(dtype['id'], self.api.rows('dcim/devices/')[0]['device_type'])
+        self.assertEqual([], inventory.synchronize(corrected, False))
+
+    def test_duplicate_chassis_assets_refuse_before_mutation(self):
+        params = self.params_for_device()
+        inventory.synchronize(dict(params, serial='CHASSIS-001'), False)
+        other = self.api.add('dcim/device-types/', manufacturer=self.maker['id'], model='Observed chassis')
+        self.api.add(ASSETS, serial='CHASSIS-001', device_type=other['id'], status='stored')
+        self.api.writes.clear()
+        with self.assertRaisesRegex(ValueError, 'Conflicting chassis assets'):
+            inventory.synchronize(dict(params, model='Observed chassis'), False)
+        self.assertEqual([], self.api.writes)
+
+    def test_missing_observation_does_not_adopt_placeholder_serial(self):
+        params = self.params_for_device()
+        self.api.tables['dcim/devices/'][self.device['id']]['serial'] = 'N/A'
+        self.assertEqual([], inventory.synchronize(params, False))
+        self.assertEqual([], self.api.rows(ASSETS))
 
     def test_new_device_without_serial_has_no_fabricated_asset(self):
         params = self.params_for_device(device='NEW-SYNTHETIC')

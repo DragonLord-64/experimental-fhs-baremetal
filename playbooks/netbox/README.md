@@ -25,9 +25,9 @@ Failed reads and missing/duplicate record IDs do not supply FRU identity fallbac
 
 | NetBox destination | Discovery |
 |---|---|
-| Device serial / chassis asset | `bootstrap_chassis_serial`, DMI chassis serial, selected FRU Chassis Serial |
-| Device type manufacturer | `bootstrap_manufacturer`, DMI system vendor, FRU Product Manufacturer |
-| Device type model | `bootstrap_device_type`, DMI product name, usable FRU Product Name, Product Part Number, Chassis Part Number |
+| Device serial / chassis asset | DMI chassis serial, selected FRU Chassis Serial, `bootstrap_chassis_serial` fallback |
+| Device type manufacturer | DMI system vendor, FRU Product Manufacturer, `bootstrap_manufacturer` fallback |
+| Device type model | DMI product name, usable FRU Product Name, Product Part Number, Chassis Part Number, `bootstrap_device_type` fallback |
 | `product_*` device fields | DMI product fields where available, otherwise corresponding FRU fields; serial/version remain product identity |
 | `motherboard_*` device fields | DMI board vendor/name/serial, otherwise FRU Board Mfg/Product/Serial; FRU part number and manufacture date |
 | Motherboard inventory item / asset | Only with observed board manufacturer, model and serial; board model identifies its type; part number is set only when observed |
@@ -45,9 +45,17 @@ provenance, FRU records and assets survive partial reads. A missing chassis
 serial permits hostname-based device updates without creating/reassigning an
 asset; it cannot establish a rename. NetBox requires a device type: new devices
 without manufacturer/model are reported and skipped until verified overrides
-are supplied. A discovered identity that conflicts with an existing chassis
-serial/type still requires review. Records imported previously with a product
-serial in the chassis field are not silently rewritten.
+are supplied. Valid hardware manufacturer/model correct the existing device and
+linked chassis asset type; the asset ID, tag and history are preserved. Changes
+are journalled with discovery sources. Hardware observations precede bootstrap
+fallbacks; disagreements are reported. Device updates use the ensured type ID.
+Conflicting chassis serial ownership, ambiguous assets and quarantine still
+require review. A changed serial alone cannot distinguish a data correction
+from a replacement; it does not silently rewrite the previous physical asset.
+
+A failed host stops its own import; other hosts and discovery families continue.
+Only completed host imports contribute to shared topology. Ansible still returns
+failure for the run when a host fails; inspect its recap before rerunning.
 
 FRU discovery never enables absence removal. Motherboard reconciliation always
 uses an incomplete scope; DDR5/NVMe, FPGA, NIC and Nexus completeness rules remain

@@ -2,7 +2,7 @@
 """Serial-safe chassis, component and Nexus asset reconciliation."""
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.fhs_netbox import (Sync, scalar, ensure_manufacturers,
-    physical_serial, physical_device, asset_candidate, ensure_asset, retire_module)
+    physical_serial, physical_device, asset_candidate, ensure_asset, retire_module, ASSETS)
 import hashlib
 import re
 
@@ -17,6 +17,21 @@ def item_type(sync,maker,model,part_number=None):
         data,model+' inventory type')
 
 
+def server_type(sync, manufacturer, model):
+    maker = sync.find('dcim/manufacturers/', name=manufacturer)
+    if not maker:
+        raise ValueError('Create manufacturer before chassis reconciliation')
+    key = {'manufacturer_id': maker['id'], 'model': model}
+    dtype = sync.find('dcim/device-types/', **key)
+    if dtype:
+        return dtype
+    slug = re.sub('[^a-z0-9]+', '-', model.lower()).strip('-')[:80] or 'server'
+    slug += '-' + hashlib.sha256((manufacturer + '\0' + model).encode()).hexdigest()[:8]
+    return sync.ensure('dcim/device-types/', key,
+                       {'manufacturer': maker['id'], 'model': model, 'slug': slug, 'u_height': 0},
+                       model + ' device type')
+
+
 def synchronize(params,check):
     sync=Sync(params,check)
     mode=params['mode']; name=params['device']
@@ -29,9 +44,34 @@ def synchronize(params,check):
         dtype=sync.find('dcim/device-types/',manufacturer_id=maker['id'],model=params['model'])
         if not dtype: raise ValueError('Create device type before chassis reconciliation')
         device=physical_device(sync,name,serial,optional)
-        if device and scalar(device['device_type'])!=dtype['id']:
-            raise ValueError('Chassis model differs; review identity before applying')
-        if serial: asset_candidate(sync,'device',dtype['id'],serial,device['id'] if device else None)
+        # Type is observed metadata, not a reason to reject the same chassis.
+        # Preflight all ownership before changing either device or linked asset.
+        observed_serial = serial or (device.get('serial') if device else '')
+        assigned = sync.find(ASSETS,device_id=device['id']) if device else None
+        candidates = [a for a in sync.list(ASSETS,serial=observed_serial)
+                      if a.get('serial') == observed_serial and scalar(a.get('device_type'))]
+        if len(candidates)>1 or (assigned and candidates and assigned['id']!=candidates[0]['id']):
+            raise ValueError('Conflicting chassis assets; review duplicate serial ownership')
+        asset = assigned or (candidates[0] if candidates else None)
+        if asset:
+            if asset.get('serial') != observed_serial or scalar(asset.get('device')) not in (None, device['id'] if device else None):
+                raise ValueError('Chassis asset identity conflicts with observed hardware')
+            if scalar(asset.get('status')) == 'faulty':
+                raise ValueError('Quarantined asset requires explicit review before installation')
+            if device and (device.get('asset_tag') or None) not in (None,asset.get('asset_tag')):
+                raise ValueError('Hardware and asset tags conflict; review before assignment')
+        correcting = device and scalar(device['device_type']) != dtype['id']
+        asset_correcting = asset and scalar(asset.get('device_type')) != dtype['id']
+        if correcting or asset_correcting:
+            if device:
+                sync.journal(device['id'],'chassis identity',observed_serial,observed_serial,'started',
+                             old_type=scalar(device['device_type']),new_type=dtype['id'],
+                             manufacturer=params['manufacturer'],model=params['model'],
+                             sources=params.get('identity_sources',{}))
+            if asset and scalar(asset.get('device')):
+                sync.ensure(ASSETS,{'id':asset['id']},{'device':None,'status':'stored'},name+' asset detached for type correction')
+            if asset_correcting:
+                sync.ensure(ASSETS,{'id':asset['id']},{'device_type':dtype['id']},name+' asset type correction')
         data={'name':name,'device_type':dtype['id']}
         if serial: data['serial']=serial
         if not device:
@@ -41,7 +81,13 @@ def synchronize(params,check):
             data.update(site=site['id'],role=role['id'],status='active')
         key={'id':device['id']} if device else {'name':name}
         device=sync.ensure('dcim/devices/',key,data,name+' chassis')
-        if serial: ensure_asset(sync,'device',dtype['id'],serial,device,name)
+        if asset:
+            sync.ensure(ASSETS,{'id':asset['id']},{'device':device['id'],'device_type':dtype['id'],'status':'used'},name+' asset')
+        elif serial:
+            ensure_asset(sync,'device',dtype['id'],serial,device,name)
+        if correcting or asset_correcting:
+            sync.journal(device['id'],'chassis identity',observed_serial,observed_serial,'corrected',
+                         new_type=dtype['id'],sources=params.get('identity_sources',{}))
         return sync.plan
     device=sync.find('dcim/devices/',name=name)
     if not device: raise ValueError('Create parent device before asset reconciliation')
@@ -132,13 +178,18 @@ def main():
     module=AnsibleModule(argument_spec=dict(
         netbox_url=dict(required=True),netbox_token=dict(required=True,no_log=True),
         validate_certs=dict(type='bool',default=True),device=dict(required=True),
-        mode=dict(required=True,choices=['resolve','device','components','nexus']),
+        mode=dict(required=True,choices=['resolve','type','device','components','nexus']),
         allow_missing_serial=dict(type='bool',default=False),
         serial=dict(default=''),manufacturer=dict(default='Unknown'),model=dict(default=''),
         site=dict(default=''),role=dict(default=''),items=dict(type='list',elements='dict',default=[]),
         complete=dict(type='bool',default=False),scope=dict(type='list',elements='str',default=[]),
+        identity_sources=dict(type='dict',default={}),
         preview=dict(type='bool',default=False)),supports_check_mode=True)
     try:
+        if module.params['mode']=='type':
+            sync=Sync(module.params,module.check_mode or module.params['preview'])
+            dtype=server_type(sync,module.params['manufacturer'],module.params['model'])
+            module.exit_json(changed=bool(sync.plan),plan=sync.plan,device_type=dtype)
         if module.params['mode']=='resolve':
             device=physical_device(Sync(module.params,True),module.params['device'],module.params['serial'],module.params['allow_missing_serial'])
             module.exit_json(changed=False,device=device)

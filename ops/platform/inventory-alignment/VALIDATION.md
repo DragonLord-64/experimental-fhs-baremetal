@@ -192,3 +192,29 @@ Private detailed evidence remains on dragonvm at
 `/tmp/fhs-discovery-completion-0gnix1wk/`. No physical device was contacted;
 plugin pages use Django Client, not browser visual QA. Prior failed reports and
 controller logs remain preserved. No claim of physical hardware discovery.
+
+
+## Hardware corrections and host isolation — 2026-10-25
+
+Retained delivered chart release/namespace `fhs-inventory-alignment`, explicit
+context `fhs-test`; NetBox `4.7.0`, Inventory `2.7.1`. No deployment changes.
+
+- 49 focused tests passed without skips: `test_fru`, `test_importer`,
+  `test_routing`, `test_task_flow`; real Ansible syntax check passed.
+- `acceptance_fru.py`: 20 native assertions passed, including manufacturer-only
+  and model-only corrections, stale bootstrap fallbacks, retained chassis asset
+  IDs, repeat-import stability and partial/failed/missing discovery preservation.
+- `acceptance.py`: 69 native assertions passed for chassis, components,
+  FPGA/NIC/Nexus replacement/removal, retained assets, journals and change logs.
+- Host-failure routing fixture confirms another Linux host and Nexus imports
+  continue while Ansible returns failure for the affected host.
+
+Private synthetic evidence on dragonvm:
+`/tmp/fhs-hardware-correction.O5jEViXt/{acceptance_fru,acceptance}.json`.
+Local orchestration log: `/tmp/fhs-hardware-acceptance-final.log`.
+An initial broad test transfer omitted legacy chart fixtures; the final focused
+checks above used their complete dependencies. Local Python-only FRU checks
+explicitly skipped native Ansible; the remote focused run had no skips.
+
+Physical hardware remains unverified. Conflicting serial identity, ambiguous
+asset ownership and quarantine still require review for the affected host.
