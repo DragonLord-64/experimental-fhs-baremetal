@@ -37,6 +37,7 @@ class RoutingTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix='fhs-routing-')
         self.addCleanup(self.temp.cleanup)
         self.folder = Path(self.temp.name)
+        shutil.copyfile(SOURCE / 'defaults.yml', self.folder / 'defaults.yml')
         (self.folder / 'tasks').mkdir()
         (self.folder / 'action_plugins').mkdir()
         (self.folder / 'ansible.cfg').write_text('[defaults]\nretry_files_enabled=False\nstdout_callback=default\n')
@@ -112,6 +113,14 @@ class ActionModule(ActionBase):
                 self.assertNotIn('network_cli', actual[host][1])
             self.assertEqual('https://routing.invalid', actual[host][2], 'Credentials override must reach both paths')
             self.assertEqual('3', actual[host][3], 'Shared API retry default must reach both paths')
+
+    def test_shared_credentials_default_reaches_both_families(self):
+        defaults = yaml.safe_load((self.folder / 'defaults.yml').read_text())
+        defaults['netbox_credentials_file'] = str(self.folder / 'credentials.yml')
+        (self.folder / 'defaults.yml').write_text(yaml.safe_dump(defaults))
+        (self.folder / 'vars.json').write_text('{}')
+        self.assert_routes(self.route('--limit', 'linux-a,nexus-var'),
+                           {'linux-a': 'linux', 'nexus-var': 'nexus'})
 
     def test_mixed_inventory_routes_each_family(self):
         self.assert_routes(self.route(), {'linux-a': 'linux', 'nexus-group': 'nexus',

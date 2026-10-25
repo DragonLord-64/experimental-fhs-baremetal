@@ -122,7 +122,8 @@ class TaskFlowTest(unittest.TestCase):
         self.assertEqual([],self.api.writes)
 
     def fpga_vars(self,raw):
-        defaults=yaml.safe_load((SOURCE/'netbox_import.yml').read_text())[1]['vars']
+        defaults=dict(yaml.safe_load((SOURCE/'defaults.yml').read_text()),
+                      **yaml.safe_load((SOURCE/'netbox_import.yml').read_text())[1]['vars'])
         selected={key:value for key,value in defaults.items() if key.startswith('bootstrap_bittware_') or key=='bootstrap_fpga_interface_type'}
         selected.update(bootstrap_bittware_enabled=True,bootstrap_fpga_complete=True,
             bootstrap_bittware_card_list_argv=[sys.executable,'-c','print('+repr(raw)+')'],

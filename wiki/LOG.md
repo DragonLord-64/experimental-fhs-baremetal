@@ -157,3 +157,11 @@ Append completed events here; keep proposed work in the plan.
 - Wiki-only source/link checks and a local structure/fragment inspection pass:
   one title per page, balanced fences, valid local paths/fragments and no trailing
   whitespace. No external-link reachability or Sphinx build was claimed.
+
+## 2026-10-25 — shared NetBox playbook defaults
+
+- Centralized [import/export defaults](../playbooks/netbox/defaults.yml), including
+  the single `netbox_credentials_file` setting. CLI overrides remain supported;
+  runtime device facts and routing stay in the playbooks. Six routing checks,
+  seven synthetic task checks and both playbook syntax checks passed. No live
+  inventory or chart changes were needed for this configuration refactor.

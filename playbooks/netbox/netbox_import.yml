@@ -4,7 +4,8 @@
   connection: local
   any_errors_fatal: true
   vars:
-    fhs_is_nexus: '{{ "nexus" in group_names or "device_roles_nexus-switch" in group_names or "device_roles_nexus_switch" in group_names or ansible_network_os | default("") in ["cisco.nxos.nxos", "nxos"] }}'
+    fhs_is_nexus: '{{ "nexus" in group_names or "device_roles_nexus-switch" in group_names or "device_roles_nexus_switch" in group_names or ansible_network_os
+      | default("") in ["cisco.nxos.nxos", "nxos"] }}'
   tasks:
   - name: Reject unsupported network operating systems before discovery
     tags: [always]
@@ -23,65 +24,13 @@
   gather_facts: false
   any_errors_fatal: true
   vars_files:
-  - '{{ netbox_credentials_file | default(''/provision/files.d/credentials/netbox.yml'') }}'
+  - defaults.yml
+  - '{{ netbox_credentials_file }}'
   vars:
-    netbox_validate_certs_default: false
-    hardware_command_path: '{{ ''/opt/netbox-demo/bin:/usr/sbin:/usr/bin:/sbin:/bin'' if hardware_simulation | default(false) | bool else ''/usr/sbin:/usr/bin:/sbin:/bin''
-      }}'
-    bootstrap_bittware_enabled: true
-    bootstrap_bittware_venv: /opt/venvs/fhs
-    bootstrap_bittware_sdk_root: /usr/share/bittware-sdk
-    bootstrap_bittware_card_list_argv:
-    - bw_card_list
-    - -v
-    - -i
-    - USB
-    bootstrap_bittware_serial_pattern: ^IA-860M\s+(\S+)\s*$
-    bootstrap_bittware_part_pattern: ^\s*Part Number\s*:\s*(.+)$
-    bootstrap_bittware_version_pattern: ^\s*Version\s*:\s*(.+)$
-    bootstrap_bittware_bmc_firmware_pattern: ^\s*BMC Version\s*:\s*(.+)$
-    bootstrap_bittware_index_pattern: ^\s*Index\s*:\s*(\d+)\b
-    resource_field_definitions:
-      cpu_arch: text
-      ram: integer
-      cpus: integer
-      disk_size: integer
-    unavailable_values:
-    - ''
-    - unknown
-    - not specified
-    - not available
-    - none
-    - to be filled by o.e.m.
     facts: '{{ hostvars[inventory_hostname].ansible_facts }}'
-    netbox_site: '{{ server_info.site | default(bootstrap_site | default(''MDA'')) }}'
-    netbox_role: '{{ server_info.role | default(bootstrap_role | default(''FPGA_HOST_SERVER'')) }}'
     netbox_manufacturer: '{{ system_identity.identity.manufacturer | default("") }}'
     netbox_device_type: '{{ system_identity.identity.model | default("") }}'
     netbox_auth: '{{ (''Bearer '' if netbox_token.startswith(''nbt_'') else ''Token '') ~ netbox_token }}'
-    bootstrap_bittware_pci_list_argv:
-    - lspci
-    - -D
-    - -nn
-    bootstrap_bittware_pci_map: {}
-    bootstrap_fpga_interface_type: 400gbase-x-qsfpdd
-    bootstrap_bittware_debug: false
-    bootstrap_nic_enabled: true
-    bootstrap_nic_manufacturer: Mellanox
-    bootstrap_nic_drivers:
-    - mlx5_core
-    bootstrap_nic_ethtool_argv:
-    - ethtool
-    bootstrap_nic_vpd_argv:
-    - lspci
-    - -vv
-    - -s
-    bootstrap_nic_collect_link: true
-    bootstrap_nic_part_pattern: \[PN\]\s+Part number:\s*(\S+)
-    bootstrap_nic_serial_pattern: \[SN\]\s+Serial number:\s*(\S+)
-    netbox_api_retries: 3
-    netbox_api_retry_delay: 5
-    netbox_api_loop_pause: 1
   module_defaults:
     ansible.builtin.uri:
       validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
@@ -100,20 +49,10 @@
   any_errors_fatal: true
   connection: ansible.netcommon.network_cli
   vars_files:
-  - '{{ netbox_credentials_file | default(''/provision/files.d/credentials/netbox.yml'') }}'
+  - defaults.yml
+  - '{{ netbox_credentials_file }}'
   vars:
     ansible_network_os: cisco.nxos.nxos
-    nexus_site: '{{ bootstrap_site | default(''Bootstrap Lab'') }}'
-    nexus_role: '{{ bootstrap_role | default(''Network switch'') }}'
-    nexus_commands:
-    - show inventory all | json
-    - show version | json
-    - show interface transceiver | json
-    nexus_epld_command: show version module 1 epld
-    netbox_validate_certs_default: false
-    netbox_api_retries: 3
-    netbox_api_retry_delay: 5
-    netbox_api_loop_pause: 1
   module_defaults:
     group/netbox.netbox.netbox:
       netbox_url: '{{ netbox_url }}'
@@ -131,7 +70,8 @@
   connection: local
   become: false
   vars_files:
-  - '{{ netbox_credentials_file | default(''/provision/files.d/credentials/netbox.yml'') }}'
+  - defaults.yml
+  - '{{ netbox_credentials_file }}'
   tasks:
   - name: Collect only this run's selected topology observations
     ansible.builtin.set_fact:
@@ -144,7 +84,7 @@
     fhs_topology_sync:
       netbox_url: '{{ netbox_url }}'
       netbox_token: '{{ netbox_token }}'
-      validate_certs: '{{ netbox_validate_certs | default(false) | bool }}'
+      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
       observations: '{{ topology_observations }}'
       preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or ("all" not in ansible_run_tags and "apply" not in ansible_run_tags) }}'
     register: topology_result

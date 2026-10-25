@@ -53,7 +53,7 @@ def main():
         folder = Path(temporary); binary = folder / 'bin'; binary.mkdir()
         (binary / 'cat').write_text('#!' + sys.executable + '\nprint("To be filled by OEM")\n')
         (binary / 'cat').chmod(0o700)
-        variables = dict(definition['vars'])
+        variables = dict(yaml.safe_load((source / 'defaults.yml').read_text()), **definition['vars'])
         variables.update(netbox_url=base, netbox_token="{{ lookup('env', 'FHS_FRU_TOKEN') }}",
             netbox_validate_certs=True, hardware_simulation=True, hardware_command_path=str(binary),
             netbox_api_retries=1, netbox_api_retry_delay=0, netbox_api_loop_pause=0,

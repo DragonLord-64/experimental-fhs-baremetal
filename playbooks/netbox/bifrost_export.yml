@@ -3,33 +3,9 @@
   connection: local
   gather_facts: false
   vars_files:
-  - '{{ netbox_credentials_file | default(''/provision/files.d/credentials/netbox.yml'') }}'
-  - '{{ redfish_credentials_file | default(''/provision/files.d/credentials/redfish.yml'') }}'
-  vars:
-    netbox_validate_certs_default: false
-    bifrost_output: '{{ playbook_dir }}/output/baremetal.yml'
-    bifrost_device_type: '{{ bootstrap_device_type | default(''TeraBox1501b'') }}'
-    bifrost_provisioning_tag: provisioning-interface
-    bifrost_root_device:
-      size: '> 900'
-    bifrost_capabilities: boot_mode:uefi
-    allowed_extra:
-    - uuid
-    - properties
-    - instance_info
-    - ipv4_address
-    - provisioning_ipv4_address
-    - addressing_mode
-    - node_network_data
-    - ipa_kernel_url
-    - ipa_ramdisk_url
-    - boot_interface
-    - deploy_interface
-    - management_interface
-    - power_interface
-    - inspect_interface
-    - automated_clean
-    - host_groups
+  - defaults.yml
+  - '{{ netbox_credentials_file }}'
+  - '{{ redfish_credentials_file }}'
   tasks:
   - name: Require a device type and provisioning-interface selector
     ansible.builtin.assert:
