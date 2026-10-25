@@ -98,3 +98,16 @@ prefix in its private values. For an application rollback after assessing the
 migration/data limits, use `helm rollback mid-cbf-hw PREVIOUS_REVISION` with the
 same explicit context/namespace and wait flags. These are operator instructions;
 no hardware deployment is established by an offline render.
+
+## Topology Views
+
+The public-image startup and optional image recipe include hash-pinned
+`netbox-topology-views==5.0.0` for NetBox `4.7.x`. Web, worker and housekeeping
+share the plugin configuration. Startup prepares writable per-pod
+`static/netbox_topology_views/img`; web runs the existing entrypoint migrations
+and collects plugin static assets before serving. Custom image uploads in this
+emptyDir are ephemeral; no persistent custom-icon store is configured.
+Open `PREFIX/netbox/plugins/netbox_topology_views/` after login. Maps use NetBox
+cable records; this does not discover physical cabling.
+
+[Focused checks and package evidence](../../../ops/platform/topology-views/README.md).

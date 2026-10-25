@@ -3,6 +3,8 @@ USER root
 COPY requirements.txt /tmp/plugins.txt
 RUN /usr/local/bin/uv pip install --python /opt/netbox/venv/bin/python --no-deps --require-hashes -r /tmp/plugins.txt
 COPY plugins.py /etc/netbox/config/plugins.py
+RUN mkdir -p /opt/netbox/netbox/static/netbox_topology_views/img \
+    && chown netbox:netbox /opt/netbox/netbox/static/netbox_topology_views/img
 RUN SECRET_KEY=build-only-not-used-at-runtime-build-only-not-used-at-runtime \
     /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py collectstatic --no-input
 USER netbox

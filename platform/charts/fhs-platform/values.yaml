@@ -29,7 +29,7 @@ credentials:
 netbox:
   fullnameOverride: fhs-netbox
   basePath: netbox/
-  plugins: [netbox_inventory, netbox_prometheus_sd]
+  plugins: [netbox_inventory, netbox_prometheus_sd, netbox_topology_views]
   pluginsConfig:
     netbox_inventory:
       sync_hardware_serial_asset_tag: true
@@ -61,7 +61,12 @@ netbox:
         printf '%s\n' 'netbox-plugin-prometheus-sd==2.2.0 --hash=sha256:14e7b8f64a499b5cb3c5e86db459f85c4a1ce3f8b1e26589f15826194a39bb1c' > /plugin-packages/discovery.txt
         /usr/local/bin/uv pip install --no-cache --no-deps --require-hashes --python /opt/netbox/venv/bin/python --target /plugin-packages --requirement /plugin-packages/discovery.txt
       fi
+      if ! /opt/netbox/venv/bin/python -c 'from importlib.metadata import version; assert version("netbox-topology-views") == "5.0.0"' 2>/dev/null; then
+        printf '%s\n' 'netbox-topology-views==5.0.0 --hash=sha256:afe03396b67e8ed16ae2ad43d13bd8380f48cc0ffd1621259b6a60fa21f7170f' > /plugin-packages/topology.txt
+        /usr/local/bin/uv pip install --no-cache --no-deps --require-hashes --python /opt/netbox/venv/bin/python --target /plugin-packages --requirement /plugin-packages/topology.txt
+      fi
       cp -R /opt/netbox/netbox/static/. /plugin-static/
+      mkdir -p /plugin-static/netbox_topology_views/img
     securityContext:
       runAsUser: 1000
       runAsGroup: 1000
