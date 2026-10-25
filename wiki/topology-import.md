@@ -9,7 +9,9 @@ Source: official `development2`, commit `dc08629`,
 Linux/FHS and NX-OS keep separate collection strategies behind one entrypoint.
 After inventory import, exact LLDP names/unique interface MACs and unique DAC
 serial pairs produce native NetBox cables. Inventory assets remain under the
-Inventory plugin; Topology Views reads the native connections. No LLDP daemon,
+Inventory plugin; Topology Views reads the native connections. See the
+[asset/replacement policy](resource-layout.md#import-decision--2026-10-22) for
+serial identity, retained assets and cabled-removal refusal. No LLDP daemon,
 port configuration or FPGA register is changed.
 
 Serial suffixes are significant. The upstream example contains mismatched

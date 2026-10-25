@@ -68,6 +68,12 @@ Append completed events here; keep proposed work in the plan.
 - Recorded the user's [current native NetBox testing priority and deferred spare-parts scope](decisions.md#confirmed-with-the-user--2026-10-23). Clarified the existing [lab integration target](../AGENTS.md#lab-test-authority): chart/importer integration belongs on dragonvm's `fhs-test`; standalone plugin tests and renders did not close that gap. The trial's cleanup boundary did not prohibit authorized lab integration testing. This documentation change establishes no new runtime test result.
 - Re-ran the current [read-only NetBox resource/API check](../ops/platform/netbox-resource-test.py) over SSH against the existing `fhs-test` / `fhs-platform` deployment: 62 API requests passed alongside a Django read; 186 device records, pod UID and zero restart count remained unchanged, with no OOM events and no server plugins enabled. The remote checkout lacked this newer script, so the checked local source was supplied through SSH stdin. This verifies existing native NetBox health, not the delivered umbrella chart or an importer end-to-end run.
 
+- Ingested the published development history through `f0603c6` into the wiki, preserving the existing append-only log and local handoff edits. Added [latest changes](latest-changes.md) for the portable six-dashboard static demo, capacity/port semantics, screenshots, native dashboard source and current NetBox playbook paths. Verified source files in a separate read-only history inspection; runtime results are attributed to their existing evidence, not rerun here. The working checkout remains at `455023d`; no deployment or inventory changes were made.
+
+- Recorded the user's revised [NetBox import/replacement decision](resource-layout.md#import-decision--2026-10-22): intentional reimport overwrites observed facts; serial identifies hardware, IP provides access; confirmed replaced modules are deleted and recreated; cabling must be freshly verified. The user selected NetBox journals for history, attached to the surviving parent rather than the deleted module. This supersedes retaining uninstalled module records; implementation and live acceptance remain pending. Reviewed the wiki refresh and passed `git diff --check`; existing local handoff edits remain preserved.
+
+- User accepted scoped absence reconciliation and selected standard YAML Ansible inventory as the common discovery/import/export interface. Recorded the [contract direction](resource-layout.md#import-decision--2026-10-22): separate real discovery from testable controller-side NetBox reconciliation; structured hardware host variables carry explicit scope/completion. No importer/exporter changes or live mutations were performed.
+
 
 ## 2026-10-24
 
@@ -113,6 +119,10 @@ Append completed events here; keep proposed work in the plan.
 - Set small-task defaults to 600 seconds per worker, 120 per configured check and three launches. The controller owns acceptance; workers avoid duplicate checks and unrelated test infrastructure. Added the same fast source-check entrypoint to private GitHub CI, with controller tests only for Python controller changes. Scope paths are guidance, not sandbox enforcement.
 - Syntax audit found and fixed empty disabled shell groups in the hardware power-test launcher; no hardware test was executed. Corrected Bifrost Quickstart and lab Inventory-image links. Existing wiki/emulator work was preserved. Final validation and limits: [pipeline validation](../ops/agent-pipeline/VALIDATION.md#2026-10-24--intake-scout-and-manager).
 
+## 2026-10-25 — temporary Filebeat setup disable
+
+- Disabled the [platform Filebeat setup default](../platform/charts/fhs-platform/values.yaml) while the image pull is unavailable; setup remains opt-in and the writer account remains enabled. Focused contracts: 13 passed; Helm lint passed. Logging resources passed server dry run on `fhs-test` with existing lab storage overrides. Full chart/importer runtime acceptance was not run; no live release was upgraded.
+
 ## 2026-10-25 — delegated Filebeat index setup
 
 - Added [control-host index setup](../roles/filebeat/README.md#elasticsearch-setup)
@@ -130,3 +140,20 @@ Append completed events here; keep proposed work in the plan.
   endpoints. Native cables appeared in Topology Views with Inventory active.
   [Evidence and limits](topology-import.md): 64 importer tests, two syntax checks,
   native topology acceptance and 69 existing asset checks passed in the lab.
+
+## 2026-10-25 — wiki consolidation
+
+- Consolidated the retired handoff and historical dashboard snapshot into the
+  [topic index](INDEX.md), [source map](sources.md), [environment evidence](test-environment-plan.md)
+  and [dashboard/telemetry note](latest-changes.md). Preserved the original
+  handoff and pre-lint wiki copies under the ignored private
+  `ops/agent-pipeline/runs/wiki-lint-20261025/` directory. Earlier log entries
+  and local user notes remain intact.
+- Reconciled [inventory policy](resource-layout.md) with recorded asset, FRU and
+  topology acceptance; kept normalized discovery YAML marked as design work.
+  Updated stale checkout paths, pipeline stages, lab memory history, image-recipe
+  location and documentation backlog. All claims come from repository sources
+  and dated results; no lab or physical-hardware check was rerun.
+- Wiki-only source/link checks and a local structure/fragment inspection pass:
+  one title per page, balanced fences, valid local paths/fragments and no trailing
+  whitespace. No external-link reachability or Sphinx build was claimed.

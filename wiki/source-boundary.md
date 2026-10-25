@@ -36,11 +36,14 @@ use the custom lab command for the validated role test. Production role behavior
 is unchanged. Other upstream docs/tests, including `testing/`, were not moved.
 
 The chart keeps compressed runtime dashboards; it never imports the development
-generator during installation. `platform/netbox-image` resolves inside
-`platform/`, and the copied chart includes its own build context. No shared
+generator during installation. The [NetBox image recipe](../platform/charts/fhs-platform/netbox-image/README.md)
+and its build context are inside the copied chart under `platform/`. No shared
 runtime script or symlink reaches into `ops/`, `wiki/` or `examples/`.
 
 ## Checks
+
+These checks apply when changing source boundaries or the corresponding runtime
+inputs. Wiki-only edits need local content/link checks, not these suites.
 
 ```sh
 python3 -m unittest discover -s ops/source-boundary -v

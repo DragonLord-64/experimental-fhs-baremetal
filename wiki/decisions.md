@@ -1,44 +1,62 @@
 # Decisions and open questions
 
+Current implementation and test limits are indexed in the
+[environment plan](test-environment-plan.md). Dated entries retain the original
+scope decisions; a later decision can supersede an earlier deferral.
+
 ## Confirmed with the user — 2026-10-21
 
-- Use a private GitHub experimental repository and a separate checkout in the home directory.
-- The agent may push experimental changes there; the user transfers accepted changes to official SKA repos.
-- The user plans to set up a Linux VM using Hyper-V on a Windows gaming PC.
-- Cloud spending must be below US$10 per month; use existing hardware first.
-- Keep a short plan and a linked knowledge wiki inspired by DragonMind.
-- Grafana dashboards are a workflow example; detailed dashboard scope is deferred.
+- Use a private experimental GitHub repository; publish tested work there and let
+  the user transfer accepted changes to official SKA repositories. Never push upstream.
+- Use existing hardware first, target zero cloud spend and stay below US$10/month.
+  No cloud purchase is authorized.
+- Keep short linked notes with evidence. Resource/NetBox ownership is recorded in
+  [controller resources](resource-layout.md).
+- The Hyper-V VM and detailed Grafana scope were initially plans. Subsequent
+  [lab evidence](test-environment-plan.md#recorded-validation) and
+  [dashboard work](latest-changes.md) supersede those early deferrals.
 
 ## Confirmed with the user — 2026-10-23
 
-- Focus on testing the current [native NetBox discovery/import and export playbooks](../docs/src/playbooks/development.md) with the [delivered platform chart](../platform/charts/fhs-platform/README.md) in the existing `fhs-test` lab on `dragonvm`; see [lab test authority](../AGENTS.md#lab-test-authority). The [2026-10-24 alignment validation](../ops/platform/inventory-alignment/VALIDATION.md) records subsequent integration evidence and its limits.
-- Spare-parts and Inventory integration were deferred at this point; the user resumed that scope on 2026-10-24. The [separate plugin trial](../ops/platform/inventory-trial/README.md) remains evidence for its bounded asset tests.
-- The [`netbox.netbox` Ansible collection](../playbooks/netbox/requirements.yml) runs on the control machine and supports native NetBox API objects. It is distinct from the trial's NetBox Inventory server extension; the aligned importer now requires that extension for physical assets.
+- Test the current native NetBox importers with the delivered chart on existing
+  dragonvm `fhs-test`. [Lab authority](../AGENTS.md#lab-test-authority) permits the
+  required disposable lab/data/resource changes; both host operating systems stay running.
+- Spare-parts integration was deferred then resumed on 2026-10-24. The
+  [plugin trial](../ops/platform/inventory-trial/README.md) is historical evidence;
+  [integrated acceptance](../ops/platform/inventory-alignment/VALIDATION.md) now
+  covers asset retention and installed-record replacement.
 
 ## Confirmed with the user — 2026-10-24
 
-- Align the tested plugin, main deployment and importers; retain physical assets by serial across installed-record removal/replacement. Chassis identity follows serial, not hostname. Complete, explicitly selected discovery scopes may reconcile absence; partial or failed scans preserve records.
-- Use one public [NetBox importer](../playbooks/netbox/netbox_import.yml) for Linux/FHS and Nexus, with internal family tasks and a compatibility Nexus wrapper. Never run server discovery on a switch.
-- Keep manual DAC stock/quarantine tracking available without inventing cable endpoints. Asset status/history and installed topology serve different purposes; change-log retention defaults to 90 days.
-
-## Proposed, not implemented
-
-- Fast lint and syntax checks, disposable Kubernetes tests, VM provisioning tests, and separate physical hardware verification.
-- A test runner on the Linux VM, with identical local and CI commands.
-- Captured telemetry fixtures, dashboard query checks, and screenshot artifacts for issue review.
-
-## Open questions
-
-- Guest boot/provisioning after the successful KVM capability check; see [provisioning limits](../ops/provisioning/README.md).
-- CI provider configuration and runner access.
-- Representative telemetry capture format and coverage.
-- Which roles require real hardware, system VMs, or simulated device interfaces.
-
-## Observed implementation
-
-The Hyper-V guest, persistent platform and restricted Bifrost fixture are implemented within the limits recorded in [VM operations](../ops/kubernetes/README.md), [platform validation](../ops/platform/VALIDATION.md) and [provisioning checks](../ops/provisioning/README.md). The [controller](../ops/agent-pipeline/README.md) owns implementation/check execution; its [validation](../ops/agent-pipeline/VALIDATION.md) records executable selection and bounded real-run evidence. Fake-agent tests alone do not prove a real task completes.
+- Keep one public [NetBox importer](../playbooks/netbox/netbox_import.yml) for
+  Linux/FHS and NX-OS, with separate family collection. Never run server discovery
+  on a switch. Other network operating systems need their own collector.
+- Physical identity follows serial. Assets survive installed-record removal;
+  complete explicit discovery scopes may reconcile absence, while partial/failed
+  scans preserve records. Parent journals retain replacement history. See
+  [reconciliation policy](resource-layout.md#import-decision--2026-10-22).
+- Keep manual DAC stock/quarantine available without inventing cable endpoints.
+  Assets, native topology and history have separate roles. Change-log retention
+  is configured independently of journals and backups.
 
 ## Confirmed with the user — 2026-10-24 pipeline cleanup
 
-- Keep task intake/scouting and one implementation worker, with user review. Use a small CLI manager for queue dispatch and existing lab inspection. No review agent or per-task manager agent.
-- Match checks to changed behavior; the controller runs configured acceptance once. Default worker/check budgets are ten/two minutes. Larger runtime changes still need real chart/importer lab acceptance. See [workflow and commands](../ops/agent-pipeline/README.md).
+- Use local task intake/scouting, one implementation worker and user review. The
+  CLI manager inspects the queue/lab; no screening, per-task manager or review agent.
+- Match checks to changed behavior. The controller runs configured acceptance
+  once; defaults are ten minutes per worker, two minutes per check and three
+  launches. Scope paths are guidance, not a filesystem boundary. See
+  [workflow and commands](../ops/agent-pipeline/README.md).
+- Docs/wiki changes use content/link checks. Real chart/importer acceptance is
+  for relevant runtime changes, not a requirement to redeploy for every edit.
+
+## Open questions
+
+- Versioned discovery-inventory YAML and round-trip semantics; current direct
+  importer behavior is implemented, the general offline boundary is still design work.
+- Guest boot/provisioning after the bounded KVM capability check; see
+  [Bifrost limits](../ops/provisioning/README.md).
+- Representative telemetry/time-series coverage and remaining observed-dashboard
+  navigation/fixture acceptance; see [dashboard boundaries](latest-changes.md).
+- Broader role container/VM/hardware coverage and CI runner access. Existing
+  configured workflows are not evidence of successful CI or physical validation.

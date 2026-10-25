@@ -1,15 +1,39 @@
-# To-do
+# Documentation backlog
 
-Documentation backlog captured 2026-10-21. Provisioning/monitoring reconciliation is integrated in the existing [Sphinx guides](../docs/src/guide/guide.rst), [development procedures](../docs/src/playbooks/development.md) and canonical role READMEs. Independent source/integration review passed; runtime limitations remain in the linked validation pages.
+Keep documentation work here; use GitHub issues for actionable implementation
+scope and acceptance. Runtime gaps are maintained in the
+[environment plan](test-environment-plan.md#remaining-work), not duplicated as
+completed documentation tasks.
 
-Style requirement: match the user's existing documentation voice. Keep descriptions short and practical, with tags and normal usage; use existing docs as writing references.
+## Recorded milestones
 
-- [x] Consolidate each role's documentation into one brief `README.md` inside its role directory: purpose, behavior, tags, usual invocation, and essential prerequisites or cautions. Reference/include that same README from the Sphinx docs for Read the Docs; avoid duplicate prose. Preserve the existing documentation structure and diagrams where useful.
-- [x] Document NetBox setup and usage: inventory, profile/group mapping, overrides, and importing devices and related data.
-- [x] Document the current monitoring architecture and deployment, including how telemetry reaches its consumers.
-- [ ] Document Grafana setup, data sources, dashboard provisioning, and normal usage.
-- [x] Review development playbooks and document those now used operationally, including NetBox imports; distinguish supported workflows from experiments.
-- [x] Document switch POAP provisioning in `playbooks/switch-poap/`, including the POAP script, Nexus configuration, and Bifrost DHCP integration.
-- [x] Check documented commands, tags, paths, and diagrams against current code, then verify the Read the Docs build and links.
+- [x] One concise README per role, referenced by the existing
+  [Sphinx structure](../docs/src/index.rst).
+- [x] NetBox identity, asset reconciliation, import/export and separate discovery
+  families in the [development guide](../docs/src/playbooks/development.md) and
+  [importer README](../playbooks/netbox/README.md).
+- [x] Current portable platform commands in the
+  [canonical chart README](../platform/charts/fhs-platform/README.md), with lab
+  procedures kept in [operations](../ops/platform/README.md).
+- [x] Switch POAP, Nexus configuration and Bifrost DHCP workflow documented in
+  the development guide and [source directory](../playbooks/switch-poap/).
+- [x] Historical strict Sphinx builds and representative diagram/page inspection
+  recorded in the [log](LOG.md#2026-10-22). Those results apply to their tested revisions.
+- [x] Consolidate the stale handoff and dashboard snapshot into current linked
+  wiki topics; preserve source inspection history and original local handoff.
 
-Keep entries concise. Move executable scope and acceptance criteria into GitHub issues when work begins.
+## Remaining documentation
+
+- [ ] Complete the observed Grafana operator guide: datasource/job adaptation,
+  provisioning/import ownership, missing-data meaning and normal navigation.
+  Start with [dashboard sources](../ops/dashboards/README.md); keep
+  [synthetic demo instructions](../examples/grafana-static-demo/README.md) separate.
+- [ ] Document the versioned discovery-inventory YAML contract when implemented;
+  the [current proposal](resource-layout.md#discovery-inventory-boundary--proposed)
+  must not be presented as existing offline import support.
+- [ ] Record capture sanitization and representative time-series coverage as
+  evidence becomes available; see [telemetry requirements](latest-changes.md#telemetry-evidence).
+
+Match nearby repository voice: short descriptions, actual tags, normal commands
+and explicit limits. Keep completed results in the append-only log and current
+behavior beside source, rather than maintaining competing setup instructions.
