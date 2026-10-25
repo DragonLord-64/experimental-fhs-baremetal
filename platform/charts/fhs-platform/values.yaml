@@ -655,5 +655,6 @@ logging:
       enabled: false
   filebeat:
     enabled: true
+  # Temporarily disabled while the Filebeat image pull is unavailable.
   filebeatSetup:
-    enabled: true
+    enabled: false

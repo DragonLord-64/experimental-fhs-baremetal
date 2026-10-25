@@ -82,7 +82,7 @@ class ChartTest(unittest.TestCase):
         self.assertNotIn('cf_prometheus_exporters',config)
 
     def test_setup_only_job_and_preserve_existing_objects(self):
-        objects=render()
+        objects=render(extra=('--set', 'logging.filebeatSetup.enabled=true'))
         job=next(o for o in objects if o['kind']=='Job' and '-filebeat-setup-' in o['metadata']['name'])
         self.assertEqual(900,job['spec']['activeDeadlineSeconds'])
         pod=job['spec']['template']['spec']; self.assertEqual('Never',pod['restartPolicy'])
@@ -111,6 +111,9 @@ class ChartTest(unittest.TestCase):
             self.assertNotEqual(page_checksum(first),page_checksum(render('/hw',True,copied)))
         p=subprocess.run(['helm','template','logs',str(ROOT/'platform/charts/elasticsearch-kibana')],capture_output=True,text=True,check=True)
         self.assertNotIn('beats/filebeat',p.stdout)
+        defaults=render()
+        self.assertFalse(any('-filebeat-setup' in o['metadata']['name'] for o in defaults))
+        self.assertNotIn('beats/filebeat',json.dumps(defaults))
 
     def test_discovery_enable_does_not_change_unrelated_templates(self):
         before=render('/hw'); after=render('/hw',True)

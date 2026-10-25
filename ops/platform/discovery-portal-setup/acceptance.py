@@ -244,7 +244,8 @@ class Acceptance:
                                'serverFiles': {'prometheus.yml': {'scrape_configs': [
                                    {'job_name': 'acceptance-empty', 'file_sd_configs': [
                                        {'files': ['/etc/config/acceptance-unused.json']}]}]}}},
-                'logging': {'elasticsearch': {'persistence': {'storageClass': 'standard', 'size': '4Gi'},
+                # This harness explicitly exercises the optional setup workflow.
+                'logging': {'filebeatSetup': {'enabled': True}, 'elasticsearch': {'persistence': {'storageClass': 'standard', 'size': '4Gi'},
                                                'heap': '512m',
                                                'resources': {'requests': {'cpu': '100m', 'memory': '768Mi'},
                                                              'limits': {'cpu': '2', 'memory': '1536Mi'}}},

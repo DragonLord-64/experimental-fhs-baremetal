@@ -61,6 +61,9 @@ tags instead. Exporters must already be installed on the selected hosts.
 
 ## Logging
 
+Filebeat setup is temporarily disabled by default because its image pull is
+unavailable. Re-enable with `logging.filebeatSetup.enabled=true` when ready.
+
 `logging.filebeatSetup.enabled` runs Filebeat setup on upgrades: templates,
 system ingest pipelines, ILM and the `fhs-filebeat` Kibana data view. Retention
 defaults to 30d for a new policy. Existing policy and data-view settings remain.
