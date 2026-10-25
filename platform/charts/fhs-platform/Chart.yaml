@@ -5,6 +5,7 @@ type: application
 version: 0.1.0
 dependencies:
   - name: netbox
+    condition: netbox.enabled
     version: 8.3.67
     repository: oci://ghcr.io/netbox-community/netbox-chart
   - name: postgresql
@@ -21,6 +22,7 @@ dependencies:
     version: 1.8.77
     repository: https://helm.influxdata.com
   - name: grafana
+    condition: grafana.enabled
     version: 13.2.7
     repository: https://grafana-community.github.io/helm-charts
   - name: elasticsearch-kibana

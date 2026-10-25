@@ -20,5 +20,5 @@ dependencies:
 - name: elasticsearch-kibana
   version: 0.5.2
   repository: file://../elasticsearch-kibana
-digest: sha256:b81542b4b7a268c2af0302fe6025517e075f1cf959e3baf480a26e06af7af327
+digest: sha256:d033c06fba6ad8e6b3e05dba530de6f95ae98c99973c2df90936f8a2561e04b6
 generated: '2026-10-23T20:56:55.706099+00:00'

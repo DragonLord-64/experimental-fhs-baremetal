@@ -96,3 +96,13 @@ Append completed events here; keep proposed work in the plan.
 - Added hash-pinned Topology Views `5.0.0` to the existing NetBox public-image startup and optional image recipe. [Focused check](../ops/platform/topology-views/README.md) covers all consumers, writable static files and a controller-only retained-release smoke with a rolled-back synthetic cable fixture. Three focused tests, six discovery chart contracts and Helm lint passed; live plugin validation remains pending controller execution. No deployment or image build was performed.
 
 - Completed [Topology Views focused lab acceptance](../ops/platform/topology-views/README.md): authenticated topology and synthetic cable connection, CSS/JS, migrations, credentials/PVCs and scale restoration passed in 78.42s. Corrected the probe route and Helm-history comparison; the plugin installation itself needed no runtime fix. Three plugin tests, six existing chart contracts and Helm lint passed. No physical discovery or browser visual validation claimed.
+
+- 2026-10-24: Extended the existing installation home with operator Markdown,
+  named links and cached website reachability through the shared ingress.
+  Six focused runtime/chart tests, 13 discovery/home, ten umbrella and three
+  Topology Views checks plus Helm lint passed
+  locally. Added the controller-only full-chart landing acceptance entrypoint;
+  live root/subpath and failure/recovery results remain pending.
+  [Settings, checks and limits](../ops/platform/landing-page/README.md).
+
+- Completed [installation-home acceptance](../ops/platform/landing-page/README.md) in the delivered chart: deployment-derived links, operator Markdown/custom links, cached 60-second website status and controlled failure/recovery passed through the shared ingress at root and prefixed paths (301.51s). Credentials/PVCs and original lab scales/settings were preserved. Browser rendering was inspected. Retained the authorized lab memory fix (8GiB / 10GiB with swap); no host or cluster restart. Removed context flags from the changed check READMEs; validated lab targets stay inside the scripts.

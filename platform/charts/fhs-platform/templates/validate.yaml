@@ -14,3 +14,23 @@
 {{- fail "External PostgreSQL requires an operator-supplied existingSecretName" -}}
 {{- end -}}
 {{- end -}}
+{{- if .Values.landing.enabled }}
+{{- if or (lt (int .Values.landing.timeoutSeconds) 1) (gt (int .Values.landing.timeoutSeconds) 10) }}
+{{- fail "landing.timeoutSeconds must be between 1 and 10" }}
+{{- end }}
+{{- if lt (int .Values.landing.staleSeconds) 120 }}
+{{- fail "landing.staleSeconds must be at least 120" }}
+{{- end }}
+{{- $ids := dict "netbox" true "grafana" true "kibana" true }}
+{{- if gt (len .Values.landing.extraChecks) 5 }}{{ fail "landing.extraChecks supports at most five endpoints" }}{{ end }}
+{{- range .Values.landing.extraChecks }}
+{{- if or (not (regexMatch "^[a-z][a-z0-9-]*$" .id)) (hasKey $ids .id) }}
+{{- fail "landing.extraChecks requires distinct lowercase ids" }}
+{{- end }}
+{{- $_ := set $ids .id true }}
+{{- if or (not (regexMatch "^https?://[^/@[:space:]]+(/[^[:space:]]*)?$" .endpoint)) (contains "@" .endpoint) }}
+{{- fail "landing.extraChecks endpoints require HTTP(S) without embedded credentials" }}
+{{- end }}
+{{- if not .expected }}{{ fail "landing.extraChecks requires expected HTTP status codes" }}{{ end }}
+{{- end }}
+{{- end }}

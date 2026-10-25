@@ -17,18 +17,23 @@ spec:
     - host: {{ .Values.global.hostname | quote }}
       http:
         paths:
+          {{- if .Values.netbox.enabled }}
           - path: {{ printf "%s/netbox/" (include "fhs-platform.prefix" .) | quote }}
             pathType: Prefix
             backend:
               service:
-                name: fhs-netbox
+                name: {{ .Values.netbox.fullnameOverride }}
                 port: {name: http}
+          {{- end }}
+          {{- if .Values.grafana.enabled }}
           - path: {{ printf "%s/grafana/" (include "fhs-platform.prefix" .) | quote }}
             pathType: Prefix
             backend:
               service:
-                name: fhs-grafana
+                name: {{ .Values.grafana.fullnameOverride }}
                 port: {name: service}
+          {{- end }}
+          {{- if .Values.logging.kibana.enabled }}
           - path: {{ printf "%s/mid-cbf-kibana/" (include "fhs-platform.prefix" .) | quote }}
             pathType: Prefix
             backend:
@@ -36,6 +41,7 @@ spec:
                 name: {{ include "elastic-small.name" . }}-kibana
                 port: {number: 5601}
 
+          {{- end }}
           {{- if .Values.landing.enabled }}
           - path: {{ printf "%s/" (include "fhs-platform.prefix" .) | quote }}
             pathType: Prefix

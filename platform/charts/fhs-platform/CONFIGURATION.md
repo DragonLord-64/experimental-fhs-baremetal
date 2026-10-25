@@ -6,7 +6,7 @@ settings cover the experimental additions.
 ## Inventory discovery and HW home
 
 The prefix root now serves a small public HW home linking to NetBox, Grafana and
-Kibana. It contains no credentials or availability claims. Destination login
+Kibana, with cached reachability from its checker. Destination login
 settings are unchanged. Set `landing.enabled=false` to omit it.
 
 Both plugin installation paths pin Inventory `2.7.1` and Prometheus SD `2.2.0`
@@ -111,3 +111,61 @@ Open `PREFIX/netbox/plugins/netbox_topology_views/` after login. Maps use NetBox
 cable records; this does not discover physical cabling.
 
 [Focused checks and package evidence](../../../ops/platform/topology-views/README.md).
+
+## Installation home
+
+`landing` serves the installation prefix root through the same ingress controller,
+hostname, scheme and TLS configuration as the applications. Browser links are
+relative to that origin and share `global.urlPrefix`; no second URL list or
+Kubernetes discovery is used. `netbox.enabled`, `grafana.enabled` and
+`logging.kibana.enabled` omit disabled application links and ingress routes.
+When disabling Kibana also disable `logging.filebeatSetup.enabled`, which needs it.
+Existing credentials, PVCs and plugin settings are unchanged.
+
+Supply a short operator introduction with `landing.introduction`, or explicitly
+use a local Markdown file (including a chosen README):
+
+Add `--set-file landing.introduction=./installation-introduction.md` to the
+existing Helm upgrade command, keeping its release, namespace and site values.
+
+Supported Markdown: headings (levels 1–3), paragraphs, bold and HTTP(S)/root-relative
+links. HTML is escaped; scripts, images and remote includes are unsupported. The
+file is read at deployment time and stored in the landing ConfigMap; never put
+secrets in introduction text or links. Assets are served locally with a CSP.
+
+Repository/documentation links and optional Jira, Confluence or other names use:
+
+```yaml
+landing:
+  links:
+    - name: Repository
+      url: https://git.example/installation
+    - name: Documentation
+      url: https://docs.example/installation
+    - name: Jira
+      url: https://jira.example/projects/HW
+    - name: Confluence
+      url: https://wiki.example/installation
+```
+
+One backend worker checks each enabled application every 60 seconds, independently
+of visitor traffic. It caches the result and UTC last-check time. NetBox's login
+page accepts 200/302 without following redirects; Grafana's prefixed health route
+requires 200; Kibana's status route accepts 200/401/403 (expected authentication).
+Other responses and connection/timeout failures are unavailable. These are website
+reachability observations from the checker, not complete functional health or pod
+status. Before the first result the page says `not checked`; results older than
+`landing.staleSeconds` (default 150, minimum 120) say `stale`. A failed status fetch
+also marks the displayed status stale. Browser status refresh is every 15 seconds;
+it never triggers endpoint checks. `landing.timeoutSeconds` defaults to 4 (1–10).
+
+Checks use configured service names/ports and application prefix paths, without
+application credentials, redirects, proxy environment variables or Kubernetes API
+permissions. Internal destinations/raw errors are absent from public responses.
+An operator may add up to five deployment-only `landing.extraChecks` entries with
+`id`, `name`, public `url`, internal HTTP(S) `endpoint` and `expected` status-code
+list. Use distinct lowercase ids, no embedded credentials and only trusted
+endpoints. Visitors cannot supply destinations. Keep the service on the intended
+installation network; it has no login. Changes to configuration roll out the home
+on upgrade. The small Python standard-library server runs without writable root
+storage or service-account token. [Checks and limits](../../../ops/platform/landing-page/README.md).

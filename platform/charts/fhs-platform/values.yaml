@@ -27,6 +27,7 @@ credentials:
   create: true
   netboxEmail: admin@localhost
 netbox:
+  enabled: true
   fullnameOverride: fhs-netbox
   basePath: netbox/
   plugins: [netbox_inventory, netbox_prometheus_sd, netbox_topology_views]
@@ -277,7 +278,13 @@ valkey:
         memory: 256Mi
 landing:
   enabled: true
-  image: docker.io/library/nginx:1.28.0-alpine
+  image: docker.io/library/python:3.13.7-alpine
+  introduction: Hardware inventory, metrics and logs.
+  links: []
+  # Operator-configured probes only; never accepted from visitors.
+  extraChecks: []
+  timeoutSeconds: 4
+  staleSeconds: 150
 prometheus:
   extraScrapeConfigs: |
     {{- if .Values.global.discovery.enabled }}
@@ -514,6 +521,7 @@ telegraf:
       memory: 512Mi
   tplVersion: 2
 grafana:
+  enabled: true
   fullnameOverride: fhs-grafana
   image:
     registry: docker.io

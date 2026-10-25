@@ -21,12 +21,12 @@ helm lint platform/charts/fhs-platform
 Controller-only live check (worker must not execute):
 
 ```bash
-ops/platform/topology-views/smoke.py --context fhs-test \
-  --namespace fhs-discovery-portal-test --report /tmp/fhs-topology-views-smoke.json
+ops/platform/topology-views/smoke.py --report /tmp/fhs-topology-views-smoke.json
 ```
 
-Uses the existing owned `mid-cbf-hw` release on dragonvm; transfers only the chart
-and check sources when orchestrated remotely. Requires Helm, minikube, Python
+Uses the existing `mid-cbf-hw` Helm release in namespace
+`fhs-discovery-portal-test` on dragonvm. NetBox Deployment/Service: `fhs-netbox`.
+Transfers only chart and check sources when orchestrated remotely. Requires Helm, minikube, Python
 with PyYAML and retained private lab values at
 `/tmp/fhs-discovery-acceptance-7fe5ixpb/lab-values.yaml`. Never prints values.
 The full delivered chart is upgraded with existing workload scales retained;

@@ -37,8 +37,11 @@ class ChartTest(unittest.TestCase):
     def test_landing_paths_local_assets_and_accessible_content(self):
         for prefix in ('', '/mid-cbf-hw', '/nested/hw/', '/nested/hw'):
             objects=render(prefix)
-            cm=next(o for o in objects if o['kind']=='ConfigMap' and 'index.html' in o.get('data',{}))
-            html=cm['data']['index.html']; parser=Links(); parser.feed(html)
+            cm=next(o for o in objects if o['kind']=='ConfigMap' and 'config.json' in o.get('data',{}))
+            import importlib.util
+            spec=importlib.util.spec_from_file_location('landing', CHART/'files/landing/server.py')
+            runtime=importlib.util.module_from_spec(spec); spec.loader.exec_module(runtime)
+            html=runtime.page(json.loads(cm['data']['config.json'])).decode(); parser=Links(); parser.feed(html)
             clean=prefix.rstrip('/')
             self.assertEqual([clean+'/'+p+'/' for p in ('netbox','grafana','mid-cbf-kibana')], parser.links)
             self.assertEqual([],parser.external)
@@ -103,7 +106,7 @@ class ChartTest(unittest.TestCase):
             first=render('/hw',True,copied)
             def page_checksum(objects):
                 return next(o['spec']['template']['metadata']['annotations']['checksum/page'] for o in objects if o['kind']=='Deployment' and o['metadata']['name'].endswith('-hw-landing'))
-            content=copied/'templates/landing-content.yaml'
+            content=copied/'files/landing/server.py'
             content.write_text(content.read_text().replace('<h1>HW management</h1>','<h1>Updated hardware home</h1>'))
             self.assertNotEqual(page_checksum(first),page_checksum(render('/hw',True,copied)))
         p=subprocess.run(['helm','template','logs',str(ROOT/'platform/charts/elasticsearch-kibana')],capture_output=True,text=True,check=True)

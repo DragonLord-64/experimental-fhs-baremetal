@@ -130,8 +130,8 @@ for obj in yaml.safe_load_all(sys.stdin):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--context', required=True)
-    parser.add_argument('--namespace', required=True)
+    parser.add_argument('--context', default=lab.CONTEXT)
+    parser.add_argument('--namespace', default=lab.NAMESPACE)
     parser.add_argument('--report', required=True)
     args = parser.parse_args()
     lab.validate_scope(args.context, args.namespace)
