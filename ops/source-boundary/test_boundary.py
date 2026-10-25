@@ -18,6 +18,17 @@ SHARED = ('platform', 'playbooks', 'roles', 'inventory', 'docs', 'scripts', 'tes
 
 
 class SourceBoundaryTest(unittest.TestCase):
+    def test_platform_operator_docs_use_official_names_without_lab_instructions(self):
+        for path in (ROOT / 'platform').rglob('*.md'):
+            text = path.read_text()
+            for unwanted in ('--kube-context', 'KUBE_CONTEXT', '--context', 'fhs-test',
+                             'dragonvm', 'ops/', 'wiki/', 'mid-cbf-monitoring-test'):
+                self.assertNotIn(unwanted, text, str(path))
+        readme = (ROOT / 'platform/charts/fhs-platform/README.md').read_text()
+        self.assertIn('helm upgrade --install mid-cbf-hw', readme)
+        self.assertIn('--namespace hw-management', readme)
+        self.assertIn('global.urlPrefix=/mid-cbf-hw', readme)
+
     def test_shared_runtime_does_not_depend_on_lab_trees(self):
         for folder in SHARED:
             for path in (ROOT / folder).rglob('*'):

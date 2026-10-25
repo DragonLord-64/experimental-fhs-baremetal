@@ -1,145 +1,28 @@
-# Experimental platform configuration
+# Platform settings
 
-Use the [install / upgrade guide](README.md) for the shared commands. These
-settings cover the experimental additions.
+Set site overrides in `site-values.yaml`; install/upgrade commands are in the
+[README](README.md). Full defaults: [values.yaml](values.yaml).
 
-## Inventory discovery and HW home
+## Access
 
-The prefix root now serves a small public HW home linking to NetBox, Grafana and
-Kibana, with cached reachability from its checker. Destination login
-settings are unchanged. Set `landing.enabled=false` to omit it.
+`global.hostname`, `scheme`, `urlPrefix`, `ingressClassName` and `tlsSecretName`
+configure the shared ingress. The home and application links use the same prefix.
+Supply the TLS Secret separately if needed.
 
-Both plugin installation paths pin Inventory `2.7.1` and Prometheus SD `2.2.0`
-with wheel hashes. Discovery is opt-in to preserve existing static scrapes.
-Before enabling it:
+## Home page
 
-1. Create a dedicated NetBox service user with only device view permission,
-   constrained to the selected active devices. No staff/superuser rights or
-   write permissions. Issue a read-only **version 1 (legacy)** API token
-   (`write_enabled=false`); this configuration uses `Authorization: Token`.
-2. Store that token, without a newline, in the namespace-local Secret
-   `fhs-netbox-discovery`, key `token`. Use a private file and
-   `kubectl create secret generic ... --from-file=token=/private/token`;
-   never put it in Helm values or shell arguments.
-3. In NetBox create a **Multiple selection** custom field named
-   `prometheus_exporters`, object type **DCIM > Device**, choices `node` and `fhs`,
-   with an empty default. Select the exporters available on each active device:
-   `node` uses port 9100; `fhs` uses port 9110. Set its primary IPv4 address.
-   The exporters must already be running. An empty field selects nothing.
-   Alternatively set `global.discovery.selector=tags` and use `node-exporter` /
-   `fhs-exporter` tags. The field name, tags and refresh interval are configurable
-   under `global.discovery`. IPv6-only discovery is not covered.
-4. In site values set `global.discovery.enabled=true`. Replace the complete
-   `prometheus.serverFiles.prometheus.yml.scrape_configs` list with your retained
-   non-node jobs (for example `switch-telegraf`); remove migrated static node/FHS
-   targets to avoid duplicates. Static configuration remains fully supported
-   when discovery is disabled. Keep unmigrated static targets only for devices
-   outside the selected inventory.
+`landing.enabled` enables the home at the prefix root. NetBox, Grafana and Kibana
+links come from deployment settings. Websites are checked every 60 seconds;
+the page shows reachability and the last check time. Application logins stay
+with each application.
 
-Prometheus reads the token from its Secret volume, calls the prefixed NetBox
-API every 30s by default, and retains device/site/role plus `node_name` labels.
-Metric `job` labels remain `node` / `fhs-exporter` for existing dashboards.
-Removal, inactive status or clearing an exporter selection removes its target on the
-next successful refresh without Helm changes. Failed refreshes may retain the
-last successful targets; inspect Prometheus service-discovery errors.
-The config reload sidecar reloads changed Prometheus configuration.
-
-## Setup-only logging
-
-`logging.filebeat.enabled` retains its original meaning: provision the limited
-`filebeat_writer` account. It never installed a collector.
-`logging.filebeatSetup.enabled` independently runs a bounded Filebeat `9.5.5`
-setup Job (enabled in this umbrella; disabled by default in the standalone
-logging chart). It loads the versioned template/mappings, Filebeat ILM policy,
-system ingest pipelines, and a stable `fhs-filebeat` Kibana data view.
-It has no inputs, host mounts, journals, DaemonSet or continuous publisher.
-Only the setup Job receives the Secret-backed administrative credential;
-remote shippers continue using `filebeat_writer`.
-
-The existing Ansible Filebeat role uses the default versioned `filebeat-*`
-destination with template installation disabled. Setup must finish before those
-writers start. The older scoped `filebeat-fhs-one-9.5.5` bootstrap has its own
-higher-priority template/policy/alias; this setup leaves those resources alone.
-No dashboards are imported. Existing template, policy and same-ID data view
-are preserved. `logging.filebeatSetup.retention` defaults to `30d` for a new ILM
-policy; it does not overwrite an existing policy's retention.
-
-Both logging service-user setup and Filebeat setup Jobs use `.Release.Revision`:
-they run on **every** same-release upgrade, including a discovery-only change.
-They are bounded Jobs; that does not imply unrelated workload rollouts.
-
-## Minimal same-release update
-
-Before upgrading, retain the existing site values, release revision, private
-Secret backup, PostgreSQL backup and stateful-volume snapshots. Verify restore
-procedures. Helm rollback cannot reverse NetBox database migrations or restore
-Elasticsearch data, ILM policies or credentials.
-
-For the existing profile, with the complete private `site-values.yaml` retained:
-
-```bash
-helm diff upgrade mid-cbf-hw ./fhs-platform \
-  --kube-context "$KUBE_CONTEXT" --namespace hw-management \
-  -f site-values.yaml --suppress-secrets
-helm upgrade mid-cbf-hw ./fhs-platform \
-  --kube-context "$KUBE_CONTEXT" --namespace hw-management \
-  -f site-values.yaml --dry-run=server --hide-secret
-helm upgrade mid-cbf-hw ./fhs-platform \
-  --kube-context "$KUBE_CONTEXT" --namespace hw-management \
-  -f site-values.yaml --wait --wait-for-jobs --timeout 20m
-```
-
-The first command requires the existing Helm diff plugin. Review the preview:
-expect NetBox plugin consumers, Prometheus/config reload, new landing resources
-and the bounded logging Jobs. PostgreSQL, Valkey, Grafana, Telegraf, Elasticsearch
-and Kibana pod templates and PVCs should stay stable. Do not uninstall, delete
-PVCs, reset credentials or run a blanket rollout. Keep the site's hostname and
-prefix in its private values. For an application rollback after assessing the
-migration/data limits, use `helm rollback mid-cbf-hw PREVIOUS_REVISION` with the
-same explicit context/namespace and wait flags. These are operator instructions;
-no hardware deployment is established by an offline render.
-
-## Topology Views
-
-The public-image startup and optional image recipe include hash-pinned
-`netbox-topology-views==5.0.0` for NetBox `4.7.x`. Web, worker and housekeeping
-share the plugin configuration. Startup prepares writable per-pod
-`static/netbox_topology_views/img`; web runs the existing entrypoint migrations
-and collects plugin static assets before serving. Custom image uploads in this
-emptyDir are ephemeral; no persistent custom-icon store is configured.
-Open `PREFIX/netbox/plugins/netbox_topology_views/` after login. Maps use NetBox
-cable records; this does not discover physical cabling.
-
-[Focused checks and package evidence](../../../ops/platform/topology-views/README.md).
-
-## Installation home
-
-`landing` serves the installation prefix root through the same ingress controller,
-hostname, scheme and TLS configuration as the applications. Browser links are
-relative to that origin and share `global.urlPrefix`; no second URL list or
-Kubernetes discovery is used. `netbox.enabled`, `grafana.enabled` and
-`logging.kibana.enabled` omit disabled application links and ingress routes.
-When disabling Kibana also disable `logging.filebeatSetup.enabled`, which needs it.
-Existing credentials, PVCs and plugin settings are unchanged.
-
-Supply a short operator introduction with `landing.introduction`, or explicitly
-use a local Markdown file (including a chosen README):
-
-Add `--set-file landing.introduction=./installation-introduction.md` to the
-existing Helm upgrade command, keeping its release, namespace and site values.
-
-Supported Markdown: headings (levels 1–3), paragraphs, bold and HTTP(S)/root-relative
-links. HTML is escaped; scripts, images and remote includes are unsupported. The
-file is read at deployment time and stored in the landing ConfigMap; never put
-secrets in introduction text or links. Assets are served locally with a CSP.
-
-Repository/documentation links and optional Jira, Confluence or other names use:
+Use `landing.introduction` for brief Markdown, or add
+`--set-file landing.introduction=./introduction.md` to the Helm command.
+Headings, paragraphs, bold and HTTP(S) links are supported; HTML is escaped.
 
 ```yaml
 landing:
   links:
-    - name: Repository
-      url: https://git.example/installation
     - name: Documentation
       url: https://docs.example/installation
     - name: Jira
@@ -148,24 +31,38 @@ landing:
       url: https://wiki.example/installation
 ```
 
-One backend worker checks each enabled application every 60 seconds, independently
-of visitor traffic. It caches the result and UTC last-check time. NetBox's login
-page accepts 200/302 without following redirects; Grafana's prefixed health route
-requires 200; Kibana's status route accepts 200/401/403 (expected authentication).
-Other responses and connection/timeout failures are unavailable. These are website
-reachability observations from the checker, not complete functional health or pod
-status. Before the first result the page says `not checked`; results older than
-`landing.staleSeconds` (default 150, minimum 120) say `stale`. A failed status fetch
-also marks the displayed status stale. Browser status refresh is every 15 seconds;
-it never triggers endpoint checks. `landing.timeoutSeconds` defaults to 4 (1–10).
+`landing.timeoutSeconds` defaults to 4; `staleSeconds` to 150.
+Optional `extraChecks` entries take `id`, `name`, public `url`, internal
+`endpoint` and `expected` HTTP codes. Up to five are supported.
+`netbox.enabled`, `grafana.enabled` and `logging.kibana.enabled` control the
+managed links and application routes. Disabling Kibana also requires
+`logging.filebeatSetup.enabled=false`.
 
-Checks use configured service names/ports and application prefix paths, without
-application credentials, redirects, proxy environment variables or Kubernetes API
-permissions. Internal destinations/raw errors are absent from public responses.
-An operator may add up to five deployment-only `landing.extraChecks` entries with
-`id`, `name`, public `url`, internal HTTP(S) `endpoint` and `expected` status-code
-list. Use distinct lowercase ids, no embedded credentials and only trusted
-endpoints. Visitors cannot supply destinations. Keep the service on the intended
-installation network; it has no login. Changes to configuration roll out the home
-on upgrade. The small Python standard-library server runs without writable root
-storage or service-account token. [Checks and limits](../../../ops/platform/landing-page/README.md).
+## NetBox
+
+Inventory 2.7.1, Prometheus SD 2.2.0 and Topology Views 5.0.0 install automatically
+on NetBox 4.7.0. Topology Views is under `netbox/plugins/netbox_topology_views/`.
+It displays recorded cables; uploaded custom icons use ephemeral pod storage.
+
+Inventory synchronizes serials/tags and supports the `faulty` asset status.
+Change-log retention is `netbox.changelogRetention` (default 90 days).
+
+## Prometheus discovery
+
+1. Create a read-only legacy NetBox API token with device-view access. Store it
+   in Secret `fhs-netbox-discovery`, key `token`, in the installation namespace.
+2. Add device multi-select field `prometheus_exporters` with choices `node` and
+   `fhs`. Select installed exporters on active devices with primary IPv4s.
+3. Enable `global.discovery.enabled` and remove migrated node/FHS targets from
+   the static scrape list, retaining unrelated jobs.
+
+Refresh defaults to 30s. `selector: tags` uses `node-exporter` / `fhs-exporter`
+tags instead. Exporters must already be installed on the selected hosts.
+
+## Logging
+
+`logging.filebeatSetup.enabled` runs Filebeat setup on upgrades: templates,
+system ingest pipelines, ILM and the `fhs-filebeat` Kibana data view. Retention
+defaults to 30d for a new policy. Existing policy and data-view settings remain.
+It installs no collector. `logging.filebeat.enabled` creates the limited
+`filebeat_writer` account used by server shippers. Run setup before shipping logs.

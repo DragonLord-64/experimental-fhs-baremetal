@@ -24,6 +24,7 @@ The user authorizes changes needed for tests on `dragonvm`: stop, remove, rebuil
 
 ## Repository boundaries
 
+- Deployment names and settings come from the official SKA baremetal `development2` source, especially `platform/charts/deploy_upgrage_mid-cbf-hw.sh`. Check that source before asking the user: release `mid-cbf-hw`, namespace `hw-management`, prefix `/mid-cbf-hw`. Keep lab names and kube-context instructions out of the copyable platform docs.
 - This is a private experimental repository. Standing order: once requested work is completed and appropriate checks pass, commit/merge and push it to `origin` at `DragonLord-64/experimental-fhs-baremetal` without asking again. Preserve unrelated user edits and credentials; the user provides review.
 - Never push to the official SKA repositories. Keep the upstream push URL disabled. The user reviews and transfers accepted changes separately.
 - Preserve source provenance and user edits. The initial source commit and snapshot-history limitation are documented in the test plan.

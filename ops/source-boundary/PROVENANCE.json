@@ -75,5 +75,15 @@
     "roles/manage_users/molecule/default/converge.yml": "100755",
     "roles/manage_users/molecule/default/verify.yml": "100755",
     "scripts/molecule-test-all.sh": "100755"
+  },
+  "platform_documentation_update": {
+    "date": "2026-10-24",
+    "source_repository": "https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal",
+    "source_revision": "eba30316f2a000834cca3e69800516e3df75319e",
+    "source_path": "platform/charts/deploy_upgrage_mid-cbf-hw.sh",
+    "release": "mid-cbf-hw",
+    "namespace": "hw-management",
+    "url_prefix": "/mid-cbf-hw",
+    "instruction": "User requested concise copyable platform documentation without kube-context or lab instructions; supersedes the prior byte-identical README requirement."
   }
 }
