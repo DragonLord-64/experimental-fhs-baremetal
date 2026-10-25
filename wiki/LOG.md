@@ -277,3 +277,11 @@ Added [raw reference capture](../playbooks/netbox/capture_reference.yml) for
 probes, without NetBox writes. Static collector fixtures checked missing tools,
 timeouts, NVMe namespaces and SDK/ethtool enumeration. Ansible syntax checked
 on dragonvm. Physical collection is for the user to run and return as evidence.
+
+### 2026-10-25 — Reference capture SDK environment correction
+
+The [capture playbook](../playbooks/netbox/capture_reference.yml) now resolves
+SDK settings from target inventory with importer precedence. It sets venv PATH,
+BWSDK_ROOT and locale after switching to the tooling user; unresolved users are
+reported rather than silently probing as root. Static card/QSFP invocation
+checks and Ansible syntax validation on dragonvm passed; hardware not contacted.

@@ -1,4 +1,4 @@
-# Standalone raw reference capture. Edit targets and SDK settings below.
+# Standalone raw reference capture. Blank SDK settings use target inventory/importer defaults.
 ---
 - name: Define the two reference targets
   hosts: localhost
@@ -7,8 +7,8 @@
     fhs_host: sys1391
     switch_host: nx00EF0
     capture_dir: '{{ playbook_dir }}/raw-reference'
-    sdk_venv: /opt/venvs/fhs
-    sdk_root: /usr/share/bittware-sdk
+    sdk_venv: ''
+    sdk_root: ''
     bmc_channels: '1'
     switch_commands:
     - show inventory all
@@ -70,10 +70,14 @@
       argv:
       - python3
       - '-'
-      - '{{ reference_sdk_venv }}'
-      - '{{ reference_sdk_root }}'
+      - '{{ reference_sdk_venv | default(bootstrap_bittware_venv | default(bittware_sdk_venv | default(gitlab_runner_venv_path
+        | default(''/opt/venvs/fhs''))), true) }}'
+      - '{{ reference_sdk_root | default(bootstrap_bittware_sdk_root | default(fpga_bittware_sdk_root | default(bwsdk_root_path
+        | default(''/usr/share/bittware-sdk''))), true) }}'
       - '{{ reference_bmc_channels }}'
-      - '{{ reference_sdk_user }}'
+      - '{{ reference_sdk_user | default(bootstrap_bittware_user | default(fpga_bittware_user | default(gitlab_runner_user
+        | default(ansible_user | default('''')))), true) }}'
+      - '{{ hardware_command_path | default(''/usr/sbin:/usr/bin:/sbin:/bin'') }}'
       stdin: |
         import datetime, glob, json, os, pathlib, re, subprocess, sys, time
         report = {'captured_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -81,12 +85,19 @@
         env = dict(os.environ, LC_ALL='C', LANG='C')
         env['PATH'] = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
         def run(argv, sdk=False):
-            if sdk and sys.argv[4]:
-                argv = ['runuser', '-u', sys.argv[4], '--'] + argv
+            if sdk:
+                if not sys.argv[4]:
+                    row = dict(argv=argv, rc=126, stdout='', stderr='SDK user unresolved; set sdk_user at the top of the playbook')
+                    report['commands'].append(row)
+                    return row
+                # Set the SDK environment AFTER switching user; runuser can reset PATH.
+                argv = ['runuser', '-u', sys.argv[4], '--', '/usr/bin/env',
+                        'BWSDK_ROOT='+sys.argv[2], 'PATH='+sys.argv[1]+'/bin:'+sys.argv[5],
+                        'LC_ALL=C', 'LANG=C'] + argv
             started = time.monotonic()
             try:
                 p = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   timeout=90, env=dict(env, BWSDK_ROOT=sys.argv[2]) if sdk else env)
+                                   timeout=90, env=env)
                 row = dict(argv=argv, rc=p.returncode, stdout=p.stdout.decode('utf-8', 'replace'),
                            stderr=p.stderr.decode('utf-8', 'replace'))
             except subprocess.TimeoutExpired as e:
@@ -137,6 +148,8 @@
             name = os.path.basename(dev)
             if re.fullmatch(r'nvme\d+n\d+', name):
                 run(['nvme', 'id-ns', '/dev/'+name, '-o', 'json'])
+        report['sdk_environment'] = dict(user=sys.argv[4], venv=sys.argv[1],
+            BWSDK_ROOT=sys.argv[2], PATH=sys.argv[1]+'/bin:'+sys.argv[5], LC_ALL='C')
         venv = sys.argv[1]
         python = venv+'/bin/python3'
         card = run([python, venv+'/bin/bw_card_list', '-v', '-i', 'USB'], sdk=True)

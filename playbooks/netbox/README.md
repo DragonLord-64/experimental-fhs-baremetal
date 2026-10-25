@@ -242,7 +242,11 @@ than creating a guessed peer or removing a missing component.
 
 [capture_reference.yml](capture_reference.yml) is standalone. Set the two hosts
 at the top (defaults `sys1391` and `nx00EF0`), SDK venv/root and optional SDK user.
-Use the same SDK user and venv as the importer; blank `sdk_user` runs as root.
+Blank SDK settings resolve from the target inventory using the importer’s
+variable precedence. The user falls back to the SSH user; an unresolved user is
+reported instead of silently running SDK commands as root. The SDK runs with its
+venv `bin` first in `PATH`, `BWSDK_ROOT`, and the C locale, set after switching
+user. The resolved settings are included in the capture.
 It needs Python 3 on Linux, sudo access, and the `cisco.nxos` and
 `ansible.netcommon` collections on the controller. Existing inventory supplies
 SSH addresses, users and credentials; the playbook also works with resolvable
