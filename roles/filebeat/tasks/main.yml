@@ -27,6 +27,13 @@
     fail_msg: Credentials file must define filebeat_elasticsearch_username and filebeat_elasticsearch_password.
   no_log: true
 
+- name: Prepare Elasticsearch from the control host
+  ansible.builtin.import_tasks: setup.yml
+  when: filebeat_setup_enabled | bool and not ansible_check_mode
+  run_once: true
+  delegate_to: "{{ filebeat_setup_delegate }}"
+  become: false
+
 - name: Require journalctl for journal collection
   ansible.builtin.command:
     argv: [journalctl, --version]

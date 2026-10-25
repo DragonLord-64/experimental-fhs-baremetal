@@ -24,3 +24,9 @@ filebeat_journald_seek: since
 filebeat_journald_since: -1h
 filebeat_journald_include_matches: []
 
+# Bootstrap index management on the control host from the exact device package.
+filebeat_setup_enabled: true
+filebeat_setup_delegate: localhost
+filebeat_setup_credentials_file: /provision/files.d/credentials/filebeat-setup.yml
+# CA paths here belong to the delegate, not the managed devices.
+filebeat_setup_ssl_certificate_authorities: []

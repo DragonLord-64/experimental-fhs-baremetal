@@ -1,0 +1,70 @@
+---
+- name: Load separate controller-side setup credentials (Vault supported)
+  ansible.builtin.include_vars:
+    file: "{{ filebeat_setup_credentials_file }}"
+    name: filebeat_setup_credentials
+  no_log: true
+
+- name: Validate setup authentication
+  ansible.builtin.assert:
+    that:
+      - >-
+        (filebeat_setup_credentials.filebeat_elasticsearch_api_key | default('') | length > 0)
+        !=
+        ((filebeat_setup_credentials.filebeat_elasticsearch_username | default('') | length > 0)
+        and (filebeat_setup_credentials.filebeat_elasticsearch_password | default('') | length > 0))
+    fail_msg: Supply either a setup API key (id:key) or setup username and password.
+  no_log: true
+
+- name: Create private setup workspace on delegate
+  ansible.builtin.tempfile:
+    state: directory
+    prefix: filebeat-setup-
+  register: filebeat_setup_workspace
+
+- name: Set up Elasticsearch with the device package
+  block:
+    - name: Copy the same controller package to setup workspace
+      ansible.builtin.copy:
+        src: "{{ filebeat_package_path }}"
+        dest: "{{ filebeat_setup_workspace.path }}/filebeat.deb"
+        mode: '0600'
+
+    - name: Extract Filebeat without installing a control-host service
+      ansible.builtin.command:
+        argv:
+          - dpkg-deb
+          - --extract
+          - "{{ filebeat_setup_workspace.path }}/filebeat.deb"
+          - "{{ filebeat_setup_workspace.path }}/package"
+      changed_when: true
+
+    - name: Render private setup configuration
+      ansible.builtin.template:
+        src: setup.yml.j2
+        dest: "{{ filebeat_setup_workspace.path }}/setup.yml"
+        mode: '0600'
+      no_log: true
+      diff: false
+
+    - name: Load versioned Filebeat template and lifecycle policy
+      ansible.builtin.command:
+        argv:
+          - "{{ filebeat_setup_workspace.path }}/package/usr/share/filebeat/bin/filebeat"
+          - setup
+          - --index-management
+          - --path.home
+          - "{{ filebeat_setup_workspace.path }}/package/usr/share/filebeat"
+          - --path.data
+          - "{{ filebeat_setup_workspace.path }}/data"
+          - --path.logs
+          - "{{ filebeat_setup_workspace.path }}/logs"
+          - -c
+          - "{{ filebeat_setup_workspace.path }}/setup.yml"
+      changed_when: true
+      no_log: true
+  always:
+    - name: Remove setup credentials and extracted package
+      ansible.builtin.file:
+        path: "{{ filebeat_setup_workspace.path }}"
+        state: absent

@@ -1,0 +1,19 @@
+# Managed by Ansible; temporary control-host configuration only.
+output.elasticsearch:
+  hosts: {{ filebeat_elasticsearch_hosts | to_json }}
+{% if filebeat_setup_credentials.filebeat_elasticsearch_api_key | default('') | length > 0 %}
+  api_key: {{ filebeat_setup_credentials.filebeat_elasticsearch_api_key | replace('${', '$${') | to_json }}
+{% else %}
+  username: {{ filebeat_setup_credentials.filebeat_elasticsearch_username | replace('${', '$${') | to_json }}
+  password: {{ filebeat_setup_credentials.filebeat_elasticsearch_password | replace('${', '$${') | to_json }}
+{% endif %}
+  ssl.verification_mode: {{ filebeat_ssl_verification_mode | to_json }}
+{% if filebeat_setup_ssl_certificate_authorities %}
+  ssl.certificate_authorities: {{ filebeat_setup_ssl_certificate_authorities | to_json }}
+{% endif %}
+setup.template.enabled: true
+setup.template.overwrite: false
+setup.ilm.enabled: true
+setup.ilm.check_exists: true
+setup.ilm.overwrite: false
+logging.to_files: false

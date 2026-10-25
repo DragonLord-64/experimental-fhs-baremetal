@@ -112,3 +112,13 @@ Append completed events here; keep proposed work in the plan.
 - Inspected FoodReserve-2D’s current GitHub task lifecycle and manager guidelines; adapted local intake/scout, one worker, FIFO dispatch and a bounded cluster/setup helper. Omitted its advisory review and editor-specific machinery. [Commands and sources](../ops/agent-pipeline/README.md).
 - Set small-task defaults to 600 seconds per worker, 120 per configured check and three launches. The controller owns acceptance; workers avoid duplicate checks and unrelated test infrastructure. Added the same fast source-check entrypoint to private GitHub CI, with controller tests only for Python controller changes. Scope paths are guidance, not sandbox enforcement.
 - Syntax audit found and fixed empty disabled shell groups in the hardware power-test launcher; no hardware test was executed. Corrected Bifrost Quickstart and lab Inventory-image links. Existing wiki/emulator work was preserved. Final validation and limits: [pipeline validation](../ops/agent-pipeline/VALIDATION.md#2026-10-24--intake-scout-and-manager).
+
+## 2026-10-25 — delegated Filebeat index setup
+
+- Added [control-host index setup](../roles/filebeat/README.md#elasticsearch-setup)
+  using the exact device Debian package and a separate setup API key or login.
+  Setup preloads the default template/data stream and ILM policy before device
+  services start; temporary credentials are removed on success or failure.
+- Role playbook syntax and the delegated synthetic-package fixture passed (API
+  key, password, failure cleanup and check mode). Live Elasticsearch and device
+  journal ingestion were not exercised; ansible-lint was unavailable.
