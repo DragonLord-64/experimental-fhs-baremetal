@@ -258,10 +258,11 @@
     netbox.netbox.netbox_device:
       data:
         name: '{{ facts.hostname }}'
-        oob_ip: '{{ bmc_address }}/32'
+        oob_ip:
+          address: '{{ bmc_address }}/32'
     when:
     - bmc_address is defined
-    - fhs_stage == "interfaces"
+    - fhs_stage == "ips"
     register: netbox_write_result
     until: netbox_write_result is succeeded or not (netbox_write_result | fhs_netbox_transient)
     retries: '{{ netbox_api_retries }}'

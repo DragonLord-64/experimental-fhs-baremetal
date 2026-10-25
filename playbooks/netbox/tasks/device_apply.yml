@@ -1,4 +1,5 @@
 - name: Create or update discovered chassis immediately
+  throttle: 1
   tags:
   - apply
   delegate_to: localhost

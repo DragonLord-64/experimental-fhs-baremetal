@@ -307,3 +307,13 @@ Server-info remains optional supplemental placement/role/PDU metadata.
 Corrected sys1392 now includes LLDP and FPGA/QSFP output. Five FPGA connector
 serials have opposite-suffix switch counterparts; no automatic suffix matching
 was added in this change. No tests or hardware commands run, per user instruction.
+
+### 2026-10-25 — Import failures from hardware run
+
+Screenshots showed OOB assignment during interfaces stage before BMC address
+creation in ips stage. Moved assignment after address creation in ips and used
+an explicit address lookup. Serialized early server/switch creation to avoid
+parallel hosts racing to create shared site/role/type prerequisites. The switch
+HTTP 500 is consistent with a shared-role creation race (one switch succeeded),
+but the screenshot alone cannot establish the server exception. No tests or
+hardware commands run, per user instruction.
