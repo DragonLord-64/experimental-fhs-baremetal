@@ -1,6 +1,12 @@
 {
   "official_ref": "0658e93b7fa0ebbcdbcb85afcce99b1cbbc45bcd",
   "private_before": "9b3d675",
+  "user_requested_document_copy": {
+    "path": "platform/charts/fhs-platform/README.md",
+    "revision": "7b0a306b091306534eef9dfa5872e23547387d7e",
+    "sha256": "faeed579daa8cf73b5d7dc7c56f81d2e3c61d38db7c5afa244243e76d2ad10db",
+    "retained_lab_link": "../../../ops/platform/inventory-alignment/README.md"
+  },
   "preserved_official_files": {
     "roles/manage_users/molecule/default/molecule.yml": "d6aa38f92c432844f611e57910cf77487d304998d115eca5c1a8eff5869860c4",
     "roles/manage_users/molecule/default/converge.yml": "7eab40934a41bbcf2504dba36244e6ea9fea58025c681847f6544128bf458111",

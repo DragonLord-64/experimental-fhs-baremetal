@@ -30,10 +30,17 @@ class SourceBoundaryTest(unittest.TestCase):
                         self.assertNotIn(private, text, str(path))
 
     def test_shared_local_document_links_do_not_require_lab_trees(self):
+        source = json.loads((ROOT / 'ops/source-boundary/PROVENANCE.json').read_text())['user_requested_document_copy']
         for folder in SHARED:
             for path in (ROOT / folder).rglob('*.md'):
                 for target in re.findall(r'\]\(([^\s)]+)\)', path.read_text()):
                     if re.match(r'\w+:|/|#|\$|<', target): continue
+                    # Keep the user's requested upstream README byte-for-byte,
+                    # including its one historical lab-validation link.
+                    if str(path.relative_to(ROOT)) == source['path'] and target == source['retained_lab_link']:
+                        self.assertEqual(source['sha256'], hashlib.sha256(path.read_bytes()).hexdigest())
+                        self.assertTrue((path.parent / target).is_file())
+                        continue
                     resolved = (path.parent / target.split('#')[0]).resolve()
                     for private in ('ops', 'wiki', 'examples'):
                         self.assertFalse(resolved.is_relative_to(ROOT / private), (str(path), target))

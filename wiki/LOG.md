@@ -88,3 +88,5 @@ Append completed events here; keep proposed work in the plan.
 - Shortened the [platform README](../platform/charts/fhs-platform/README.md) to high-level installation, update, verification and access commands at the user's request. Six source-boundary checks and whitespace validation passed; no runtime configuration changed.
 
 - Restored the [platform chart README](../platform/charts/fhs-platform/README.md) byte-for-byte from official SKA `development2` `7b0a306`, as requested, superseding the earlier adaptations and shortening. Verified source byte equality and whitespace; no deployment configuration changed.
+
+- Made `platform/README.md` a short pointer to the canonical chart README, removing the competing legacy deployment guide. The user-confirmed SKA `development2` README remains byte-identical to `7b0a306`; its exact hash and original validation link are recorded in source-boundary provenance. Six boundary checks passed. All edits remain experimental-only; upstream push stays disabled.

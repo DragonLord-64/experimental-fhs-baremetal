@@ -13,6 +13,10 @@ stubbed for launcher checks; no container lifecycle or image build is claimed.
 Eleven capture/reference hashes and four preserved official-file hashes match.
 Original provenance labels remain historical; the manifest records new locations.
 
+The user requested an exact copy of the SKA `development2` chart README at
+`7b0a306`. Its one historical lab link is retained; the check requires that
+document's exact source hash. Other documentation and runtime boundaries remain.
+
 Regression results after moves: 47 dashboard tests, 19 static-demo tests,
 38 importer alignment tests, ten umbrella tests and 12 controller tests pass.
 Shell syntax and `git diff --check` pass. Strict Sphinx 7.4.7
