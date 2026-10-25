@@ -102,3 +102,5 @@ bifrost-install-env.json
 roles/ubuntu24_cis
 
 
+# Private raw hardware reference captures
+playbooks/netbox/raw-reference/

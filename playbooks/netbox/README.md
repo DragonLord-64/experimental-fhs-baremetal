@@ -237,3 +237,39 @@ as individual component fields. The Nexus path does not currently import switch
 interface MAC/IP addresses; it preserves existing addresses. Optical serials
 alone never identify a fiber cable. Incomplete observations are reported rather
 than creating a guessed peer or removing a missing component.
+
+## Raw hardware reference
+
+[capture_reference.yml](capture_reference.yml) is standalone. Set the two hosts
+at the top (defaults `sys1391` and `nx00EF0`), SDK venv/root and optional SDK user.
+Use the same SDK user and venv as the importer; blank `sdk_user` runs as root.
+It needs Python 3 on Linux, sudo access, and the `cisco.nxos` and
+`ansible.netcommon` collections on the controller. Existing inventory supplies
+SSH addresses, users and credentials; the playbook also works with resolvable
+hostnames and CLI credentials. It does not read NetBox credentials.
+
+```sh
+ansible-playbook -i YOUR_INVENTORY playbooks/netbox/capture_reference.yml -u YOUR_USER -K
+```
+
+Use your actual SSH inventory path. Do not pass `--limit`: the initial localhost
+play defines the two capture groups. No importer files are required, so the YAML
+can also be copied and run independently. No tools are installed or configured.
+
+The controller receives `raw-reference/sys1391.json` and
+`raw-reference/nx00EF0.json` beside the playbook (or set `capture_dir`). Each run
+replaces these files. Files are private and gitignored. Linux command output is
+kept verbatim in `collector.stdout` as JSON, with argv, exit status, stderr,
+timeouts and timestamps; Ansible facts are also retained. Switch results retain
+command text, raw stdout and unsupported-command errors. Missing tools do not
+stop later probes. A connection or sudo failure is recorded where available.
+Review the files before sharing: they contain real serials, addresses, network
+neighbors, server-info and host facts, which can include environment details.
+
+Linux captures FRU, DMI, BMC channels, PCI/VPD, USB, CPU/memory, block devices,
+NVMe controller/namespace identity, OS/server-info, interface MAC/IP/routes,
+ethtool driver/link/permanent MAC/EEPROM, LLDP, and BittWare USB card/QSFP output.
+NX-OS captures inventory, versions/EPLD, modules/environment, interfaces,
+transceivers, LLDP, VRFs, IP addresses and port channels. Unsupported variants
+remain visible as errors. These captures are discovery evidence, not inventory
+updates or proof of historical hardware replacements.

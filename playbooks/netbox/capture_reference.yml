@@ -1,0 +1,180 @@
+# Standalone raw reference capture. Edit targets and SDK settings below.
+---
+- name: Define the two reference targets
+  hosts: localhost
+  gather_facts: false
+  vars:
+    fhs_host: sys1391
+    switch_host: nx00EF0
+    capture_dir: '{{ playbook_dir }}/raw-reference'
+    sdk_venv: /opt/venvs/fhs
+    sdk_root: /usr/share/bittware-sdk
+    bmc_channels: '1'
+    switch_commands:
+    - show inventory all
+    - show inventory all | json
+    - show version
+    - show version | json
+    - show version module 1 epld
+    - show module
+    - show environment
+    - show interface
+    - show interface | json
+    - show interface status | json
+    - show interface transceiver
+    - show interface transceiver | json
+    - show interface transceiver details
+    - show lldp neighbors detail
+    - show lldp neighbors detail | json
+    - show ip interface brief vrf all
+    - show ipv6 interface brief vrf all
+    - show vrf
+    - show port-channel summary
+    sdk_user: ''
+  tasks:
+  - name: Create private controller capture directory
+    ansible.builtin.file:
+      path: '{{ capture_dir }}'
+      state: directory
+      mode: '0700'
+  - name: Define Linux capture target
+    ansible.builtin.add_host:
+      name: '{{ fhs_host }}'
+      groups: reference_linux
+      reference_dir: '{{ capture_dir }}'
+      reference_sdk_venv: '{{ sdk_venv }}'
+      reference_sdk_root: '{{ sdk_root }}'
+      reference_bmc_channels: '{{ bmc_channels }}'
+      reference_sdk_user: '{{ sdk_user }}'
+  - name: Define NX-OS capture target
+    ansible.builtin.add_host:
+      name: '{{ switch_host }}'
+      groups: reference_nxos
+      ansible_connection: ansible.netcommon.network_cli
+      ansible_network_os: cisco.nxos.nxos
+      reference_dir: '{{ capture_dir }}'
+      reference_commands: '{{ switch_commands }}'
+  connection: local
+- name: Capture Linux hardware without changing inventory
+  hosts: reference_linux
+  gather_facts: false
+  become: true
+  tasks:
+  - name: Capture the same Linux facts used by the importer
+    ansible.builtin.setup: {}
+    register: linux_facts
+    failed_when: false
+    ignore_unreachable: true
+  - name: Run embedded read-only collector (missing tools remain in report)
+    ansible.builtin.command:
+      argv:
+      - python3
+      - '-'
+      - '{{ reference_sdk_venv }}'
+      - '{{ reference_sdk_root }}'
+      - '{{ reference_bmc_channels }}'
+      - '{{ reference_sdk_user }}'
+      stdin: |
+        import datetime, glob, json, os, pathlib, re, subprocess, sys, time
+        report = {'captured_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                  'hostname': os.uname().nodename, 'commands': [], 'files': []}
+        env = dict(os.environ, LC_ALL='C', LANG='C')
+        env['PATH'] = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+        def run(argv, sdk=False):
+            if sdk and sys.argv[4]:
+                argv = ['runuser', '-u', sys.argv[4], '--'] + argv
+            started = time.monotonic()
+            try:
+                p = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   timeout=90, env=dict(env, BWSDK_ROOT=sys.argv[2]) if sdk else env)
+                row = dict(argv=argv, rc=p.returncode, stdout=p.stdout.decode('utf-8', 'replace'),
+                           stderr=p.stderr.decode('utf-8', 'replace'))
+            except subprocess.TimeoutExpired as e:
+                row = dict(argv=argv, rc=124, stdout=(e.stdout or b'').decode('utf-8', 'replace'),
+                           stderr=(e.stderr or b'').decode('utf-8', 'replace'), error='90 second timeout')
+            except OSError as e:
+                row = dict(argv=argv, rc=127, stdout='', stderr=str(e))
+            row['elapsed_seconds'] = round(time.monotonic()-started, 3)
+            report['commands'].append(row)
+            return row
+
+        def read(path):
+            try:
+                report['files'].append(dict(path=path, content=pathlib.Path(path).read_text()))
+            except (OSError, UnicodeError) as e:
+                report['files'].append(dict(path=path, error=str(e)))
+
+        for argv in [
+            ['hostnamectl'], ['hostname', '-f'], ['uname', '-a'], ['lscpu'],
+            ['ipmitool', '-V'], ['ipmitool', 'fru'], ['ipmitool', 'mc', 'info'],
+            ['ipmitool', 'sdr', 'elist'], ['dmidecode', '--version'], ['dmidecode'],
+            ['lspci', '--version'], ['lspci', '-D', '-nn'], ['lspci', '-D', '-vv'],
+            ['lsusb'], ['lsblk', '--json', '-O'], ['nvme', 'version'], ['nvme', 'list', '-o', 'json'],
+            ['ip', '-details', '-json', 'link', 'show'], ['ip', '-json', 'address', 'show'],
+            ['ip', '-json', 'route', 'show', 'table', 'all'], ['ip', '-6', '-json', 'route', 'show', 'table', 'all'],
+            ['lldpcli', '-v'], ['lldpcli', '-f', 'json', 'show', 'neighbors'],
+            ['lldpcli', '-f', 'json', 'show', 'interfaces'], ['ethtool', '--version']]:
+            run(argv)
+        for channel in sys.argv[3].split(','):
+            run(['ipmitool', 'lan', 'print', channel])
+        for path in ['/etc/server-info.yaml', '/etc/os-release', '/proc/meminfo']:
+            read(path)
+        for iface_path in sorted(glob.glob('/sys/class/net/*')):
+            iface = os.path.basename(iface_path)
+            for suffix in ['address', 'mtu', 'operstate', 'phys_port_name', 'phys_switch_id', 'dev_port']:
+                read(iface_path+'/'+suffix)
+            for suffix in ['device', 'device/physfn']:
+                path = iface_path+'/'+suffix
+                report['files'].append(dict(path=path, symlink=os.path.realpath(path), exists=os.path.exists(path)))
+            for flags in [[], ['-i'], ['-P'], ['-m']]:
+                run(['ethtool']+flags+[iface])
+        # Controller identity and namespace details are separate raw samples.
+        for dev in sorted(glob.glob('/sys/class/nvme/nvme[0-9]*')):
+            name = os.path.basename(dev)
+            if re.fullmatch(r'nvme\d+', name):
+                run(['nvme', 'id-ctrl', '/dev/'+name, '-o', 'json'])
+        for dev in sorted(glob.glob('/sys/class/block/nvme*n*')):
+            name = os.path.basename(dev)
+            if re.fullmatch(r'nvme\d+n\d+', name):
+                run(['nvme', 'id-ns', '/dev/'+name, '-o', 'json'])
+        venv = sys.argv[1]
+        python = venv+'/bin/python3'
+        card = run([python, venv+'/bin/bw_card_list', '-v', '-i', 'USB'], sdk=True)
+        for index in dict.fromkeys(re.findall(r'^\s*Index\s*:\s*(\d+)\b', card['stdout'], re.M)):
+            run([python, venv+'/bin/bw_qsfp_info', '-c', index, '-i', 'USB', 'display'], sdk=True)
+        print(json.dumps(report, indent=2))
+    register: linux_capture
+    changed_when: false
+    failed_when: false
+    ignore_unreachable: true
+  - name: Save unmodified collector output and invocation result on controller
+    ansible.builtin.copy:
+      dest: '{{ reference_dir }}/{{ inventory_hostname }}.json'
+      content: '{{ {''schema_version'': 1, ''host'': inventory_hostname, ''ansible_facts_result'': linux_facts,
+        ''collector'': linux_capture} | to_nice_json }}'
+      mode: '0600'
+    delegate_to: localhost
+    become: false
+- name: Capture NX-OS raw command responses independently
+  hosts: reference_nxos
+  gather_facts: false
+  tasks:
+  - name: Read each switch command even when another is unsupported
+    cisco.nxos.nxos_command:
+      commands:
+      - '{{ item }}'
+    loop: '{{ reference_commands }}'
+    register: switch_capture
+    changed_when: false
+    ignore_errors: true
+    vars:
+      ansible_command_timeout: 90
+    ignore_unreachable: true
+  - name: Save command responses and errors on controller
+    ansible.builtin.copy:
+      dest: '{{ reference_dir }}/{{ inventory_hostname }}.json'
+      content: '{{ {''captured_at'': now(utc=true, fmt=''%Y-%m-%dT%H:%M:%SZ''), ''host'': inventory_hostname, ''results'':
+        switch_capture.results} | to_nice_json }}'
+      mode: '0600'
+    delegate_to: localhost
+    become: false

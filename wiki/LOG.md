@@ -269,3 +269,11 @@ Append completed events here; keep proposed work in the plan.
   Inventory asset and Topology Views graph. Physical hardware remains unverified.
 - Automatic approval blocked destructive cable-conflict replacement and removal
   of IP/MAC ownership safeguards; existing network conflicts remain reported.
+
+### 2026-10-25 — Standalone hardware reference capture
+
+Added [raw reference capture](../playbooks/netbox/capture_reference.yml) for
+`sys1391` and `nx00EF0`: raw command results, Linux facts and per-interface/card
+probes, without NetBox writes. Static collector fixtures checked missing tools,
+timeouts, NVMe namespaces and SDK/ethtool enumeration. Ansible syntax checked
+on dragonvm. Physical collection is for the user to run and return as evidence.
