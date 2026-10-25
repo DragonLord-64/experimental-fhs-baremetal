@@ -34,6 +34,16 @@ completed documentation tasks.
 - [ ] Record capture sanitization and representative time-series coverage as
   evidence becomes available; see [telemetry requirements](latest-changes.md#telemetry-evidence).
 
+## Pipeline proposals — not approved for implementation
+
+The current [pipeline](../ops/agent-pipeline/README.md) keeps intake, scouting,
+manual dispatch, one implementation worker, configured checks and user review.
+These ideas are proposals only, not existing behavior or authorization to build:
+
+- Shared test-hardware reservations across tasks/checkouts to avoid concurrent
+  use, potentially with a brief health check before tests.
+- A maintenance agent that activates when pipeline work gets stuck.
+
 Match nearby repository voice: short descriptions, actual tags, normal commands
 and explicit limits. Keep completed results in the append-only log and current
 behavior beside source, rather than maintaining competing setup instructions.

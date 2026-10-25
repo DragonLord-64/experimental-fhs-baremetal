@@ -175,3 +175,9 @@ Append completed events here; keep proposed work in the plan.
   pipeline evidence with SHA-256 provenance. Sanitized representative fixtures
   and full chart/importer/plugin acceptance are required; implementation has not
   started. Task source/link checks passed.
+
+## 2026-10-25 — pipeline proposals
+
+- Recorded [shared hardware reservations and stuck-work maintenance](TODO.md#pipeline-proposals--not-approved-for-implementation)
+  as future ideas only. Neither is implemented or approved for implementation;
+  pipeline behavior is unchanged. Documentation source/link checks passed.
