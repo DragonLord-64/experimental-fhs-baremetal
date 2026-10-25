@@ -181,3 +181,13 @@ Append completed events here; keep proposed work in the plan.
 - Recorded [shared hardware reservations and stuck-work maintenance](TODO.md#pipeline-proposals--not-approved-for-implementation)
   as future ideas only. Neither is implemented or approved for implementation;
   pipeline behavior is unchanged. Documentation source/link checks passed.
+
+## 2026-10-25 — focused task creation and acceptance
+
+- Recorded the user's feedback in [task creation guidance](task-creation.md):
+  bound acceptance to changed behavior, reuse existing checks and avoid making
+  a practical implementation into a harness project. Linked it from task intake
+  and worker rules. Four documentation/source-link checks passed.
+- Redirected the existing NetBox discovery task to finish its implementation
+  with focused tests, preserving its feature scope and partial work. Controller
+  acknowledgement was observed; native acceptance remains pending.

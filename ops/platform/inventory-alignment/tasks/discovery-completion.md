@@ -150,3 +150,19 @@ hardware success may be claimed from synthetic fixtures or screenshots.
 Completion requires the controller report to pass; one-cable smoke or unit-only
 success does not complete this scope. If scope/time or a tool boundary blocks
 acceptance, preserve work and give a precise handoff rather than weaken checks.
+
+## User redirection — 2026-10-25
+
+The user rejected the oversized acceptance effort and directed this same task to
+finish the changes with focused tests. This supersedes the exhaustive validation
+matrix above, without changing the requested features or data-safety behavior.
+Use the [task creation guide](../../../../wiki/task-creation.md).
+
+Keep the screenshot-derived parsing cases, one unambiguous physical DAC/breakout
+connection, a conflicting-cable preservation check, repeat-import idempotency,
+rack-unit placement and both PDU mappings with a representative invalid/occupied
+case. Use one small native check on the retained chart to verify the changed
+objects and plugin compatibility. Reuse the code already written; do not build
+another harness, repeat broad asset/plugin lifecycles or test every failure/mode
+permutation. Fix relevant failures rather than hiding them. Finish the concise
+operator documentation and hand off for controller checks.

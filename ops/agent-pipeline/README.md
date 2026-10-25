@@ -8,6 +8,7 @@ Small local runner, inspired by FoodReserve's [task lifecycle](https://github.co
 
 Requires Python 3.10+, Git and authenticated Codex CLI. Pin the absolute `codex` executable for automation; see [executable selection and historical validation](VALIDATION.md). The user's configured model is inherited. tmux is optional.
 
+Follow [task creation and focused acceptance](../../wiki/task-creation.md).
 Write a short task: goal, allowed paths, acceptance, explicit exclusions. Copy `config.example.json`, adjust `scope` and choose the smallest useful `checks` (argv arrays, no shell). The example validates this runner only. Configure trusted checks for disposable environments.
 
 ```sh

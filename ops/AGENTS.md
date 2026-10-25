@@ -4,6 +4,7 @@ Use one implementation worker followed by the user's review. Do not require or
 spawn a screening agent, manager agent or independent review agent for a task.
 The [pipeline manager](agent-pipeline/README.md) is a small queue/lab helper.
 
+Use [task creation and focused acceptance](../wiki/task-creation.md).
 Read the original task, nearest instructions and relevant source. Keep the goal,
 allowed paths, acceptance commands and exclusions explicit. Do not expand a tiny
 change into framework work, broad cleanup or infrastructure validation. Record

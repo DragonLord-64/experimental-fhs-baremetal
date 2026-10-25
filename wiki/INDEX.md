@@ -14,7 +14,7 @@ work to the [log](LOG.md).
 | LLDP and FPGA DAC connections | [Topology import](topology-import.md) | [Native acceptance](../ops/platform/inventory-alignment/README.md#lldp-and-dac-topology) |
 | Dashboards and telemetry | [Demo versus observed data](latest-changes.md), [VCC/FSP units](unit-topology.md) | [Dashboard sources](../ops/dashboards/README.md), [static demo](../examples/grafana-static-demo/README.md), [captures](../ops/telemetry/README.md) |
 | Logging and installation home | [Environment evidence](test-environment-plan.md#recorded-validation) | [Logging fixture](../ops/platform/logging/README.md), [device role](../roles/filebeat/README.md), [installation home](../ops/platform/landing-page/README.md) |
-| Task execution and scope | [Decisions](decisions.md#confirmed-with-the-user--2026-10-24-pipeline-cleanup) | [Task intake/scout/manager](../ops/agent-pipeline/README.md), [worker rules](../ops/AGENTS.md) |
+| Task execution and scope | [Task creation and focused acceptance](task-creation.md), [decisions](decisions.md#confirmed-with-the-user--2026-10-24-pipeline-cleanup) | [Task intake/scout/manager](../ops/agent-pipeline/README.md), [worker rules](../ops/AGENTS.md) |
 | Source provenance and transfer | [Source map](sources.md), [copy boundary](source-boundary.md) | [Preserved-source manifest](../ops/source-boundary/PROVENANCE.json) |
 
 ## Decisions and history
