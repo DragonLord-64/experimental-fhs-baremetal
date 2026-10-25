@@ -106,3 +106,9 @@ Append completed events here; keep proposed work in the plan.
   [Settings, checks and limits](../ops/platform/landing-page/README.md).
 
 - Completed [installation-home acceptance](../ops/platform/landing-page/README.md) in the delivered chart: deployment-derived links, operator Markdown/custom links, cached 60-second website status and controlled failure/recovery passed through the shared ingress at root and prefixed paths (301.51s). Credentials/PVCs and original lab scales/settings were preserved. Browser rendering was inspected. Retained the authorized lab memory fix (8GiB / 10GiB with swap); no host or cluster restart. Removed context flags from the changed check READMEs; validated lab targets stay inside the scripts.
+
+## 2026-10-24 — pipeline cleanup and scope limits
+
+- Inspected FoodReserve-2D’s current GitHub task lifecycle and manager guidelines; adapted local intake/scout, one worker, FIFO dispatch and a bounded cluster/setup helper. Omitted its advisory review and editor-specific machinery. [Commands and sources](../ops/agent-pipeline/README.md).
+- Set small-task defaults to 600 seconds per worker, 120 per configured check and three launches. The controller owns acceptance; workers avoid duplicate checks and unrelated test infrastructure. Added the same fast source-check entrypoint to private GitHub CI, with controller tests only for Python controller changes. Scope paths are guidance, not sandbox enforcement.
+- Syntax audit found and fixed empty disabled shell groups in the hardware power-test launcher; no hardware test was executed. Corrected Bifrost Quickstart and lab Inventory-image links. Existing wiki/emulator work was preserved. Final validation and limits: [pipeline validation](../ops/agent-pipeline/VALIDATION.md#2026-10-24--intake-scout-and-manager).

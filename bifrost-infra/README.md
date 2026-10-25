@@ -18,7 +18,7 @@ If you want to get a working environment running immediately, use the automated 
 ./scripts/deploy-bifrost-container.sh
 ```
 
-For a manual setup or to understand the underlying Docker/Ansible architecture, please refer to the [Quickstart Guide](../QUICKSTART.md).
+For a manual setup or to understand the underlying Docker/Ansible architecture, please refer to the [Quickstart Guide](../docs/src/bifrost-infra/QUICKSTART.md).
 
 ---
 
@@ -57,7 +57,7 @@ Depending on your current task, please consult the appropriate guide:
 The environment runs in a privileged Docker container. It utilizes network_mode: host to allow dnsmasq to provide DHCP/TFTP services to the local network and provides direct access to /dev for disk provisioning.
 
 ### Path Resolution
-Because the Docker daemon resolves bind-mount paths from the host filesystem, absolute paths must be defined in a .env file (see Quickstart in ../QUICKSTART.md for details).
+Because the Docker daemon resolves bind-mount paths from the host filesystem, absolute paths must be defined in a .env file (see the Quickstart Guide above for details).
 
 ### Inventory Logic
 The environment uses a hybrid inventory approach:

@@ -1,7 +1,8 @@
 {
   "codex": "codex",
-  "max_runs": 8,
-  "max_retries": 2,
-  "timeout": 3600,
+  "max_runs": 3,
+  "timeout": 600,
+  "check_timeout": 120,
+  "scope": ["ops/agent-pipeline/", "ops/AGENTS.md"],
   "checks": [["python3", "-m", "unittest", "discover", "-s", "ops/agent-pipeline/tests", "-v"]]
 }

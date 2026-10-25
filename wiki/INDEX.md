@@ -18,3 +18,5 @@ Keep reusable understanding beside its evidence, following DragonMind's linked-n
 - [Isolated provisioning checks](../ops/provisioning/README.md)
 
 Future notes can cover telemetry contracts, dashboard verification, provisioning tests, and lab procedures as those subjects are investigated.
+
+- [Task intake, scout, focused checks and cluster manager](../ops/agent-pipeline/README.md)

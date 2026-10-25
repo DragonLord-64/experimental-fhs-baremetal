@@ -2,7 +2,7 @@
 
 Start at [INDEX.md](INDEX.md). Keep notes short, linked, and grounded in source evidence. Follow the nearest applicable AGENTS.md.
 
-For implementation tasks across this repository, follow the implementation and user-review workflow in [ops/AGENTS.md](ops/AGENTS.md). For automated runs, [ops/agent-pipeline](ops/agent-pipeline/README.md) owns execution and configured checks; no manager or independent review agent is needed. Interactive work may delegate implementation when requested.
+For implementation tasks across this repository, follow the implementation and user-review workflow in [ops/AGENTS.md](ops/AGENTS.md). For automated runs, [ops/agent-pipeline](ops/agent-pipeline/README.md) owns task intake, scouting, one worker and configured checks; its small manager helper inspects the queue and lab. No independent review agent is needed. Interactive work may delegate implementation when requested.
 
 ## Server safety
 

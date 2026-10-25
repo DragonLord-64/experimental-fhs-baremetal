@@ -1,63 +1,63 @@
 # Agent pipeline
 
-Local task runner. One implementation worker inspects, tests and implements; the user reviews the result.
+`task intake -> scout -> one implementation worker -> configured checks -> user review`
 
-`implement + tests -> configured checks -> done (user review pending)`
+Small local runner, inspired by FoodReserve's [task lifecycle](https://github.com/DragonLord-64/FoodReserve-2D/blob/main/docs/project-management/task-pipeline.md) and [manager guidelines](https://github.com/DragonLord-64/FoodReserve-2D/blob/main/docs/project-management/pipeline-manager-proposal.md), inspected 2026-10-24. No screening or review agent. One task owns this checkout; work stays in its original scope. Larger feature acceptance stays separate from a small task's completion.
 
-No independent review agent is launched. Blockers, invalid results, failed checks and launch limits stop the run. The runner does not itself commit, push or deploy; the caller publishes completed work under the standing private-repository instruction.
+## Tasks
 
-## Run
+Requires Python 3.10+, Git and authenticated Codex CLI. Pin the absolute `codex` executable for automation; see [executable selection and historical validation](VALIDATION.md). The user's configured model is inherited. tmux is optional.
 
-Requires Python 3.10+, Git and an authenticated Codex CLI. tmux is optional. Run from the private experimental checkout on a task branch. Only one task may own the checkout at a time. Existing edits and untracked files are preserved; use a clean checkout if you need an unambiguous task diff.
+Write a short task: goal, allowed paths, acceptance, explicit exclusions. Copy `config.example.json`, adjust `scope` and choose the smallest useful `checks` (argv arrays, no shell). The example validates this runner only. Configure trusted checks for disposable environments.
 
-Write the task in a text file. Copy `config.example.json` and replace `checks` with the actual task's acceptance commands. Each command is an argv array, not a shell string. The example checks this controller only; it does not validate Ansible changes. Checks run with your user's permissions: use trusted commands and disposable environments.
-
-Set `codex` to the absolute CLI path for automation, for example `"codex": "/home/dragon-lord/.local/bin/codex"` on dragonvm. Check that executable's `--version` and `login status` in the same noninteractive SSH environment used to launch the runner. An interactive shell can select a different installation: dragonvm's noninteractive `codex` selected `/usr/local/bin/codex` 0.142.5 while the updated user installation was 0.163.0. The older executable rejected the configured model; the updated executable ran it successfully. Keep the user's configured model unless a change is explicitly requested.
-
-```bash
-python3 ops/agent-pipeline/pipeline.py start --task-file /tmp/task.txt --config /tmp/pipeline.json
+```sh
+python3 ops/agent-pipeline/pipeline.py intake --task-file /tmp/task.txt --config /tmp/pipeline.json
+python3 ops/agent-pipeline/pipeline.py scout
+python3 ops/agent-pipeline/manager.py dispatch-next
 python3 ops/agent-pipeline/pipeline.py status TASK
 python3 ops/agent-pipeline/pipeline.py logs TASK --lines 80
+```
+
+Intake records a queued task without starting a model. Scout only reads status and controller PID liveness. The manager dispatches one queued task in arrival order; running or paused work prevents dispatch. It never invents tasks or resumes paused/blocked work. PID liveness is diagnostic, not proof that the original controller still owns that PID. Reconcile stale state and actual processes before recovery. `start` remains immediate intake/dispatch. No scheduler service is installed.
+
+The worker implements and supplies evidence. The controller owns acceptance checks, so the worker must not repeat them. Additional checks need a specific changed behavior or observed failure. Duplicate configured commands are rejected. Defaults: 600 seconds per worker, 120 per check, three total launches including resumes. Increase budgets only for the actual task. `scope` is prompt guidance, not a filesystem security boundary. Existing saved configurations retain their explicit limits; legacy `max_retries` remains accepted without a review gate.
+
+The controller records `done` only after a valid result and successful checks; `review_required: true` means the user reviews it. The caller then publishes under the private-origin standing order. The runner does not commit, push or deploy.
+
+## Controls
+
+```sh
+python3 ops/agent-pipeline/pipeline.py pause TASK
+python3 ops/agent-pipeline/pipeline.py redirect TASK 'Keep the original goal; correct this detail'
+python3 ops/agent-pipeline/pipeline.py resume TASK
+python3 ops/agent-pipeline/pipeline.py cancel TASK
 python3 ops/agent-pipeline/pipeline.py watch TASK
 python3 ops/agent-pipeline/pipeline.py tmux TASK
 ```
 
-`tmux` prints the attach command. The monitor shows status, agent PID/session ID, elapsed time and recent raw JSON events. It is a viewer, not an interactive Codex terminal. The detached controller keeps running when the monitor closes.
+Controls for active tasks are queued; check status for acknowledgement. Pause/redirect interrupts the owned process group, saves a patch and resumes with a fresh worker. A paused task stays paused. Cancel preserves files. Queued tasks can be cancelled before dispatch. Never control unrelated processes. An interrupted external operation needs inspection before retry. Stopped runs are immutable; retain evidence when starting a replacement. A killed controller cannot auto-recover.
 
-## Redirect
+`runs/TASK/` is ignored and private: task/config, prompts, raw events, results, patches and check logs. Untracked files stay on disk; patches do not include them. Inspect sensitive output before publishing. Workers use workspace-write and approval policy `never`; permission failures become blockers.
 
-Humans and authorized supervising agents use the same commands:
+## Cluster/setup manager
 
-```bash
-python3 ops/agent-pipeline/pipeline.py pause TASK
-python3 ops/agent-pipeline/pipeline.py redirect TASK 'Keep the original scope; also check upgrades'
-python3 ops/agent-pipeline/pipeline.py resume TASK
-python3 ops/agent-pipeline/pipeline.py cancel TASK
+```sh
+python3 ops/agent-pipeline/manager.py status
+python3 ops/agent-pipeline/manager.py lab-status
+python3 ops/agent-pipeline/manager.py lab-up
 ```
 
-Commands are queued; check `status` for acknowledgement. Pause interrupts the active process group and preserves working files, logs and a patch. Resume starts a fresh agent at the same stage. Redirect does the same, adding the correction to the next prompt; legacy screening/review checkpoints resume as implementation. A paused task stays paused. Cancel stops the task without deleting changes. Never run these against unrelated processes.
+Run locally. `lab-status` inspects existing nodes, pods, deployments, services and PVCs over the configured dragonvm SSH connection, always naming `fhs-test`. `lab-up` explicitly calls the existing [lab lifecycle helper](../kubernetes/README.md); it does not run acceptance tests or deploy the platform. Both host operating systems stay running. There is no periodic agent, automatic repair, cluster deletion or host lifecycle action. If SSH is unreachable follow the [wake protocol](../../AGENTS.md#dragonvm-wake-protocol), wait at least 60 seconds, then inspect preserved state. Network sandbox denial alone does not mean the VM is down.
 
-This version deliberately uses interrupt/checkpoint/restart. The installed CLI offers `codex queue`, but queued delivery is not treated as guaranteed live steering for `codex exec`. No terminal keystrokes are injected. An interruption can leave an external operation partially complete: inspect it before resuming.
+## Checks
 
-## Files
-
-Everything for the runner lives here. `runs/TASK/` is ignored by Git and private to the local user. It contains the original task, configuration, state, command history, prompts, raw events, structured results, patches and verification logs. `status` prints JSON for other agents. `agent_thread` is populated from Codex's `thread.started` event when available.
-
-Treat run files as sensitive: agent output may contain environment details. Do not publish them without review. Tracked docs/tests stay in this directory; implementation changes for dispatched tasks go in their normal source paths.
-
-## Limits
-
-- Default: eight total agent launches, one hour per worker/check. Legacy `max_retries` config is accepted but no review retry gate remains. Pausing or redirecting consumes a new launch on resume.
-- The implementation worker uses workspace-write with approval policy `never`; unavailable permissions become blockers rather than interactive prompts. The runner never bypasses the sandbox. This is process isolation, not a hostile-code security boundary.
-- Completion requires a valid implementation result, evidence, and successful configured checks, then records `review_required: true`. The user reviews the change; configure checks that test the real requirement. Untracked files stay on disk and are listed, not included in Git patches.
-- Authentication, sandbox, network or usage failures stop the task. Restart as a new task with the previous evidence; stopped runs are immutable.
-- A killed controller cannot auto-recover. Status records the worker PID for diagnosis; verify it is alive. Do not resume by signalling a PID copied from old state.
-- Runtime cleanup/retention and CI/GitHub issue dispatch are not implemented.
-
-## Test
-
-```bash
-python3 -m unittest discover -s ops/agent-pipeline/tests -v
+```sh
+python3 ops/agent-pipeline/checks.py                          # changed tracked source + whitespace
+python3 ops/agent-pipeline/checks.py path/to/changed.py       # explicit files, including new files
+python3 ops/agent-pipeline/checks.py --all                    # full tracked syntax audit
+python3 -m unittest discover -s ops/agent-pipeline/tests -v   # runner changes only
 ```
 
-Tests use a fake Codex executable, with no model calls. CLI flags were checked against installed `codex exec --help` and [official noninteractive documentation](https://developers.openai.com/codex/noninteractive). See [validation](VALIDATION.md) for dragonvm results and executable selection in the real smoke test.
+The audit checks Python/JSON/shell syntax and local Markdown file links, excluding code fences, images and anchors. It does not execute project code or replace Ansible lint, Helm lint, documentation builds or behavioral tests when those are relevant. The private GitHub workflow uses the same entry points and only runs controller tests for Python controller changes. Existing upstream GitLab CI remains the source-side workflow.
+
+Tests use fake workers and temporary repositories, with no model calls or deployments. Platform/importer changes still require the [real chart/importer lab acceptance](../platform/inventory-alignment/README.md); docs and controller changes do not.

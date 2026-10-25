@@ -37,3 +37,8 @@
 ## Observed implementation
 
 The Hyper-V guest, persistent platform and restricted Bifrost fixture are implemented within the limits recorded in [VM operations](../ops/kubernetes/README.md), [platform validation](../ops/platform/VALIDATION.md) and [provisioning checks](../ops/provisioning/README.md). The [controller](../ops/agent-pipeline/README.md) owns implementation/check execution; its [validation](../ops/agent-pipeline/VALIDATION.md) records executable selection and bounded real-run evidence. Fake-agent tests alone do not prove a real task completes.
+
+## Confirmed with the user — 2026-10-24 pipeline cleanup
+
+- Keep task intake/scouting and one implementation worker, with user review. Use a small CLI manager for queue dispatch and existing lab inspection. No review agent or per-task manager agent.
+- Match checks to changed behavior; the controller runs configured acceptance once. Default worker/check budgets are ten/two minutes. Larger runtime changes still need real chart/importer lab acceptance. See [workflow and commands](../ops/agent-pipeline/README.md).

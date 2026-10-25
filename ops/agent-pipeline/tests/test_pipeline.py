@@ -196,12 +196,52 @@ out.write_text(json.dumps(dict(status=status, summary=stage, handoff='useful con
         self.start()
         self.wait(lambda s: s.get('agent_pid'))
         first_id, first_run = self.id, self.run
-        self.start()
-        state = self.wait(lambda s: s['status'] == 'blocked')
-        self.assertIn('owns this repository', state['reason'])
+        result = subprocess.run(['python3', str(self.script), 'start', '--task-file', str(self.task),
+                                 '--config', str(self.config)], capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('running/paused work', result.stderr)
         self.cli('cancel', first_id)
         self.id, self.run = first_id, first_run
         self.wait(lambda s: s['status'] == 'cancelled')
+
+    def test_intake_scout_dispatch(self):
+        self.config.write_text(json.dumps(self.settings))
+        self.id = self.cli('intake', '--task-file', str(self.task), '--config', str(self.config)).strip()
+        self.run = self.home / 'runs' / self.id
+        self.addCleanup(self.cleanup_worker)
+        tasks = json.loads(self.cli('scout'))
+        self.assertEqual(tasks[0]['status'], 'queued')
+        self.assertFalse(tasks[0]['controller_alive'])
+        self.assertFalse(list(self.run.glob('*.prompt.txt')))
+        self.cli('dispatch', self.id)
+        state = self.wait(lambda s: s['status'] in pipeline.TERMINAL)
+        self.assertEqual(state['status'], 'done')
+        prompt = next(self.run.glob('*.prompt.txt')).read_text()
+        self.assertIn('Do not run those commands yourself', prompt)
+        self.assertIn('120 seconds per command', prompt)
+
+    def test_duplicate_checks_rejected(self):
+        self.settings['checks'] *= 2
+        self.config.write_text(json.dumps(self.settings))
+        result = subprocess.run(['python3', str(self.script), 'intake', '--task-file', str(self.task),
+                                 '--config', str(self.config)], capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('Duplicate verification', result.stderr)
+
+    def test_queued_cancel_does_not_launch_worker(self):
+        self.config.write_text(json.dumps(self.settings))
+        self.id = self.cli('intake', '--task-file', str(self.task), '--config', str(self.config)).strip()
+        self.run = self.home / 'runs' / self.id
+        self.cli('cancel', self.id)
+        state = json.loads((self.run / 'state.json').read_text())
+        self.assertEqual(state['status'], 'cancelled')
+        self.assertFalse(list(self.run.glob('*.prompt.txt')))
+
+    def test_check_timeout_is_separate_from_worker_budget(self):
+        self.settings.update(check_timeout=1, checks=[['python3', '-c', 'import time; time.sleep(30)']])
+        self.start()
+        state = self.wait(lambda s: s['status'] == 'blocked')
+        self.assertIn('verification timeout', state['reason'])
 
     def test_result_validation(self):
         for result in ({}, {'status': 'ready', 'summary': '', 'handoff': '', 'evidence': []}):

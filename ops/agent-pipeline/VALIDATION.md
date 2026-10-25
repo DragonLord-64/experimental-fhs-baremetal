@@ -29,3 +29,31 @@ happy path, checks remain mandatory, legacy review checkpoints resume
 implementation, and pause/redirect/cancel/timeout/locking behavior is retained.
 This is controller behavior evidence, not a new authenticated model smoke run.
 Existing paused/blocked runs were not resumed.
+
+## 2026-10-24 — intake, scout and manager
+
+- Eighteen fake-worker/manager tests pass in 10.077 seconds. They cover queued
+  intake, FIFO single dispatch, preserved paused/blocked work, pre-dispatch cancel,
+  duplicate-check rejection, separate check timeout and existing controls/locks.
+- Full tracked audit: 254 source/link file checks passed; 253 relative Markdown
+  links were also inspected independently with no missing targets. New helper
+  sources passed explicit syntax checks. Whitespace and workflow YAML pass.
+- YAML structural inspection parsed 238 ordinary files; twelve Helm templates
+  require rendering rather than a raw YAML parser. Both delivered charts pass
+  Helm lint, retaining existing Grafana probe-coalescing and chart icon warnings.
+  Seven source-boundary tests pass in 0.818 seconds, including chart rendering and
+  preserved-source hashes. No source hash exceptions were changed.
+- New manager `lab-status` completed against existing dragonvm `fhs-test`:
+  node Ready, active application pods Running, retained claims Bound. Some
+  deployments were already scaled to zero; no scale or restart was performed.
+  No pipeline processes were found in the initial remote process inspection;
+  that checkout had no `ops/agent-pipeline/runs` directory.
+- No authenticated model task, deployment, hardware test, cluster lifecycle test
+  or `lab-up` mutation was run. Sphinx and ansible-lint are absent locally; a full
+  documentation build and full Ansible lint were not run. GitHub workflow execution
+  remains pending CI. Prior wiki/emulator edits were kept outside this commit.
+
+The full audit initially exposed invalid empty subshells in two disabled hardware
+power-test blocks. Commenting their delimiters fixes parsing without activating
+those blocks. Bifrost Quickstart and relocated lab Inventory-image links were
+also corrected. The manager is an explicit CLI helper, not an installed watchdog.
