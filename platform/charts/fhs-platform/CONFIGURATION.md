@@ -69,3 +69,30 @@ system ingest pipelines, ILM and the `fhs-filebeat` Kibana data view. Retention
 defaults to 30d for a new policy. Existing policy and data-view settings remain.
 It installs no collector. `logging.filebeat.enabled` creates the limited
 `filebeat_writer` account used by server shippers. Run setup before shipping logs.
+
+## APT cache
+
+`aptCacher.enabled` installs `mid-cbf-hw-apt-cacher` on TCP 3142 with a
+20Gi persistent cache (`bds1`). Override `aptCacher.persistence.storageClass`
+and `size` for the site. Logs are ephemeral under `/var/log/apt-cacher-ng`.
+The retained cache claim survives Helm uninstall; remove it explicitly to
+discard cached packages.
+
+The service defaults to ClusterIP. Set `aptCacher.service.type: NodePort`
+and optionally `nodePort`, or use `LoadBalancer`, for provisioning clients
+outside Kubernetes. Restrict external access to the provisioning network.
+Use the reachable service address in `/etc/apt/apt.conf.d/01proxy`:
+
+```text
+Acquire::http::Proxy "http://CACHE_HOST:3142";
+Acquire::https::Proxy "http://CACHE_HOST:3142";
+```
+
+For NodePort use the assigned node port instead of 3142. HTTPS CONNECT is
+allowed only for archive.ubuntu.com, security.ubuntu.com, deb.debian.org,
+download.docker.com, rmdlinuxrepo.mda.ca and pkgs.k8s.io on port 443.
+HTTPS tunnels are passed through; HTTP package downloads are cached.
+The five overrides are in `templates/apt-cacher-config.yaml`; other settings
+use the image's packaged apt-cacher-ng defaults. The pinned
+[container source](https://github.com/mbentley/docker-apt-cacher-ng) supplies
+the package; its broad CONNECT override is replaced by this chart.

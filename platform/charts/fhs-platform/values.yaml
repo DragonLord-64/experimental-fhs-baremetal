@@ -658,3 +658,17 @@ logging:
   # Temporarily disabled while the Filebeat image pull is unavailable.
   filebeatSetup:
     enabled: false
+
+aptCacher:
+  enabled: true
+  image: docker.io/mbentley/apt-cacher-ng@sha256:7ff8b3fb3f518289faa65e25fb773e4d82aaf3e24b4e76bdfe7f9dd7025a7ea9
+  service:
+    type: ClusterIP
+    # Set for NodePort access from provisioning clients outside Kubernetes.
+    nodePort: null
+  persistence:
+    storageClass: bds1
+    size: 20Gi
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits: {cpu: '1', memory: 256Mi}

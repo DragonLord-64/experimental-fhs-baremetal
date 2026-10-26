@@ -1,7 +1,7 @@
 # FHS platform
 
 One Helm release installs NetBox, PostgreSQL, Valkey, Prometheus, Telegraf,
-Grafana, Elasticsearch/Kibana and the installation home. Dependencies and
+Grafana, Elasticsearch/Kibana, apt-cacher-ng and the installation home. Dependencies and
 dashboards are bundled. NetBox plugins install automatically; no image build
 is required.
 

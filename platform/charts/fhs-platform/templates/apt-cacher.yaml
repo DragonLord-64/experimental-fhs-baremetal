@@ -1,0 +1,77 @@
+{{- if .Values.aptCacher.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-apt-cacher
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: {{ .Values.aptCacher.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.aptCacher.persistence.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-apt-cacher
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: {{ .Release.Name }}-apt-cacher}
+  template:
+    metadata:
+      labels: {app: {{ .Release.Name }}-apt-cacher}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/apt-cacher-config.yaml") . | sha256sum }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: apt-cacher
+        image: {{ .Values.aptCacher.image | quote }}
+        # Run the packaged daemon directly; retain packaged configuration and
+        # replace the image's broad CONNECT override with our minimal one.
+        command: [/usr/sbin/apt-cacher-ng]
+        args: ['-c', /etc/apt-cacher-ng, 'ForeGround=1']
+        ports: [{name: proxy, containerPort: 3142}]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities: {drop: [ALL]}
+        resources:
+          {{- toYaml .Values.aptCacher.resources | nindent 10 }}
+        readinessProbe:
+          tcpSocket: {port: proxy}
+        livenessProbe:
+          tcpSocket: {port: proxy}
+          initialDelaySeconds: 15
+        volumeMounts:
+        - {name: config, mountPath: /etc/apt-cacher-ng/zzz_acng.conf, subPath: zzz_acng.conf, readOnly: true}
+        - {name: cache, mountPath: /var/cache/apt-cacher-ng}
+        - {name: logs, mountPath: /var/log/apt-cacher-ng}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-apt-cacher
+      - name: cache
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-apt-cacher
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-apt-cacher
+spec:
+  type: {{ .Values.aptCacher.service.type }}
+  selector: {app: {{ .Release.Name }}-apt-cacher}
+  ports:
+  - name: proxy
+    port: 3142
+    targetPort: proxy
+    {{- if and (eq .Values.aptCacher.service.type "NodePort") .Values.aptCacher.service.nodePort }}
+    nodePort: {{ .Values.aptCacher.service.nodePort }}
+    {{- end }}
+{{- end }}

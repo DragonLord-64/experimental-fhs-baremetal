@@ -357,3 +357,23 @@ the server traceback was not available to prove its cause. Linux interface,
 address and LLDP discovery now uses hardware-backed interfaces, retaining USB,
 explicit BMC and FPGA ports. Existing logical records are preserved. No tests,
 hardware or lab commands run, per user instruction; hardware validation pending.
+
+### 2026-10-26 — Platform APT cache
+
+Added an enabled-by-default apt-cacher-ng Deployment, Service and retained 20Gi
+cache claim to the [platform chart](../platform/charts/fhs-platform/README.md).
+The user's five configuration overrides replace the pinned image's broad CONNECT
+settings; other daemon settings remain packaged defaults. Service exposure and
+storage are configurable; [client settings](../platform/charts/fhs-platform/CONFIGURATION.md#apt-cache).
+
+Helm lint and enabled/disabled renders passed (existing Grafana probe warnings).
+On dragonvm, chart-rendered resources were applied alongside the retained
+`mid-cbf-hw` release in `fhs-discovery-portal-test`, context `fhs-test`, with
+`standard` storage. Service HTTP downloads matched across two requests; the
+cache log showed 140038 inbound bytes initially and 761 on revalidation for
+138891 outbound bytes each time. CONNECT to deb.debian.org:443 returned 200;
+example.com:443 returned 403. Cached Release data survived pod replacement.
+The umbrella applications were scaled down before testing and left unchanged;
+no full-stack upgrade or native importer rerun is claimed. Importers unchanged.
+Lab resources remain available for inspection; logs are ephemeral. Only one
+allowed CONNECT host was exercised; the exact allowlist is in the ConfigMap.

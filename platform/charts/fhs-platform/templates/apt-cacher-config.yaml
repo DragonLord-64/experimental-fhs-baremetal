@@ -1,0 +1,13 @@
+{{- if .Values.aptCacher.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-apt-cacher
+data:
+  zzz_acng.conf: |
+    CacheDir: /var/cache/apt-cacher-ng
+    LogDir: /var/log/apt-cacher-ng
+    Port: 3142
+    BindAddress: 0.0.0.0
+    PassThroughPattern: ^(archive\.ubuntu\.com|security\.ubuntu\.com|deb\.debian\.org|download\.docker\.com|rmdlinuxrepo\.mda\.ca|pkgs\.k8s\.io):443$
+{{- end }}
