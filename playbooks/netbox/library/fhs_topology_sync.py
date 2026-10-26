@@ -2,6 +2,7 @@
 """Native observed interfaces, module metadata and conflict-safe physical cables."""
 from collections import defaultdict
 import json
+import hashlib
 import re
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.fhs_netbox import Sync, scalar
@@ -85,6 +86,129 @@ def metadata(sync, device, observation, endpoints, omitted):
         else:
             from ansible.module_utils.fhs_inventory_helpers import port_inventory
             port_inventory(sync, device, connector, vendor, part, serial, detail, endpoints.get((observation['device'], connector)))
+
+
+def inventory_dacs(sync, observations, devices, omitted):
+    """Inventory verified copper only; move only our explicitly managed unknown end."""
+    groups = defaultdict(list)
+    for observation in observations:
+        for item in observation.get('serials', []):
+            serial = str(item.get('serial', '')).strip()
+            vendor = str(item.get('vendor', '')).strip().upper()
+            part = str(item.get('part', '')).strip().upper()
+            if not serial or serial.lower() in ('unknown', 'n/a', 'none', '0') or not vendor or not part:
+                continue
+            identity = serial
+            if (vendor, part) == ('FS', 'QDD-400G-PC01') and re.fullmatch(r'.+-[12]', serial):
+                identity = serial[:-2]
+            key = hashlib.sha256(json.dumps([vendor, part, identity]).encode()).hexdigest()
+            groups[key].append(dict(item, device=observation['device']))
+    if not groups: return
+    field = 'fhs_dac_observation'
+    old_field = sync.find('extras/custom-fields/', name=field)
+    if old_field and scalar(old_field.get('type')) != 'json':
+        raise ValueError('Incompatible '+field+' custom field')
+    types = list((old_field or {}).get('object_types') or [])
+    if 'dcim.cable' not in types: types.append('dcim.cable')
+    sync.ensure('extras/custom-fields/', dict(name=field),
+                dict(name=field, type='json', object_types=types), field)
+    managed_tag = sync.ensure('extras/tags/', dict(slug='fhs-dac'),
+                             dict(name='FHS DAC', slug='fhs-dac'), 'FHS DAC tag')
+    unresolved_tag = sync.ensure('extras/tags/', dict(slug='endpoint-unresolved'),
+                                dict(name='Endpoint unresolved', slug='endpoint-unresolved'), 'Unresolved tag')
+    registry = defaultdict(list)
+    for cable in sync.list('dcim/cables/', tag='fhs-dac'):
+        detail = (cable.get('custom_fields') or {}).get(field) or {}
+        if detail.get('identity'): registry[detail['identity']].append(cable)
+    for identity, records in sorted(groups.items()):
+        matches = registry[identity]
+        if len(matches) > 1:
+            omitted.append(identity+': duplicate managed DAC identities; preserved'); continue
+        old = matches[0] if matches else None
+        detail = ((old.get('custom_fields') or {}).get(field) or {}) if old else {}
+        observed = {(r['device'], r['port']): r for r in detail.get('ends', [])}
+        observed.update({(r['device'], r['port']): r for r in records})
+        sides = defaultdict(list)
+        for r in observed.values(): sides[(r['device'], physical_port(r['port']), r['kind'])].append(r)
+        if len(sides) not in (1, 2) or (len(sides) == 2 and {k[2] for k in sides} != {'fpga', 'nexus'}):
+            omitted.append(identity+': ambiguous DAC endpoints; preserved'); continue
+        serials = {r['serial'] for r in observed.values()}
+        first = records[0]
+        if len(sides) == 2 and (first['vendor'].strip().upper(), first['part'].strip().upper()) == ('FS', 'QDD-400G-PC01'):
+            base = re.sub(r'-[12]$', '', first['serial'])
+            if len(serials) != 1 and serials != {base+'-1', base+'-2'}:
+                omitted.append(identity+': unsupported DAC serial pair; preserved'); continue
+            if len(serials) == 1 and re.fullmatch(r'.+-[12]', first['serial']):
+                omitted.append(identity+': repeated suffix at both ends; preserved'); continue
+        real_sides = []; failed = False
+        for side in sides.values():
+            interfaces = []
+            for r in side:
+                dev = devices.get(r['device']) or sync.find('dcim/devices/', name=r['device'])
+                interface = sync.find('dcim/interfaces/', device_id=dev['id'], name=r['port']) if dev else None
+                if not interface or interface.get('mark_connected') or (interface.get('cable') and scalar(interface['cable']) != (old or {}).get('id')):
+                    failed = True; break
+                interfaces.append(interface)
+            real_sides.append(interfaces)
+        if failed:
+            omitted.append(identity+': absent or occupied DAC endpoint; preserved'); continue
+        real_ids = {i['id'] for side in real_sides for i in side}
+        if old:
+            # Only the dedicated interface recorded on this cable is movable.
+            # A fully resolved cable is immutable even if a later scan disagrees.
+            placeholder = detail.get('placeholder_interface')
+            terms = old.get('a_terminations', []) + old.get('b_terminations', [])
+            old_ids = {t.get('object_id') for t in terms if t.get('object_type') == 'dcim.interface'}
+            if not placeholder or placeholder not in old_ids or len(old_ids) != len(terms) or not (old_ids-{placeholder}) <= real_ids:
+                continue
+            stub = sync.find('dcim/interfaces/', id=placeholder)
+            stub_device = sync.find('dcim/devices/', id=scalar(stub.get('device'))) if stub else None
+            if (not stub or stub.get('description') != 'FHS unresolved DAC '+identity or not stub_device
+                    or managed_tag['id'] not in [scalar(t) for t in stub_device.get('tags', [])]):
+                omitted.append(identity+': placeholder ownership changed; preserved'); continue
+        else:
+            placeholder = None
+        unresolved = len(real_sides) == 1
+        if unresolved:
+            if not placeholder:
+                dev = devices[records[0]['device']]; site = scalar(dev.get('site'))
+                role = sync.ensure('dcim/device-roles/', dict(slug='fhs-placeholder'),
+                    dict(name='FHS placeholder', slug='fhs-placeholder', color='9e9e9e'), 'Placeholder role')
+                maker = sync.ensure('dcim/manufacturers/', dict(slug='fhs-placeholder'),
+                    dict(name='FHS placeholder', slug='fhs-placeholder'), 'Placeholder manufacturer')
+                dtype = sync.ensure('dcim/device-types/', dict(slug='fhs-unknown-endpoint'),
+                    dict(manufacturer=maker['id'], model='Unknown endpoint', slug='fhs-unknown-endpoint', u_height=0), 'Placeholder type')
+                name = 'Unknown endpoint - '+str(site)
+                stub_device = sync.find('dcim/devices/', name=name)
+                if stub_device and (scalar(stub_device.get('device_type')) != dtype['id']
+                        or managed_tag['id'] not in [scalar(t) for t in stub_device.get('tags', [])]):
+                    omitted.append(name+': placeholder name occupied; preserved'); continue
+                stub_device = sync.ensure('dcim/devices/', dict(name=name),
+                    dict(name=name, site=site, role=role['id'], device_type=dtype['id'], status='planned', tags=[managed_tag['id']]), name)
+                stub = sync.ensure('dcim/interfaces/', dict(device_id=stub_device['id'], name='DAC-'+identity),
+                    dict(device=stub_device['id'], name='DAC-'+identity, type='other', description='FHS unresolved DAC '+identity), 'Unknown DAC end')
+                if stub.get('cable'):
+                    omitted.append(identity+': placeholder occupied; preserved'); continue
+                placeholder = stub['id']
+            real_sides.append([dict(id=placeholder)])
+        tags = [scalar(t) for t in (old or {}).get('tags', []) if scalar(t) != unresolved_tag['id']]
+        if managed_tag['id'] not in tags: tags.append(managed_tag['id'])
+        if unresolved: tags.append(unresolved_tag['id'])
+        detail = dict(identity=identity, ends=list(observed.values()), placeholder_interface=placeholder if unresolved else None)
+        data = dict(a_terminations=[dict(object_type='dcim.interface', object_id=i['id']) for i in real_sides[0]],
+                    b_terminations=[dict(object_type='dcim.interface', object_id=i['id']) for i in real_sides[1]],
+                    status='planned' if unresolved else 'connected', tags=tags, custom_fields={field: detail})
+        # Retain full raw connector properties (including reported lengths); do not guess units.
+        if old:
+            expected = ({i['id'] for i in real_sides[0]}, {i['id'] for i in real_sides[1]})
+            actual = tuple({t['object_id'] for t in old.get(side, [])} for side in ('a_terminations', 'b_terminations'))
+            if actual == expected:
+                data.pop('a_terminations'); data.pop('b_terminations')
+            sync.ensure('dcim/cables/', dict(id=old['id']), data, 'DAC '+identity)
+        else:
+            data['description'] = 'FHS observed DAC; remote endpoint unresolved' if unresolved else 'FHS observed DAC'
+            sync.plan.append(dict(object='DAC '+identity, action='create', before={}, after=data))
+            if not sync.check: sync.request('POST', 'dcim/cables/', json=data)
 
 
 def synchronize(params, check):
@@ -253,6 +377,7 @@ def synchronize(params, check):
                     status='connected', description='FHS discovery: '+evidence)
         sync.plan.append(dict(object='cable', action='create', before={}, after=data))
         if not sync.check: sync.request('POST', 'dcim/cables/', json=data)
+    inventory_dacs(sync, observations, devices, omitted)
     return dict(plan=sync.plan, omissions=omitted, diagnostics=diagnostics)
 
 

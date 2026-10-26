@@ -335,3 +335,14 @@ identity/connection rules, failure boundaries and deferred improvements. This is
 user-reported hardware success, not a claim of independently observed complete
 coverage. Future changes should be small and explicitly scoped. Documentation
 only; no importer, hardware or lab changes in this milestone.
+
+### 2026-10-26 — Inventory unresolved observed DACs
+
+Added native DAC cables with a dedicated unknown endpoint per cable on a tagged
+per-site placeholder device. Full observed connector identities and properties
+remain on the cable. A later unique opposite-end observation can replace only
+the importer-managed placeholder, retaining the same cable ID across runs.
+Real occupied endpoints, optical-only observations and absent hardware retain
+the working baseline's protections. No tests, hardware or lab commands run,
+per user instruction; user hardware validation remains pending. See the
+[importer README](../playbooks/netbox/README.md).

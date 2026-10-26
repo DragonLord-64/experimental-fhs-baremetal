@@ -151,7 +151,19 @@ An exceptional verified endpoint pair can be supplied in `bootstrap_dac_endpoint
 `host_serial`, `switch_serial` and `evidence` (all nonempty strings). Both full
 serials must resolve to one FPGA connector and one switch connector. Conflicting
 rules, multiple physical connectors and occupied terminations are refused.
-Existing cables are never moved. Review `topology_result.omissions` and
+Existing real-to-real cables are never moved.
+
+Verified DACs with an unresolved peer get a native cable to a dedicated interface
+on `Unknown endpoint - <site ID>`, tagged `fhs-dac` and `endpoint-unresolved`.
+The cable JSON field `fhs_dac_observation` keeps full serials, vendor, part and raw
+connector properties (including reported length). Later unique opposite-end DAC
+discovery replaces only that importer-managed placeholder endpoint, preserving
+the cable ID; it also works when the ends are imported in separate runs.
+Unresolved cables have Planned status; resolved cables are Connected. Empty
+placeholder interfaces are retained. Optical transceivers alone create no cable.
+The existing supported DAC product list and exact/FS paired-serial rules apply.
+Ambiguous identities and occupied real endpoints remain untouched.
+Review `topology_result.omissions` and
 `topology_result.diagnostics`; repeated unchanged apply creates nothing.
 
 `--tags facts` collects without topology API calls; `--tags compare` and `--check`

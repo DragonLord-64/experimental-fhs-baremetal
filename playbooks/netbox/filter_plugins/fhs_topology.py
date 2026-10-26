@@ -120,7 +120,7 @@ def topology_linux(name, lldp, eeprom, fpga, identity=None):
         result['interfaces'].append(p['name'])
         if p['dac'] and p['serial']:
             result['serials'].append(dict(port=p['name'], serial=p['serial'], kind='fpga',
-                                         vendor=p['vendor'], part=p['part'], connector=p['connector']))
+                                         vendor=p['vendor'], part=p['part'], connector=p['connector'], metadata=p.get('metadata', {})))
     return result
 
 
@@ -151,7 +151,7 @@ def topology_nexus(name, lldp, optics):
                     result['ports'].append(p); count += 1
                     if p['dac'] and p['serial']:
                         result['serials'].append(dict(port=local, serial=p['serial'], kind='nexus', vendor=vendor,
-                                                     part=part_number, connector=p['connector']))
+                                                     part=part_number, connector=p['connector'], metadata=p.get('metadata', {})))
             result['diagnostics'].append(dict(probe='NX-OS '+kind, parsed_rows=count))
             if not count: result['omissions'].append('NX-OS '+kind+': empty or unsupported report; existing records preserved')
         except (ValueError, TypeError):
