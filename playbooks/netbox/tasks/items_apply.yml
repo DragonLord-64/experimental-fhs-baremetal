@@ -9,6 +9,7 @@
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   block:
   - name: Reconcile observed motherboard without authorizing absence removal
+    throttle: 1
     fhs_inventory_sync:
       netbox_url: '{{ netbox_url }}'
       netbox_token: '{{ netbox_token }}'
@@ -24,6 +25,7 @@
     retries: '{{ netbox_api_retries }}'
     delay: '{{ netbox_api_retry_delay }}'
   - name: Reconcile serial-bearing DDR5 and NVMe assets
+    throttle: 1
     fhs_inventory_sync:
       netbox_url: '{{ netbox_url }}'
       netbox_token: '{{ netbox_token }}'

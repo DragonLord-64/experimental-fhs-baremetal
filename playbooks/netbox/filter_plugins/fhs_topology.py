@@ -81,6 +81,8 @@ def topology_linux(name, lldp, eeprom, fpga, identity=None):
             if not isinstance(entries, list): raise ValueError('interface shape')
             for entry in entries:
                 for local, neighbor in entry.items():
+                    if identity is not None and 'physical_interfaces' in identity and local not in identity['physical_interfaces']:
+                        continue
                     for data in neighbor if isinstance(neighbor, list) else [neighbor]:
                         chassis = data.get('chassis', {})
                         for remote, details in chassis.items():

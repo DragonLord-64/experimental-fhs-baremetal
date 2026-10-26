@@ -96,6 +96,7 @@
   ansible.builtin.set_fact:
     switch: '{{ (discovered.stdout + [switch_optics_json]) | nexus_inventory }}'
 - name: Reconcile serial-bearing installed modules and retained assets
+  throttle: 1
   fhs_inventory_sync:
     netbox_url: '{{ netbox_url }}'
     netbox_token: '{{ netbox_token }}'
@@ -233,6 +234,7 @@
       inventory: '{{ discovered.stdout }}'
       lldp: '{{ topology_nexus_lldp.stdout | default([]) }}'
 - name: Write observed switch interfaces without creating cables
+  throttle: 1
   tags:
   - interfaces
   - apply

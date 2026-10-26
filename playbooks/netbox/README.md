@@ -32,6 +32,15 @@ No tags (or `--tags apply`) runs all stages. Combine stages with commas.
 | `ips` | Host addresses, primary IPv4 and available BMC out-of-band address |
 | `cables` | LLDP/DAC connections, QSFP metadata/assets and explicit server-info power mappings |
 
+Linux host interfaces must have `/sys/class/net/<name>/device` hardware backing;
+this includes physical USB NICs and excludes loopback, container interfaces,
+bridges and tunnels. IP and LLDP imports use the same physical interface set.
+Explicit BMC and SDK-discovered FPGA ports are added separately. Existing logical
+interface records are left untouched.
+
+Shared component/type and pluggable writes run one host at a time to avoid
+parallel hosts creating the same prerequisite records.
+
 Later stages find the existing parent and skip it with a message if absent;
 they do not create server records. NetBox may instantiate components already
 defined in a module-type template. Physical cards and inventory items update in

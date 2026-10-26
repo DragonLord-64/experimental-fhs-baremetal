@@ -19,7 +19,7 @@
   tags: [always]
 - name: Keep Linux topology observations for controller reconciliation
   ansible.builtin.set_fact:
-    fhs_topology: '{{ facts.hostname | fhs_topology_linux(topology_lldp, topology_nic_eeprom.results | default([]), topology_fpga_eeprom.results | default([]), {"aliases": [inventory_hostname, ansible_host | default(inventory_hostname)], "macs": facts | dict2items | selectattr("value", "mapping") | selectattr("value.macaddress", "defined") | map(attribute="value.macaddress") | list}) }}'
+    fhs_topology: '{{ facts.hostname | fhs_topology_linux(topology_lldp, topology_nic_eeprom.results | default([]), topology_fpga_eeprom.results | default([]), {"physical_interfaces": physical_interface_names, "aliases": [inventory_hostname, ansible_host | default(inventory_hostname)], "macs": discovered_interfaces | map(attribute="mac") | reject("equalto", "") | list}) }}'
   tags: [always]
 - name: Retain optional protected Linux probe evidence
   ansible.builtin.import_tasks: capture.yml

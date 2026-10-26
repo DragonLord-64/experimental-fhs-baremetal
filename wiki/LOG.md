@@ -346,3 +346,14 @@ Real occupied endpoints, optical-only observations and absent hardware retain
 the working baseline's protections. No tests, hardware or lab commands run,
 per user instruction; user hardware validation remains pending. See the
 [importer README](../playbooks/netbox/README.md).
+
+
+### 2026-10-26 — Serialize component writes and omit logical interfaces
+
+Added per-task serialization to observed inventory/QSFP, switch-module and
+pluggable-association writes; NIC/FPGA and chassis writes were already serialized.
+This addresses the likely shared-type creation race behind the reported HTTP 500;
+the server traceback was not available to prove its cause. Linux interface,
+address and LLDP discovery now uses hardware-backed interfaces, retaining USB,
+explicit BMC and FPGA ports. Existing logical records are preserved. No tests,
+hardware or lab commands run, per user instruction; hardware validation pending.

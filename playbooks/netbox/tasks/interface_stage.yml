@@ -22,6 +22,7 @@
   ansible.builtin.import_tasks: topology_linux.yml
   when: fhs_topology is not defined
 - name: Associate observed pluggables without cabling
+  throttle: 1
   delegate_to: localhost
   become: false
   vars:

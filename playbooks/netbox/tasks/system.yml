@@ -42,6 +42,14 @@
         cards: []
       desired_nic_cards: []
       nic_discovery_warnings: []
+  - name: Identify interfaces backed by physical hardware
+    ansible.builtin.stat:
+      path: '/sys/class/net/{{ item }}/device'
+    loop: '{{ facts.interfaces | sort }}'
+    register: physical_interface_devices
+  - name: Retain hardware-backed Linux interface names
+    ansible.builtin.set_fact:
+      physical_interface_names: '{{ physical_interface_devices.results | selectattr("stat.exists") | map(attribute="item") | list }}'
   - name: Normalize each interface and its addresses
     ansible.builtin.set_fact:
       discovered_interfaces: '{{ discovered_interfaces + [discovered_interface] }}'
@@ -59,7 +67,7 @@
           | lower in [''bmc'', ''lo'']) or (item in bootstrap_management_only_interfaces | default([]))) }}'
         addresses: '{{ raw_addresses if netbox_include_local_addresses | default(false) | bool else raw_addresses | rejectattr(''address'', ''match'', ''^(127\.|169\.254\.|::1$|[Ff][Ee][89AaBb][0-9A-Fa-f]:)'')
           | list }}'
-    loop: '{{ facts.interfaces | sort }}'
+    loop: '{{ physical_interface_names }}'
     loop_control:
       label: '{{ item }}'
   - name: Show discovered server
