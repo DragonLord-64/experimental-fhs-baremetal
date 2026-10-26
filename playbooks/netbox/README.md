@@ -141,8 +141,13 @@ native cable with multiple lane terminations; their shared transceiver module
 records the connector association. No internal lane wiring is inferred.
 Optical module serials never identify fiber cables.
 
-There is no automatic suffix stripping. An exceptional verified endpoint pair
-can be supplied in `bootstrap_dac_endpoint_pairs` with `vendor`, `part`,
+For FS `QDD-400G-PC01`, the captured hardware reports complementary
+`BASE-1` / `BASE-2` cable ends. After exact matches and explicit mappings, these
+are paired automatically only when vendor/part match and the base resolves to
+one FPGA connector and one switch connector. Both full serials remain recorded;
+other products and suffixes have no automatic pairing rule.
+
+An exceptional verified endpoint pair can be supplied in `bootstrap_dac_endpoint_pairs` with `vendor`, `part`,
 `host_serial`, `switch_serial` and `evidence` (all nonempty strings). Both full
 serials must resolve to one FPGA connector and one switch connector. Conflicting
 rules, multiple physical connectors and occupied terminations are refused.

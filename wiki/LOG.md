@@ -317,3 +317,12 @@ parallel hosts racing to create shared site/role/type prerequisites. The switch
 HTTP 500 is consistent with a shared-role creation race (one switch succeeded),
 but the screenshot alone cannot establish the server exception. No tests or
 hardware commands run, per user instruction.
+
+### 2026-10-26 — FPGA DAC paired-end matching
+
+Added the FS QDD-400G-PC01 BASE-1/BASE-2 convention observed in corrected sys1392
+and nx0EF00 references. Exact serials and explicit endpoint mappings retain
+precedence. Automatic matching requires matching vendor/part and one physical
+FPGA connector plus one switch connector; reused/ambiguous bases remain omitted.
+Both complete endpoint serials and existing occupied-cable protections remain.
+No tests or hardware commands run, per user instruction.

@@ -183,8 +183,7 @@ def synchronize(params, check):
         candidate(*values, evidence); return True
     for serial, records in serial_groups.items():
         if match_serial(records, 'DAC exact serial '+serial): consumed.add(serial)
-    # Suffixes have no implicit meaning. An operator may supply a verified full
-    # endpoint pair with provenance, vendor and part; collisions still fail.
+    # Explicit endpoint pairs retain precedence over the observed FS suffix rule.
     claimed = defaultdict(int)
     mappings = params.get('endpoint_pairs', [])
     for mapping in mappings:
@@ -201,8 +200,31 @@ def synchronize(params, check):
             r['serial'] != (a if r['kind'] == 'fpga' else b) for r in records):
             omitted.append('DAC endpoint mapping identity mismatch'); continue
         if match_serial(records, 'DAC verified endpoint pair '+a+' / '+b): consumed.update((a, b))
+    # The hardware references show FS QDD-400G-PC01 ends labelled BASE-1/BASE-2.
+    # Group every observation before considering a pair: a reused base, different
+    # product, or an already claimed end must not silently select a cable.
+    bases = defaultdict(list)
+    for serial, records in serial_groups.items():
+        match = re.fullmatch(r'(.+)-([12])', serial)
+        if match:
+            bases[match[1]].extend(records)
+    for base, records in bases.items():
+        serials = {r['serial'] for r in records}
+        identities = {(str(r.get('vendor', '')).strip().upper(),
+                       str(r.get('part', '')).strip().upper()) for r in records}
+        if serials != {base+'-1', base+'-2'} or serials & consumed:
+            continue
+        if identities != {('FS', 'QDD-400G-PC01')}:
+            continue
+        groups = sides(records)
+        if len(groups) != 2 or any(len({r['serial'] for r in records
+                if (r['device'], physical_port(r['port']), r['kind']) == key}) != 1
+                for key in groups):
+            continue
+        if match_serial(records, 'DAC FS paired ends '+base+'-1 / '+base+'-2'):
+            consumed.update(serials)
     for serial in serial_groups.keys()-consumed:
-        omitted.append(serial+': DAC needs exactly one observed FPGA connector and one switch connector; full serial mismatch/ambiguity retained')
+        omitted.append(serial+': DAC needs exactly one observed FPGA connector and one switch connector; no unique supported serial pair; existing cables retained')
     peers = defaultdict(set)
     for signature in pairs:
         for side in signature:
