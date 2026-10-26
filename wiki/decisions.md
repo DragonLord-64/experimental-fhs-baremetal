@@ -60,3 +60,10 @@ scope decisions; a later decision can supersede an earlier deferral.
   navigation/fixture acceptance; see [dashboard boundaries](latest-changes.md).
 - Broader role container/VM/hardware coverage and CI runner access. Existing
   configured workflows are not evidence of successful CI or physical validation.
+
+## Confirmed with the user — working NetBox import baseline
+
+The user confirmed the hardware import worked after `b966fb7` and requested that
+we lock it in and make further changes carefully. Preserve the
+[accepted baseline](netbox-import-baseline.md): small, explicit changes, hardware
+validation by the user, and no unsolicited refactor or new test harness work.

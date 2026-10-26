@@ -1,5 +1,9 @@
 # Controller resources and inventory
 
+Current accepted behavior: [working hardware import baseline](netbox-import-baseline.md).
+The dated records below retain earlier decisions and validation boundaries; the
+baseline supersedes their identity, suffix-matching and removal policies.
+
 Resource-directory changes remain proposed. NetBox import/reconciliation is
 implemented within the acceptance boundaries below. No resource drive, secrets
 or production inventory was migrated by this wiki update.

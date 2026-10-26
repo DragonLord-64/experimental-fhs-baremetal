@@ -326,3 +326,12 @@ precedence. Automatic matching requires matching vendor/part and one physical
 FPGA connector plus one switch connector; reused/ambiguous bases remain omitted.
 Both complete endpoint serials and existing occupied-cable protections remain.
 No tests or hardware commands run, per user instruction.
+
+### 2026-10-25 — User accepted the working hardware import
+
+The user reported “the import worked” after `b966fb7` and asked to lock in the
+result. Recorded the [working baseline](netbox-import-baseline.md), source tag,
+identity/connection rules, failure boundaries and deferred improvements. This is
+user-reported hardware success, not a claim of independently observed complete
+coverage. Future changes should be small and explicitly scoped. Documentation
+only; no importer, hardware or lab changes in this milestone.

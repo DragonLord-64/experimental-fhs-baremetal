@@ -1,5 +1,9 @@
 # NetBox topology import
 
+Current accepted behavior: [working hardware import baseline](netbox-import-baseline.md).
+The dated records below retain earlier decisions and validation boundaries; the
+baseline supersedes their identity, suffix-matching and removal policies.
+
 [Issue #15](https://github.com/DragonLord-64/experimental-fhs-baremetal/issues/15)
 adds topology to the [unified importer](../playbooks/netbox/README.md#topology).
 Source: official `development2`, commit `dc08629`,

@@ -10,6 +10,7 @@ work to the [log](LOG.md).
 | Topic | Current note | Commands and evidence |
 |---|---|---|
 | Test environment and remaining gaps | [Environment plan](test-environment-plan.md) | [VM access/lifecycle](../ops/kubernetes/README.md), [platform lab](../ops/platform/README.md), [Bifrost isolation](../ops/provisioning/README.md) |
+| Working physical NetBox import | [Accepted baseline](netbox-import-baseline.md) | Code `b966fb7`; user-confirmed hardware run; change discipline and remaining limits |
 | NetBox identity, assets and controller resources | [Ownership and reconciliation](resource-layout.md) | [Importer](../playbooks/netbox/README.md), [asset/FRU acceptance](../ops/platform/inventory-alignment/VALIDATION.md) |
 | LLDP and FPGA DAC connections | [Topology import](topology-import.md) | [Native acceptance](../ops/platform/inventory-alignment/README.md#lldp-and-dac-topology) |
 | Dashboards and telemetry | [Demo versus observed data](latest-changes.md), [VCC/FSP units](unit-topology.md) | [Dashboard sources](../ops/dashboards/README.md), [static demo](../examples/grafana-static-demo/README.md), [captures](../ops/telemetry/README.md) |
