@@ -481,3 +481,18 @@ devpi cache persistence passed. Source and transfer summary:
 [cleanup handoff](../ops/role-tests/cleanup/STAGE6-HANDOFF.md); observed checks and
 remaining hardware/system limitations: [evidence](../ops/role-tests/cleanup/EVIDENCE.md).
 No official repository changes or production deployment.
+
+## 2026-10-26 — Late development2 transfer preparation
+
+Fetched official `58d49fe` and reconciled the late LLDP placement and DNS-resolver
+restart with the accepted cleanup, retaining change-triggered handlers and strict
+APT error reporting. Latest official broadens node targeting and disables BIST;
+those behavior choices remain explicitly unresolved rather than silently changing
+the reviewed cleanup. Focused Ansible syntax/source contracts passed. Transfer
+paths, prerequisites and exclusions: [transfer manifest](../ops/role-tests/cleanup/TRANSFER.md).
+
+### 2026-10-26 — Late upstream targeting decisions
+
+User confirmed node preparation targets `all` and installation-only BIST remains
+enabled. Updated site and docs; [transfer decisions](../ops/role-tests/cleanup/TRANSFER.md)
+now record both choices. No join, service or hardware operations performed.

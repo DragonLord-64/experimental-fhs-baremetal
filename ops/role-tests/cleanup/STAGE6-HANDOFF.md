@@ -10,8 +10,10 @@ entry in [EVIDENCE.md](EVIDENCE.md).
 
 Compared against official development2 `7704587034e7e41f1b1266c109b0e903279617a9`
 (stage-1 successful fetch), with worker baseline `a5395d00715ee1a50454fc71e54820901580d7e7`.
-The fetched official ref is unchanged locally. Preserve accepted experimental
-behavior; do not replace these folders with a blind upstream copy.
+This is the completed cleanup's historical baseline. Later official changes and
+current copy prerequisites are tracked in [the transfer manifest](TRANSFER.md).
+Preserve accepted experimental behavior; do not replace these folders with a
+blind upstream copy.
 
 | Source | Deliberate difference retained/delivered |
 |---|---|

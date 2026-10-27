@@ -23,7 +23,7 @@ first matching filename: inspect earlier matching files in `/etc`, `/run` and
 Installs/enables/starts systemd-networkd, systemd-resolved and systemd-timesyncd;
 links `/etc/resolv.conf` to resolved's stub and configures NTP in
 `/etc/systemd/timesyncd.conf.d/00-fhs.conf`. Changes restart only the affected
-network/time service. The role owns these settings; CIS time rules are disabled.
+network/DNS/time services. The role owns these settings; CIS time rules are disabled.
 Review existing Chrony/NTP installations before applying: APT may replace
 conflicting time-daemon packages when installing timesyncd. Actual internal NTP synchronization needs user validation.
 

@@ -4,7 +4,7 @@ Applies configuration to installed FHS servers. [provision.yml](provision.yml.md
 
 ## Roles and tags
 
-Each role include has its exact role name as a tag. Most plays target `all`; `setup_fhs_node` and `manage_fhs_bist` target `fhs_nodes`; external `ubuntu24_cis` targets the independent `ubuntu24_cis_production` Linux policy group. Confirm that group exists in the resolved inventory; the current NetBox file creates `teraboxes` and device-role groups, not `fhs_nodes`.
+Each role include has its exact role name as a tag. Most plays target `all`, including `setup_fhs_node` and the enabled installation-only `manage_fhs_bist`; external `ubuntu24_cis` targets the independent `ubuntu24_cis_production` Linux policy group. Confirm that group exists in the resolved inventory; the current NetBox file creates `teraboxes` and device-role groups, not `fhs_nodes`.
 
 | Play tag | Role tags |
 |---|---|

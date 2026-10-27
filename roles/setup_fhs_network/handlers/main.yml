@@ -5,6 +5,12 @@
     name: systemd-networkd
     state: restarted
 
+- name: Restart systemd-resolved
+  listen: fhs network changed
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+
 - name: Restart systemd-timesyncd
   ansible.builtin.systemd_service:
     name: systemd-timesyncd

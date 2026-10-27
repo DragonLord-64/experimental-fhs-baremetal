@@ -101,7 +101,7 @@
       tags: [manage_dpdk_ark_doca]
 
 - name: FHS nodes
-  hosts: fhs_nodes
+  hosts: all
   become: true
   gather_facts: true
   tags: [fhs_node]
@@ -189,5 +189,21 @@
     - name: Ensure rsync service is active and starts at boot
       ansible.builtin.systemd_service:
         name: rsync
+        state: started
+        enabled: true
+
+- name: HW Management
+  hosts: all
+  become: true
+  gather_facts: false
+  tags: [hw_management]
+  tasks:
+    - name: Fetch and verify lldpd package
+      ansible.builtin.apt:
+        name: lldpd
+        state: present
+    - name: Establish systemd persistence for the lldpd service
+      ansible.builtin.systemd:
+        name: lldpd
         state: started
         enabled: true
