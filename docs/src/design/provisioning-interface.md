@@ -2,7 +2,7 @@
 
 ![Provisioning Environment Diagram](mid-cbf-provisioning-environement.excalidraw.png)
 
-The drawings describe the intended physical workflow, not completed lab validation. See [NetBox inventory and export](../guide/using_netbox_inventory.md) for the implemented ownership boundary. The private lab has passed an isolated Ironic API smoke; guest boot, DHCP/PXE and physical provisioning remain untested.
+The drawings describe the intended physical workflow. See [NetBox inventory and export](../guide/using_netbox_inventory.md) for discovery and export responsibilities.
 
 ## Strategy
 

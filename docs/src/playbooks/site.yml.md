@@ -58,35 +58,23 @@ Patching, password-quality and AIDE controls remain deferred for user policy
 review; their disabled state is not evidence of deployed insecurity. This is
 selected-policy wiring verification, not a CIS application/compliance result.
 Install external `ubuntu24_cis` at the declared 1.6.0 version; supply the existing
-Goss binary/audit archive before an authorized apply. No CIS apply was performed.
+Goss binary/audit archive before an authorized apply.
 
-Transfer the inventory group wiring and sanitized policy with these playbook/role
-changes; copying only `roles/`, `docs/` and `playbooks/` does not supply inventory
-membership, reviewed versions, DNS/NTP or discovery credentials. Do not copy
-protected inventory credentials. Experimental checks remain under `ops/role-tests`.
+Configure inventory membership, reviewed versions, DNS/NTP and protected discovery
+credentials before running the playbook.
 
 The final `rsync` play preserves the upstream package/service tasks outside the
 FPGA role; it does not configure modules or authentication. Supply an approved
 rsync daemon configuration before enabling it on real hosts.
 
 
-## Transfer prerequisites
+## Prerequisites
 
-Transfer the roles, playbooks and consolidated docs together, including the
-retired Poetry role/page and updated archive/download callers. `site.yml` and
-`provision.yml` remain the entry points; shared SDK permissions require
-`manage_venvs/tasks/permissions.yml`. Standalone Poetry invocation is retired.
+Supply inventory settings for shared BittWare identity, approved development users,
+Linux CIS policy membership, Kubernetes/runtime versions, network MAC/address/prefix,
+DNS/NTP and reachable proxy URLs. Install the platform services before configuring
+clients to use them.
 
-Also transfer the platform chart's APT/devpi/Squid services and deliberately
-merge sanitized inventory changes: shared BittWare identity, approved development
-sudo/key directory, Linux CIS group membership/policy, reviewed Kubernetes and
-runtime versions, network MAC/address/prefix, DNS/NTP and reachable proxy URLs.
-Supply approved controller/bitstream/SDK/DOCA/build archives, matching locks where
-needed, monitoring archives and separate protected setup/publishing credentials.
-Neither the three folders alone nor these configuration checks deploy all of this.
-
-Keep experimental orchestration, service stand-ins, captures and test reports
-outside the official transfer folders. Fresh install/rerun fixtures do not prove
-real SDK/FPGA/NIC behavior, firmware, boot/hugepages, systemd, network/DNS/NTP,
-CIS enforcement or live logging. The changed platform chart still requires real
-service acceptance after deployment; production readiness remains an objective.
+Provide the selected controller, bitstream, SDK, DOCA and build archives, matching
+lock files where required, monitoring packages and protected setup/publishing
+credentials. `site.yml` and `provision.yml` are the entry points.

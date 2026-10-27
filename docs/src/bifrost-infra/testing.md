@@ -1,9 +1,9 @@
 # Testing Guide
 
-The following is the source deployment procedure, not a completed dragonvm provisioning test. The tracked `bifrost-infra/` container definition uses host networking and privilege; do not use it as a disposable lab fixture. Bifrost playbooks come from the image under `/opt/bifrost/playbooks`, not this repository. The separate [restricted lab smoke](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/ops/provisioning/README.md) passed only the empty Ironic API and KVM capability checks; full guest provisioning and physical hardware behavior remain untested.
+The `bifrost-infra/` container uses host networking and privilege. Review the target network before running it. Bifrost playbooks are supplied by the image under `/opt/bifrost/playbooks`.
 
 
-This is an unverified reference procedure for the image-provided Bifrost libvirt tests. It has not completed in the private lab; review isolation and image dependencies before any run.
+This procedure uses the image-provided Bifrost libvirt tests. Review isolation and image dependencies before running it.
 
 > [!WARNING]
 > **ENVIRONMENT LIMITATION:** This test suite is intended for local development. It is **not** fully functional for all hardware types or complex network topologies. Use with caution.

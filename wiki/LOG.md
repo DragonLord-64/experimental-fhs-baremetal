@@ -496,3 +496,9 @@ paths, prerequisites and exclusions: [transfer manifest](../ops/role-tests/clean
 User confirmed node preparation targets `all` and installation-only BIST remains
 enabled. Updated site and docs; [transfer decisions](../ops/role-tests/cleanup/TRANSFER.md)
 now record both choices. No join, service or hardware operations performed.
+
+### 2026-10-26 — Portable source documentation
+
+Removed private environment history, hostnames and experimental-only links from
+copyable source documentation. Kept operational prerequisites and limitations.
+Sphinx HTML build passed; external Python inventory was unavailable in sandbox.

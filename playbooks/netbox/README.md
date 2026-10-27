@@ -187,8 +187,6 @@ no NetBox authentication. Check mode does not write captures. Keep these files
 out of Git and public artifacts; each new capture replaces that host's file, so
 use a separate directory per run. Parsed diagnostics are not raw captures.
 
-See [fixture provenance and limits](../../ops/platform/inventory-alignment/fixtures/discovery/README.md)
-and the [controller acceptance](../../ops/platform/inventory-alignment/README.md#discovery-completion).
 Hardware assets use `netbox_inventory`; connections use native NetBox interfaces
 and cables consumed by Topology Views. An Inventory API 404 indicates a plugin
 prerequisite; an undrawn Topology Views page needs filters/search. Neither alone
@@ -399,6 +397,3 @@ configuration templates and unregistered relationship targets are unsupported.
 Free-text/JSON may itself contain private material: these files need the same
 protection as inventory backups. An export refuses the active API token if found
 in source metadata; this is not a general secret scanner.
-
-Focused validation and actual lab limits are recorded in
-[transfer validation](../../ops/platform/inventory-alignment/TRANSFER-VALIDATION.md).

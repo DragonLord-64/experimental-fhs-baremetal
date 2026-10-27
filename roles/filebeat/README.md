@@ -63,13 +63,3 @@ Set `filebeat_setup_ssl_certificate_authorities` to CA paths on the delegate;
 This loads the package's default versioned template, data stream and ILM policy.
 The journald input uses no module ingest pipelines or Kibana dashboards. Set
 `filebeat_setup_enabled: false` only when index management is already provisioned.
-
-Offline delegated setup fixture (requires Ansible, Python PyYAML and `dpkg-deb`):
-
-```bash
-python3 -m unittest discover -s ops/platform/logging -p test_role_setup.py -v
-```
-
-The fixture checks API-key/password setup, delegation to localhost, private config,
-failure cleanup and check-mode skipping. It does not establish live Elasticsearch
-compatibility or device journal ingestion.

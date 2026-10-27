@@ -41,7 +41,7 @@ Inventory output can contain secrets. Keep it outside Git and build artifacts. C
 Discovery imports native rack positions, interfaces and network/power cables;
 Inventory assets retain physical identity and module metadata. Optional server
 `rack_unit` and independent `power_ports` mappings are documented in the
-[importer schema](../../../playbooks/netbox/README.md#optional-server-placement-and-power).
+[importer schema](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/playbooks/netbox/README.md#optional-server-placement-and-power).
 Use the unified importer's compare/apply workflow before polling the updated
 inventory. Neither Topology Views filters nor an Inventory API prerequisite
 failure establish a physical connection.
@@ -75,4 +75,4 @@ The protected files supply `netbox_url`, `netbox_token` and `redfish_credentials
 
 See [development playbooks](../playbooks/development.md) for discovery/import and switch POAP, and [provisioning design](../design/provisioning-interface.md) for the intended physical sequence.
 
-[Inventory configuration](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/inventory/dev_env/netbox-inv.yml) and [export implementation](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/development/playbooks/netbox/bifrost_export.yml).
+Source files: `inventory/dev_env/netbox-inv.yml` and `playbooks/netbox/bifrost_export.yml`.

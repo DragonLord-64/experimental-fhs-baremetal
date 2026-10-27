@@ -41,7 +41,7 @@ A device without a chassis serial gets no chassis asset. Existing devices can
 retain their type; creating a device without manufacturer/model is skipped until
 verified type overrides are supplied. DDR5/NVMe items still need part and serial.
 
-See the [importer README](../../../playbooks/netbox/README.md) for FRU selection,
+See the [importer README](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/playbooks/netbox/README.md) for FRU selection,
 field mapping and provenance. Inspect `--tags facts` before compare/apply;
 BIOS, BMC firmware and FRU product version have separate sources.
 
@@ -69,12 +69,12 @@ journal records the cabled refusal. Prior cabling is never treated as newly
 verified or copied to a replacement. Topology discovery joins observed LLDP peers
 and exact DAC serial matches after all selected devices are imported. Unresolved local transceivers remain inventory
 only; a standalone DAC asset may also be managed manually. See the
-[importer topology options](../../../playbooks/netbox/README.md).
+[importer topology options](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/playbooks/netbox/README.md).
 The importer refuses to install a `faulty` asset until explicitly reviewed.
 
 Optional `/etc/server-info.yaml` keys `rack_unit` and `power_ports` add native
 placement and independent server inlet-to-PDU-outlet cables. Keep existing
-site/role/location/rack fields. See the [metadata schema](../../../playbooks/netbox/README.md#optional-server-placement-and-power).
+site/role/location/rack fields. See the [metadata schema](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/playbooks/netbox/README.md#optional-server-placement-and-power).
 Missing new metadata preserves existing records; identities and occupied
 terminations must be resolved before apply.
 
@@ -114,6 +114,6 @@ ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/switch-poap/confi
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/switch-poap/configure_nexus.yml --list-tags
 ```
 
-Listing is read-only but inventory polling needs private access. Even without opt-in tags, Nexus authentication tasks run; do not use an untagged execution as a safety check. No physical POAP or Cisco telemetry validation is claimed for the private lab.
+Listing is read-only but inventory polling needs private access. Even without opt-in tags, Nexus authentication tasks run; do not use an untagged execution as a safety check.
 
-[NetBox helpers](https://github.com/DragonLord-64/experimental-fhs-baremetal/tree/development/playbooks/netbox) and [switch POAP implementation](https://github.com/DragonLord-64/experimental-fhs-baremetal/tree/development/playbooks/switch-poap).
+Source directories: `playbooks/netbox/` and `playbooks/switch-poap/`.

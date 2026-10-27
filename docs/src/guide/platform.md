@@ -7,8 +7,7 @@ the intended cluster before deployment.
 Copy the whole `platform/charts/fhs-platform/` directory for a single-release
 installation. Its README contains build/load instructions for the pinned NetBox
 Inventory image, namespace/prefix selection, upgrade credentials and persistent
-storage. Dependencies and the six runtime dashboards are included; deployment
-does not require a lab generator or test checkout.
+storage. Dependencies and the six runtime dashboards are included.
 
 The root `platform/README.md` documents the older separate-release procedure.
 Keep existing release names, credentials and volumes on upgrades. Back up NetBox
