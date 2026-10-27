@@ -8,5 +8,24 @@
       ansible.builtin.raw: "! getent passwd moleculeuser"
       changed_when: false
     - name: Install Python for Ansible (sudo is installed by the actual role)
-      ansible.builtin.raw: apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3
+      ansible.builtin.raw: apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 python3-venv python3-pip sudo
+      changed_when: true
+
+    - name: Seed an unrelated runner supplementary membership
+      ansible.builtin.shell: |
+        groupadd retained-group
+        useradd -m -s /bin/bash -G retained-group gitlab-runner
+        useradd -m -s /bin/bash denied-user
+      changed_when: true
+
+    - name: Build an offline pure Python wheel for owner installation
+      ansible.builtin.shell: |
+        python3 - <<'PYWHEEL'
+        import zipfile
+        with zipfile.ZipFile('/tmp/permission_fixture-1.0-py3-none-any.whl', 'w') as wheel:
+            wheel.writestr('permission_fixture.py', 'VALUE = 42\n')
+            wheel.writestr('permission_fixture-1.0.dist-info/METADATA', 'Metadata-Version: 2.1\nName: permission-fixture\nVersion: 1.0\n')
+            wheel.writestr('permission_fixture-1.0.dist-info/WHEEL', 'Wheel-Version: 1.0\nGenerator: fixture\nRoot-Is-Purelib: true\nTag: py3-none-any\n')
+            wheel.writestr('permission_fixture-1.0.dist-info/RECORD', '')
+        PYWHEEL
       changed_when: true

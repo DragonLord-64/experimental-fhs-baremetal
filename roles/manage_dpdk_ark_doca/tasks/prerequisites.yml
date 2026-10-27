@@ -1,57 +1,30 @@
 ---
 - name: Install System Dependencies in a Single Fast Batch
   ansible.builtin.apt:
-    name:
-      - apt-utils
-      - build-essential
-      - libpcap-dev
-      - numactl
-      - libnuma-dev
-      - linux-headers-generic
-      - libboost-dev
-      - zlib1g-dev
-      - libboost-python-dev
-      - libpci-dev
-      - libyaml-dev
-      - libaio-dev
-      - libbsd-dev
-      - libxslt-dev
-      - ninja-build
-      - pkg-config
-      - python3-pip
-      - libjsoncpp-dev
-      - python3-pyelftools
-      - meson
-      - libpython3-dev
-      - libsystemd-dev
-      - python3-scapy
-      - libibverbs-dev
-      - librdmacm-dev
+    name: "{{ dpdk_apt_packages }}"
     state: present
     update_cache: true
   become: true
 
-- name: Trick Atomic Rules script into skipping runtime vm.nr_hugepages allocation
+- name: Retain the Arkville automatic-allocation bypass
   ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
     line: "# vm.nr_hugepages bypass for atomic rules script"
     create: true
-    state: present
     mode: '0644'
-  become: true
 
-- name: Ensure 1GB hugepages virtual mount directory exists
+- name: Ensure hugepage mount directory exists
   ansible.builtin.file:
-    path: /mnt/huge_1gb
+    path: "{{ fhs_hugepage_mount }}"
     state: directory
     mode: "0755"
-  become: true
+  when: dpdk_manage_hugepages | bool
 
-- name: Configure persistent 1GB hugepage mounting inside fstab
+- name: Mount reserved hugepages persistently
   ansible.posix.mount:
-    path: /mnt/huge_1gb
+    path: "{{ fhs_hugepage_mount }}"
     src: nodev
     fstype: hugetlbfs
-    opts: pagesize=1G
+    opts: "pagesize={{ fhs_hugepage_size }}"
     state: mounted
-  become: true
+  when: dpdk_manage_hugepages | bool

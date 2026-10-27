@@ -1,0 +1,36 @@
+---
+- name: Privileged exporter refuses writable code and repairs missing installation
+  hosts: all
+  gather_facts: true
+  vars_files: [stage5-vars.yml]
+  tasks:
+    - name: Introduce writable console only in disposable environment
+      ansible.builtin.file:
+        path: '{{ fhs_exporter_venv_path }}/bin/fhs-prometheus-exporter'
+        mode: '0775'
+    - name: Require rejection before executing existing code
+      block:
+        - ansible.builtin.include_role:
+            name: manage_fhs_exporter
+        - ansible.builtin.fail:
+            msg: Writable console was accepted
+      rescue:
+        - ansible.builtin.assert:
+            that: ansible_failed_task.name == 'Reject user-writable code in the privileged exporter environment'
+      always:
+        - ansible.builtin.file:
+            path: '{{ fhs_exporter_venv_path }}/bin/fhs-prometheus-exporter'
+            mode: '0755'
+    - name: Require unchanged starts after permission rejection
+      ansible.builtin.command: python3 /tmp/stage5_verify.py --unchanged
+      changed_when: false
+    - name: Remove console to simulate incomplete installation
+      ansible.builtin.file:
+        path: '{{ fhs_exporter_venv_path }}/bin/fhs-prometheus-exporter'
+        state: absent
+    - name: Repair the selected real package
+      ansible.builtin.include_role:
+        name: manage_fhs_exporter
+    - name: Verify only exporter restarted once
+      ansible.builtin.command: python3 /tmp/stage5_verify.py --exporter-repaired
+      changed_when: false

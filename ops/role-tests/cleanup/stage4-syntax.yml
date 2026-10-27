@@ -1,0 +1,9 @@
+---
+- name: Parse only stage four
+  hosts: all
+  gather_facts: false
+  roles:
+    - manage_fhs_grpc
+    - manage_fhs_bist
+  tasks:
+    - ansible.builtin.import_tasks: ../../../roles/manage_fhs_grpc/tasks/install.yml

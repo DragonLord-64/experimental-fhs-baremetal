@@ -3,6 +3,8 @@
 - name: Converge actual manage_users role
   hosts: all
   gather_facts: false
+  vars_files:
+    - ../../../cleanup/suite-vars.yml
   vars:
     fhs_keys_dir: "{{ playbook_dir }}/fixtures"
     vault_user_password_moleculeuser: '$6$rounds=656000$saltysalt$5IbeoxKbjI7g/8oIZjAdULp1WJ4hVTBNRGsTcSlYTOj4nKMfx1l8jH/zsfqHj6zE85cMzNxnEnGqkxbnSpwj/.'
@@ -12,3 +14,13 @@
     - name: Apply actual role with synthetic fixtures
       ansible.builtin.import_role:
         name: manage_users
+
+    - name: Apply actual venv role
+      ansible.builtin.import_role:
+        name: manage_venvs
+    - name: Apply actual SDK role with minimal stand-in deb
+      ansible.builtin.import_role:
+        name: manage_bittware_sdk
+    - name: Apply actual runner account and per-user SDK role
+      ansible.builtin.import_role:
+        name: manage_gitlab-runner

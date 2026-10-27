@@ -1,0 +1,16 @@
+---
+fhs_bittware_group: bittware
+fhs_bittware_group_gid: 666
+fpga_apt_packages: []
+fpga_update_bittware_sdk: true
+fpga_bittware_sdk_deb: "{{ lookup('env', 'FHS_SDK_FIXTURE_DEB') | default('/tmp/fhs-role-cleanup-sdk.deb', true) }}"
+fpga_bittware_sdk_package: fhs-sdk-fixture
+users_setup_venvs: true
+venvs:
+  - path: /opt/venvs/permission-test
+    python: /usr/bin/python3
+    owner: moleculeuser
+    group: bittware
+    mode: '0770'
+    packages:
+      - /tmp/permission_fixture-1.0-py3-none-any.whl

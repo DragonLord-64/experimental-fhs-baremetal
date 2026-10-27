@@ -1,9 +1,10 @@
+# Registration preparation only; supply reviewed discovery data before manual join.
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: JoinConfiguration
 nodeRegistration:
-  name: {{ inventory_hostname }}
-
-  taints:
-{% for taint in hostvars[inventory_hostname].k8s_taints | default([]) %}
-    - key: "{{ taint.key }}"
-      value: "{{ taint.value | default('') }}"
-      effect: "{{ taint.effect }}"
-{% endfor %}
+  name: {{ inventory_hostname | to_json }}
+  criSocket: unix:///run/containerd/containerd.sock
+  taints: {{ k8s_taints | to_json }}
+  kubeletExtraArgs:
+    - name: node-labels
+      value: {{ (k8s_labels.items() | map('join', '=') | join(',')) | to_json }}

@@ -1,0 +1,22 @@
+---
+- name: Render boot reservation without applying any host changes
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../../../roles/manage_dpdk_ark_doca/defaults/main.yml
+    - ../../../roles/setup_fpga_host/defaults/main.yml
+  vars:
+    ansible_managed: fixture
+  tasks:
+    - name: Render the actual GRUB template
+      ansible.builtin.set_fact:
+        rendered_grub: "{{ lookup('template', '../../../roles/setup_fpga_host/templates/grub.j2') }}"
+    - name: Assert shared hugepage contract and safe defaults
+      ansible.builtin.assert:
+        that:
+          - "'hugepagesz=1G hugepages=8 default_hugepagesz=1G' in rendered_grub"
+          - fhs_hugepage_mount == '/mnt/huge_1gb'
+          - not fpga_update_grub
+          - not fpga_update_bmc
+          - not fpga_reboot_on_change

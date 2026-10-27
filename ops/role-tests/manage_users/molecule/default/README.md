@@ -57,3 +57,16 @@ applications, kernel/boot, PXE, NIC/FPGA or physical hardware. Bifrost with
 isolated disposable VMs remains a separate provisioning layer: restricted
 Bifrost API smoke is verified; its full guest-provisioning cycle is unverified.
 The role README is the canonical source included by Sphinx documentation.
+
+## Combined role cleanup fixture (2026-10-26)
+
+The scenario now also exercises `manage_venvs`, `manage_bittware_sdk` and
+`manage_gitlab-runner`. The runner builds an inert SDK stand-in deb with
+`ops/role-tests/cleanup/make_sdk_fixture.py` (requires controller `dpkg-deb`),
+then supplies `FHS_SDK_FIXTURE_DEB`. Manual runs can set that environment variable
+or generate `/tmp/fhs-role-cleanup-sdk.deb` first. No proprietary SDK is bundled.
+The fixture installs a tiny local wheel, checks allowed/denied user and group
+access, preserved runner supplementary membership, interpreter symlink safety,
+and deliberate group/mode drift repair. This is Linux userland/installer wiring
+coverage only. See the new [stage evidence](../../../cleanup/EVIDENCE.md);
+the earlier validation above retains its original narrower scope.

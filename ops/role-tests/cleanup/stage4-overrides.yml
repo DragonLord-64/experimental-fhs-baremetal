@@ -1,0 +1,36 @@
+---
+- name: Approved alternate-index pair and unchanged rerun
+  hosts: all
+  gather_facts: false
+  vars_files: [stage4-vars.yml]
+  tasks:
+    - name: Select approved VCC dependency pair
+      ansible.builtin.set_fact:
+        _approved_controllers: "{{ manage_grpc_controllers | combine({'vcc': {'pyproject': '/tmp/fhs-stage4-approved-pyproject.toml', 'lock': '/tmp/fhs-stage4-approved-poetry.lock'}}, recursive=true) }}"
+    - name: Apply approved source metadata and matching lock
+      ansible.builtin.include_role:
+        name: manage_fhs_grpc
+      vars:
+        tags: [grpc-vcc]
+        manage_grpc_controllers: "{{ _approved_controllers }}"
+    - name: Record service starts after changed inputs
+      ansible.builtin.slurp:
+        src: /tmp/service-vcc-grpc.json
+      register: _starts_before
+    - name: Repeat approved installation without changes
+      ansible.builtin.include_role:
+        name: manage_fhs_grpc
+      vars:
+        tags: [grpc-vcc]
+        manage_grpc_controllers: "{{ _approved_controllers }}"
+    - name: Read unchanged service starts
+      ansible.builtin.slurp:
+        src: /tmp/service-vcc-grpc.json
+      register: _starts_after
+    - ansible.builtin.assert:
+        that:
+          - (_starts_before.content | b64decode | from_json).starts == 2
+          - _starts_before.content == _starts_after.content
+    - name: Verify stand-in console responds after changed-input restart
+      ansible.builtin.command: python3 -c 'import socket; s=socket.create_connection(("127.0.0.1",50051),timeout=3); assert s.recv(32)==b"vcc"; s.close()'
+      changed_when: false

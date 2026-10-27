@@ -1,0 +1,16 @@
+---
+- name: Exercise the full DPDK role with a minimal real C build
+  hosts: all
+  gather_facts: false
+  become: true
+  vars:
+    dpdk_local_path: /tmp/fhs-role-cleanup-dpdk-fixture
+    dpdk_tarball_filename: dpdk.tar.gz
+    arkville_local_path: /tmp/fhs-role-cleanup-dpdk-fixture
+    arkville_release: fixture
+    doca_local_path: /tmp/fhs-role-cleanup-dpdk-fixture
+    doca_deb_filename: doca.deb
+    dpdk_manage_hugepages: false
+    dpdk_apt_packages: [build-essential, meson, ninja-build]
+  roles:
+    - manage_dpdk_ark_doca

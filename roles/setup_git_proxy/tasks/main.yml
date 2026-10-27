@@ -4,7 +4,6 @@
     that:
       - git_proxy_url | length > 0
     fail_msg: "Set git_proxy_url to the Squid proxy URL."
-  tags: [git_proxy, config]
 
 - name: Read the system Git HTTP proxy
   ansible.builtin.command:
@@ -18,7 +17,6 @@
   check_mode: false
   changed_when: false
   failed_when: existing_git_http_proxy.rc not in [0, 1]
-  tags: [git_proxy, config]
 
 - name: Configure the system Git HTTP proxy
   ansible.builtin.command:
@@ -31,7 +29,6 @@
       - "{{ git_proxy_url }}"
   when: existing_git_http_proxy.stdout != git_proxy_url
   changed_when: true
-  tags: [git_proxy, config]
 
 - name: Read configured system Git URL rewrites
   ansible.builtin.command:
@@ -48,7 +45,6 @@
   check_mode: false
   changed_when: false
   failed_when: existing_git_url_rewrites.rc not in [0, 1]
-  tags: [git_proxy, config]
 
 - name: Configure system Git URL rewrites
   ansible.builtin.command:
@@ -64,4 +60,3 @@
     label: "{{ item.item.instead_of }} -> {{ item.item.target }}"
   when: item.item.instead_of not in item.stdout_lines
   changed_when: true
-  tags: [git_proxy, config]

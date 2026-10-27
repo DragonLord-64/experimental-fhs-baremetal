@@ -1,14 +1,9 @@
 ---
-# roles/bist/tasks/main.yml
-
 - name: Configure pre-requisites
   ansible.builtin.import_tasks: prereqs.yml
-  tags: [prereq-bist]
 
-- name: Install BIST
-  ansible.builtin.include_tasks: install-bist.yml
-  tags: [install-bist]
+- name: Install BIST placeholder
+  ansible.builtin.import_tasks: install-bist.yml
 
-- name: Configure BIST
-  ansible.builtin.include_tasks: configure-bist.yml
-  tags: [configure-bist]
+- name: Configure BIST without running hardware tests
+  ansible.builtin.import_tasks: configure-bist.yml

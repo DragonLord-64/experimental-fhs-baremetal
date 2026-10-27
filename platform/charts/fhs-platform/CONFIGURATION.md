@@ -96,3 +96,42 @@ The five overrides are in `templates/apt-cacher-config.yaml`; other settings
 use the image's packaged apt-cacher-ng defaults. The pinned
 [container source](https://github.com/mbentley/docker-apt-cacher-ng) supplies
 the package; its broad CONNECT override is replaced by this chart.
+
+## Python and Git proxies
+
+`devpi.enabled` installs `mid-cbf-hw-devpi` on 3141, backed by a retained 10Gi
+claim at `/var/devpi`. Override `devpi.persistence.storageClass`/`size` for the
+site. One replica and Recreate protect its SQLite state. Startup needs up to
+1Gi for secret hashing in the pinned image. Back up the claim before upgrades;
+there is no automated database migration. Initialization creates an unknown
+random root password; this is a public PyPI cache, with no usable admin login
+or private uploads. Existing claims keep their existing account policy.
+
+`gitProxy.enabled` installs `mid-cbf-hw-git-proxy` on 3128. Squid allows GET,
+POST and HEAD to `gitProxy.allowedDomains`, plus CONNECT to those domains only
+on 443. Defaults are `gitlab.com` and `git-collab.nrc-cnrc.gc.ca`; add required
+redirect/archive hosts deliberately. A leading dot allows subdomains. No disk
+cache or TLS interception is used. Git still verifies origin certificates.
+
+Both default to ClusterIP. Like APT, each supports `service.type` and optional
+`service.nodePort`. Set reachable addresses in inventory, rather than copying
+cluster DNS names to servers outside Kubernetes:
+
+```yaml
+apt_cache_url: http://<apt-proxy-host>:3142
+pip_index_url: http://<python-index-host>:3141/root/pypi/+simple/
+git_proxy_url: http://<git-proxy-host>:3128
+```
+
+These are unauthenticated internal endpoints, with no TLS listeners. Restrict
+reachability to approved provisioning clients; do not publish them on the
+Internet. For pip on an untrusted network, provide approved HTTPS termination
+and CA trust instead of `pip_trusted_hosts`. The latter bypasses certificate
+verification. APT keeps Signed-By verification; HTTP cache transport does not
+replace package signatures. Do not embed credentials in system-wide URLs.
+
+Images are pinned by digest in values.yaml: prebuilt
+[jonasal/devpi-server](https://github.com/JonasAlfredsson/docker-devpi) (6.20.3)
+and [Canonical Squid](https://hub.docker.com/r/ubuntu/squid) (24.04 channel,
+actual packaged Squid 6.13). No image build or startup package download is
+required. The registry tag is descriptive; the digest selects the tested image.

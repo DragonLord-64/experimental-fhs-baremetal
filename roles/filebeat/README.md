@@ -22,7 +22,10 @@ Set `filebeat_elasticsearch_hosts` for the target environment and supply `filebe
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags filebeat
 ```
 
-The `filebeat` tag is supplied by the site wrapper; the role has no internal phase tags. Installation validates configuration and, by default, the output connection before starting the service. This role was not exercised by the synthetic monitoring validation.
+The `filebeat` tag is supplied by the site wrapper; the role has no internal phase tags. Installation validates configuration and, by default, the output connection before starting the service. Stage-5 checks use the real pinned Debian package and validate installation,
+configuration and a process start without a live Elasticsearch endpoint. Live
+index-management compatibility, publishing and journal ingestion remain unvalidated;
+the disposable container service fixture is not systemd.
 
 ## Elasticsearch setup
 

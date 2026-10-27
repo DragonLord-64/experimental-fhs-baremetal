@@ -5,4 +5,4 @@ GRUB_TIMEOUT_STYLE=hidden
 GRUB_TIMEOUT=0
 GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
 GRUB_CMDLINE_LINUX_DEFAULT=""
-GRUB_CMDLINE_LINUX="iommu=pt amd_iommu=on default_hugepagesz=1G hugepagesz=1G hugepages=16"
+GRUB_CMDLINE_LINUX="{{ fpga_kernel_cmdline | join(' ') }}"

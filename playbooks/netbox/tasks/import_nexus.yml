@@ -226,6 +226,14 @@
   - interfaces
   - cables
   - apply
+- name: Read observed Nexus management interface and address
+  cisco.nxos.nxos_command:
+    commands: '{{ nexus_management_command }}'
+  register: nexus_management
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  tags: [interfaces, ips, apply, compare, facts]
 - name: Retain optional protected Nexus probe evidence
   ansible.builtin.import_tasks: capture.yml
   vars:
@@ -233,6 +241,8 @@
       commands: '{{ nexus_commands }}'
       inventory: '{{ discovered.stdout }}'
       lldp: '{{ topology_nexus_lldp.stdout | default([]) }}'
+      management_command: '{{ nexus_management_command }}'
+      management: '{{ nexus_management.stdout | default([]) }}'
 - name: Write observed switch interfaces without creating cables
   throttle: 1
   tags:
@@ -249,4 +259,26 @@
     netbox_token: '{{ netbox_token }}'
     validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
     observations: '{{ [fhs_topology | combine({"neighbors": [], "serials": []})] }}'
-    preview: '{{ ansible_check_mode or "compare" in ansible_run_tags }}'
+    preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or "facts" in ansible_run_tags }}'
+- name: Reconcile or preview observed Nexus management interface and primary IP
+  fhs_nexus_management:
+    netbox_url: '{{ netbox_url }}'
+    netbox_token: '{{ netbox_token }}'
+    validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+    device: '{{ switch.name }}'
+    serial: '{{ switch.serial }}'
+    output: '{{ nexus_management.stdout[0] if not (nexus_management.failed | default(false)) and nexus_management.stdout | default([]) | length == 1 else "" }}'
+    include_ips: '{{ "all" in ansible_run_tags or "ips" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags or "facts" in ansible_run_tags }}'
+    preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or "facts" in ansible_run_tags }}'
+  register: nexus_management_result
+  delegate_to: localhost
+  connection: local
+  become: false
+  throttle: 1
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  tags: [interfaces, ips, apply, compare, facts]
+- name: Report Nexus management observations and preservation diagnostics
+  ansible.builtin.debug:
+    var: nexus_management_result
+  tags: [interfaces, ips, apply, compare, facts]

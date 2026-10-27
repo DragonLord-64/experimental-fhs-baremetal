@@ -1,0 +1,7 @@
+---
+- name: Install selected stand-in through actual role
+  hosts: all
+  gather_facts: false
+  become: true
+  vars_files: [../../stage4-vars.yml]
+  roles: [manage_fhs_grpc]

@@ -42,19 +42,9 @@
     group: "{{ bist_group }}"
     recurse: true
 
-- name: Install pip-tools
+- name: Install supplied pinned BIST requirements
   become: true
   become_user: "{{ bist_user }}"
   ansible.builtin.pip:
-    name: pip-tools
+    requirements: "{{ app_dir }}/requirements.txt"
     executable: "{{ venv_dir }}/bin/pip"
-
-- name: Install requirements
-  become: true
-  become_user: "{{ bist_user }}"
-  ansible.builtin.shell: |
-    {{ venv_dir }}/bin/pip-compile requirements.in
-    {{ venv_dir }}/bin/pip install -r requirements.txt
-  args:
-    chdir: "{{ app_dir }}"
-  changed_when: true

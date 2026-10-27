@@ -1,16 +1,9 @@
 ---
 argument_specs:
   main:
-    short_description: Install and configure the FSP and VCC gRPC services
+    short_description: Install the single NetBox-selected locked gRPC controller
     options:
-      manage_grpc_fsp_controller: {type: str, required: true}
-      manage_grpc_vcc_controller: {type: str, required: true}
-      manage_grpc_vcc_bitstream: {type: str, required: true}
-      manage_grpc_fsp_bitstream: {type: str, required: true}
-      manage_grpc_grpcurl_version: {type: str, required: true}
-      manage_grpc_protos_version: {type: str, required: true}
-      manage_grpc_port: {type: str, default: "50051"}
-      manage_grpc_emulation_mode: {type: str, default: "true", choices: ["true", "false"]}
-      manage_grpc_card: {type: str, required: true}
-      manage_grpc_device_address: {type: str, required: true}
-      manage_grpc_device_region: {type: str, default: "0"}
+      manage_grpc_controllers: {type: dict}
+      manage_grpc_poetry_version: {type: str}
+      manage_grpc_user: {type: str}
+      manage_grpc_emulation_mode: {type: bool}

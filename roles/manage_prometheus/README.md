@@ -25,4 +25,22 @@ See `defaults/main.yml`, `tasks/main.yaml` and `templates/` for service users an
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_prometheus
 ```
 
-Run from `/provision` with archives and private inventory available. The wrapper tag selects the whole role; internal `prometheus_config` marks only part of configuration and is not a standalone install path.
+Run from `/provision` with archives and private inventory available. The wrapper tag selects the whole role; there are no internal phase tags.
+
+Changed archives notify the matching service, including same-path binary
+replacement. Configuration is checked with the installed promtool before writing.
+Pending changes restart once before the final start/enable tasks; unchanged runs
+avoid restarts and reruns recover stopped services. Node Exporter retries failures.
+The Prometheus port variable configures its actual listener.
+
+Configuration is root-owned and readable by the Prometheus group. Services use
+separate unprivileged accounts. Authentication is off by default and both services
+listen on all addresses; use the deployment's approved access controls. Enabling
+basic auth requires a privately supplied bcrypt hash; there is no example hash.
+Basic auth alone does not encrypt traffic: terminate TLS in the approved ingress
+or proxy. Node Exporter has no authentication configuration in this role.
+
+Real pinned binaries/configuration and process starts are checked in a disposable
+container. The service-manager fixture does not establish systemd sandboxing,
+automatic failure restart or boot behavior. No monitoring feature or hardware
+reading correctness is claimed.

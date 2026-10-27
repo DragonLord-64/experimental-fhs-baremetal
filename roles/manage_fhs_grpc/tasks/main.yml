@@ -1,157 +1,18 @@
-- name: Add directories for gRPC controllers
-  become: true
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0755"
-  loop:
-    - /opt/grpc/fsp
-    - /opt/grpc/vcc
-    - /opt/bitstreams
-  tags: [grpc_install]
+---
+- name: Normalize NetBox tag slugs
+  ansible.builtin.set_fact:
+    _grpc_tags: "{{ (tags | default([]) | select('string') | list) + (tags | default([]) | reject('string') | map(attribute='slug') | list) }}"
 
-- name: Extract the FSP gRPC controller
-  become: true
-  ansible.builtin.unarchive:
-    src: /provision/files.d/external_archives/{{ manage_grpc_fsp_controller }}.tar.gz
-    dest: /opt/grpc/fsp
-  tags: [grpc_install]
+- name: Reject conflicting controller tags before writes
+  ansible.builtin.assert:
+    that: not ('grpc-fsp' in _grpc_tags and 'grpc-vcc' in _grpc_tags)
+    fail_msg: Select only one of grpc-fsp and grpc-vcc.
 
-- name: Extract the VCC gRPC controller
-  become: true
-  ansible.builtin.unarchive:
-    src: /provision/files.d/external_archives/{{ manage_grpc_vcc_controller }}.tar.gz
-    dest: /opt/grpc/vcc
-  tags: [grpc_install]
-
-- name: Upload FSP bitstream to target
-  become: true
-  ansible.builtin.unarchive:
-    src: /provision/files.d/external_archives/{{ manage_grpc_fsp_bitstream }}.tar.gz
-    dest: /opt/bitstreams
-  tags: [grpc_install]
-
-- name: Upload VCC bitstream to target
-  become: true
-  ansible.builtin.unarchive:
-    src: /provision/files.d/external_archives/{{ manage_grpc_vcc_bitstream }}.tar.gz
-    dest: /opt/bitstreams
-  tags: [grpc_install]
-
-- name: Copy modify pyproject for FSP gRPC
-  become: true
-  ansible.builtin.template:
-    src: pyproject-fsp.toml.j2
-    dest: /opt/grpc/fsp/{{ manage_grpc_fsp_controller }}/pyproject.toml
-  tags: [grpc_install]
-
-- name: Lock Poetry for FSP gRPC
-  become: true
-  ansible.builtin.command:
-    cmd: /opt/venvs/fhs/bin/poetry lock --regenerate
-    chdir: /opt/grpc/fsp/{{ manage_grpc_fsp_controller }}
-  changed_when: false
-  tags: [grpc_install]
-
-- name: Install requirements for FSP
-  become: true
-  ansible.builtin.command:
-    cmd: /opt/venvs/fhs/bin/poetry install
-    chdir: /opt/grpc/fsp/{{ manage_grpc_fsp_controller }}
-  changed_when: false
-  tags: [grpc_install]
-
-- name: Copy modify pyproject for VCC gRPC
-  become: true
-  ansible.builtin.template:
-    src: pyproject-vcc.toml.j2
-    dest: /opt/grpc/vcc/{{ manage_grpc_vcc_controller }}/pyproject.toml
-  tags: [grpc_install]
-
-- name: Lock Poetry for VCC gRPC
-  become: true
-  ansible.builtin.command:
-    cmd: /opt/venvs/fhs/bin/poetry lock --regenerate
-    chdir: /opt/grpc/vcc/{{ manage_grpc_vcc_controller }}
-  changed_when: false
-  tags: [grpc_install]
-
-- name: Install requirements for VCC
-  become: true
-  ansible.builtin.command:
-    cmd: /opt/venvs/fhs/bin/poetry install
-    chdir: /opt/grpc/vcc/{{ manage_grpc_vcc_controller }}
-  changed_when: false
-  tags: [grpc_install]
-
-- name: Upload and restart VCC gRPC service file
-  become: true
-  ansible.builtin.template:
-    src: templates/vcc-grpc.service.j2
-    dest: /etc/systemd/system/vcc-grpc.service
-    mode: "0644"
-  changed_when: true
-  notify: Restart VCC gRPC
-  tags: [grpc_install, grpc_configure]
-
-- name: Upload VCC gRPC service file
-  become: true
-  ansible.builtin.template:
-    src: templates/fsp-grpc.service.j2
-    dest: /etc/systemd/system/fsp-grpc.service
-    mode: "0644"
-  changed_when: true
-  notify: Restart FSP gRPC
-  tags: [grpc_install, grpc_configure]
-
-
-- name: Flush handlers to ensure gRPC services are running
-  ansible.builtin.meta: flush_handlers
-  tags: [grpcurl_install]
-
-- name: Create directory for FSP gRPC install
-  become: true
-  ansible.builtin.file:
-    path: /tmp/grpcurl
-    state: directory
-    mode: "0755"
-  tags: [grpcurl_install]
-
-- name: Upload grpcurl utility to target
-  become: true
-  ansible.builtin.copy:
-    src: /provision/files.d/external_archives/{{ manage_grpc_grpcurl_version }}.deb
-    dest: /tmp/grpcurl
-  tags: [grpcurl_install]
-
-- name: Install grpcurl for testing
-  become: true
-  ansible.builtin.apt:
-    deb: /tmp/grpcurl/{{ manage_grpc_grpcurl_version }}.deb
-  tags: [grpcurl_install]
-
-- name: Install protos
-  become: true
-  ansible.builtin.unarchive:
-    src: /provision/files.d/external_archives/{{ manage_grpc_protos_version }}.tar.gz
-    dest: /tmp/
-    mode: "0755"
-  tags: [grpcurl_install]
-
-# - name: Run config to get around bug
-#   ansible.builtin.command:
-#     cmd: 'grpcurl -plaintext -import-path ./vcc_drivers -proto vcc_drivers.proto -d ''{"name": "card0_sys_id_base_driver", "sys_id_config": { "scratch": 10}}'' localhost:50051 vcc_driver_protos.VccFpgaDriver/configure'
-#     chdir: /tmp/{{ manage_grpc_protos_version }}/protos
-#   tags: [grpcurl_install]
-
-# - name: Run basic poll
-#   ansible.builtin.command:
-#     cmd: 'grpcurl -plaintext -import-path ./vcc_drivers -proto vcc_drivers.proto -d ''{"name": "card0_sys_id_base_driver", "clear": false}'' localhost:50051 vcc_driver_protos.VccFpgaDriver/status'
-#     chdir: /tmp/{{ manage_grpc_protos_version }}/protos
-#   register: poll_output
-#   tags: [grpcurl_poll]
-
-# - name: Print basic poll output
-#   ansible.builtin.debug:
-#     msg: "{{ poll_output.stdout }}"
-#   tags: [grpcurl_poll]
+- name: Install selected controller
+  ansible.builtin.include_tasks: install.yml
+  vars:
+    _grpc_kind: "{{ 'fsp' if 'grpc-fsp' in _grpc_tags else 'vcc' }}"
+    _grpc_config: "{{ manage_grpc_controllers[_grpc_kind] }}"
+    _grpc_project: "{{ manage_grpc_root }}/{{ _grpc_kind }}/{{ _grpc_config.controller }}"
+    _grpc_other: "{{ 'vcc' if _grpc_kind == 'fsp' else 'fsp' }}"
+  when: "'grpc-fsp' in _grpc_tags or 'grpc-vcc' in _grpc_tags"

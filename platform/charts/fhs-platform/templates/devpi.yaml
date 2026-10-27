@@ -1,0 +1,80 @@
+{{- if .Values.devpi.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-devpi
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: {{ .Values.devpi.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.devpi.persistence.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-devpi
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: {{ .Release.Name }}-devpi}
+  template:
+    metadata:
+      labels: {app: {{ .Release.Name }}-devpi}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/devpi-config.yaml") . | sha256sum }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+      - name: devpi
+        image: {{ .Values.devpi.image | quote }}
+        command: [/bin/sh, /config/start.sh]
+        ports: [{name: index, containerPort: 3141}]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities: {drop: [ALL]}
+        resources:
+          {{- toYaml .Values.devpi.resources | nindent 10 }}
+        startupProbe:
+          httpGet: {path: /+status, port: index}
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          httpGet: {path: /+status, port: index}
+        livenessProbe:
+          httpGet: {path: /+status, port: index}
+          periodSeconds: 30
+        volumeMounts:
+        - {name: config, mountPath: /config, readOnly: true}
+        - {name: data, mountPath: /var/devpi}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-devpi
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-devpi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-devpi
+spec:
+  type: {{ .Values.devpi.service.type }}
+  selector: {app: {{ .Release.Name }}-devpi}
+  ports:
+  - name: index
+    port: 3141
+    targetPort: index
+    {{- if and (eq .Values.devpi.service.type "NodePort") .Values.devpi.service.nodePort }}
+    nodePort: {{ .Values.devpi.service.nodePort }}
+    {{- end }}
+{{- end }}

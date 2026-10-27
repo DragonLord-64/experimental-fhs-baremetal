@@ -1,0 +1,19 @@
+[Unit]
+Description=FHS {{ _grpc_kind | upper }} gRPC controller
+After=network.target
+
+[Service]
+User={{ manage_grpc_user }}
+Group={{ manage_grpc_group }}
+WorkingDirectory={{ _grpc_project }}
+ExecStart={{ _grpc_project }}/.venv/bin/ska-mid-cbf-fhs-{{ _grpc_kind }}-grpc-controller --devices {{ _grpc_config.devices | join(' ') }} --regions {{ _grpc_config.regions | join(' ') }} --cards {{ _grpc_config.cards | join(' ') }} --host {{ manage_grpc_host }} --port {{ _grpc_config.port }} --bitstream_pkg_path {{ _grpc_config.bitstream_pkg_path }} --log info{% if manage_grpc_emulation_mode | bool %} --emulation_mode{% endif %}
+
+Environment="PATH={{ _grpc_project }}/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH={{ _grpc_config.python_paths | join(':') }}"
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+UMask=0022
+
+[Install]
+WantedBy=multi-user.target

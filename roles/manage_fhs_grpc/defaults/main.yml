@@ -1,15 +1,49 @@
 ---
-# Version management
-manage_grpc_fsp_controller: "ska-mid-cbf-fhs-fsp-grpc-controller-0.0.3"
-manage_grpc_vcc_controller: "ska-mid-cbf-fhs-vcc-grpc-controller-0.0.3"
-manage_grpc_vcc_bitstream: "ska-mid-cbf-bitstreams-1.2.0"
-manage_grpc_fsp_bitstream: "ska-mid-cbf-fsp-corr-bitstreams-0.1.0"
-manage_grpc_grpcurl_version: "grpcurl_1.9.3_linux_amd64"
-manage_grpc_protos_version: "ska-mid-cbf-fhs-grpc-protos-0.0.1"
-
-# gRPC service configuration
-manage_grpc_port: "50051"
-manage_grpc_emulation_mode: "true"
-manage_grpc_card: "t1413c1"
+manage_grpc_fsp_controller: ska-mid-cbf-fhs-fsp-grpc-controller-0.0.3
+manage_grpc_vcc_controller: ska-mid-cbf-fhs-vcc-grpc-controller-0.0.3
+manage_grpc_fsp_bitstream: ska-mid-cbf-fsp-corr-bitstreams-0.1.0
+manage_grpc_vcc_bitstream: ska-mid-cbf-bitstreams-1.2.0
+manage_grpc_archive_dir: /provision/files.d/external_archives
+manage_grpc_root: /opt/grpc
+manage_grpc_bitstream_root: /opt/bitstreams
+manage_grpc_poetry_venv: /opt/grpc/poetry
+manage_grpc_poetry_version: "2.2.1"
+manage_grpc_python: /usr/bin/python3
+manage_grpc_user: fhs-grpc
+manage_grpc_group: bittware
+manage_grpc_group_gid: 666
+manage_grpc_port: 50051
+manage_grpc_host: 127.0.0.1
+manage_grpc_emulation_mode: true
+manage_grpc_card: t1413c1
 manage_grpc_device_address: "0000:81:00.1"
 manage_grpc_device_region: "0"
+# Empty uses the release's original pyproject/lock and declared Poetry sources.
+# To change indexes, provide BOTH approved files; never resolve on deployment.
+manage_grpc_controllers:
+  fsp:
+    controller: "{{ manage_grpc_fsp_controller }}"
+    bitstream: "{{ manage_grpc_fsp_bitstream }}"
+    bitstream_pkg_path: "{{ manage_grpc_bitstream_root }}/{{ manage_grpc_fsp_bitstream }}/raw/ska-mid-cbf-agilex-fsp-corr"
+    python_paths:
+      - "{{ manage_grpc_bitstream_root }}/{{ manage_grpc_fsp_bitstream }}/raw/ska-mid-cbf-agilex-fsp-corr/drivers"
+      - "{{ manage_grpc_bitstream_root }}/{{ manage_grpc_fsp_bitstream }}/raw/ska-mid-cbf-agilex-fsp-corr/drivers/fpga_driver_common/driver"
+    pyproject: ""
+    lock: ""
+    devices: ["{{ manage_grpc_device_address }}"]
+    regions: ["{{ manage_grpc_device_region }}"]
+    cards: ["{{ manage_grpc_card }}"]
+    port: "{{ manage_grpc_port }}"
+  vcc:
+    controller: "{{ manage_grpc_vcc_controller }}"
+    bitstream: "{{ manage_grpc_vcc_bitstream }}"
+    bitstream_pkg_path: "{{ manage_grpc_bitstream_root }}/{{ manage_grpc_vcc_bitstream }}/raw/ska-mid-cbf-agilex-vcc"
+    python_paths:
+      - "{{ manage_grpc_bitstream_root }}/{{ manage_grpc_vcc_bitstream }}/raw/ska-mid-cbf-agilex-vcc/drivers"
+      - "{{ manage_grpc_bitstream_root }}/{{ manage_grpc_vcc_bitstream }}/raw/ska-mid-cbf-agilex-vcc/drivers/fpga_driver_common/driver"
+    pyproject: ""
+    lock: ""
+    devices: ["{{ manage_grpc_device_address }}"]
+    regions: ["{{ manage_grpc_device_region }}"]
+    cards: ["{{ manage_grpc_card }}"]
+    port: "{{ manage_grpc_port }}"

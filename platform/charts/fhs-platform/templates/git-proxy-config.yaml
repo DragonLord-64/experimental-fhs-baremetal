@@ -1,0 +1,25 @@
+{{- if .Values.gitProxy.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-git-proxy
+data:
+  squid.conf: |
+    http_port 3128
+    visible_hostname fhs-git-proxy
+    pid_filename /tmp/squid.pid
+    cache_log /dev/stderr
+    access_log stdio:/dev/stdout
+    cache_store_log none
+    cache deny all
+    acl CONNECT method CONNECT
+    acl SSL_ports port 443
+    acl Safe_ports port 80 443
+    acl git_methods method GET POST HEAD
+    acl git_domains dstdomain {{ join " " .Values.gitProxy.allowedDomains }}
+    http_access deny !Safe_ports
+    http_access deny CONNECT !SSL_ports
+    http_access allow CONNECT git_domains
+    http_access allow git_methods git_domains
+    http_access deny all
+{{- end }}

@@ -4,7 +4,7 @@ Applies configuration to installed FHS servers. [provision.yml](provision.yml.md
 
 ## Roles and tags
 
-Each role include has its exact role name as a tag. Most plays target `all`; `setup_fhs_node`, `manage_fhs_bist` and external `ubuntu24_cis` target `fhs_nodes`. Confirm that group exists in the resolved inventory; the current NetBox file creates `teraboxes` and device-role groups, not `fhs_nodes`.
+Each role include has its exact role name as a tag. Most plays target `all`; `setup_fhs_node` and `manage_fhs_bist` target `fhs_nodes`; external `ubuntu24_cis` targets the independent `ubuntu24_cis_production` Linux policy group. Confirm that group exists in the resolved inventory; the current NetBox file creates `teraboxes` and device-role groups, not `fhs_nodes`.
 
 | Play tag | Role tags |
 |---|---|
@@ -12,10 +12,16 @@ Each role include has its exact role name as a tag. Most plays target `all`; `se
 | `distribution` | `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
 | `environment` | `manage_venvs`, `manage_bittware_sdk`, `manage_gitlab-runner` |
 | `dpdk_arkville` | `manage_dpdk_ark_doca` |
-| `fhs_node` | `setup_fhs_node`, `manage_fhs_bist`, `ubuntu24_cis` |
-| No play tag | `manage_poetry`, `manage_fhs_grpc`, `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
+| `fhs_node` | `setup_fhs_node`, `manage_fhs_bist` |
+| `ubuntu24_cis` | `ubuntu24_cis` |
+| `rsync` | Final package/service tasks (no role) |
+| No play tag | `manage_fhs_grpc`, `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
 
-The `local_dev` play sets a local account password from protected variables; it is included by an unrestricted run. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. `--skip-tags hardware` does not establish container safety.
+`manage_fhs_grpc` includes its own Poetry setup and requires exactly one NetBox
+controller tag (`grpc-fsp` or `grpc-vcc`); no tag skips it. `manage_fhs_bist` only
+installs/configures its placeholder and does not start hardware tests.
+
+The `local_dev` play sets a local account password from protected variables; it is included by an unrestricted run. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. Firmware requires both its flag and explicit `firmware` selection; `never` alone is not a safety boundary.
 
 ## Commands
 
@@ -28,4 +34,59 @@ ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-h
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_prometheus
 ```
 
-The final command changes the host. See the role pages for defaults and internal tags. Dynamic includes mean `--list-tasks` and `--list-tags` do not enumerate all internal tasks. Development `config.yml` and `syntax_check.yml` retain stale imports; they are not verified validation entry points.
+The final command changes the host. See the role pages for defaults and explicit functional/safety tags. Dynamic includes mean `--list-tasks` and `--list-tags` do not enumerate all internal tasks. Development `config.yml` and `syntax_check.yml` retain stale imports; they are not verified validation entry points.
+
+## Ubuntu 24 CIS scope
+
+Use `-i inventory/dev_env` to merge explicit Linux group membership with NetBox.
+The policy group includes `linux_servers` (known FPGA server role, control servers
+and FHS nodes). The NetBox file also selects the known `fpga-host-server` role/tag;
+other Linux roles must set `fhs_linux_server: true` in NetBox config context or be
+explicitly placed in `linux_servers` in `hosts.yml`. No platform names are guessed.
+Switches must not be placed in this group. Confirm `--list-hosts --tags ubuntu24_cis`
+contains every intended Linux host before applying; the role requires Ubuntu 24.04.
+
+`inventory/dev_env/group_vars/ubuntu24_cis_production.yml` supplies the effective
+policy to every selected host, including non-Kubernetes servers. Enforcement
+(`audit_only: false`) is intentional and no longer hidden in an include override.
+Preflight checks the effective OS/policy before external-role writes: no reboot,
+no firewall section, no Chrony/time-service changes and no audit storage actions
+that halt the host. The network role owns systemd-timesyncd. Approved development
+NOPASSWD sudo remains excluded from CIS password enforcement.
+
+Patching, password-quality and AIDE controls remain deferred for user policy
+review; their disabled state is not evidence of deployed insecurity. This is
+selected-policy wiring verification, not a CIS application/compliance result.
+Install external `ubuntu24_cis` at the declared 1.6.0 version; supply the existing
+Goss binary/audit archive before an authorized apply. No CIS apply was performed.
+
+Transfer the inventory group wiring and sanitized policy with these playbook/role
+changes; copying only `roles/`, `docs/` and `playbooks/` does not supply inventory
+membership, reviewed versions, DNS/NTP or discovery credentials. Do not copy
+protected inventory credentials. Experimental checks remain under `ops/role-tests`.
+
+The final `rsync` play preserves the upstream package/service tasks outside the
+FPGA role; it does not configure modules or authentication. Supply an approved
+rsync daemon configuration before enabling it on real hosts.
+
+
+## Transfer prerequisites
+
+Transfer the roles, playbooks and consolidated docs together, including the
+retired Poetry role/page and updated archive/download callers. `site.yml` and
+`provision.yml` remain the entry points; shared SDK permissions require
+`manage_venvs/tasks/permissions.yml`. Standalone Poetry invocation is retired.
+
+Also transfer the platform chart's APT/devpi/Squid services and deliberately
+merge sanitized inventory changes: shared BittWare identity, approved development
+sudo/key directory, Linux CIS group membership/policy, reviewed Kubernetes and
+runtime versions, network MAC/address/prefix, DNS/NTP and reachable proxy URLs.
+Supply approved controller/bitstream/SDK/DOCA/build archives, matching locks where
+needed, monitoring archives and separate protected setup/publishing credentials.
+Neither the three folders alone nor these configuration checks deploy all of this.
+
+Keep experimental orchestration, service stand-ins, captures and test reports
+outside the official transfer folders. Fresh install/rerun fixtures do not prove
+real SDK/FPGA/NIC behavior, firmware, boot/hugepages, systemd, network/DNS/NTP,
+CIS enforcement or live logging. The changed platform chart still requires real
+service acceptance after deployment; production readiness remains an objective.

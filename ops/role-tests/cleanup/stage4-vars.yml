@@ -1,0 +1,26 @@
+---
+tags: [grpc-fsp]
+manage_grpc_archive_dir: /tmp/fhs-stage4-archives
+manage_grpc_controllers:
+  fsp:
+    controller: fixture-fsp
+    bitstream: fixture-bitstream
+    bitstream_pkg_path: /opt/bitstreams/fixture-bitstream/raw/fsp
+    python_paths: [/opt/bitstreams/fixture-bitstream/raw/fsp/drivers]
+    pyproject: ''
+    lock: ''
+    devices: ['0000:81:00.1']
+    regions: ['0']
+    cards: [fixture]
+    port: 50051
+  vcc:
+    controller: fixture-vcc
+    bitstream: fixture-bitstream
+    bitstream_pkg_path: /opt/bitstreams/fixture-bitstream/raw/vcc
+    python_paths: [/opt/bitstreams/fixture-bitstream/raw/vcc/drivers]
+    pyproject: ''
+    lock: ''
+    devices: ['0000:81:00.1']
+    regions: ['0']
+    cards: [fixture]
+    port: 50051

@@ -1,0 +1,11 @@
+---
+- name: Parse changed selection and distribution tasks only
+  hosts: all
+  gather_facts: false
+  roles:
+    - manage_users
+    - manage_bittware_sdk
+    - setup_apt_source
+    - setup_pip_source
+    - setup_git_proxy
+    - setup_fpga_host

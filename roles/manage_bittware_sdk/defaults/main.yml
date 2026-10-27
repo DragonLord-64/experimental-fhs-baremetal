@@ -7,11 +7,13 @@
 fpga_bittware_sdk_deb: ""
 fpga_bittware_sdk_package: bittware-sdk
 fpga_bittware_sdk_root: /usr/share/bittware-sdk
-fpga_bittware_group_gid: 666
+fhs_bittware_group: bittware
+fhs_bittware_group_gid: 666
+fpga_bittware_group_gid: "{{ fhs_bittware_group_gid }}"
 
 
 # Bittware group (some Bittware tooling resolves group by gid).
-fpga_bittware_group: bittware
+fpga_bittware_group: "{{ fhs_bittware_group }}"
 
 
 # Apt packages required on every FPGA host.
@@ -25,3 +27,7 @@ fpga_apt_packages:
 
 # OS version check — set to "" to skip.
 fpga_approved_os: "Ubuntu 24.04"
+
+fpga_update_bittware_sdk: false
+users_setup_venvs: false
+venvs: []

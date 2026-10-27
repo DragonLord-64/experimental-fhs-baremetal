@@ -262,8 +262,15 @@ Values below are recorded when available; missing observations preserve records.
 | Cables | LLDP local/remote endpoints and chassis identifiers; exact/verified FPGA DAC matches; native cable connections |
 
 Per-DIMM capacity/vendor and per-NVMe capacity/firmware are not currently retained
-as individual component fields. The Nexus path does not currently import switch
-interface MAC/IP addresses; it preserves existing addresses. Optical serials
+as individual component fields. Nexus management discovery reads
+`show interface mgmt0` (`nexus_management_command` override). `interfaces` ensures
+the observed management interface; `ips`, default/apply also assign the observed
+prefixed address and primary IPv4/IPv6. An `ips`-only run requires an existing
+chassis and never creates one. No prefix or address is derived from the SSH target.
+Missing, failed or ambiguous address observations and ownership conflicts preserve
+existing addresses and primary selection, with diagnostics. Check mode, `compare`
+and `facts` preview without writes. Switch interface MAC import remains unsupported.
+Optical serials
 alone never identify a fiber cable. Incomplete observations are reported rather
 than creating a guessed peer or removing a missing component.
 
@@ -328,3 +335,70 @@ Syntax references: [Cisco NX-OS interface commands](https://www.cisco.com/c/en/u
 and [NVMe identify namespace](https://github.com/linux-nvme/nvme-cli/blob/master/Documentation/nvme-id-ns.txt).
 Actual switch release, driver and hardware support is established by the returned
 capture, including any command errors.
+
+## Portable inventory JSON
+
+[netbox_transfer.py](netbox_transfer.py) copies native inventory through the REST
+API using the existing Python requirements. It does not migrate the database,
+history, users, permissions, credentials or plugin objects. Review the private
+report: exit `2` means incomplete/unsupported data, `1` means an input/API failure.
+A successful command alone is not an all-field migration guarantee.
+
+```bash
+python3 playbooks/netbox/netbox_transfer.py export \
+  --vars /private/old-netbox.yml --file /private/inventory.json \
+  --device switch01 --device pdu01 --device server01 --report /private/export-report.json
+python3 playbooks/netbox/netbox_transfer.py import \
+  --vars /private/new-netbox.yml --file /private/inventory.json \
+  --dry-run --report /private/preview.json
+python3 playbooks/netbox/netbox_transfer.py import \
+  --vars /private/new-netbox.yml --file /private/inventory.json \
+  --report /private/import-report.json
+```
+
+Vars use `netbox_url`, `netbox_token` and `netbox_validate_certs` (fallback
+`netbox_validate_certs_default: false`, matching the playbooks). URLs may include
+a deployment prefix. Values must be resolved YAML, without Jinja expressions.
+Tokens use `Bearer` for `nbt_` tokens and `Token` otherwise. Vault files use
+`ansible-vault view`; inline `!vault` uses Ansible's DataLoader. Pass
+`--vault-password-file /private/password` or `--vault-id name@/private/password`;
+Ansible must be available in the same environment. No password/token arguments.
+Exports and reports require new paths and are created mode `0600`; their parent
+folder should be private too. Stdout contains counts, not inventory or payloads.
+
+Without `--device`, export scans supported native endpoints. Selection includes
+connected components/cables and their dependencies, potentially including other
+devices. Inspect the file before import. Sites, locations, racks, manufacturers,
+roles, device/module types and component templates precede installations through
+portable natural keys. Primary IP/MAC and other forward references are deferred.
+Inventory items, interfaces, addresses, PSU ports/outlets, cable terminations,
+tags and custom-field definitions/values use destination IDs after resolution.
+JSON custom fields and local context data remain literal nested JSON. Object
+custom fields require a supported target type; unsupported fields are reported.
+
+Import creates missing records and PATCHes matching records. Names are scoped
+by parent/site where applicable; devices match site/name, modules match their
+bay, IPs match VRF/address, MACs match address and cables match both endpoint
+sets. Ambiguity is an error. No DELETE operations occur. Fields absent from the
+file preserve destination values. Explicit null/empty fields are submitted to
+the API, subject to its validation; lists replace supplied lists. Supplied
+custom-field names merge with destination values; `{}` requests all values be
+cleared. An occupied IP/MAC cannot be detached or reassigned, and occupied cable
+endpoints are preserved. Unprofiled NetBox 4.7 cables emit null `profile` but
+reject it on input; creation omits that default, while clearing an existing
+profile remains an API error. Reruns retry failures and converge on supported
+fields; imports are partial operations, without rollback.
+
+The file records source versions and read-only/generated fields. Destination
+OPTIONS must expose writable metadata; version/plugin differences are reported.
+Unknown nested relationships and numeric ID fields require explicit adapters and
+are omitted with a report, never copied as source IDs. Inventory plugin assets,
+item types/groups, asset roles, suppliers, purchases, deliveries and audit objects
+are explicitly unsupported. Other plugins, virtualization, wireless, circuits,
+configuration templates and unregistered relationship targets are unsupported.
+Free-text/JSON may itself contain private material: these files need the same
+protection as inventory backups. An export refuses the active API token if found
+in source metadata; this is not a general secret scanner.
+
+Focused validation and actual lab limits are recorded in
+[transfer validation](../../ops/platform/inventory-alignment/TRANSFER-VALIDATION.md).

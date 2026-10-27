@@ -8,7 +8,7 @@ Historical entry points retained for reference; they are not part of the current
 | `run_ubuntu_cis.yml` | Former standalone prototype remediation. Review the current `site.yml` CIS scope and policy before selecting its `ubuntu24_cis` tag. |
 | `node_setup.yml` | Former node wrapper; current wrapper: `site.yml --tags setup_fhs_node`. |
 | `install_bist.yml` | Former BIST wrapper; current wrapper: `site.yml --tags manage_fhs_bist`. |
-| `install_grpc.yml` | Former Poetry/gRPC wrapper; current wrapper: `site.yml --tags manage_poetry,manage_fhs_grpc`. |
+| `install_grpc.yml` | Former Poetry/gRPC wrapper; current wrapper: `site.yml --tags manage_fhs_grpc`. |
 | `install_prometheus.yml` | Former exporter/Prometheus wrapper; current wrapper: `site.yml --tags manage_fhs_exporter,manage_prometheus`. |
 | `exds_configure.yaml` | Former machine-specific EXDS Netplan/Puppet setup, including fixed network settings and a private Puppet backup path. No general replacement is claimed. |
 | `filebeat_setup.yml` | Former development wrapper; current wrapper: `site.yml --tags filebeat`. |

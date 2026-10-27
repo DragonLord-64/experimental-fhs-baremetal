@@ -18,3 +18,41 @@ arkville_local_path: "/provision/files.d/arkville/archive"
 # ==============================================================================
 doca_local_path: "/provision/files.d/"
 doca_deb_filename: "doca-host_3.3.0-088000-26.01-ubuntu2404_amd64.deb"
+
+# Every input change uses a full clean procedure, never partial repair.
+dpdk_force_rebuild: false
+dpdk_build_revision: '2'
+dpdk_success_file: /var/lib/fhs/dpdk-success.sha256
+dpdk_install_outputs:
+  - /usr/local/bin/dpdk-testpmd
+dpdk_manage_hugepages: true
+fhs_hugepage_size: 1G
+fhs_hugepage_count: 8
+fhs_hugepage_mount: /mnt/huge_1gb
+
+dpdk_apt_packages:
+  - apt-utils
+  - build-essential
+  - libpcap-dev
+  - numactl
+  - libnuma-dev
+  - linux-headers-generic
+  - libboost-dev
+  - zlib1g-dev
+  - libboost-python-dev
+  - libpci-dev
+  - libyaml-dev
+  - libaio-dev
+  - libbsd-dev
+  - libxslt-dev
+  - ninja-build
+  - pkg-config
+  - python3-pip
+  - libjsoncpp-dev
+  - python3-pyelftools
+  - meson
+  - libpython3-dev
+  - libsystemd-dev
+  - python3-scapy
+  - libibverbs-dev
+  - librdmacm-dev

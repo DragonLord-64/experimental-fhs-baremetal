@@ -1,0 +1,23 @@
+---
+- name: Validate Linux target and effective CIS safety policy
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.system == 'Linux'
+      - ansible_facts.distribution == 'Ubuntu'
+      - ansible_facts.distribution_version == '24.04'
+      - not (audit_only | bool)
+      - skip_reboot | bool
+      - not (ubtu24cis_section4 | bool)
+      - not (ubtu24cis_rule_5_2_4 | bool)
+      - ubtu24cis_time_sync_tool == 'systemd-timesyncd'
+      - not (ubtu24cis_rule_2_3_1_1 | bool)
+      - not (ubtu24cis_rule_2_3_2_1 | bool)
+      - not (ubtu24cis_rule_2_3_2_2 | bool)
+      - not (ubtu24cis_rule_2_3_3_1 | bool)
+      - not (ubtu24cis_rule_2_3_3_2 | bool)
+      - not (ubtu24cis_rule_2_3_3_3 | bool)
+      - ubtu24cis_auditd_disk_full_action == 'syslog'
+      - ubtu24cis_auditd_disk_error_action == 'syslog'
+      - ubtu24cis_auditd_space_left_action == 'syslog'
+      - ubtu24cis_auditd_admin_space_left_action == 'syslog'
+    fail_msg: Review the resolved Ubuntu 24 enforcement policy; host power, firewall and time-service changes by CIS are prohibited here.

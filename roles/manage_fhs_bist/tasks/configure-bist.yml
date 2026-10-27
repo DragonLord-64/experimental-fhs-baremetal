@@ -38,28 +38,3 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Reload systemd daemon
-  ansible.builtin.systemd:
-    daemon_reload: true
-
-- name: Enable BIST service
-  ansible.builtin.systemd:
-    name: "{{ bist_service }}"
-    enabled: true
-
-- name: Start BIST service
-  ansible.builtin.systemd:
-    name: "{{ bist_service }}"
-    state: started
-
-- name: Check log files
-  ansible.builtin.find:
-    paths: "{{ traces_dir }}"
-    file_type: file
-  register: log_files
-
-- name: Fail if no log files exist
-  ansible.builtin.fail:
-    msg: "ERROR: No log files found in {{ traces_dir }}"
-  when: log_files.matched == 0

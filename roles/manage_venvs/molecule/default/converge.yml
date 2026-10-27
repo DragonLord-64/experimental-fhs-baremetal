@@ -14,4 +14,4 @@
   tasks:
     - name: Apply venvs
       ansible.builtin.import_role:
-        name: venvs
+        name: manage_venvs

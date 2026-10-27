@@ -3,7 +3,6 @@
   ansible.builtin.stat:
     path: "{{ apt_repo_keyring }}"
   register: apt_repo_keyring_status
-  tags: [apt_repo, config]
 
 - name: Validate repository signing key
   ansible.builtin.assert:
@@ -12,7 +11,6 @@
     fail_msg: >-
       The repository signing key does not exist at {{ apt_repo_keyring }}.
       Ensure the ubuntu-keyring package is installed.
-  tags: [apt_repo, config]
 
 - name: Configure apt source (deb822)
   ansible.builtin.template:
@@ -22,7 +20,6 @@
     group: root
     mode: "0644"
   notify: fhs apt repo changed
-  tags: [apt_repo, config]
 
 - name: Configure apt proxy
   ansible.builtin.template:
@@ -33,7 +30,6 @@
     mode: "0644"
   when: apt_cache_url | length > 0
   notify: fhs apt repo changed
-  tags: [apt_repo, config]
 
 - name: Remove apt proxy configuration when disabled
   ansible.builtin.file:
@@ -41,21 +37,18 @@
     state: absent
   when: apt_cache_url | length == 0
   notify: fhs apt repo changed
-  tags: [apt_repo, config]
 
 - name: Remove insecure apt settings
   ansible.builtin.file:
     path: "{{ apt_repo_conf_dir }}/99allow-insecure"
     state: absent
   notify: fhs apt repo changed
-  tags: [apt_repo, config]
 
 - name: Remove disabled TLS verification setting
   ansible.builtin.file:
     path: "{{ apt_repo_conf_dir }}/99ignore-ssl"
     state: absent
   notify: fhs apt repo changed
-  tags: [apt_repo, config]
 
 - name: Configure apt disable cnf
   ansible.builtin.template:
@@ -65,4 +58,3 @@
     group: root
     mode: "0644"
   notify: fhs apt repo changed
-  tags: [apt_repo, config, insecure]

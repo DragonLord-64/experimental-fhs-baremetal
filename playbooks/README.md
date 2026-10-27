@@ -20,7 +20,7 @@ ansible-playbook playbooks/syntax_check.yml --syntax-check
 ansible-playbook -i inventory/dev_env playbooks/provision.yml
 
 # Useful subsets
-ansible-playbook -i inventory/dev_env playbooks/provision.yml --tags users
+ansible-playbook -i inventory/dev_env playbooks/provision.yml --tags manage_users
 ansible-playbook -i inventory/dev_env playbooks/provision.yml --limit sys1353 --tags fpga,config
 ansible-playbook -i inventory/dev_env playbooks/provision.yml --skip-tags hardware,destructive
 ```

@@ -1,55 +1,51 @@
 ---
+- name: Validate venv definitions before writing
+  ansible.builtin.assert:
+    that:
+      - item.path is match('^/[^ ]+$')
+      - item.python is match('^/[^ ]+$')
+      - item.owner | default('root') | length > 0
+      - item.mode | default('0750') is string
+      - item.mode | default('0750') is match('^0[0-7]{3}$')
+  loop: "{{ venvs }}"
+
 - name: Install venv apt prerequisites
   ansible.builtin.apt:
     name: "{{ venv_apt_packages }}"
     state: present
     cache_valid_time: 3600
-  tags: [venvs, install]
 
-# - name: Ensure venv parent directories exist
-#   ansible.builtin.file:
-#     path: "{{ item.path | dirname }}"
-#     state: directory
-#     owner: "{{ item.owner | default('root') }}"
-#     group: "{{ item.group | default('root') }}"
-#     mode: "{{ item.mode | default('0775') }}"
-#   loop: "{{ venvs }}"
-#   loop_control:
-#     label: "{{ item.path }}"
-#   tags: [venvs, config]
-
-- name: Create venvs
-  ansible.builtin.command:
-    cmd: "{{ item.python }} -m venv {{ item.path }}"
-    creates: "{{ item.path }}/bin/python"
+- name: Ensure venv parent directories exist
+  ansible.builtin.file:
+    path: "{{ item.path | dirname }}"
+    state: directory
   loop: "{{ venvs }}"
-  loop_control:
-    label: "{{ item.path }}"
-  become: true
-  become_user: "{{ item.owner | default('root') }}"
-  tags: [venvs, install]
 
-- name: Set venv directory ownership and mode
+- name: Ensure venv directories exist for their intended owners
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     owner: "{{ item.owner | default('root') }}"
     group: "{{ item.group | default('bittware') }}"
-    mode: "{{ item.mode | default('0775') }}"
-    recurse: false
+    mode: "{{ item.mode | default('0750') }}"
   loop: "{{ venvs }}"
-  loop_control:
-    label: "{{ item.path }}"
-  tags: [venvs, config]
 
-- name: Install venv packages
+- name: Create venvs as their owners
+  ansible.builtin.command:
+    argv: ["{{ item.python }}", -m, venv, "{{ item.path }}"]
+    creates: "{{ item.path }}/bin/python"
+  loop: "{{ venvs }}"
+  become: true
+  become_user: "{{ item.owner | default('root') }}"
+
+- name: Install venv packages as their owners
   ansible.builtin.pip:
     name: "{{ item.1 }}"
     virtualenv: "{{ item.0.path }}"
     state: present
   loop: "{{ venvs | subelements('packages', skip_missing=True) }}"
-  loop_control:
-    label: "{{ item.0.path }} :: {{ item.1 }}"
   become: true
   become_user: "{{ item.0.owner | default('root') }}"
-  tags: [venvs, install]
+
+- name: Apply venv ownership and permissions
+  ansible.builtin.import_tasks: permissions.yml

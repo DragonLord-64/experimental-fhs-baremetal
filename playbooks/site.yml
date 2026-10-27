@@ -118,27 +118,27 @@
         apply:
           tags: [manage_fhs_bist]
       tags: [manage_fhs_bist]
+
+- name: Ubuntu 24 Linux server policy
+  hosts: ubuntu24_cis_production
+  become: true
+  gather_facts: true
+  tags: [ubuntu24_cis]
+  tasks:
+    - name: Verify effective CIS policy before apply
+      ansible.builtin.import_tasks: tasks/cis-policy-preflight.yml
     - name: Apply Ubuntu 24 CIS hardening
       ansible.builtin.include_role:
         name: ubuntu24_cis
         apply:
           tags: [ubuntu24_cis]
-      vars:
-        audit_only: false
       tags: [ubuntu24_cis]
-
 
 - name: FHS services
   hosts: all
   become: true
   gather_facts: true
   tasks:
-    - name: Install Poetry
-      ansible.builtin.include_role:
-        name: manage_poetry
-        apply:
-          tags: [manage_poetry]
-      tags: [manage_poetry]
     - name: Install FHS gRPC service
       ansible.builtin.include_role:
         name: manage_fhs_grpc
@@ -175,3 +175,19 @@
         apply:
           tags: [setup_fpga_host]
       tags: [setup_fpga_host]
+
+- name: File transfer service
+  hosts: all
+  become: true
+  gather_facts: false
+  tags: [rsync]
+  tasks:
+    - name: Ensure the rsync package
+      ansible.builtin.apt:
+        name: rsync
+        state: present
+    - name: Ensure rsync service is active and starts at boot
+      ansible.builtin.systemd_service:
+        name: rsync
+        state: started
+        enabled: true

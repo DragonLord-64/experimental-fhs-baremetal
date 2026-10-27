@@ -11,3 +11,9 @@ k8s_packages:
   - kubectl
 
 k8s_taints: []
+
+k8s_labels: {}
+# Required: reviewed target cluster version and exact Docker containerd.io package.
+k8s_control_plane_version: ""
+containerd_pkg_version: ""
+k8s_enable_ceph: false

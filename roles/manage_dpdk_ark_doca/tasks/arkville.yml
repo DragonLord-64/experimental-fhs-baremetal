@@ -19,7 +19,7 @@
   ansible.builtin.file:
     path: "/opt/arkville/arkville_{{ arkville_release }}"
     state: directory
-    mode: "0775"
+    mode: "0755"
   become: true
 
 - name: Copy and Unpack Arkville Tarball from Localhost directly onto target host
@@ -31,10 +31,12 @@
       - --strip-components=1
   become: true
 
-- name: Grant user ownership over the Arkville directory for compilation
+- name: Restrict ownership of the Arkville directory for compilation
   ansible.builtin.file:
     path: /opt/arkville/arkville_{{ arkville_release }}
-    owner: "{{ ansible_user }}" # Or specify a hardcoded user like "ubuntu"
-    group: "users" # Or specify a hardcoded group like "ubuntu"
+    owner: root
+    group: root
+    mode: "u=rwX,g=rX,o=rX"
+    follow: false
     recurse: true                  # Applies ownership to all subfolders and files
   become: true

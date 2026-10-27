@@ -14,7 +14,7 @@
 ubtu24cis_section1: true
 ubtu24cis_section2: true
 ubtu24cis_section3: true
-ubtu24cis_section4: true
+ubtu24cis_section4: false # Firewall work is outside this policy run.
 ubtu24cis_section5: true
 ubtu24cis_section6: true
 ubtu24cis_section7: true
@@ -76,7 +76,7 @@ audit_run_heavy_tests: false
 audit_max_concurrent: 50
 
 ## Only run Audit do not remediate
-audit_only: true
+audit_only: false # Enforcement is intentional.
 
 #############################
 
@@ -311,3 +311,13 @@ ubtu24cis_apt_lock_timeout: 180
 ## Ignore change_when for apt update task
 # This variable modifies behavior of 'changed_when' for 'apt update' task in prelim that always changes.
 ubtu24cis_ignore_apt_update_changed_when: true
+
+# Network role owns timesyncd; never select the external role's Chrony default.
+ubtu24cis_time_sync_tool: systemd-timesyncd
+
+# Keep the host running even if audit storage fills. External 1.6.0 otherwise
+# defaults admin_space_left_action to halt (rule 6.2.2.4 is enabled).
+ubtu24cis_auditd_disk_full_action: syslog
+ubtu24cis_auditd_disk_error_action: syslog
+ubtu24cis_auditd_space_left_action: syslog
+ubtu24cis_auditd_admin_space_left_action: syslog

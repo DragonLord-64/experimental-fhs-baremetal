@@ -25,7 +25,7 @@ These variables manage system-level package installation and OS validation.
 | Variable Name | Default | Description |
 | :--- | :--- | :--- |
 | `fpga_apt_packages` | `[python3, python3-pip, ...]` | List of APT packages required on every FPGA host. |
-| `fpga_approved_os` | `"Ubuntu 24.04"` | Validates the host OS version. Set to `""` to skip. |
+| `fpga_approved_os` | `"Ubuntu 24.04"` | Informational only; the role currently does not enforce this value. |
 
 ### 3. Virtual Environment Management
 These variables are used to manage Python environments via `bw_pip.py`.
@@ -45,3 +45,13 @@ These variables are used to manage Python environments via `bw_pip.py`.
 ## License
 
 BSD-3-Clause
+Shared identity: set `fhs_bittware_group` and `fhs_bittware_group_gid` consistently
+for users, SDK and runner (defaults `bittware`, `666`). Legacy `fpga_bittware_group`
+and `fpga_bittware_group_gid` default to these shared values; do not override them
+inconsistently. A GID change on an existing server needs ownership review.
+
+SDK venv packaging and installation run as each venv's owner. The system package
+step does not set up the runner account/venv. `fpga_update_bittware_sdk` and
+`users_setup_venvs` default false. A missing SDK skips venv SDK installation.
+The focused fixture is a minimal deb with an installer/entrypoint; real installer,
+SDK commands and FPGA behavior are unvalidated.

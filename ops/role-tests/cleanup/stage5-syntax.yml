@@ -1,0 +1,8 @@
+---
+- name: Parse stage five roles only
+  hosts: all
+  gather_facts: false
+  roles:
+    - manage_prometheus
+    - manage_fhs_exporter
+    - filebeat

@@ -1,76 +1,38 @@
 ---
-- name: Ensure network directory exists
+- name: Check required network inputs
+  ansible.builtin.import_tasks: validate.yml
+
+- name: Configure network files
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Install DNS and time services
+  ansible.builtin.apt:
+    name: [systemd-resolved, systemd-timesyncd]
+    state: present
+
+- name: Ensure timesyncd drop-in directory exists
   ansible.builtin.file:
-    path: "{{ network_dir }}"
+    path: /etc/systemd/timesyncd.conf.d
     state: directory
-    owner: root
-    group: root
     mode: "0755"
-  tags: [network, config]
 
-- name: Discover stale network files
-  ansible.builtin.find:
-    paths: "{{ network_dir }}"
-    file_type: file
-    excludes: "{{ network_managed_files }}"
-  register: stale_network_files
-  tags: [network, config]
-
-- name: Remove stale network files
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: absent
-  loop: "{{ stale_network_files.files }}"
-  loop_control:
-    label: "{{ item.path }}"
-  notify: fhs network changed
-  tags: [network, config]
-
-- name: Configure primary NIC
+- name: Configure authorized NTP servers
   ansible.builtin.template:
-    src: 00-fhs.network.j2
-    dest: "{{ network_dir }}/00-fhs.network"
-    owner: root
-    group: root
+    src: timesyncd.conf.j2
+    dest: /etc/systemd/timesyncd.conf.d/00-fhs.conf
     mode: "0644"
-  when:
-    - sys_mac_address is defined
-    - ansible_host is defined
-  notify: fhs network changed
-  tags: [network, config, hardware]
+  notify: Restart systemd-timesyncd
 
-- name: Warn when MAC/IP missing
-  ansible.builtin.debug:
-    msg: "sys_mac_address / ansible_host not defined — primary NIC config skipped"
-  when:
-    - sys_mac_address is not defined or ansible_host is not defined
-  tags: [network, config]
-
-- name: Configure 'ignore-others' catch-all
-  ansible.builtin.template:
-    src: 99-ignore-others.network.j2
-    dest: "{{ network_dir }}/99-ignore-others.network"
-    owner: root
-    group: root
-    mode: "0644"
-  notify: fhs network changed
-  tags: [network, config]
-
-- name: Disable cloud-init network management
-  ansible.builtin.copy:
-    dest: /etc/cloud/cloud-init.disabled
-    content: ""
-    owner: root
-    group: root
-    mode: "0644"
-    force: false
-  when: network_disable_cloud_init | bool
-  tags: [network, config]
-
-- name: Remove legacy cloud-init netplan file
+- name: Use resolved stub resolver
   ansible.builtin.file:
-    path: "{{ network_legacy_netplan_file }}"
-    state: absent
-  when: network_remove_legacy_netplan | bool
-  notify: fhs network changed
-  tags: [network, config]
+    path: /etc/resolv.conf
+    src: /run/systemd/resolve/stub-resolv.conf
+    state: link
+    force: true
+
+- name: Enable network DNS and time services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: [systemd-networkd, systemd-resolved, systemd-timesyncd]

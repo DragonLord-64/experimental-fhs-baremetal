@@ -11,7 +11,8 @@ argument_specs:
           path: {type: path, required: true}
           python: {type: path, required: true}
           owner: {type: str, default: root}
-          group: {type: str, default: root}
-          mode: {type: str, default: "0775"}
+          group: {type: str, default: bittware}
+          mode: {type: str, default: "0750"}
+          tree_mode: {type: str}
           packages: {type: list, elements: str, default: []}
       venv_apt_packages: {type: list, elements: str}

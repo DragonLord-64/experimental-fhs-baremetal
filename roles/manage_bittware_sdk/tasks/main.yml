@@ -3,17 +3,14 @@
 # tasks file for bittware_sdk
 - name: FPGA host packages + group
   ansible.builtin.import_tasks: packages.yml
-  tags: [bittware, install]
 
 - name: Bittware SDK
   ansible.builtin.import_tasks: bittware_sdk.yml
   when: fpga_update_bittware_sdk | bool
-  tags: [bittware, install]
 
 - name: Bittware venvs
   ansible.builtin.import_tasks: bittware_venvs.yml
   when: users_setup_venvs | bool
-  tags: [bittware, config]
 
 
 # - name: Ensure correct file ownership

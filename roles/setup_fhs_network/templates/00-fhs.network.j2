@@ -9,7 +9,9 @@ DHCP=no
 {% for d in network_dns %}
 DNS={{ d }}
 {% endfor %}
-Domains=dev-mirror.svc.cluster.local
+{% for domain in network_domains %}
+Domains={{ domain }}
+{% endfor %}
 {% for n in network_ntp %}
 NTP={{ n }}
 {% endfor %}

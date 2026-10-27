@@ -672,3 +672,31 @@ aptCacher:
   resources:
     requests: {cpu: 50m, memory: 64Mi}
     limits: {cpu: '1', memory: 256Mi}
+
+# Read-only public PyPI cache. No private upload/index administration is exposed.
+devpi:
+  enabled: true
+  # jonasal/devpi-server 6.20.3; prebuilt, no startup pip installation.
+  image: docker.io/jonasal/devpi-server@sha256:5e6768442a738251a760acac91f595a07e80cfac28fcfaed098c3e0e544cf46e
+  service:
+    type: ClusterIP
+    nodePort: null
+  persistence:
+    storageClass: bds1
+    size: 10Gi
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    # Initial secret hashing exceeds 512Mi in the pinned image.
+    limits: {cpu: '1', memory: 1Gi}
+
+gitProxy:
+  enabled: true
+  # Canonical ubuntu/squid 6.6-24.04_beta, pinned multiarch manifest.
+  image: docker.io/ubuntu/squid@sha256:6a097f68bae708cedbabd6188d68c7e2e7a38cedd05a176e1cc0ba29e3bbe029
+  allowedDomains: [gitlab.com, git-collab.nrc-cnrc.gc.ca]
+  service:
+    type: ClusterIP
+    nodePort: null
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits: {cpu: '1', memory: 256Mi}

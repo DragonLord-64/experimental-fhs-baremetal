@@ -1,0 +1,4 @@
+{{ ansible_managed | comment }}
+[Time]
+NTP={{ network_ntp | join(' ') }}
+FallbackNTP=

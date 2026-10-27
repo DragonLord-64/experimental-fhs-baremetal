@@ -1,0 +1,61 @@
+{{- if .Values.gitProxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-git-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: {{ .Release.Name }}-git-proxy}
+  template:
+    metadata:
+      labels: {app: {{ .Release.Name }}-git-proxy}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/git-proxy-config.yaml") . | sha256sum }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 13
+        runAsGroup: 13
+      containers:
+      - name: squid
+        image: {{ .Values.gitProxy.image | quote }}
+        command: [/usr/sbin/squid]
+        args: ['-N', '-f', /etc/squid/squid.conf]
+        ports: [{name: proxy, containerPort: 3128}]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities: {drop: [ALL]}
+        resources:
+          {{- toYaml .Values.gitProxy.resources | nindent 10 }}
+        readinessProbe:
+          tcpSocket: {port: proxy}
+        livenessProbe:
+          tcpSocket: {port: proxy}
+          initialDelaySeconds: 15
+        volumeMounts:
+        - {name: config, mountPath: /etc/squid/squid.conf, subPath: squid.conf, readOnly: true}
+        - {name: runtime, mountPath: /tmp}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-git-proxy
+      - name: runtime
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-git-proxy
+spec:
+  type: {{ .Values.gitProxy.service.type }}
+  selector: {app: {{ .Release.Name }}-git-proxy}
+  ports:
+  - name: proxy
+    port: 3128
+    targetPort: proxy
+    {{- if and (eq .Values.gitProxy.service.type "NodePort") .Values.gitProxy.service.nodePort }}
+    nodePort: {{ .Values.gitProxy.service.nodePort }}
+    {{- end }}
+{{- end }}

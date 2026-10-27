@@ -4,7 +4,7 @@
 #   python:   /usr/bin/python3.10 # required — full path
 #   owner:    root                # owner of the venv directory
 #   group:    bittware            # group of the venv directory
-#   mode:     "0775"              # directory mode
+#   mode:     "0750"              # directory mode
 #   packages: []                  # pip packages to install (versioned for idempotency)
 venvs: []
 
@@ -13,3 +13,6 @@ venvs: []
 venv_apt_packages:
   - python3-venv
   - python3-pip
+
+# Symbolic X preserves executability only for directories and existing scripts.
+venv_mode_bits: ['', 'X', 'w', 'wX', 'r', 'rX', 'rw', 'rwX']

@@ -14,7 +14,7 @@ manage_prometheus_data_dir: /var/lib/prometheus
 
 # Authentication Settings:
 manage_prometheus_enable_auth: false
-manage_prometheus_user_cred: "$2b$12$nk3YaT9.oGhFHSFA084eWeai85B0TjTujC7fZSD9ktAOheOxfiWTO"
+manage_prometheus_user_cred: ""
 
 # Basic Settings:
 manage_prometheus_prometheus_port: 9090

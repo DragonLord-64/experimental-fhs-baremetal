@@ -1,0 +1,11 @@
+---
+manage_prometheus_file_directory: /tmp
+manage_exporters_exporter_file: /tmp/fhs-stage5-exporter.tar.gz
+fhs_exporter_venv_path: /opt/venvs/fhs-exporter
+# Vendor MFT is unavailable; no collector is invoked in this test.
+fhs_exporter_apt_packages: [python3-pip, python3-venv, pciutils, sudo, ipmitool, ethtool]
+filebeat_package_path: /tmp/filebeat-9.5.5-amd64.deb
+filebeat_credentials_file: /tmp/fhs-stage5-publishing.yml
+filebeat_setup_enabled: false
+filebeat_validate_output: false
+filebeat_elasticsearch_hosts: ['http://127.0.0.1:19200']

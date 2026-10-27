@@ -1,22 +1,21 @@
 ---
-# Triggered ONLY if fhs-exporter.service.j2 changes
+# Reload after the exporter unit changes
 - name: Reload Systemd Daemon
   ansible.builtin.systemd_service:
     daemon_reload: true
   become: true
 
-# Triggered if the service file OR thresholds configuration change
+# Restart after exporter package or unit changes
 - name: Restart Exporter
-  ansible.builtin.service:
+  ansible.builtin.systemd_service:
     name: fhs-exporter
     state: restarted
     enabled: true
   become: true
 
-# Triggered ONLY if the main prometheus.yml changes
+# Rule files are useful locally only when this host runs Prometheus.
 - name: Restart Prometheus
-  ansible.builtin.service:
+  ansible.builtin.systemd_service:
     name: prometheus
     state: restarted
-    enabled: true
-  become: true
+  when: "'prometheus.service' in ansible_facts.services"

@@ -1,0 +1,25 @@
+---
+- name: Check production and explicitly approved development sudo policy offline
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../../../roles/manage_users/defaults/main.yml
+  vars:
+    found_key_files:
+      files:
+        - path: /synthetic/approveduser.pub
+  tasks:
+    - name: Production does not grant passwordless development access
+      ansible.builtin.assert:
+        that:
+          - "'NOPASSWD' not in fhs_sudoers_content"
+    - name: Resolve development opt-in
+      ansible.builtin.set_fact:
+        fhs_development_passwordless_sudo: true
+    - name: Development policy grants only the approved key account
+      ansible.builtin.assert:
+        that:
+          - "'approveduser ALL=(ALL) NOPASSWD:ALL' in fhs_sudoers_content"
+          - "'%sudo' not in fhs_sudoers_content"
+          - "'.pub' not in fhs_sudoers_content"

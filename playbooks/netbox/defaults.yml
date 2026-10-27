@@ -107,3 +107,6 @@ server_info_path: /etc/server-info.yaml
 
 # Opt-in controller evidence only; directory must already exist with mode 0700.
 bootstrap_discovery_capture_dir: ""
+
+# Read-only NX-OS output; the observed interface and prefix are authoritative.
+nexus_management_command: show interface mgmt0

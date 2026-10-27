@@ -1,0 +1,12 @@
+---
+- name: Stage five real package installation in owned container
+  hosts: all
+  gather_facts: true
+  vars_files: [stage5-vars.yml]
+  roles:
+    - role: manage_prometheus
+      tags: [manage_prometheus]
+    - role: manage_fhs_exporter
+      tags: [manage_fhs_exporter]
+    - role: filebeat
+      tags: [filebeat]

@@ -1,28 +1,73 @@
 ---
+- name: Ensure shared BittWare identity exists
+  ansible.builtin.group:
+    name: "{{ fhs_bittware_group }}"
+    gid: "{{ fhs_bittware_group_gid }}"
+    state: present
+
 - name: Create gitlab-runner group
   ansible.builtin.group:
     name: "{{ gitlab_runner_group }}"
     state: present
 
-- name: Create gitlab-runner system user
+- name: Create gitlab-runner system user with supplementary SDK membership
   ansible.builtin.user:
     name: "{{ gitlab_runner_user }}"
     group: "{{ gitlab_runner_group }}"
-    system: yes
-    create_home: yes
+    groups: "{{ fhs_bittware_group }}"
+    append: true
+    system: true
+    create_home: true
     shell: /bin/bash
 
-- name: Create virtual environment and execute bittware pip installer
+- name: Refresh SSH membership
+  ansible.builtin.meta: reset_connection
+
+- name: Create runner virtual environment
+  ansible.builtin.command:
+    argv: [python3, -m, venv, "{{ gitlab_runner_venv_path }}"]
+    creates: "{{ gitlab_runner_venv_path }}/bin/python"
+  become: true
+  become_user: "{{ gitlab_runner_user }}"
+
+- name: Inspect installed SDK entrypoint
+  ansible.builtin.stat:
+    path: "{{ gitlab_runner_venv_path }}/bin/bw_card_monitor"
+  register: runner_sdk_entrypoint
+  become: true
+  become_user: "{{ gitlab_runner_user }}"
+
+- name: Check runner Python dependency installation
+  ansible.builtin.command:
+    argv: ["{{ gitlab_runner_venv_path }}/bin/python", -m, pip, check]
+  register: runner_sdk_check
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ gitlab_runner_user }}"
+
+- name: Install runner BittWare Python tooling
   ansible.builtin.shell: |
-    python3 -m venv {{ gitlab_runner_venv_path }}
-    source {{ gitlab_runner_venv_path }}/bin/activate
-    
-    {{ bwsdk_root_path }}/bin/bw_pip install
+    . {{ (gitlab_runner_venv_path ~ '/bin/activate') | quote }}
+    {{ (bwsdk_root_path ~ '/bin/bw_pip') | quote }} install
   args:
     executable: /bin/bash
-    chdir: "/home/{{ gitlab_runner_user }}"
-    creates: "{{ gitlab_runner_venv_path }}/lib/python3.12/site-packages/pydantic" # Safeguards against running it again if packages exist
   environment:
     BWSDK_ROOT: "{{ bwsdk_root_path }}"
-  become: True
+  become: true
+  become_user: "{{ gitlab_runner_user }}"
+  when: not runner_sdk_entrypoint.stat.exists or not runner_sdk_entrypoint.stat.executable | default(false) or runner_sdk_check.rc != 0
+
+- name: Verify the SDK entrypoint after installation
+  ansible.builtin.command:
+    argv: ["{{ gitlab_runner_venv_path }}/bin/python", -c, "import os, sys; assert os.access(sys.prefix + '/bin/bw_card_monitor', os.X_OK)"]
+  changed_when: false
+  become: true
+  become_user: "{{ gitlab_runner_user }}"
+
+- name: Verify runner Python dependencies after installation
+  ansible.builtin.command:
+    argv: ["{{ gitlab_runner_venv_path }}/bin/python", -m, pip, check]
+  changed_when: false
+  become: true
   become_user: "{{ gitlab_runner_user }}"

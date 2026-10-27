@@ -65,3 +65,14 @@ list variables. Use `--limit` to subset further at run time.
 `netbox_placeholder.yml` is a stub for the eventual NetBox-backed
 dynamic inventory. When that lands it will replace `dev_env/hosts.yml`
 while keeping the same group taxonomy.
+
+## Ubuntu 24 policy membership
+
+`ubuntu24_cis_production` contains `linux_servers`, whose children are the known
+FPGA server role, `control_servers` and `fhs_nodes`. This policy is independent of
+Kubernetes membership. Merge `hosts.yml` with NetBox by using `-i inventory/dev_env`.
+For a different NetBox Linux role, set config context `fhs_linux_server: true`, or
+add explicit membership to `linux_servers`. Do not guess platform names or include
+switches. Check `playbooks/site.yml --list-hosts --tags ubuntu24_cis` before apply.
+The selected policy enforces Ubuntu 24 settings; firewall work is excluded and the
+network role owns timesyncd. See [site policy notes](../docs/src/playbooks/site.yml.md).

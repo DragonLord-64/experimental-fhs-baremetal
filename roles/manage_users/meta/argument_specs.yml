@@ -11,7 +11,7 @@ argument_specs:
           name: {type: str, required: true}
           password: {type: str, no_log: true}
           ssh_keys: {type: list, elements: str, default: []}
-      fhs_keys_dir: {type: path, default: /provision/files.d/dev-ssh-keys.d}
+      fhs_keys_dir: {type: path, default: ""}
       fhs_user_groups: {type: list, elements: str, default: [sudo, bittware]}
-      fhs_sudoers_file: {type: path, default: /etc/sudoers.d/10-sudo-group}
+      fhs_sudoers_file: {type: path, default: /etc/sudoers.d/99-fhs-passwordless}
       fhs_sudoers_content: {type: str}

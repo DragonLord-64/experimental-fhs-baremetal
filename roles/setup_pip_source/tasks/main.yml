@@ -4,7 +4,6 @@
     that:
       - pip_index_url | length > 0
     fail_msg: "Set pip_index_url to the devpi +simple index URL."
-  tags: [pip_index, config]
 
 - name: Write system pip.conf
   ansible.builtin.template:
@@ -13,4 +12,3 @@
     owner: root
     group: root
     mode: "0644"
-  tags: [pip_index, config]

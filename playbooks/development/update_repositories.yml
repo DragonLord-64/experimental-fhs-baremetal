@@ -9,8 +9,9 @@
     download_list:
       - name: "node_exporter"
         type: "direct_download"
-        url: "https://github.com"
-        dest_filename: "node_exporter-1.12.1.linux-amd64.tar.gz"
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.11.1/node_exporter-1.11.1.linux-amd64.tar.gz"
+        dest_filename: "node_exporter-1.11.1.linux-amd64.tar.gz"
+        checksum: "sha256:9f5ea48e5bc7b656f8a91a32e7d7deb89f70f73dabd0d974418aca15f37d6810"
 
       - name: "ska-mid-cbf-fhs-bist"
         type: "gitlab_repo"
@@ -24,8 +25,9 @@
 
       - name: "prometheus"
         type: "direct_download"
-        url: "https://github.com"
-        dest_filename: "prometheus-3.13.2.linux-amd64.tar.gz"
+        url: "https://github.com/prometheus/prometheus/releases/download/v3.12.0/prometheus-3.12.0.linux-amd64.tar.gz"
+        dest_filename: "prometheus-3.12.0.linux-amd64.tar.gz"
+        checksum: "sha256:20da47f8e5303f74aecb78edd7f7e39041dac08ac4939dba75efd7a900ae8867"
 
       - name: "ska-mid-cbf-bitstreams"
         type: "gitlab_repo"
@@ -67,6 +69,7 @@
     - name: Download direct release tarballs (GitHub items)
       ansible.builtin.get_url:
         url: "{{ item.url }}"
+        checksum: "{{ item.checksum | default(omit) }}"
         dest: "{{ output_directory }}/{{ item.dest_filename }}"
         mode: "0644"
       loop: "{{ download_list }}"

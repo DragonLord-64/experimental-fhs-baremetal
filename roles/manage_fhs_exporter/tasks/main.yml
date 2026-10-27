@@ -1,10 +1,7 @@
 ---
 - name: Install apt packages for exporters
   ansible.builtin.apt:
-    name:
-      - ipmitool
-      - ethtool
-      - mft
+    name: "{{ fhs_exporter_apt_packages }}"
     state: present
 
 - name: Create required installation and configuration directories
@@ -18,18 +15,60 @@
     - /etc/prometheus/rules
     - /etc/prometheus/targets
     - /etc/exporters/config
+    - /var/cache/fhs-exporter
 
-- name: Copy local source tar.gz exporter file to temporary installation path
+- name: Inspect installed services for optional local Prometheus integration
+  ansible.builtin.service_facts:
+
+- name: Require a root-owned environment for the privileged exporter
+  ansible.builtin.file:
+    path: "{{ fhs_exporter_venv_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Inspect privileged exporter environment permissions before execution
+  ansible.builtin.command:
+    argv:
+      [find, -L, "{{ fhs_exporter_venv_path }}", -xdev,
+       '(', -type, f, -o, -type, d, ')',
+       '(', '!', -user, root, -o, -perm, /022, ')', -print, -quit]
+  register: fhs_exporter_writable_code
+  changed_when: false
+
+- name: Reject user-writable code in the privileged exporter environment
+  ansible.builtin.assert:
+    that: fhs_exporter_writable_code.stdout | length == 0
+    fail_msg: Use a dedicated root-owned venv without group/other write access.
+
+- name: Copy reviewed exporter archive to root-owned cache
   ansible.builtin.copy:
     src: "{{ manage_exporters_exporter_file }}"
-    dest: "/tmp/{{ manage_exporters_exporter_file | basename }}"
-    mode: "0644"
+    dest: /var/cache/fhs-exporter/exporter.tar.gz
+    owner: root
+    group: root
+    mode: "0600"
+  register: fhs_exporter_archive
+
+- name: Read last successful installation checksum
+  ansible.builtin.command: cat /var/cache/fhs-exporter/installed.sha1
+  register: fhs_exporter_installed
+  changed_when: false
+  failed_when: fhs_exporter_installed.rc not in [0, 1]
+
+- name: Check installed exporter entry point
+  ansible.builtin.stat:
+    path: "{{ fhs_exporter_venv_path }}/bin/fhs-prometheus-exporter"
+  register: fhs_exporter_entrypoint
 
 - name: Extract Prometheus aggregation rules from archive
   ansible.builtin.unarchive:
-    src: "/tmp/{{ manage_exporters_exporter_file | basename }}"
+    src: /var/cache/fhs-exporter/exporter.tar.gz
     dest: /etc/prometheus/rules/
     remote_src: true
+    owner: root
+    group: root
     extra_opts:
       - --strip-components=3
       - --wildcards
@@ -39,21 +78,53 @@
 
 - name: Extract Prometheus threshold rules from archive
   ansible.builtin.unarchive:
-    src: "/tmp/{{ manage_exporters_exporter_file | basename }}"
+    src: /var/cache/fhs-exporter/exporter.tar.gz
     dest: /etc/prometheus/rules/
     remote_src: true
+    owner: root
+    group: root
     extra_opts:
       - --strip-components=3
       - --wildcards
       - "*/etc/prometheus_config/threshold_rules.yml"
     mode: "0644"
-  notify: Restart Exporter
+  notify: Restart Prometheus
 
-- name: Pip install the exporter directly from the temp archive path
-  ansible.builtin.pip:
-    name: "/tmp/{{ manage_exporters_exporter_file | basename }}"
-    virtualenv: "{{ fhs_exporter_venv_path }}"
-    state: forcereinstall
+- name: Check exporter installation imports and entry point without collecting
+  ansible.builtin.command:
+    argv: ["{{ fhs_exporter_venv_path }}/bin/fhs-prometheus-exporter", --help]
+  register: fhs_exporter_install_check
+  changed_when: false
+  failed_when: false
+  when: fhs_exporter_entrypoint.stat.exists
+
+- name: Install changed or missing exporter
+  when: >-
+    fhs_exporter_installed.stdout != fhs_exporter_archive.checksum or
+    not fhs_exporter_entrypoint.stat.exists or
+    fhs_exporter_install_check.rc | default(1) != 0
+  block:
+    - name: Install reviewed exporter and its runtime dependencies
+      ansible.builtin.pip:
+        name: /var/cache/fhs-exporter/exporter.tar.gz
+        virtualenv: "{{ fhs_exporter_venv_path }}"
+        # Gated above: replace same-version archive contents or a broken install.
+        state: forcereinstall
+        virtualenv_command: /usr/bin/python3 -m venv
+      notify: Restart Exporter
+
+    - name: Verify installed exporter console imports
+      ansible.builtin.command:
+        argv: ["{{ fhs_exporter_venv_path }}/bin/fhs-prometheus-exporter", --help]
+      changed_when: false
+
+    - name: Record successful exporter installation
+      ansible.builtin.copy:
+        content: "{{ fhs_exporter_archive.checksum }}"
+        dest: /var/cache/fhs-exporter/installed.sha1
+        owner: root
+        group: root
+        mode: "0600"
 
 - name: Deploy FHS Exporter target configuration for File Service Discovery
   ansible.builtin.template:
@@ -72,7 +143,11 @@
     - Reload Systemd Daemon
     - Restart Exporter
 
-- name: Clean up temporary installer archive
-  ansible.builtin.file:
-    path: "/tmp/{{ manage_exporters_exporter_file | basename }}"
-    state: absent
+- name: Apply pending exporter changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start exporter (also recover a stopped service)
+  ansible.builtin.systemd_service:
+    name: fhs-exporter
+    enabled: true
+    state: started

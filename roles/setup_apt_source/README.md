@@ -23,4 +23,4 @@ apt-cacher-ng service.
 Packages retrieved through apt-cacher-ng retain Ubuntu's original signatures
 and are verified against the keyring supplied by the `ubuntu-keyring` package.
 
-Tags: `apt_repo`, `config`.
+Select `--tags setup_apt_source` in `playbooks/site.yml`.

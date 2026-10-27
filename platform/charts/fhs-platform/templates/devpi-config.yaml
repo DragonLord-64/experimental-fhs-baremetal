@@ -1,0 +1,17 @@
+{{- if .Values.devpi.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-devpi
+data:
+  start.sh: |
+    #!/bin/sh
+    set -eu
+    if [ ! -f /var/devpi/.serverversion ]; then
+      # Cache-only service: disable usable administrator credentials. The random
+      # password is never logged or stored outside devpi's salted hash.
+      devpi-init --serverdir /var/devpi --root-passwd "$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+    fi
+    # This is a package cache; do not index the entire PyPI catalog for web search.
+    exec devpi-server --serverdir /var/devpi --host 0.0.0.0 --port 3141 --restrict-modify root --indexer-backend null
+{{- end }}

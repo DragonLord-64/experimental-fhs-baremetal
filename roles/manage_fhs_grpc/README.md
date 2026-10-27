@@ -1,50 +1,70 @@
 # Manage FHS gRPC
-Manages the [gRPC](https://grpc.io/docs/languages/python/quickstart/) controller services for VCC/FSP, allowing them to be deployed on target hosts, configured, and shut down as required.
 
-## External References
+Installs one controller selected by NetBox `grpc-fsp` or `grpc-vcc` tag.
+Neither tag skips installation; both fail before filesystem/account changes.
+The NetBox inventory plugin emits string slugs; dictionary tags with `slug` are
+also accepted. Switching tags stops/disables and removes the previous role-owned
+`fsp-grpc.service` or `vcc-grpc.service`, then starts the selected controller.
+These two unit names are reserved for this role.
 
-- [VCC gRPC controller repository](https://gitlab.com/ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-vcc-grpc-controller)
-- [FSP gRPC controller repository](https://gitlab.com/ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-fsp-grpc-controller)
+```bash
+ansible-playbook -i <INVENTORY> playbooks/site.yml --limit <HOST> --tags manage_fhs_grpc
+```
 
-## Requirements
+Poetry installation belongs to this role; the standalone manage_poetry role is
+retired. Python with venv support and the approved archives from
+`playbooks/development/update_repositories.yml`
+are prerequisites. Default controller releases are 0.0.3, Poetry is pinned to
+2.2.1. `manage_grpc_archive_dir` is controller-side. Archives must contain the
+named release directory. No grpcurl/proto installation or polling is performed.
 
-The gRPC controllers use Poetry to manage dependencies. If running on a fresh installation, run the Poetry installation playbook to ensure they can be set up correctly. Currently, usage of Poetry requires that access to PyPi be maintained.
+## Configuration
 
-Also requires that compressed tarballs for the controllers be provided. Currently, custom `pyproject.toml` files for both should also be provided, to get around errors due to sources for packages being changed.
+See `defaults/main.yml`. `manage_grpc_controllers` holds each
+controller's release, bitstream, `devices`, `regions`, `cards` (equal-length lists),
+`port`, `bitstream_pkg_path` and `python_paths`. When overriding this dictionary,
+supply the complete selected entry, including `pyproject` and `lock` (empty uses
+the release files). Existing single-card `manage_grpc_card`,
+`manage_grpc_device_address`, `manage_grpc_device_region` and `manage_grpc_port`
+feed the default entries. `manage_grpc_host` defaults to loopback; configure an
+approved bind address explicitly for remote clients. No authentication/TLS is
+added by this role; do not expose the endpoint beyond its approved network.
 
-Additionally, the gRPC controllers that bitstream sources be provided.
+Verified release source layouts:
 
-## Variables
+- FSP 0.1.0: `raw/ska-mid-cbf-agilex-fsp-corr`.
+- VCC 1.2.0: `raw/ska-mid-cbf-agilex-vcc`.
 
-*All variables are prefixed with manage_grpc_*
+Each uses its own `drivers` and `drivers/fpga_driver_common/driver` on PYTHONPATH.
+PATH contains executables only. Existing approved archives must include these
+files; repository inspection does not prove the contents of a private archive.
 
-| **Variable Name**    | **Use**                                                                                                                                                      | **Default/Example** |
-|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------|
-| grpc_fsp_controller  | Defines the version of the FSP gRPC controller to install. Must have `S<VERSION>.tar.gz` present in the files directory.. | ska-mid-cbf-fhs-fsp-grpc-controller-0.0.3               |
-| grpc_vcc_controller  | Defines the version of the VCC gRPC controller to install. Must have `<VERSION>.tar.gz` present in the files directory.  | ska-mid-cbf-fhs-vcc-grpc-controller-0.0.3               |
-| grpc_vcc_bitstream   | Bitstream tarball to use for VCC. Must have `<VERSION>.tar.gz` present in the files directory.                                               | ska-mid-cbf-bitstreams-1.2.0               |
-| grpc_fsp_bitstream   | Bitstream tarball to use for VCC. Must have `<VERSION>.tar.gz` present in the files directory.                                          | ska-mid-cbf-fsp-corr-bitstreams-0.1.0               |
-| grpc_grpcurl_version | The version of the .deb image of gRPCurl provided in the files directory.                                                                                    | grpcurl_1.9.3_linux_amd64               |
-| grpc_port            | Port to use for the gRPC service.                                                                                                                            | 50051               |
-| grpc_emulation_mode  | Set to true if emulation mode should be used.                                                                                                                | true                |
-| card                 | ID of the FPGA card to connect to with gRPC.                                                                                                                 | t1413c1             |
-| device_address       | The PCIe bus device addresses to gain access to the registers.                                                                                               | 0000:81:00.1        |
-| device_region        | PCIe BAR connected to the memory mapped registers                                                                                                            | 0                   |
+## Dependencies and runtime
 
-## Tags/Usage
+By default the original release pyproject and lock are preserved, including
+FSP/VCC dependency differences and Poetry sources. `pip_index_url` selects the
+index for installing Poetry itself; it does **not** replace Poetry project
+sources. To use an alternate project index, supply **both** controller-side
+`pyproject` and `lock` paths in the selected entry. Prepare/review that matched
+pair ahead of deployment; preserve selected-release dependencies and scripts,
+change only required source metadata. `poetry check --lock` must pass. No lock
+is generated on the server. Never embed index credentials in these files.
 
-## grpc_install
+Installation uses `poetry install --only main` and a project-local .venv. A
+success fingerprint is written only after installation; changed release content,
+pyproject/lock, Python path or Poetry version, or a missing console entrypoint,
+causes installation. An unchanged rerun neither installs nor restarts. Unit or
+selected bitstream changes restart the service; stopped services are started.
 
-Extracts and deploys provided tarballs (via version number defined) for VCC/FSP to the target system(s), and installs them into the FHS virtual env via Poetry. Also installs the required bitstreams from the provided bitstream tarballs. Once these setup stages are complete, uploads and restarts the .service file for both controllers, running them as background processes. These can be verified by running `journalctl -u vcc-grpc.service` and `journalctl -u fsp-grpc.service` and verifying that the GRPC server starts on each.
+Root owns installation code and environments. Runtime uses `fhs-grpc` with the
+shared `bittware` group/GID 666, preserving supplementary groups. The service has
+`Restart=on-failure`. Supply appropriate VFIO device permissions for real use;
+root execution is not the workaround. Real controller dependency packaging should
+be fixed upstream to declare driver imports and provide reviewed deployable
+locks/index metadata; those repositories are outside this change.
 
-## grpcurl_install
-
-Installs [gRPCurl](https://github.com/fullstorydev/grpcurl) onto the target system, allowing local polling of the VCC/FSP endpoints. Requires the debian image be provided under `/files`.
-
-## grpc_configure
-
-Uploads and restarts the service files for he gRPC controllers. Use if updating the commands to execute the gRPC controllers.
-
-## grpcurl_poll
-
-Runs a basic polling command against gRPCurl to validate that the vcc target is working. Polls the base driver and prints the output from the request.
+Focused tests cover real Poetry installation of stand-in packages, fresh-user
+permissions, selection, reruns and controller switching with a service-manager
+stand-in. Real systemd startup/recovery, selected-release dependency installation,
+SDK/driver imports and FPGA behavior remain unvalidated. Emulation is enabled by
+default; it does not establish hardware correctness.

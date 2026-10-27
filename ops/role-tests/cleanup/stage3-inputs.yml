@@ -1,0 +1,11 @@
+---
+sys_mac_address: '02:00:00:00:00:31'
+ansible_host: 192.0.2.31
+network_dns: [192.0.2.53]
+network_ntp: [192.0.2.123]
+ansible_distribution: Ubuntu
+ansible_distribution_version: '24.04'
+k8s_control_plane_version: '1.31.4'
+containerd_pkg_version: '1.7.24-1'
+k8s_labels: {node-type: fhs-worker, region: test}
+k8s_taints: [{key: node-type, value: fhs-worker, effect: NoSchedule}]

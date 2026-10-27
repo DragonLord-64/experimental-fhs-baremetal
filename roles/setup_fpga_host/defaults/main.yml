@@ -2,9 +2,9 @@
 fpga_kernel_cmdline:
   - iommu=pt
   - amd_iommu=on
-  - hugepages=8
-  - hugepagesz=1G
-  - default_hugepagesz=1G
+  - "hugepagesz={{ fhs_hugepage_size }}"
+  - "hugepages={{ fhs_hugepage_count }}"
+  - "default_hugepagesz={{ fhs_hugepage_size }}"
 
 # VFIO udev rules.
 fpga_vfio_rules_file: 98-ska_vfio.rules
@@ -17,7 +17,7 @@ fpga_bmc_firmware_version: ""
 fpga_bmc_cards: [0, 1]
 # The dedicated unprivileged account that owns the Bittware tooling.
 fpga_bittware_user: "{{ansible_user}}"
-fpga_bittware_group: "bittware"
+fpga_bittware_group: "{{ fhs_bittware_group | default('bittware') }}"
 # Feature flags — destructive defaults to false. Flip in inventory or via -e.
 fpga_update_grub: false
 fpga_update_bittware_sdk: false
@@ -25,5 +25,10 @@ fpga_update_bmc: false
 users_setup_venvs: true
 
 # Reboot behaviour.
-fpga_reboot_on_change: true
+fpga_reboot_on_change: false
 fpga_reboot_timeout: 600
+
+# Shared with manage_dpdk_ark_doca; reservation applies only through explicit GRUB opt-in.
+fhs_hugepage_size: 1G
+fhs_hugepage_count: 8
+fhs_hugepage_mount: /mnt/huge_1gb

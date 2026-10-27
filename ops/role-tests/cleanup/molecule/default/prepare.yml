@@ -1,0 +1,56 @@
+---
+- name: Prepare isolated service fixture
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install container-only Python prerequisites
+      ansible.builtin.raw: apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 python3-venv python3-pip sudo
+      changed_when: true
+    - name: Copy fixture builder
+      ansible.builtin.copy:
+        src: ../../stage4_fixture.py
+        dest: /tmp/stage4_fixture.py
+        mode: '0644'
+    - name: Build tiny locked controller archives and service-manager stand-in
+      ansible.builtin.command: python3 /tmp/stage4_fixture.py
+      changed_when: true
+    - name: Install actual pinned Poetry for fixture lock generation
+      ansible.builtin.pip:
+        name: poetry==2.2.1
+        virtualenv: /opt/grpc/poetry
+        virtualenv_command: python3 -m venv
+    - name: Generate fixture-only empty dependency locks before deployment
+      ansible.builtin.shell: |
+        set -eu
+        cd /tmp/fixtures/{{ item }}
+        /opt/grpc/poetry/bin/poetry lock
+        tar czf /tmp/archives/{{ item }}.tar.gz -C /tmp/fixtures {{ item }}
+      loop: [fixture-fsp, fixture-vcc]
+      changed_when: true
+    - name: Fetch fixtures to the Ansible controller archive source
+      ansible.builtin.fetch:
+        src: /tmp/archives/{{ item }}.tar.gz
+        dest: /tmp/fhs-stage4-archives/
+        flat: true
+      loop: [fixture-fsp, fixture-vcc, fixture-bitstream, fixture-bist]
+    - name: Create controller-side empty BIST template directory
+      delegate_to: localhost
+      ansible.builtin.file:
+        path: /tmp/fhs-stage4-bist-repo/templates
+        state: directory
+        mode: '0755'
+    - name: Prepare approved alternate-source fixture pair outside deployment
+      ansible.builtin.shell: |
+        set -eu
+        cd /tmp/fixtures/fixture-vcc
+        printf '\n[[tool.poetry.source]]\nname = "fixture-mirror"\nurl = "https://pypi.org/simple"\npriority = "primary"\n' >> pyproject.toml
+        /opt/grpc/poetry/bin/poetry lock
+      changed_when: true
+    - name: Fetch approved alternate-source fixture pair
+      ansible.builtin.fetch:
+        src: /tmp/fixtures/fixture-vcc/{{ item.src }}
+        dest: /tmp/fhs-stage4-approved-{{ item.dest }}
+        flat: true
+      loop:
+        - {src: pyproject.toml, dest: pyproject.toml}
+        - {src: poetry.lock, dest: poetry.lock}

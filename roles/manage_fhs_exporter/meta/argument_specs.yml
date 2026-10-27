@@ -8,5 +8,5 @@ argument_specs:
       fhs_exporter_log_level:
         type: str
         default: DEBUG
-        choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
-      fhs_exporter_venv_path: {type: path, default: /opt/venvs/fhs}
+        choices: [DEBUG, INFO, WARNING, ERROR]
+      fhs_exporter_venv_path: {type: path, default: /opt/venvs/fhs-exporter}

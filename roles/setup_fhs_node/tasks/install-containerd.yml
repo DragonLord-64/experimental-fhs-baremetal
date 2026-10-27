@@ -27,7 +27,7 @@
 
 - name: Install containerd
   ansible.builtin.apt:
-    name: containerd.io
+    name: "containerd.io={{ containerd_pkg_version }}"
     state: present
     update_cache: true
 
@@ -42,18 +42,17 @@
   register: containerd_config
   changed_when: false
 
-- name: Write containerd configuration
+- name: Check generated containerd cgroup setting
+  ansible.builtin.assert:
+    that:
+      - "'SystemdCgroup = false' in containerd_config.stdout or 'SystemdCgroup = true' in containerd_config.stdout"
+    fail_msg: Review the pinned containerd default configuration before applying.
+
+- name: Write final containerd configuration
   ansible.builtin.copy:
-    content: "{{ containerd_config.stdout }}"
+    content: "{{ containerd_config.stdout | replace('SystemdCgroup = false', 'SystemdCgroup = true') }}\n"
     dest: /etc/containerd/config.toml
     mode: '0644'
-
-- name: Enable SystemdCgroup in containerd
-  ansible.builtin.lineinfile:
-    path: /etc/containerd/config.toml
-    regexp: '(\s+)SystemdCgroup = false'
-    line: '\1SystemdCgroup = true'
-    backrefs: true
   notify: Restart containerd
 
 - name: Ensure containerd is running

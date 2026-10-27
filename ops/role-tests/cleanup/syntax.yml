@@ -1,0 +1,11 @@
+---
+- name: Parse changed account and SDK roles without running them
+  hosts: all
+  gather_facts: false
+  roles:
+    - manage_users
+    - manage_venvs
+    - manage_bittware_sdk
+    - manage_gitlab-runner
+    - manage_dpdk_ark_doca
+    - setup_fpga_host

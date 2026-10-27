@@ -1,0 +1,20 @@
+---
+# Review note: check the exact run label before deletion; refuse an unrelated name collision.
+- name: Destroy only this run's container
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Check exact ownership label
+      ansible.builtin.command:
+        argv: [docker, inspect, --format, '{{ "{{" }} index .Config.Labels "org.fhs.molecule.run" {{ "}}" }}', "{{ lookup('env', 'FHS_MOLECULE_NAME') }}"]
+      register: owned
+      changed_when: false
+      failed_when: owned.rc != 0 and 'no such' not in (owned.stderr | lower)
+    - name: Refuse an unowned name collision
+      ansible.builtin.assert:
+        that: owned.rc != 0 or owned.stdout == lookup('env', 'FHS_MOLECULE_NAME')
+    - name: Remove owned container
+      ansible.builtin.command:
+        argv: [docker, rm, --force, "{{ lookup('env', 'FHS_MOLECULE_NAME') }}"]
+      when: owned.rc == 0
+      changed_when: true

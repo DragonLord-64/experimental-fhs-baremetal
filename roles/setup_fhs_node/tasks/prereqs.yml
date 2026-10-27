@@ -10,6 +10,8 @@
     state: present
     update_cache: true
 
+  when: k8s_enable_ceph | bool
+
 - name: Check if swap is enabled
   ansible.builtin.shell: |
     set -o pipefail
@@ -27,18 +29,14 @@
 - name: Remove swap from fstab
   ansible.builtin.lineinfile:
     path: /etc/fstab
-    regexp: ".*swap.*"
+    regexp: '^\s*[^#]\S*\s+\S+\s+swap\s'
     state: absent
 
 - name: Load required kernel modules
   community.general.modprobe:
     name: "{{ item }}"
     state: present
-  loop:
-    - overlay
-    - br_netfilter
-    - rbd
-    - ceph
+  loop: "{{ ['overlay', 'br_netfilter'] + (['rbd', 'ceph'] if k8s_enable_ceph | bool else []) }}"
 
 - name: Persist kernel modules
   ansible.builtin.copy:

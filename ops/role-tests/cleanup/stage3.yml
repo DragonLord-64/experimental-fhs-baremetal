@@ -1,0 +1,163 @@
+---
+- name: Offline stage 3 configuration checks only
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../../../roles/setup_fhs_network/defaults/main.yml
+    - ../../../roles/setup_fhs_node/defaults/main.yml
+    - stage3-inputs.yml
+  vars:
+    ansible_remote_tmp: /tmp/fhs-stage3-ansible-tmp
+    repo: "{{ playbook_dir }}/../../.."
+    ansible_managed: Ansible managed
+  tasks:
+    - name: Create private fixture directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: fhs-stage3-
+      register: scratch
+    - ansible.builtin.set_fact:
+        network_dir: "{{ scratch.path }}/network"
+        network_cloud_init_config_dir: "{{ scratch.path }}/cloud.cfg.d"
+        network_legacy_netplan_file: "{{ scratch.path }}/50-cloud-init.yaml"
+    - name: Check invalid network input fails actual preflight before writes
+      block:
+        - ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_network/tasks/validate.yml"
+          vars:
+            sys_mac_address: invalid
+        - ansible.builtin.fail:
+            msg: Invalid MAC reached role writes
+      rescue:
+        - ansible.builtin.assert:
+            that: ansible_failed_task.name == 'Validate primary network inputs before writes'
+    - name: Check missing address fails before writes
+      block:
+        - ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_network/tasks/validate.yml"
+          vars:
+            ansible_host: ''
+        - ansible.builtin.fail:
+            msg: Missing IP reached role writes
+      rescue:
+        - ansible.builtin.assert:
+            that: ansible_failed_task.name == 'Validate primary network inputs before writes'
+    - name: Check out-of-range address fails before writes
+      block:
+        - ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_network/tasks/validate.yml"
+          vars:
+            ansible_host: 192.0.2.999
+        - ansible.builtin.fail:
+            msg: Invalid IP reached role writes
+      rescue:
+        - ansible.builtin.assert:
+            that: ansible_failed_task.name == 'Validate primary network inputs before writes'
+    - name: Check invalid prefix fails before writes
+      block:
+        - ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_network/tasks/validate.yml"
+          vars:
+            network_interface_prefix: 33
+        - ansible.builtin.fail:
+            msg: Invalid prefix reached role writes
+      rescue:
+        - ansible.builtin.assert:
+            that: ansible_failed_task.name == 'Validate primary network inputs before writes'
+    - ansible.builtin.stat:
+        path: "{{ network_dir }}"
+      register: absent_network
+    - ansible.builtin.assert:
+        that: not absent_network.stat.exists
+    - ansible.builtin.file:
+        path: "{{ network_dir }}"
+        state: directory
+        mode: '0755'
+    - ansible.builtin.copy:
+        dest: "{{ item }}"
+        content: 'unrelated fixture'
+        mode: '0644'
+      loop:
+        - "{{ network_dir }}/10-unrelated.network"
+        - "{{ network_dir }}/99-ignore-others.network"
+        - "{{ network_legacy_netplan_file }}"
+    - name: Isolate actual file tasks for an unprivileged offline run
+      ansible.builtin.copy:
+        dest: "{{ scratch.path }}/configure.yml"
+        mode: '0600'
+        content: "{{ lookup('file', repo ~ '/roles/setup_fhs_network/tasks/configure.yml') | replace('    owner: root', '') | replace('    group: root', '') | replace('src: 00-fhs.network.j2', 'src: ' ~ repo ~ '/roles/setup_fhs_network/templates/00-fhs.network.j2') }}"
+    - name: Apply actual file-only network configuration
+      ansible.builtin.include_tasks: "{{ scratch.path }}/configure.yml"
+    - ansible.builtin.set_fact:
+        network_first: "{{ lookup('file', network_dir ~ '/00-fhs.network') }}"
+    - ansible.builtin.assert:
+        that:
+          - "'MACAddress=02:00:00:00:00:31' in network_first"
+          - "'Address=192.0.2.31/16' in network_first"
+          - "'DNS=192.0.2.53' in network_first"
+          - "'Name=*' not in network_first"
+          - lookup('file', network_dir ~ '/10-unrelated.network') == 'unrelated fixture'
+          - lookup('file', network_legacy_netplan_file) == 'unrelated fixture'
+          - (lookup('file', network_cloud_init_config_dir ~ '/99-fhs-disable-network-config.cfg') | from_yaml) == {'network':{'config':'disabled'}}
+          - "['10-unrelated.network', '00-fhs.network', '10-netplan-eth0.network'] | sort | first == '00-fhs.network'"
+    - ansible.builtin.stat:
+        path: "{{ network_dir }}/99-ignore-others.network"
+      register: retired
+    - ansible.builtin.assert:
+        that: not retired.stat.exists
+    - name: Rerun actual file-only configuration
+      ansible.builtin.include_tasks: "{{ scratch.path }}/configure.yml"
+    - name: Render configured NTP from actual template
+      ansible.builtin.assert:
+        that:
+          - "'NTP=192.0.2.123' in lookup('template', repo ~ '/roles/setup_fhs_network/templates/timesyncd.conf.j2')"
+          - "'FallbackNTP=' in lookup('template', repo ~ '/roles/setup_fhs_network/templates/timesyncd.conf.j2')"
+    - name: Validate node configuration without executing setup
+      ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_node/tasks/validate.yml"
+    - name: Reject mismatched cluster versions
+      block:
+        - ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_node/tasks/validate.yml"
+          vars:
+            k8s_control_plane_version: '1.37.1'
+        - ansible.builtin.fail:
+            msg: Mismatched cluster version accepted
+      rescue:
+        - ansible.builtin.assert:
+            that: ansible_failed_task.name == 'Require reviewed runtime and cluster versions before writes'
+    - ansible.builtin.set_fact:
+        registration: "{{ lookup('template', repo ~ '/roles/setup_fhs_node/templates/kubeadm-join.yaml.j2') | from_yaml }}"
+    - name: Check real kubeadm registration template
+      ansible.builtin.assert:
+        that:
+          - registration.apiVersion == 'kubeadm.k8s.io/v1beta4'
+          - registration.kind == 'JoinConfiguration'
+          - registration.nodeRegistration.taints == k8s_taints
+          - registration.nodeRegistration.kubeletExtraArgs == [{'name':'node-labels','value':'node-type=fhs-worker,region=test'}]
+          - registration.nodeRegistration.criSocket == 'unix:///run/containerd/containerd.sock'
+          - registration.discovery is not defined
+    - name: Check final containerd content with actual task arguments
+      ansible.builtin.include_tasks: stage3-containerd.yml
+      loop:
+        - '[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]'
+        - "[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.runc.options]"
+      loop_control:
+        loop_var: runtime_table
+    - name: Test legacy Netplan retirement only with explicit opt-in
+      ansible.builtin.include_tasks: "{{ scratch.path }}/configure.yml"
+      vars:
+        network_remove_legacy_netplan: true
+    - ansible.builtin.stat:
+        path: "{{ network_legacy_netplan_file }}"
+      register: retired_netplan
+    - ansible.builtin.assert:
+        that: not retired_netplan.stat.exists
+    - ansible.builtin.file:
+        path: "{{ scratch.path }}"
+        state: absent
+  handlers:
+    - name: Fixture network change (no host service operation)
+      listen: fhs network changed
+      ansible.builtin.debug:
+        msg: File-only fixture; no host network operation
+    - name: Restart systemd-networkd
+      ansible.builtin.debug:
+        msg: Role handler intercepted; no host service operation
+    - name: Restart containerd
+      ansible.builtin.debug:
+        msg: Role handler intercepted; no host service operation

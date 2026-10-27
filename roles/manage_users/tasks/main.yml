@@ -1,11 +1,15 @@
 ---
+- name: Require an explicitly approved controller key directory
+  ansible.builtin.assert:
+    that: fhs_keys_dir | length > 0
+    fail_msg: Set fhs_keys_dir to the approved key directory for this inventory.
+
 - name: Find all user public key files on controller
   ansible.builtin.find:
     paths: "{{ fhs_keys_dir }}"
     patterns: "*.pub"
   register: found_key_files
   delegate_to: localhost
-  tags: [users, config]
 
 - name: Abort if no public key files are found
   ansible.builtin.fail:
@@ -14,22 +18,26 @@
       • Ensure the directory exists on your Ansible controller.
       • Populate it with files named after your users (e.g., aschell.pub).
   when: found_key_files.matched == 0
-  tags: [users, config]
 
 - name: Install sudo
   ansible.builtin.package:
     name: sudo
     state: present
   become: true
-  tags: [users, install]
 
 - name: Ensure managed groups exist
   ansible.builtin.group:
     name: "{{ item }}"
     state: present
   become: true
-  loop: "{{ fhs_user_groups + ['bittware'] }}"
-  tags: [users, config]
+  loop: "{{ fhs_user_groups | difference([fhs_bittware_group]) }}"
+
+- name: Ensure the shared BittWare group has its configured GID
+  ansible.builtin.group:
+    name: "{{ fhs_bittware_group }}"
+    gid: "{{ fhs_bittware_group_gid }}"
+    state: present
+  become: true
 
 - name: Configure sudo group privilege
   ansible.builtin.copy:
@@ -40,19 +48,13 @@
     mode: "0440"
     validate: /usr/sbin/visudo -cf %s
   become: true
-  tags: [users, config]
-
-- name: Flush SSH connections to apply new sudo privileges immediately
-  ansible.builtin.meta: reset_connection
-  tags: [users, config]
 
 - name: Add the current Ansible user to the bittware group
   ansible.builtin.user:
     name: "{{ ansible_user }}"
-    groups: bittware
+    groups: "{{ fhs_bittware_group }}"
     append: true
   become: true
-  tags: [users, config]
 
 - name: Create user accounts
   ansible.builtin.user:
@@ -67,7 +69,6 @@
   loop: "{{ found_key_files.files }}"
   loop_control:
     label: "{{ item.path | basename }}"
-  tags: [users, config]
 
 - name: Install authorized SSH keys
   ansible.posix.authorized_key:
@@ -78,4 +79,6 @@
   loop: "{{ found_key_files.files }}"
   loop_control:
     label: "{{ item.path | basename }}"
-  tags: [users, config]
+
+- name: Refresh SSH membership after all account changes
+  ansible.builtin.meta: reset_connection

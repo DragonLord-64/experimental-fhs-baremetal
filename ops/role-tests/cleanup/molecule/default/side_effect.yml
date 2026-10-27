@@ -1,0 +1,100 @@
+---
+- name: Verify tag preflight and selected-controller transition
+  hosts: all
+  gather_facts: false
+  vars_files: [../../stage4-vars.yml]
+  tasks:
+    - name: No controller tag leaves target untouched
+      ansible.builtin.include_role:
+        name: manage_fhs_grpc
+      vars:
+        tags: []
+        manage_grpc_root: /opt/should-not-exist
+    - name: Conflicting tags fail before writes
+      block:
+        - ansible.builtin.include_role:
+            name: manage_fhs_grpc
+          vars:
+            tags: [{slug: grpc-fsp}, {slug: grpc-vcc}]
+            manage_grpc_root: /opt/should-not-exist
+        - ansible.builtin.fail:
+            msg: Conflicting controller tags unexpectedly succeeded
+      rescue:
+        - ansible.builtin.assert:
+            that: ansible_failed_task.name == 'Reject conflicting controller tags before writes'
+    - name: Check that invalid selection made no directories
+      ansible.builtin.stat:
+        path: /opt/should-not-exist
+      register: untouched
+    - ansible.builtin.assert:
+        that: not untouched.stat.exists
+    - name: Switch to dictionary-shaped VCC tag
+      ansible.builtin.include_role:
+        name: manage_fhs_grpc
+      vars:
+        tags: [{slug: grpc-vcc}]
+    - name: Verify previous service retired and new fresh-session process responds
+      ansible.builtin.shell: |
+        set -eu
+        test ! -f /etc/systemd/system/fsp-grpc.service
+        test -f /etc/systemd/system/vcc-grpc.service
+        python3 - <<'PY'
+        import json, socket
+        old=json.load(open('/tmp/service-fsp-grpc.json'))
+        new=json.load(open('/tmp/service-vcc-grpc.json'))
+        assert old['pid'] is None and not old['enabled']
+        assert new['pid'] and new['enabled'] and new['starts'] == 1
+        s=socket.create_connection(('127.0.0.1',50051)); assert s.recv(32)==b'vcc'; s.close()
+        PY
+      changed_when: false
+    - name: Rerun selected VCC with unchanged inputs
+      ansible.builtin.include_role:
+        name: manage_fhs_grpc
+      vars:
+        tags: [grpc-vcc]
+    - name: Confirm no needless service restart
+      ansible.builtin.command: python3 -c 'import json; assert json.load(open("/tmp/service-vcc-grpc.json"))["starts"] == 1'
+      changed_when: false
+
+- name: Verify BIST installation/configuration without application execution
+  tags: [bist-fixture]
+  hosts: all
+  gather_facts: false
+  vars:
+    archive_path: /tmp/fhs-stage4-archives/fixture-bist.tar.gz
+    archive_name: fixture-bist.tar.gz
+    app_dir: /opt/bist-fixture
+    venv_dir: /opt/bist-fixture/venv
+    bist_user: fhs-grpc
+    bist_group: bittware
+    bist_service: fhs-bist
+    repo_dir: /tmp/fhs-stage4-bist-repo
+    log_dir: /var/log/bist-fixture
+    traces_dir: /var/log/bist-fixture/traces
+    results_dir: /var/log/bist-fixture/results
+    test_inputs_dir: /opt/bist-fixture/inputs
+  tasks:
+    - ansible.builtin.import_tasks: ../../../../../roles/manage_fhs_bist/tasks/install-bist.yml
+    - name: Configure BIST from actual role task file
+      ansible.builtin.include_role:
+        name: manage_fhs_bist
+        tasks_from: configure-bist.yml
+      vars:
+        app_dir: /opt/bist-fixture
+        venv_dir: /opt/bist-fixture/venv
+        bist_user: fhs-grpc
+        bist_group: bittware
+        bist_service: fhs-bist
+        repo_dir: /tmp/fhs-stage4-bist-repo
+        log_dir: /var/log/bist-fixture
+        traces_dir: /var/log/bist-fixture/traces
+        results_dir: /var/log/bist-fixture/results
+        test_inputs_dir: /opt/bist-fixture/inputs
+    - name: Assert BIST configured without starting hardware test process or demanding output
+      ansible.builtin.shell: |
+        set -eu
+        test -f /etc/systemd/system/fhs-bist.service
+        test -x /opt/bist-fixture/venv/bin/python
+        test ! -f /tmp/service-fhs-bist.json
+        test -z "$(ls -A /var/log/bist-fixture/traces)"
+      changed_when: false

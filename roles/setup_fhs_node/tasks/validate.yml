@@ -1,0 +1,21 @@
+---
+- name: Require reviewed runtime and cluster versions before writes
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == 'Ubuntu'
+      - ansible_distribution_version == '24.04'
+      - k8s_pkg_version is version('1.31.0', '>=')
+      - k8s_repo_version == 'v' ~ (k8s_pkg_version.split('.')[:2] | join('.'))
+      - k8s_control_plane_version is match('^[0-9]+[.][0-9]+[.][0-9]+$')
+      - k8s_pkg_version.split('.')[:2] == k8s_control_plane_version.split('.')[:2]
+      - containerd_pkg_version is match('^(1[.]7|2[.][0-9]+)[.][0-9]+[-+~.0-9a-zA-Z]*$')
+      - k8s_pkg_version is version('1.38.0', '<') or containerd_pkg_version is match('^2[.]')
+      - k8s_labels is mapping
+    fail_msg: Review Ubuntu 24.04, exact containerd 1.7/2.x package and matching Kubernetes/control-plane minor versions before applying.
+
+- name: Validate registration taints
+  ansible.builtin.assert:
+    that:
+      - item.key | length > 0
+      - item.effect in ['NoSchedule', 'PreferNoSchedule', 'NoExecute']
+  loop: "{{ k8s_taints }}"

@@ -1,0 +1,45 @@
+---
+- name: Ensure network directory exists
+  ansible.builtin.file:
+    path: "{{ network_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Retire old role-owned catch-all
+  ansible.builtin.file:
+    path: "{{ network_dir }}/99-ignore-others.network"
+    state: absent
+  notify: fhs network changed
+
+- name: Configure primary NIC
+  ansible.builtin.template:
+    src: 00-fhs.network.j2
+    dest: "{{ network_dir }}/00-fhs.network"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: fhs network changed
+
+- name: Disable only cloud-init networking
+  when: network_disable_cloud_init | bool
+  block:
+    - name: Ensure cloud-init config directory exists
+      ansible.builtin.file:
+        path: "{{ network_cloud_init_config_dir }}"
+        state: directory
+        mode: "0755"
+    - name: Disable cloud-init network generation
+      ansible.builtin.copy:
+        dest: "{{ network_cloud_init_config_dir }}/99-fhs-disable-network-config.cfg"
+        content: "network: {config: disabled}\n"
+        mode: "0644"
+
+- name: Remove legacy cloud-init netplan file
+  ansible.builtin.file:
+    path: "{{ network_legacy_netplan_file }}"
+    state: absent
+  when: network_remove_legacy_netplan | bool
+  notify: fhs network changed
+

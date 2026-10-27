@@ -33,7 +33,7 @@ Append completed events here; keep proposed work in the plan.
 
 ## 2026-10-22
 
-- Corrected two review findings against [the authenticated Elasticsearch readiness probe](../platform/charts/elasticsearch-kibana/templates/elasticsearch.yaml) and [active Poetry tasks](../roles/manage_poetry/tasks/main.yml): health checks use the container's protected password; Poetry documentation describes installation only, its existing virtual environment and the site wrapper tag. Strict Sphinx 7.4.7 `-E -a -b html -n -W --keep-going` passed using the external documentation tools after allowing the public Python inventory fetch; sandbox DNS had blocked that fetch. Poetry wrapper syntax/task selection and health-command shell syntax passed without contacting targets. Loopback Playwright checks rendered both Mermaid diagrams and representative built pages without page errors; private captures remain under `/tmp/fhs-docs-*`. No runtime service, provisioning or wake-script checks were performed. Independent review remains the controller's next stage.
+- Corrected two review findings against [the authenticated Elasticsearch readiness probe](../platform/charts/elasticsearch-kibana/templates/elasticsearch.yaml) and [then-active Poetry tasks](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/a5395d00715ee1a50454fc71e54820901580d7e7/roles/manage_poetry/tasks/main.yml): health checks use the container's protected password; Poetry documentation describes installation only, its existing virtual environment and the site wrapper tag. Strict Sphinx 7.4.7 `-E -a -b html -n -W --keep-going` passed using the external documentation tools after allowing the public Python inventory fetch; sandbox DNS had blocked that fetch. Poetry wrapper syntax/task selection and health-command shell syntax passed without contacting targets. Loopback Playwright checks rendered both Mermaid diagrams and representative built pages without page errors; private captures remain under `/tmp/fhs-docs-*`. No runtime service, provisioning or wake-script checks were performed. Independent review remains the controller's next stage.
 
 - Established the actual `manage_users` container test on dragonvm: fresh state, unchanged rerun, sudo policy change, observed container drift and repair all passed; owned container cleanup passed. See [commands, evidence and limits](../ops/role-tests/manage_users/molecule/default/VALIDATION.md). Bifrost guest provisioning and physical hardware remain unverified.
 
@@ -377,3 +377,107 @@ The umbrella applications were scaled down before testing and left unchanged;
 no full-stack upgrade or native importer rerun is claimed. Importers unchanged.
 Lab resources remain available for inspection; logs are ephemeral. Only one
 allowed CONNECT host was exercised; the exact allowlist is in the ConfigMap.
+
+### 2026-10-26 — Portable NetBox JSON transfer
+
+Added the [inventory CLI](../playbooks/netbox/README.md#portable-inventory-json)
+with schema-filtered export, portable relationships, create/update import,
+read-only preview, protected files and explicit partial reports. Inventory plugin
+objects remain unsupported. Three focused local behavior tests and whole-file/
+inline Vault checks passed. A disposable native fixture on existing `fhs-test`
+passed nine assertions over 20 objects, including destination IDs, management IP,
+dual PSU/network cables, nested JSON and unchanged rerun. Actual CLI export
+returned partial status with reported omissions; no all-field migration claim.
+See [exact results and limits](../ops/platform/inventory-alignment/TRANSFER-VALIDATION.md).
+Controller owns source checks and publication; neither was run by this worker.
+
+- 2026-10-26: Nexus management import now observes an explicit interface/address
+  prefix, reconciles interface ownership and primary IPv4/IPv6, and preserves
+  addressing on missing/ambiguous/conflicting evidence. Focused contracts and
+  native retained-chart preview/apply/repeat passed; physical NX-OS remains
+  unverified. See [validation](../ops/platform/inventory-alignment/NEXUS-MANAGEMENT-VALIDATION.md).
+
+### 2026-10-26 — Role cleanup, stages 1–2 (overall task incomplete)
+
+Fetched official development2 at `7704587034e7e41f1b1266c109b0e903279617a9`.
+Unified BittWare identity, preserved supplementary groups, repaired venv ownership/
+permissions, replaced runner's Python-specific sentinel and made development sudo
+an explicit named-account inventory opt-in. One isolated Molecule fixture passed
+unchanged rerun, permission checks and observed drift repair with an inert SDK.
+DPDK now records success only after a full installation, skips unchanged inputs
+and rebuilds changed/failed inputs; a small real C build checked these paths.
+Fixed GRUB's hardcoded hugepage count, removed automatic reboot execution and
+made firmware require its explicit tag. No hardware, firmware, GRUB application
+or deployment was tested. HTML docs built with recorded warnings. Stages 3–6
+remain unfinished; no whole-task readiness or production claim. See
+[commands, results and resume boundary](../ops/role-tests/cleanup/EVIDENCE.md).
+
+### 2026-10-26 — Role cleanup, stage 3 (overall task incomplete)
+
+Node preparation now requires reviewed versions, renders registration labels/
+taints without joining, keeps Ceph optional and avoids containerd rewrite/restart
+on unchanged content. Network configuration preserves unrelated files, checks
+inputs before writes, disables only cloud-init networking and owns resolved/
+timesyncd. CIS policy targets explicit Linux membership beyond Kubernetes nodes;
+enforcement remains intentional, with reboot/firewall/time-service and audit
+halt-action guards. Deferred patch/password-quality/AIDE policy awaits user review.
+Targeted syntax, offline file/template checks and effective-policy fixtures passed;
+HTML built with recorded existing warnings. No isolated VM was available, so no
+network/kernel/CIS application or hardware validation is claimed. Stages 4–6 and
+supervisor runtime acceptance remain. See [evidence and transfer prerequisites](../ops/role-tests/cleanup/EVIDENCE.md).
+
+### 2026-10-26 — Role cleanup stage 4 source and stand-in checks
+
+- gRPC now owns pinned Poetry setup, selects one NetBox controller tag, preserves
+  release locks/dependency differences and uses unprivileged, change-driven units.
+  Retired standalone Poetry role/callers; corrected actual CLI and FSP paths.
+- BIST remains installation/configuration only: supplied pinned requirements,
+  no automatic hardware-test service start or trace-file requirement.
+- Syntax, real Poetry stand-in installation, unchanged rerun, permissions,
+  controller switch, approved source/lock override and Sphinx HTML passed with
+  recorded warnings. Real systemd/controller dependencies/SDK/hardware remain
+  limits; stages 5–6 and supervisor runtime acceptance remain outstanding.
+- [Focused evidence](../ops/role-tests/cleanup/EVIDENCE.md),
+  [selected-release packaging](../ops/role-tests/cleanup/PACKAGING.md).
+
+### 2026-10-26 — Role cleanup stage 5 monitoring source and package checks
+
+- Exporter installation now skips unchanged archives, checks console imports,
+  rejects writable privileged code and uses a dedicated root-owned venv. Added
+  observed missing startup dependencies; local Prometheus integration is optional.
+- Monitoring archive changes notify the matching service; configuration uses
+  real promtool validation, private auth hashes and root-owned configuration.
+  Corrected downloader URLs/checksums to the existing role release pins.
+- Preserved Filebeat's controller-only setup, separate credentials and package
+  extraction; real device package/config/process checks and existing setup fixture
+  passed. Binary version changes, same-path binary repair, unchanged reruns and
+  exporter permission/incomplete-install checks passed in a bounded container.
+- Sphinx HTML built with recorded existing warnings. Real systemd, live
+  Elasticsearch, vendor SDK/MFT and hardware remain limits. Stage 6 and supervisor
+  real fhs-test chart/runtime acceptance remain outstanding.
+- [Focused commands, results and transfer prerequisites](../ops/role-tests/cleanup/EVIDENCE.md).
+
+## 2026-10-26 — role cleanup source stage 6
+
+Added pinned prebuilt devpi (persistent `/var/devpi`, 3141) and restricted Squid
+Git proxy (3128) to the platform chart; preserved existing APT cache. Consolidated
+role selection at site callers, retained explicit firmware gates, restored rsync
+package/service tasks at the end of site and documented transfer prerequisites.
+Helm render/lint, focused offline syntax/tag gates, real disposable pip/Git/APT
+fetches and Sphinx HTML passed; five known docs warnings remain. Devpi startup
+needed 1Gi after an observed 512Mi OOM. No deployment or hardware/systemd claim.
+All six source stages ready for review; supervisor real `fhs-test` chart/Service/
+PVC acceptance remains. [Evidence and transfer commands](../ops/role-tests/cleanup/STAGE6-HANDOFF.md).
+
+
+## 2026-10-26 — Role cleanup and proxy acceptance
+
+Completed six bounded cleanup stages against official development2 `7704587`,
+preserving consolidated docs and the Filebeat controller setup. Focused role
+installation/rerun/permission/build/selection checks and Sphinx HTML passed with
+recorded limits/warnings. The existing delivered-chart lab now includes APT,
+persistent devpi and restricted Squid; actual Service package/Git fetches and
+devpi cache persistence passed. Source and transfer summary:
+[cleanup handoff](../ops/role-tests/cleanup/STAGE6-HANDOFF.md); observed checks and
+remaining hardware/system limitations: [evidence](../ops/role-tests/cleanup/EVIDENCE.md).
+No official repository changes or production deployment.

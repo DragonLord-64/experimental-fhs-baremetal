@@ -1,0 +1,191 @@
+---
+- name: Validate selected deployment inputs before writes
+  ansible.builtin.assert:
+    that:
+      - _grpc_config.bitstream_pkg_path | length > 0
+      - _grpc_config.bitstream_pkg_path.startswith(manage_grpc_bitstream_root + '/')
+      - _grpc_config.devices | length > 0
+      - _grpc_config.devices | length == _grpc_config.regions | length
+      - _grpc_config.devices | length == _grpc_config.cards | length
+      - (_grpc_config.pyproject | length > 0) == (_grpc_config.lock | length > 0)
+      - manage_grpc_user != 'root'
+    fail_msg: Supply verified bitstream paths and a matching approved pyproject/lock pair for any source override.
+
+- name: Ensure shared hardware group
+  ansible.builtin.group:
+    name: "{{ manage_grpc_group }}"
+    gid: "{{ manage_grpc_group_gid }}"
+
+- name: Create unprivileged runtime account
+  ansible.builtin.user:
+    name: "{{ manage_grpc_user }}"
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+    groups: "{{ manage_grpc_group }}"
+    append: true
+
+- name: Create root-owned installation directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ manage_grpc_root }}"
+    - "{{ manage_grpc_root }}/{{ _grpc_kind }}"
+    - "{{ manage_grpc_bitstream_root }}"
+
+- name: Install private Poetry tool environment
+  ansible.builtin.pip:
+    name: "poetry=={{ manage_grpc_poetry_version }}"
+    virtualenv: "{{ manage_grpc_poetry_venv }}"
+    virtualenv_command: "{{ manage_grpc_python }} -m venv"
+    extra_args: "{{ ('--index-url ' + pip_index_url) if pip_index_url is defined else omit }}"
+
+  no_log: true
+
+- name: Extract selected controller release
+  ansible.builtin.unarchive:
+    src: "{{ manage_grpc_archive_dir }}/{{ _grpc_config.controller }}.tar.gz"
+    dest: "{{ manage_grpc_root }}/{{ _grpc_kind }}"
+    owner: root
+    group: root
+    mode: u=rwX,go=rX
+    extra_opts: "{{ ['--exclude=pyproject.toml', '--exclude=poetry.lock'] if _grpc_config.pyproject | length > 0 else omit }}"
+  register: _grpc_source
+
+- name: Extract selected bitstream release
+  ansible.builtin.unarchive:
+    src: "{{ manage_grpc_archive_dir }}/{{ _grpc_config.bitstream }}.tar.gz"
+    dest: "{{ manage_grpc_bitstream_root }}"
+    owner: root
+    group: root
+    mode: u=rwX,go=rX
+  register: _grpc_bitstream
+
+- name: Apply approved dependency source and lock overrides together
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ _grpc_project }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - {src: "{{ _grpc_config.pyproject }}", dest: pyproject.toml}
+    - {src: "{{ _grpc_config.lock }}", dest: poetry.lock}
+  when: _grpc_config.pyproject | length > 0
+
+- name: Validate locked project without resolving dependencies
+  ansible.builtin.command:
+    argv: ["{{ manage_grpc_poetry_venv }}/bin/poetry", check, --lock]
+    chdir: "{{ _grpc_project }}"
+  changed_when: false
+
+- name: Fingerprint installation inputs
+  ansible.builtin.stat:
+    path: "{{ _grpc_project }}/{{ item }}"
+    checksum_algorithm: sha256
+  loop: [pyproject.toml, poetry.lock]
+  register: _grpc_inputs
+
+- name: Calculate desired installation state
+  ansible.builtin.set_fact:
+    _grpc_desired: "{{ (_grpc_inputs.results | map(attribute='stat.checksum') | list + [manage_grpc_poetry_version, manage_grpc_python, '1']) | join(':') }}"
+
+- name: Read previous successful installation
+  ansible.builtin.slurp:
+    src: "{{ _grpc_project }}/.fhs-installed"
+  register: _grpc_previous
+  failed_when: false
+  changed_when: false
+
+- name: Check installed console entrypoint
+  ansible.builtin.stat:
+    path: "{{ _grpc_project }}/.venv/bin/ska-mid-cbf-fhs-{{ _grpc_kind }}-grpc-controller"
+  register: _grpc_entrypoint
+
+- name: Install when source or locked inputs changed or completion is missing
+  when: not (_grpc_entrypoint.stat.exists) or _grpc_source.changed or (_grpc_previous.content | default('') | b64decode) != _grpc_desired
+  block:
+    - name: Clear success before attempting installation
+      ansible.builtin.file:
+        path: "{{ _grpc_project }}/.fhs-installed"
+        state: absent
+    - name: Install selected locked runtime dependencies and project
+      ansible.builtin.command:
+        argv: ["{{ manage_grpc_poetry_venv }}/bin/poetry", install, --only, main, --no-interaction]
+        chdir: "{{ _grpc_project }}"
+      environment:
+        POETRY_VIRTUALENVS_IN_PROJECT: 'true'
+      changed_when: true
+      notify: Restart selected gRPC
+    - name: Record complete installation
+      ansible.builtin.copy:
+        content: "{{ _grpc_desired }}"
+        dest: "{{ _grpc_project }}/.fhs-installed"
+        owner: root
+        group: root
+        mode: '0644'
+
+- name: Check configured runtime paths
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ [_grpc_config.bitstream_pkg_path] + _grpc_config.python_paths }}"
+  register: _grpc_paths
+
+- name: Require actual bitstream and driver directories
+  ansible.builtin.assert:
+    that: item.stat.isdir | default(false)
+  loop: "{{ _grpc_paths.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Remember selected service for handler
+  ansible.builtin.set_fact:
+    _grpc_service: "{{ _grpc_kind }}-grpc"
+
+- name: Inspect previously owned controller unit
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/{{ _grpc_other }}-grpc.service"
+  register: _grpc_old_unit
+
+- name: Stop previous controller on tag transition
+  ansible.builtin.systemd_service:
+    name: "{{ _grpc_other }}-grpc"
+    state: stopped
+    enabled: false
+  when: _grpc_old_unit.stat.exists
+
+- name: Retire previous role-owned controller unit
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ _grpc_other }}-grpc.service"
+    state: absent
+  when: _grpc_old_unit.stat.exists
+  notify: Restart selected gRPC
+
+- name: Configure selected service
+  ansible.builtin.template:
+    src: grpc.service.j2
+    dest: "/etc/systemd/system/{{ _grpc_kind }}-grpc.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart selected gRPC
+
+- name: Restart after selected bitstream changes
+  ansible.builtin.debug:
+    msg: Selected bitstream changed.
+  when: _grpc_bitstream.changed
+  changed_when: _grpc_bitstream.changed
+  notify: Restart selected gRPC
+
+- name: Apply service changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Keep selected controller enabled and running
+  ansible.builtin.systemd_service:
+    name: "{{ _grpc_kind }}-grpc"
+    enabled: true
+    state: started

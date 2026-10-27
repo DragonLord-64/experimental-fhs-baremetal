@@ -1,20 +1,97 @@
 ---
-- name: Install system dependencies and prep environment
-  ansible.builtin.include_tasks: prerequisites.yml
-  tags: [install, prereqs]
+- name: Require at least one installation output
+  ansible.builtin.assert:
+    that: dpdk_install_outputs | length > 0
 
-- name: Setup NVIDIA DOCA framework from local artifact
-  ansible.builtin.include_tasks: doca.yml
-  tags: [install, doca]
+- name: Fingerprint local installation artifacts
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    checksum_algorithm: sha256
+  loop:
+    - "{{ doca_local_path }}/{{ doca_deb_filename }}"
+    - "{{ arkville_local_path }}/arkville_{{ arkville_release }}.tar.gz"
+    - "{{ dpdk_local_path }}/{{ dpdk_tarball_filename }}"
+  delegate_to: localhost
+  become: false
+  register: dpdk_artifacts
 
-- name: Extract Atomic Rules Arkville driver trees
-  ansible.builtin.include_tasks: arkville.yml
-  tags: [install, arkville]
+- name: Require all installation artifacts before changing the target
+  ansible.builtin.assert:
+    that: item.stat.checksum is defined
+  loop: "{{ dpdk_artifacts.results }}"
+  loop_control:
+    label: "{{ item.item }}"
 
-- name: Build and install DPDK framework with Arkville extensions
-  ansible.builtin.include_tasks: dpdk.yml
-  tags: [install, dpdk]
+- name: Read target kernel version
+  ansible.builtin.command: uname -r
+  register: dpdk_kernel
+  changed_when: false
 
-- name: Compile final Arkville high-performance application suite
-  ansible.builtin.include_tasks: arkville_apps.yml
-  tags: [install, arkville_apps]
+- name: Calculate installation identity
+  ansible.builtin.set_fact:
+    dpdk_install_identity: "{{ {'artifacts': dpdk_artifacts.results | map(attribute='stat.checksum') | list, 'arkville': arkville_release, 'kernel': dpdk_kernel.stdout, 'revision': dpdk_build_revision, 'hugepages': [fhs_hugepage_size, fhs_hugepage_count, fhs_hugepage_mount], 'packages': dpdk_apt_packages} | to_json | hash('sha256') }}"
+
+- name: Check successful installation state
+  ansible.builtin.stat:
+    path: "{{ dpdk_success_file }}"
+  register: dpdk_success_stat
+  become: true
+
+- name: Read successful installation identity
+  ansible.builtin.slurp:
+    src: "{{ dpdk_success_file }}"
+  when: dpdk_success_stat.stat.exists
+  register: dpdk_success_state
+  become: true
+
+- name: Check installed outputs
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ dpdk_install_outputs }}"
+  register: dpdk_outputs
+
+- name: Decide whether a full installation is needed
+  ansible.builtin.set_fact:
+    dpdk_install_required: "{{ dpdk_force_rebuild | bool or (dpdk_success_state.content | default('') | b64decode | trim) != dpdk_install_identity or (dpdk_outputs.results | rejectattr('stat.exists') | list | length > 0) }}"
+
+- name: Complete the entire installation on changed or incomplete inputs
+  when: dpdk_install_required | bool
+  become: true
+  block:
+    - name: Invalidate success before any installation work
+      ansible.builtin.file:
+        path: "{{ dpdk_success_file }}"
+        state: absent
+    - name: Prepare dependencies and hugepages
+      ansible.builtin.import_tasks: prerequisites.yml
+    - name: Install DOCA
+      ansible.builtin.import_tasks: doca.yml
+    - name: Extract Arkville
+      ansible.builtin.import_tasks: arkville.yml
+    - name: Build DPDK from a clean tree
+      ansible.builtin.import_tasks: dpdk.yml
+    - name: Install Arkville applications
+      ansible.builtin.import_tasks: arkville_apps.yml
+    - name: Check outputs after the full procedure
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: "{{ dpdk_install_outputs }}"
+      register: dpdk_completed_outputs
+    - name: Require completed installation outputs
+      ansible.builtin.assert:
+        that: item.stat.exists
+      loop: "{{ dpdk_completed_outputs.results }}"
+    - name: Create root-owned installation state directory
+      ansible.builtin.file:
+        path: "{{ dpdk_success_file | dirname }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    - name: Record success only after every step completes
+      ansible.builtin.copy:
+        dest: "{{ dpdk_success_file }}"
+        content: "{{ dpdk_install_identity }}\n"
+        owner: root
+        group: root
+        mode: '0644'

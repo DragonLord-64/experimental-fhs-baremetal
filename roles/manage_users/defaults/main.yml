@@ -1,13 +1,25 @@
 ---
 # Users to create. Each entry: {name, password (SHA-512 hash), ssh_keys: [...]}
 fhs_users: []
-fhs_keys_dir: "/provision/files.d/dev-ssh-keys.d"
+fhs_keys_dir: ""
 # Groups every managed user is added to.
 fhs_user_groups:
   - sudo
-  - bittware
+  - "{{ fhs_bittware_group }}"
 
-# Sudoers file to drop (controls passwordless vs. password sudo for the
-# `sudo` group). Mode 0440 enforced by visudo.
+# Sudoers policy drop-in, mode 0440 and checked with visudo.
 fhs_sudoers_file: /etc/sudoers.d/99-fhs-passwordless
-fhs_sudoers_content: "%sudo ALL=(ALL) NOPASSWD:ALL\n"
+# Only controller-approved key-file accounts receive development passwordless sudo.
+# Production inventories leave this false; existing group memberships are preserved.
+fhs_development_passwordless_sudo: false
+fhs_sudoers_content: |
+  # Managed FHS development policy
+  {% if fhs_development_passwordless_sudo | bool %}
+  {% for key in found_key_files.files | sort(attribute='path') %}
+  {{ key.path | basename | regex_replace('[.]pub$', '') }} ALL=(ALL) NOPASSWD:ALL
+  {% endfor %}
+  {% endif %}
+
+# Shared identity used by the SDK and runner roles as well.
+fhs_bittware_group: bittware
+fhs_bittware_group_gid: 666

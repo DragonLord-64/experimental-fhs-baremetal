@@ -17,6 +17,8 @@
         usermod --shell /bin/sh moleculeuser
         truncate -s 0 /home/moleculeuser/.ssh/authorized_keys
         chmod 0600 /etc/sudoers.d/99-fhs-passwordless
+        find /opt/venvs/permission-test/lib -name site-packages -type d -exec chmod 0700 {} \;
+        find /opt/venvs/permission-test/lib -name site-packages -type d -exec chgrp root {} \;
       changed_when: true
     # Review note: proving drift first prevents an unchanged fixture from masquerading as recovery.
     - name: Prove deliberate drift exists before repair

@@ -23,6 +23,8 @@ group_by:
   - device_roles
 # Add this block at the bottom of your NetBox inventory file
 groups:
+  # Known server role/tag; other Linux roles opt in through config context.
+  ubuntu24_cis_production: "'fpga-host-server' in (tags | map(attribute='slug') | list) or device_role.slug == 'fpga-host-server' or (config_context | default({})).get('fhs_linux_server', false)"
   teraboxes: "'fpga-host-server' in (tags | map(attribute='slug') | list) or device_role.slug == 'fpga-host-server'"
   nexus: "'nexus-switch' in (tags | map(attribute='slug') | list) or device_role.slug == 'nexus-switch'"
 

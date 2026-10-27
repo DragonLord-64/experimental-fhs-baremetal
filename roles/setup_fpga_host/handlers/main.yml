@@ -11,7 +11,6 @@
     cmd: udevadm control --reload-rules
   register: udev_reload
   changed_when: udev_reload.rc == 0
-  failed_when: false
 
 - name: Mark reboot required
   listen: fpga reboot required

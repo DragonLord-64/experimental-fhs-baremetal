@@ -1,10 +1,19 @@
 # Manage FHS BIST
 
-Installs and configures BIST (Built-in Self Test) on a FHS server.
+Installation/configuration placeholder for BIST (Built-in Self Test), not a
+production-ready application. It writes the unit but does not enable/start it,
+run pytest or require traces/results during installation. Starting the supplied
+unit runs hardware tests and requires separate explicit user authorization.
+
+Supply a reviewed archive with pinned `requirements.txt`; deployment installs it
+without resolving a new requirements file. Python venv support and the configured
+service account/group must already exist. Source/archive preparation remains on
+the Ansible controller. Installation tests use an inert archive, not hardware
+results. Real application dependencies and service execution remain unvalidated.
 
 ## Configuration Variables
 
-All variables below are located in `defaults/main.yml` and can be overridden in your inventory.
+Hardware defaults are in `defaults/main.yml`; current application/build paths and identity are in `vars/main.yml` (role vars override inventory). Review them before use; task/extra vars can override them.
 
 ### 1. Hardware Mappings (Inventory Specific)
 These variables map physical hardware to the BIST software. These **must** be overridden in your inventory to match the specific hardware of each server.

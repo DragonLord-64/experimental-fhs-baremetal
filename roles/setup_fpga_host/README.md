@@ -1,37 +1,32 @@
 # setup_fpga_host
 
-Configure a Bittware FPGA host: apt prerequisites, VFIO udev rules,
-GRUB kernel cmdline, Bittware SDK, per-user venvs, BMC firmware.
+Installs VFIO udev rules and optionally writes GRUB settings or programs BMC
+firmware. SDK/package and venv installation belong to `manage_bittware_sdk`.
+Select `--tags setup_fpga_host` in `playbooks/site.yml` for the default udev path.
 
-Destructive operations (GRUB, SDK, BMC firmware) are off by default and
-gated by feature-flag vars. BMC firmware also carries the `never` tag —
-opt in explicitly with `--tags fpga,firmware`.
-
-## Variables (high-traffic)
-
-| Var | Default | Purpose |
+| Variable | Default | Purpose |
 |---|---|---|
-| `fpga_kernel_cmdline` | `[iommu=pt, amd_iommu=on, hugepages=8, hugepagesz=1G, default_hugepagesz=1G]` | GRUB cmdline (list) |
-| `fpga_bittware_sdk_deb` | `""` | Local path to SDK .deb (required for SDK install) |
-| `fpga_bmc_firmware_zip` | `""` | Local path to BMC firmware zip |
-| `fpga_bmc_firmware_version` | `""` | Approved BMC firmware version |
-| `fpga_bittware_user` | `""` | Account that owns Bittware tooling |
-| `fpga_update_grub` | `false` | Apply GRUB cmdline + grub-mkconfig + reboot |
-| `fpga_update_bittware_sdk` | `false` | Install/refresh SDK deb |
-| `fpga_update_bmc` | `false` | Program BMC firmware (always requires `--tags firmware`) |
-| `users_setup_venvs` | `true` | Provision `~user/.bw_venv` for every bittware-group member |
-| `fpga_reboot_on_change` | `true` | Reboot at end of play if GRUB/SDK/BMC changed |
+| `fpga_update_grub` | `false` | Write GRUB config and run grub-mkconfig |
+| `fpga_kernel_cmdline` | IOMMU + shared hugepage settings | Kernel command-line list |
+| `fpga_update_bmc` | `false` | Also requires explicit `--tags setup_fpga_host,firmware` |
+| `fpga_bmc_firmware_zip` | Empty | Approved local firmware archive |
+| `fpga_bmc_firmware_version` | Empty | Expected BMC version |
+| `fpga_bittware_user` | Ansible user | Unprivileged tooling owner |
+| `fpga_bmc_cards` | `[0, 1]` | Cards to program |
 
-## Tags
+The role never reboots. Pending boot changes are reported; old
+`fpga_reboot_on_change`/`fpga_reboot_timeout` settings no longer trigger a reboot.
+GRUB and firmware require their feature flags; selecting the whole role alone
+does not enable either. The `never` tag is supplemented by an explicit firmware
+tag check, so inherited site tags cannot enable firmware accidentally.
 
-| Tag | Tasks |
-|---|---|
-| `fpga` | All of this role |
-| `install` | apt + SDK install + venv create |
-| `config` | udev + GRUB + venv ownership |
-| `hardware` | udev, GRUB, reboot, BMC |
-| `destructive` | GRUB, SDK, BMC, reboot |
-| `firmware` | BMC firmware |
-| `never` | BMC firmware (opt-in only) |
+Shared DPDK settings: `fhs_hugepage_size=1G`, `fhs_hugepage_count=8`,
+`fhs_hugepage_mount=/mnt/huge_1gb`. GRUB uses these defaults through
+`fpga_kernel_cmdline`; keep custom command-line overrides consistent. The DPDK
+role mounts this page size, and does not reserve pages itself.
 
-Tags: `fpga`, `install`, `config`, `hardware`, `firmware`, `destructive`, `never`.
+Udev reload errors fail the run. The shipped rules invoke SDK-provided
+`bittware-bind-vfio.sh`/`bittware-vfio-cleanup.sh`; their device permission behavior
+cannot be verified without the SDK. Shared BittWare group membership alone does
+not prove VFIO access. Offline rendering and a small DPDK build fixture do not
+validate firmware, boot/kernel behavior, device access or physical hardware.

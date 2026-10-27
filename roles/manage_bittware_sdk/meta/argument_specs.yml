@@ -11,5 +11,5 @@ argument_specs:
       fpga_apt_packages: {type: list, elements: str}
       fpga_approved_os: {type: str, default: "Ubuntu 24.04"}
       fpga_update_bittware_sdk: {type: bool, default: false}
-      users_setup_venvs: {type: bool, default: true}
+      users_setup_venvs: {type: bool, default: false}
       venvs: {type: list, elements: dict, default: []}

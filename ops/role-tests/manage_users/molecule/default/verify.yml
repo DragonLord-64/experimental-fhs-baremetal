@@ -10,3 +10,43 @@
         executable: /usr/bin/python3
       changed_when: false
       no_log: true
+
+    - name: Verify BittWare group identity
+      ansible.builtin.command: getent group bittware
+      register: bw_group
+      changed_when: false
+    - name: Assert configured GID
+      ansible.builtin.assert:
+        that: bw_group.stdout.split(':')[2] == '666'
+    - name: Verify fresh runner process memberships and SDK execution
+      ansible.builtin.shell: |
+        id -nG | tr ' ' '\n' | grep -qx bittware
+        id -nG | tr ' ' '\n' | grep -qx retained-group
+        "$HOME/.bw_venv/bin/bw_card_monitor"
+        /opt/venvs/permission-test/bin/bw_card_monitor
+        touch /opt/venvs/permission-test/bin/group-write-check
+        rm /opt/venvs/permission-test/bin/group-write-check
+      become: true
+      become_user: gitlab-runner
+      changed_when: false
+    - name: Verify intended owner can execute its installed local package
+      ansible.builtin.shell: |
+        /opt/venvs/permission-test/bin/python -c 'import permission_fixture; assert permission_fixture.VALUE == 42'
+        /opt/venvs/permission-test/bin/bw_card_monitor
+      become: true
+      become_user: moleculeuser
+      changed_when: false
+    - name: Verify non-member cannot execute or write the venv
+      ansible.builtin.shell: |
+        test ! -w /opt/venvs/permission-test
+        test ! -x /opt/venvs/permission-test/bin/python
+      become: true
+      become_user: denied-user
+      changed_when: false
+    - name: Verify repaired site-packages group and write permissions
+      ansible.builtin.command: /usr/bin/python3 -c "import glob, os, grp; p=glob.glob('/opt/venvs/permission-test/lib/python*/site-packages')[0]; s=os.stat(p); assert s.st_gid == grp.getgrnam('bittware').gr_gid; assert s.st_mode & 0o070 == 0o070; assert not s.st_mode & 0o007"
+      changed_when: false
+
+    - name: Verify recursive permissions did not follow system interpreter symlink
+      ansible.builtin.command: /usr/bin/python3 -c "import os; s=os.stat('/usr/bin/python3'); assert s.st_uid == 0 and s.st_gid == 0 and s.st_mode & 0o777 == 0o755"
+      changed_when: false

@@ -1,0 +1,18 @@
+---
+- name: Verify installation and fresh-user runtime
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Inspect actual fixture service process and filesystem permissions
+      ansible.builtin.shell: |
+        set -eu
+        test -f /etc/systemd/system/fsp-grpc.service
+        test ! -f /etc/systemd/system/vcc-grpc.service
+        grep -q 'Restart=on-failure' /etc/systemd/system/fsp-grpc.service
+        grep -q -- '--devices 0000:81:00.1 --regions 0 --cards fixture' /etc/systemd/system/fsp-grpc.service
+        runuser -u fhs-grpc -- test ! -w /opt/grpc/fsp/fixture-fsp/server.py
+        runuser -u fhs-grpc -- test -x /opt/grpc/fsp/fixture-fsp/.venv/bin/ska-mid-cbf-fhs-fsp-grpc-controller
+        runuser -u fhs-grpc -- id -nG | grep -w bittware
+        python3 -c 'import json; assert json.load(open("/tmp/service-fsp-grpc.json"))["starts"] == 1'
+        python3 -c 'import socket; s=socket.create_connection(("127.0.0.1", 50051)); assert s.recv(32) == b"fsp"; s.close()'
+      changed_when: false

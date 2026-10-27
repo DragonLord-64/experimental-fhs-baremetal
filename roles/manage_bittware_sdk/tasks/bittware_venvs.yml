@@ -4,21 +4,14 @@
     path: "{{ fpga_bittware_sdk_root }}/scripts/bw_pip.py"
   register: fpga_sdk_root_stat
 
-- name: Build a list of venvs whose owning group is the bittware group
+- name: Select BittWare venvs
   ansible.builtin.set_fact:
-    bw_venvs: >-
-      {{ venvs
-         | selectattr('group','defined')
-         | selectattr('group','equalto', fpga_bittware_group)
-         | list }}
-  when: venvs | length > 0
-
+    bw_venvs: "{{ venvs | selectattr('group', 'defined') | selectattr('group', 'equalto', fpga_bittware_group) | list }}"
 
 - name: Bail out early when there are no bittware venvs
   ansible.builtin.debug:
     msg: "No venvs owned by group {{ fpga_bittware_group }} – nothing to install."
   when: bw_venvs is not defined or bw_venvs | length == 0
-  tags: [bittware, skip]
 
 # Each task below runs as the target user so files inside the venv end
 # up owned correctly without a recurse-chown that breaks idempotence.
@@ -31,10 +24,11 @@
         name: packaging
         virtualenv: "{{ item.path }}"
         state: present
+      become: true
+      become_user: "{{ item.owner | default('root') }}"
       loop: "{{ bw_venvs }}"
       loop_control:
         label: "{{ item }}"
-      tags: [bittware, skip]
 
     - name: Install Bittware SDK Python package into each bittware venv
       ansible.builtin.command:
@@ -45,7 +39,15 @@
       environment:
         BWSDK_ROOT: "{{ fpga_bittware_sdk_root }}"
       become: true
+      become_user: "{{ item.owner | default('root') }}"
       loop: "{{ bw_venvs }}"
       loop_control:
         label: "{{ item }}"
       when: fpga_sdk_root_stat.stat.exists
+
+    - name: Restore shared venv permissions after SDK package installation
+      ansible.builtin.include_role:
+        name: manage_venvs
+        tasks_from: permissions
+      vars:
+        venvs: "{{ bw_venvs }}"

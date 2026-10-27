@@ -49,16 +49,6 @@
     state: present
     update_cache: false
 
-- name: Temporarily lift version holds to allow the downgrade/update
-  ansible.builtin.dpkg_selections:
-    name: "{{ item }}"
-    selection: install
-  loop:
-    - kubelet
-    - kubeadm
-    - kubectl
-  ignore_errors: true
-
 - name: Install Kubernetes packages
   ansible.builtin.apt:
     name:
@@ -68,6 +58,7 @@
     state: present
     update_cache: true
     allow_downgrades: true
+    allow_change_held_packages: true
 
 - name: Hold Kubernetes packages at current version
   ansible.builtin.dpkg_selections:
@@ -77,7 +68,6 @@
     - kubelet
     - kubeadm
     - kubectl
-  ignore_errors: true
 
 - name: Ensure kubelet is enabled
   ansible.builtin.service:

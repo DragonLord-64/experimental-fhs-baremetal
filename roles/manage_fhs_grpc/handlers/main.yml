@@ -1,16 +1,7 @@
 ---
-- name: Restart VCC gRPC
-  ansible.builtin.service:
-    name: vcc-grpc
+- name: Restart selected gRPC
+  ansible.builtin.systemd_service:
+    name: "{{ _grpc_service }}"
     state: restarted
     enabled: true
     daemon_reload: true
-  become: true
-
-- name: Restart FSP gRPC
-  ansible.builtin.service:
-    name: fsp-grpc
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  become: true

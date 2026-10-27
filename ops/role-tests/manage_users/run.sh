@@ -44,6 +44,8 @@ trap 'exit 143' TERM
     timeout --signal=TERM --kill-after=10s 180s docker pull "$FHS_MOLECULE_IMAGE"
     docker image inspect "$FHS_MOLECULE_IMAGE" --format '{{json .RepoDigests}}'
 } > "$report/versions.txt"
+export FHS_SDK_FIXTURE_DEB="$report/sdk-fixture.deb"
+python3 "$repo/ops/role-tests/cleanup/make_sdk_fixture.py" "$FHS_SDK_FIXTURE_DEB"
 cd "$repo/ops/role-tests/manage_users"
 printf 'Evidence: %s\n' "$report"
 # Review note: bound the full lifecycle while pipefail preserves a failing Molecule exit status.
