@@ -19,7 +19,7 @@ Each role include has its exact role name as a tag. Most plays target `all`, inc
 | `audit_python_ca` | Final read-only Python/CA audit |
 
 FSP/VCC gRPC installation is retired. Use
-[remove_fhs_grpc](../roles/remove_fhs_grpc.md) through
+[the tagged certificate cleanup](certificate-update.md) in
 `playbooks/development/certificate-update.yml` to remove existing services and
 environments before recreating the provisioning venvs. `manage_fhs_bist` only
 installs/configures its placeholder and does not start hardware tests.

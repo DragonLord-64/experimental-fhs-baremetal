@@ -29,6 +29,7 @@ FHS Baremetal Documentation
    playbooks/usage.md
    playbooks/provision.yml.md
    playbooks/site.yml.md
+   playbooks/certificate-update.md
    playbooks/development.md
 
 .. ROLES =============================================================
@@ -58,5 +59,3 @@ FHS Baremetal Documentation
    bifrost-infra/recovery.md
    bifrost-infra/diskimage-builder.md
    bifrost-infra/testing.md
-
-   

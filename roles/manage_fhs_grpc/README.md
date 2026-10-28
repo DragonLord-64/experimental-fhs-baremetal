@@ -1,7 +1,7 @@
 # Manage FHS gRPC
 
 Retired from `site.yml`. The installer remains as historical reference; use
-[remove_fhs_grpc](../remove_fhs_grpc/README.md) and the certificate cleanup playbook
+[the tagged certificate cleanup](../../docs/src/playbooks/certificate-update.md)
 to stop/remove existing FSP/VCC controllers and their environments.
 
 Installs one controller selected by NetBox `grpc-fsp` or `grpc-vcc` tag.

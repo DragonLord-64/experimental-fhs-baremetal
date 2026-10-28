@@ -516,7 +516,7 @@ production provisioning was run; scope and exclusions are documented in the role
 ### 2026-10-28 — Retire FSP/VCC gRPC provisioning
 
 Removed the gRPC installer from `site.yml` and its unused controller/proto/grpcurl
-downloads. The [certificate cleanup](../roles/remove_fhs_grpc/README.md) updates CA
+downloads. The [certificate cleanup](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/3ac370e/roles/remove_fhs_grpc/README.md) updates CA
 trust, decodes the system bundle, stops/disables the two controller services and
 removes their units, managed/legacy installations and matching root Poetry venvs
 before deleting the FHS/runner venvs. Shared bitstreams, SDK and unrelated user
@@ -530,3 +530,17 @@ reported `changed=0`, and a failed service stop preserved controller data. Sourc
 and documentation links passed. No VM or production run; real systemd remains
 unverified. The personal gRPC certifi and shared virtualenv seed-cache findings
 are outside this controller removal and remain for separate remediation.
+
+### 2026-10-28 — Inline and tag certificate cleanup
+
+Removed the cleanup role and moved its tasks and conditional systemd reload
+directly into `certificate-update.yml`. Independent blocks now expose `update_ca`,
+`verify_ca`, `remove_fhs_grpc`, `reset_venvs` and `refresh_snaps`. Existing cleanup
+root overrides remain supported. [Commands and scope](../docs/src/playbooks/certificate-update.md)
+replace the removed role documentation; the earlier role reference is pinned to
+its original commit.
+
+Provisioning/cleanup syntax and tag listing passed. The bounded file/service
+fixture passed tagged cleanup, an unchanged rerun, preservation on a stop failure
+and independently tagged venv reset. Source/link checks passed. No VM or production
+execution; real systemd remains unverified.

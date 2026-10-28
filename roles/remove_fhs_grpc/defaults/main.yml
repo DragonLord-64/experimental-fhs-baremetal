@@ -1,5 +1,0 @@
----
-remove_fhs_grpc_root: "{{ manage_grpc_root | default('/opt/grpc') }}"
-remove_fhs_grpc_legacy_root: /etc/grpc
-remove_fhs_grpc_unit_dir: /etc/systemd/system
-remove_fhs_grpc_cache_dir: /root/.cache/pypoetry/virtualenvs
