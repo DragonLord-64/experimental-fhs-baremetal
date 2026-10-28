@@ -3,6 +3,6 @@
   hosts: all
   become: true
   gather_facts: false
-  tags: [audit_python_ca]
+  tags: [always, audit_python_ca]
   roles:
     - audit_python_ca

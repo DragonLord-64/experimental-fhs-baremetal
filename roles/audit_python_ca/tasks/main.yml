@@ -15,6 +15,7 @@
   ansible.builtin.assert:
     that: audit_python_ca_result.rc == 0
     fail_msg: >-
-      Python certificate audit found exposure requiring review (exit 1) or
-      incomplete checks (exit 2). See the report above. No remediation was applied.
+      Host certificate validation did not pass. See ACTION REQUIRED and
+      INCOMPLETE CHECKS above for affected paths, explanations and next steps.
+      Exit 1 means findings; exit 2 means incomplete checks. No remediation was applied.
     success_msg: No findings in the Python certificate audit's documented scope.

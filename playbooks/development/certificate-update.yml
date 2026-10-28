@@ -143,3 +143,12 @@
           ansible.builtin.command: /usr/bin/snap refresh
           changed_when: true
           when: certificate_update_snap.stat.exists
+
+    - name: Validate Python certificate trust after cleanup
+      tags: [always, audit_python_ca]
+      block:
+        - name: Run the host Python and CA audit
+          ansible.builtin.include_role:
+            name: audit_python_ca
+            apply:
+              tags: [always, audit_python_ca]

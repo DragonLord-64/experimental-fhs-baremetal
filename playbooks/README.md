@@ -31,6 +31,8 @@ See [Usage](../docs/src/playbooks/usage.md) for details
 
 The full site run ends with the read-only [Python CA audit](../roles/audit_python_ca/README.md).
 Run `playbooks/audit_python_ca.yml` separately or select `--tags audit_python_ca`.
+The final audit also runs after tagged cleanup/provisioning; an explicit
+`--skip-tags audit_python_ca` defers validation.
 FSP/VCC gRPC installation is retired. Use the
 [tagged certificate cleanup](../docs/src/playbooks/certificate-update.md) to remove old services
 and their environments before recreating the provisioning venvs.

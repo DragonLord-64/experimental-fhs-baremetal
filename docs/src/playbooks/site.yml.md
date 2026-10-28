@@ -16,7 +16,7 @@ Each role include has its exact role name as a tag. Most plays target `all`, inc
 | `ubuntu24_cis` | `ubuntu24_cis` |
 | `rsync` | Final package/service tasks (no role) |
 | No play tag | `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
-| `audit_python_ca` | Final read-only Python/CA audit |
+| `always`, `audit_python_ca` | Final read-only Python/CA audit, including tagged provisioning runs |
 
 FSP/VCC gRPC installation is retired. Use
 [the tagged certificate cleanup](certificate-update.md) in

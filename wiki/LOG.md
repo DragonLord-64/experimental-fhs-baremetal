@@ -544,3 +544,18 @@ Provisioning/cleanup syntax and tag listing passed. The bounded file/service
 fixture passed tagged cleanup, an unchanged rerun, preservation on a stop failure
 and independently tagged venv reset. Source/link checks passed. No VM or production
 execution; real systemd remains unverified.
+
+### 2026-10-28 — Validate cleanup and explain certificate findings
+
+Added the shared [Python CA audit](../roles/audit_python_ca/README.md) after
+[certificate cleanup](../docs/src/playbooks/certificate-update.md). Both cleanup
+and final provisioning validation run on tagged executions; skipping
+`audit_python_ca` explicitly defers validation. Reports lead with the result and
+numbered findings, affected environments, meanings and remediation guidance.
+Package inventory and successful bundle checks follow; scope limits remain explicit.
+
+Real certificate fixtures reproduced five findings across eight environments,
+passed after bundle replacement and rejected an invalid bundle as incomplete.
+Real Ansible task fixtures verified both tagged call sites and failure gates.
+Full provisioning/cleanup syntax, tag listing and source/link checks passed.
+No VM or production execution was performed.
