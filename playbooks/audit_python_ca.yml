@@ -1,0 +1,8 @@
+---
+- name: Audit Python certificate trust after provisioning
+  hosts: all
+  become: true
+  gather_facts: false
+  tags: [audit_python_ca]
+  roles:
+    - audit_python_ca

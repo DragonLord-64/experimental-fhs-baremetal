@@ -29,6 +29,9 @@ ansible-playbook -i inventory/dev_env playbooks/provision.yml --skip-tags hardwa
 
 See [Usage](../docs/src/playbooks/usage.md) for details
 
+The full site run ends with the read-only [Python CA audit](../roles/audit_python_ca/README.md).
+Run `playbooks/audit_python_ca.yml` separately or select `--tags audit_python_ca`.
+
 ## Operational NetBox and switch playbooks
 
 - `netbox/`: server/switch discovery, NetBox updates and protected Bifrost inventory export.

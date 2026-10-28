@@ -1,0 +1,20 @@
+---
+- name: Inspect Python environments and certificate bundles
+  ansible.builtin.script:
+    cmd: audit.sh
+    executable: /bin/bash
+  register: audit_python_ca_result
+  changed_when: false
+  failed_when: audit_python_ca_result.rc | default(-1) not in [0, 1, 2]
+
+- name: Show Python certificate audit report
+  ansible.builtin.debug:
+    msg: "{{ (audit_python_ca_result.stdout_lines | default([])) + (audit_python_ca_result.stderr_lines | default([])) }}"
+
+- name: Require no certificate findings or incomplete checks
+  ansible.builtin.assert:
+    that: audit_python_ca_result.rc == 0
+    fail_msg: >-
+      Python certificate audit found exposure requiring review (exit 1) or
+      incomplete checks (exit 2). See the report above. No remediation was applied.
+    success_msg: No findings in the Python certificate audit's documented scope.

@@ -207,3 +207,6 @@
         name: lldpd
         state: started
         enabled: true
+
+- name: Check Python certificate trust after provisioning
+  ansible.builtin.import_playbook: audit_python_ca.yml

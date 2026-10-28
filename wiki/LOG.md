@@ -502,3 +502,13 @@ now record both choices. No join, service or hardware operations performed.
 Removed private environment history, hostnames and experimental-only links from
 copyable source documentation. Kept operational prerequisites and limitations.
 Sphinx HTML build passed; external Python inventory was unavailable in sandbox.
+
+### 2026-10-28 — Python CA audit in provisioning
+
+Added [audit_python_ca](../roles/audit_python_ca/README.md), its bundled read-only
+script and standalone playbook. The final site play imports the audit; reports
+are printed before findings or incomplete checks fail provisioning. No package
+or certificate remediation is performed. Full provisioning syntax, real Ansible
+task fixtures for clean/finding/incomplete/error results (`changed=0`), public
+certificate detection fixtures and source/link checks passed. No server audit or
+production provisioning was run; scope and exclusions are documented in the role.
