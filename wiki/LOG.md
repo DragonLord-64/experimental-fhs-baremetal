@@ -512,3 +512,21 @@ or certificate remediation is performed. Full provisioning syntax, real Ansible
 task fixtures for clean/finding/incomplete/error results (`changed=0`), public
 certificate detection fixtures and source/link checks passed. No server audit or
 production provisioning was run; scope and exclusions are documented in the role.
+
+### 2026-10-28 — Retire FSP/VCC gRPC provisioning
+
+Removed the gRPC installer from `site.yml` and its unused controller/proto/grpcurl
+downloads. The [certificate cleanup](../roles/remove_fhs_grpc/README.md) updates CA
+trust, decodes the system bundle, stops/disables the two controller services and
+removes their units, managed/legacy installations and matching root Poetry venvs
+before deleting the FHS/runner venvs. Shared bitstreams, SDK and unrelated user
+environments remain. Copied the latest official Ubuntu Python/CA package update
+into site provisioning under `python_ca_updates`.
+
+Full provisioning, cleanup and artifact-download syntax passed. A bounded
+Ansible fixture used real file/find tasks with a service-manager stand-in:
+controller paths were removed, shared/personal paths preserved, the second run
+reported `changed=0`, and a failed service stop preserved controller data. Source
+and documentation links passed. No VM or production run; real systemd remains
+unverified. The personal gRPC certifi and shared virtualenv seed-cache findings
+are outside this controller removal and remain for separate remediation.

@@ -39,26 +39,6 @@
         project_path: "ska-telescope/ska-mid-cbf/infra/ska-mid-cbf-fsp-corr-bitstreams"
         version: "0.1.0"
 
-      - name: "ska-mid-cbf-fhs-fsp-grpc-controller"
-        type: "gitlab_repo"
-        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-fsp-grpc-controller"
-        version: "0.0.3"
-
-      - name: "ska-mid-cbf-fhs-vcc-grpc-controller"
-        type: "gitlab_repo"
-        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-vcc-grpc-controller"
-        version: "0.0.3"
-    
-      - name: "ska-mid-cbf-fhs-grpc-protos"
-        type: "gitlab_repo"
-        project_path: "ska-telescope/ska-mid-cbf/host-software/ska-mid-cbf-fhs-grpc-protos"
-        version: "0.0.1"
-
-      - name: "grpcurl"
-        type: "direct_download"
-        url: "https://github.com/fullstorydev/grpcurl/releases/download/v1.9.3/grpcurl_1.9.3_linux_amd64.deb"
-        dest_filename: "grpcurl_1.9.3_linux_amd64.deb"
-
   tasks:
     - name: Ensure dedicated output directory exists
       ansible.builtin.file:

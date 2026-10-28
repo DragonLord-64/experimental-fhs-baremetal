@@ -44,6 +44,17 @@
   gather_facts: false
   tags: [distribution]
   tasks:
+    - name: Update Ubuntu Python tooling and certificate trust
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - python3.12
+          - python3.12-venv
+          - python3-pip
+          - python3-pip-whl
+        state: latest
+        update_cache: true
+      tags: [python_ca_updates]
     - name: Apply apt_repo_access
       ansible.builtin.include_role:
         name: setup_apt_source
@@ -139,12 +150,6 @@
   become: true
   gather_facts: true
   tasks:
-    - name: Install FHS gRPC service
-      ansible.builtin.include_role:
-        name: manage_fhs_grpc
-        apply:
-          tags: [manage_fhs_grpc]
-      tags: [manage_fhs_grpc]
     - name: Install FHS exporter
       ansible.builtin.include_role:
         name: manage_fhs_exporter

@@ -31,6 +31,9 @@ See [Usage](../docs/src/playbooks/usage.md) for details
 
 The full site run ends with the read-only [Python CA audit](../roles/audit_python_ca/README.md).
 Run `playbooks/audit_python_ca.yml` separately or select `--tags audit_python_ca`.
+FSP/VCC gRPC installation is retired. Use the
+[certificate cleanup](../roles/remove_fhs_grpc/README.md) to remove old services
+and their environments before recreating the provisioning venvs.
 
 ## Operational NetBox and switch playbooks
 

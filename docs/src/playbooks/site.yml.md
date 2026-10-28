@@ -9,16 +9,19 @@ Each role include has its exact role name as a tag. Most plays target `all`, inc
 | Play tag | Role tags |
 |---|---|
 | `foundation` | `manage_users`, `setup_fhs_network` |
-| `distribution` | `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
+| `distribution` | `python_ca_updates` (Ubuntu packages), `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
 | `environment` | `manage_venvs`, `manage_bittware_sdk`, `manage_gitlab-runner` |
 | `dpdk_arkville` | `manage_dpdk_ark_doca` |
 | `fhs_node` | `setup_fhs_node`, `manage_fhs_bist` |
 | `ubuntu24_cis` | `ubuntu24_cis` |
 | `rsync` | Final package/service tasks (no role) |
-| No play tag | `manage_fhs_grpc`, `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
+| No play tag | `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
+| `audit_python_ca` | Final read-only Python/CA audit |
 
-`manage_fhs_grpc` includes its own Poetry setup and requires exactly one NetBox
-controller tag (`grpc-fsp` or `grpc-vcc`); no tag skips it. `manage_fhs_bist` only
+FSP/VCC gRPC installation is retired. Use
+[remove_fhs_grpc](../roles/remove_fhs_grpc.md) through
+`playbooks/development/certificate-update.yml` to remove existing services and
+environments before recreating the provisioning venvs. `manage_fhs_bist` only
 installs/configures its placeholder and does not start hardware tests.
 
 The `local_dev` play sets a local account password from protected variables; it is included by an unrestricted run. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. Firmware requires both its flag and explicit `firmware` selection; `never` alone is not a safety boundary.
@@ -75,6 +78,6 @@ Linux CIS policy membership, Kubernetes/runtime versions, network MAC/address/pr
 DNS/NTP and reachable proxy URLs. Install the platform services before configuring
 clients to use them.
 
-Provide the selected controller, bitstream, SDK, DOCA and build archives, matching
-lock files where required, monitoring packages and protected setup/publishing
+Provide the bitstream, SDK, DOCA and build archives,
+monitoring packages and protected setup/publishing
 credentials. `site.yml` and `provision.yml` are the entry points.

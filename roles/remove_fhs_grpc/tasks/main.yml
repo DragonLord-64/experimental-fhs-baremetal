@@ -1,0 +1,65 @@
+---
+- name: Validate gRPC cleanup roots before deletion
+  ansible.builtin.assert:
+    that:
+      - item is string
+      - item.startswith('/')
+      - item != '/'
+      - "'..' not in item.split('/')"
+    fail_msg: Supply absolute, non-root cleanup directories without parent traversal.
+  loop:
+    - "{{ remove_fhs_grpc_root }}"
+    - "{{ remove_fhs_grpc_legacy_root }}"
+    - "{{ remove_fhs_grpc_unit_dir }}"
+    - "{{ remove_fhs_grpc_cache_dir }}"
+
+- name: Inspect installed services before removing gRPC
+  ansible.builtin.service_facts:
+
+- name: Stop and disable the retired FSP and VCC controllers
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop: [fsp-grpc.service, vcc-grpc.service]
+  when:
+    - item in ansible_facts.services
+    - ansible_facts.services[item].status | default('') != 'not-found'
+
+- name: Remove the retired controller service units
+  ansible.builtin.file:
+    path: "{{ remove_fhs_grpc_unit_dir }}/{{ item }}"
+    state: absent
+  loop: [fsp-grpc.service, vcc-grpc.service]
+  notify: Reload systemd after gRPC removal
+
+- name: Inspect the root-owned Poetry environment cache
+  ansible.builtin.stat:
+    path: "{{ remove_fhs_grpc_cache_dir }}"
+  register: remove_fhs_grpc_cache
+
+- name: Require a directory for an existing Poetry cache
+  ansible.builtin.assert:
+    that: not remove_fhs_grpc_cache.stat.exists or remove_fhs_grpc_cache.stat.isdir | default(false)
+
+- name: Find only the retired controller Poetry environments
+  ansible.builtin.find:
+    paths: "{{ remove_fhs_grpc_cache_dir }}"
+    patterns:
+      - ska-mid-cbf-fhs-fsp-grpc-controller-*-py*
+      - ska-mid-cbf-fhs-vcc-grpc-controller-*-py*
+    file_type: directory
+    recurse: false
+    hidden: true
+  register: remove_fhs_grpc_cached_envs
+  when: remove_fhs_grpc_cache.stat.exists
+
+- name: Remove controller installations and their Python environments
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: >-
+    {{ [remove_fhs_grpc_root ~ '/fsp', remove_fhs_grpc_root ~ '/vcc',
+        remove_fhs_grpc_root ~ '/poetry', remove_fhs_grpc_legacy_root ~ '/fsp',
+        remove_fhs_grpc_legacy_root ~ '/vcc'] +
+       (remove_fhs_grpc_cached_envs.files | default([]) | map(attribute='path') | list) }}

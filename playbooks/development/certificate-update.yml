@@ -1,0 +1,59 @@
+---
+- name: Update CA trust and remove retired controller environments
+  hosts: all
+  become: true
+  gather_facts: false
+  vars:
+    venv_path: /opt/venvs/fhs
+    glab_venv_path: /home/gitlab-runner/.bw_venv
+  tasks:
+    - name: Validate the provisioning venv deletion paths
+      ansible.builtin.assert:
+        that:
+          - item.startswith('/')
+          - item.split('/')[-1] in ['fhs', '.bw_venv']
+          - "'..' not in item.split('/')"
+      loop: "{{ [venv_path, glab_venv_path] }}"
+
+    - name: Update the Ubuntu CA certificate package
+      ansible.builtin.apt:
+        name: ca-certificates
+        state: latest
+        update_cache: true
+
+    - name: Decode the system CA bundle before checking certificate subjects
+      ansible.builtin.shell: |
+        set -o pipefail
+        openssl crl2pkcs7 -nocrl -certfile /etc/ssl/certs/ca-certificates.crt |
+          openssl pkcs7 -print_certs -noout
+      args:
+        executable: /bin/bash
+      register: certificate_update_subjects
+      changed_when: false
+
+    - name: Require the removed emSign root to be absent from the system bundle
+      ansible.builtin.assert:
+        that:
+          - certificate_update_subjects.stdout | length > 0
+          - "'emSign ECC Root CA - G3' not in certificate_update_subjects.stdout"
+        success_msg: The removed emSign root is absent from the decoded system CA bundle.
+
+    - name: Remove the retired FSP and VCC gRPC services and environments
+      ansible.builtin.include_role:
+        name: remove_fhs_grpc
+
+    - name: Remove the provisioning environments before recreating them
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop: "{{ [venv_path, glab_venv_path] }}"
+
+    - name: Inspect the optional Snap client
+      ansible.builtin.stat:
+        path: /usr/bin/snap
+      register: certificate_update_snap
+
+    - name: Refresh installed Snap packages
+      ansible.builtin.command: /usr/bin/snap refresh
+      changed_when: true
+      when: certificate_update_snap.stat.exists

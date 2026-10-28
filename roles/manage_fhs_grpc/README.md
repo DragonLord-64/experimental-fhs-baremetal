@@ -1,15 +1,15 @@
 # Manage FHS gRPC
 
+Retired from `site.yml`. The installer remains as historical reference; use
+[remove_fhs_grpc](../remove_fhs_grpc/README.md) and the certificate cleanup playbook
+to stop/remove existing FSP/VCC controllers and their environments.
+
 Installs one controller selected by NetBox `grpc-fsp` or `grpc-vcc` tag.
 Neither tag skips installation; both fail before filesystem/account changes.
 The NetBox inventory plugin emits string slugs; dictionary tags with `slug` are
 also accepted. Switching tags stops/disables and removes the previous role-owned
 `fsp-grpc.service` or `vcc-grpc.service`, then starts the selected controller.
 These two unit names are reserved for this role.
-
-```bash
-ansible-playbook -i <INVENTORY> playbooks/site.yml --limit <HOST> --tags manage_fhs_grpc
-```
 
 Poetry installation belongs to this role; the standalone manage_poetry role is
 retired. Python with venv support and the approved archives from
