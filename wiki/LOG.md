@@ -559,3 +559,15 @@ passed after bundle replacement and rejected an invalid bundle as incomplete.
 Real Ansible task fixtures verified both tagged call sites and failure gates.
 Full provisioning/cleanup syntax, tag listing and source/link checks passed.
 No VM or production execution was performed.
+
+### 2026-10-29 — Hardware BOM planning workbook
+
+Added the [inventory planner](../outputs/hardware-bom-20261029/hardware-inventory-planner.xlsx)
+with editable definitions, reusable recipes, unique role hierarchy, build/spares
+totals, serial asset assignments and partial shipment tracking. All populated
+records are illustrative. Stock snapshots and current assignments are manual;
+the workbook does not synchronize NetBox or retain assignment history.
+
+Formula checks covered shared quantities, zero overrides, new parts/roles,
+missing components and partial receipts. LibreOffice recalculation verified the
+example BOM and a changed recipe with one VCCU excluded. No hardware accessed.
