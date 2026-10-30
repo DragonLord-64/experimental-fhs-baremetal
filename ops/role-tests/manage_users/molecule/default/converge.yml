@@ -6,6 +6,7 @@
   vars_files:
     - ../../../cleanup/suite-vars.yml
   vars:
+    fhs_setup_user_environments: false
     fhs_keys_dir: "{{ playbook_dir }}/fixtures"
     vault_user_password_moleculeuser: '$6$rounds=656000$saltysalt$5IbeoxKbjI7g/8oIZjAdULp1WJ4hVTBNRGsTcSlYTOj4nKMfx1l8jH/zsfqHj6zE85cMzNxnEnGqkxbnSpwj/.'
     # Review note: vary a real managed sudo policy without modifying production role tasks.

@@ -1,0 +1,6 @@
+all:
+  hosts:
+    fhs-user-environments-20261030:
+      ansible_connection: community.docker.docker
+      ansible_user: ubuntu
+      ansible_python_interpreter: /usr/bin/python3

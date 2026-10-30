@@ -1,5 +1,9 @@
 # Manage Bittware SDK
 
+The site provisioning workflow now uses `manage_users`
+for accounts, system SDK and all BittWare environments. This standalone role
+remains for existing direct callers; use `--tags manage_users` with `site.yml`.
+
 Installs the Bittware SDK onto a FHS system. This role installs required system packages and utilizes `bw_pip.py` to install the SDK into managed Python virtual environments.
 
 ## Requirements

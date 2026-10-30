@@ -1,0 +1,14 @@
+---
+- name: Configure the shared environment
+  ansible.builtin.include_tasks: environment.yml
+  vars:
+    fhs_environment_path: "{{ fhs_shared_venv_path }}"
+    fhs_environment_owner: "{{ fhs_shared_venv_owner }}"
+    fhs_environment_group: "{{ fhs_bittware_group }}"
+    fhs_environment_shared: true
+
+- name: Configure each managed user's environment
+  ansible.builtin.include_tasks: user_environment.yml
+  loop: "{{ fhs_managed_usernames }}"
+  loop_control:
+    loop_var: fhs_environment_user

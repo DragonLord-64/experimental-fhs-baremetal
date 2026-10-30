@@ -8,9 +8,9 @@ Each role include has its exact role name as a tag. Most plays target `device_ro
 
 | Play tag | Role tags |
 |---|---|
-| `foundation` | `manage_users`, `setup_fhs_network` |
+| `foundation` | `setup_fhs_network` |
 | `distribution` | `setup_platform_ca`, `python_ca_updates` (Ubuntu packages), `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
-| `environment` | `manage_venvs`, `manage_bittware_sdk`, `manage_gitlab-runner` |
+| `environment` | `manage_users` (accounts, SDK, shared and personal venvs) |
 | `dpdk_arkville` | `manage_dpdk_ark_doca` |
 | `fhs_node` | `setup_fhs_node`, `manage_fhs_bist` |
 | `ubuntu24_cis` | `ubuntu24_cis` |
@@ -24,7 +24,7 @@ FSP/VCC gRPC installation is retired. Use
 environments before recreating the provisioning venvs. `manage_fhs_bist` only
 installs/configures its placeholder and does not start hardware tests.
 
-The `local_dev` play sets a local account password from protected variables; it is included by an unrestricted run. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. Firmware requires both its flag and explicit `firmware` selection; `never` alone is not a safety boundary.
+Additional accounts, including the local development account and `gitlab-runner`, are configured in `fhs_users` in environment group vars. The former separate venv/SDK/runner role tags are replaced by `manage_users`. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. Firmware requires both its flag and explicit `firmware` selection; `never` alone is not a safety boundary.
 
 ## Commands
 

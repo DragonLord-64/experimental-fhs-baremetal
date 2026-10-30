@@ -1,0 +1,122 @@
+---
+- name: Require an explicitly approved controller key directory
+  ansible.builtin.assert:
+    that: fhs_keys_dir | length > 0
+    fail_msg: Set fhs_keys_dir to the approved key directory for this inventory.
+
+- name: Find all user public key files on controller
+  ansible.builtin.find:
+    paths: "{{ fhs_keys_dir }}"
+    patterns: "*.pub"
+  register: found_key_files
+  delegate_to: localhost
+
+- name: Abort if no public key files are found
+  ansible.builtin.fail:
+    msg: |
+      No public key files (*.pub) were found in "{{ fhs_keys_dir }}".
+      • Ensure the directory exists on your Ansible controller.
+      • Populate it with files named after your users (e.g., aschell.pub).
+  when: found_key_files.matched == 0
+
+- name: Resolve managed account names
+  ansible.builtin.set_fact:
+    fhs_key_usernames: "{{ found_key_files.files | map(attribute='path') | map('basename') | map('regex_replace', '[.]pub$', '') | list }}"
+
+- name: Resolve complete user environment membership
+  ansible.builtin.set_fact:
+    fhs_managed_usernames: "{{ (fhs_key_usernames + (fhs_users | map(attribute='name') | list) + [ansible_user]) | unique | list }}"
+
+- name: Install sudo
+  ansible.builtin.package:
+    name: sudo
+    state: present
+  become: true
+
+- name: Ensure managed groups exist
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  become: true
+  loop: "{{ fhs_user_groups | difference([fhs_bittware_group]) }}"
+
+- name: Ensure the shared BittWare group has its configured GID
+  ansible.builtin.group:
+    name: "{{ fhs_bittware_group }}"
+    gid: "{{ fhs_bittware_group_gid }}"
+    state: present
+  become: true
+
+- name: Configure sudo group privilege
+  ansible.builtin.copy:
+    dest: "{{ fhs_sudoers_file }}"
+    content: "{{ fhs_sudoers_content }}"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+  become: true
+
+- name: Add the current Ansible user to the bittware group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: "{{ fhs_bittware_group }}"
+    append: true
+  become: true
+
+- name: Create public-key user accounts
+  ansible.builtin.user:
+    name: "{{ item }}"
+    password: "{{ lookup('vars', 'vault_user_password_' ~ item, default='!') }}"
+    groups: "{{ fhs_user_groups | join(',') }}"
+    append: true
+    create_home: true
+    shell: /bin/bash
+    state: present
+  become: true
+  loop: "{{ fhs_key_usernames | difference(fhs_users | map(attribute='name') | list) }}"
+  no_log: true
+
+- name: Create explicit account groups
+  ansible.builtin.group:
+    name: "{{ item.group | default(item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: present
+  loop: "{{ fhs_users }}"
+  no_log: true
+
+- name: Create explicit accounts including service users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ (item.groups | default([fhs_bittware_group] if item.system | default(false) else fhs_user_groups)) | union([fhs_bittware_group]) | join(',') }}"
+    append: true
+    system: "{{ item.system | default(false) }}"
+    home: "{{ item.home | default(omit) }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    password: "{{ item.password | default(omit) }}"
+    create_home: true
+    state: present
+  loop: "{{ fhs_users }}"
+  no_log: true
+
+- name: Install authorized SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ item.path | basename | regex_replace('\\.pub$') }}"
+    key: "{{ lookup('file', item.path) }}"
+    state: present
+  become: true
+  loop: "{{ found_key_files.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+
+- name: Install additional explicit account SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.name }}"
+    key: "{{ item.1 }}"
+    state: present
+  loop: "{{ fhs_users | subelements('ssh_keys', skip_missing=True) }}"
+  no_log: true
+
+- name: Refresh SSH membership after all account changes
+  ansible.builtin.meta: reset_connection

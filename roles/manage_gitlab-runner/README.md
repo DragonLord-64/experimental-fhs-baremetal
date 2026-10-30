@@ -1,5 +1,9 @@
 # Manage Gitlab Runner
 
+The site provisioning workflow now uses `manage_users`
+for accounts, system SDK and all BittWare environments. This standalone role
+remains for existing direct callers; use `--tags manage_users` with `site.yml`.
+
 Required setup for gitlab runners use by MDA development team
 Example: https://git-collab.nrc-cnrc.gc.ca/haa/fsa/fpga/libraries/bittware_testing_notebooks
 

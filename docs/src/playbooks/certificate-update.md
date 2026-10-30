@@ -45,5 +45,5 @@ PASS means no known incident findings in the audit's documented scan scope.
 After cleanup, recreate the provisioning venvs and rerun the audit:
 
 ```sh
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --ask-vault-pass --tags python_ca_updates,manage_venvs,manage_bittware_sdk,manage_gitlab-runner,audit_python_ca
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --ask-vault-pass --tags python_ca_updates,manage_users,audit_python_ca
 ```

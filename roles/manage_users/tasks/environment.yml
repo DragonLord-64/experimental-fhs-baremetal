@@ -1,0 +1,121 @@
+---
+- name: Validate environment paths before writing
+  ansible.builtin.assert:
+    that:
+      - fhs_environment_path is match('^/[^ ]+$')
+      - fhs_environment_path != '/'
+      - "'..' not in fhs_environment_path.split('/')"
+      - fhs_user_venv_name is match('^[A-Za-z0-9_.-]+$')
+      - fhs_user_venv_name not in ['.', '..']
+
+- name: Ensure environment parent directory
+  ansible.builtin.file:
+    path: "{{ fhs_environment_path | dirname }}"
+    state: directory
+
+- name: Ensure owned environment directory
+  ansible.builtin.file:
+    path: "{{ fhs_environment_path }}"
+    state: directory
+    owner: "{{ fhs_environment_owner }}"
+    group: "{{ fhs_environment_group }}"
+    mode: '0750'
+
+- name: Create environment as its owner
+  ansible.builtin.command:
+    argv: ["{{ fhs_venv_python }}", -m, venv, "{{ fhs_environment_path }}"]
+    creates: "{{ fhs_environment_path }}/bin/python"
+  become: true
+  become_user: "{{ fhs_environment_owner }}"
+
+- name: Repair existing environment ownership before package installation
+  ansible.builtin.file:
+    path: "{{ fhs_environment_path }}"
+    owner: "{{ fhs_environment_owner }}"
+    group: "{{ fhs_environment_group }}"
+    mode: u=rwX,g=rX,o=
+    recurse: true
+    follow: false
+
+- name: Install environment bootstrap packages
+  ansible.builtin.pip:
+    name: "{{ fhs_venv_packages }}"
+    virtualenv: "{{ fhs_environment_path }}"
+    state: present
+  become: true
+  become_user: "{{ fhs_environment_owner }}"
+  when: fhs_venv_packages | length > 0
+
+- name: Inspect installed tooling
+  ansible.builtin.stat:
+    path: "{{ fhs_environment_path }}/bin/bw_card_monitor"
+  register: fhs_bw_entrypoint
+
+- name: Inspect SDK installation marker
+  ansible.builtin.stat:
+    path: "{{ fhs_environment_path }}/.fhs-bittware-version"
+  register: fhs_bw_marker
+
+- name: Read SDK installation marker
+  ansible.builtin.slurp:
+    src: "{{ fhs_environment_path }}/.fhs-bittware-version"
+  register: fhs_bw_marker_content
+  when: fhs_bw_marker.stat.exists
+
+- name: Check installed environment dependencies
+  ansible.builtin.command:
+    argv: ["{{ fhs_environment_path }}/bin/python", -m, pip, check]
+  register: fhs_bw_dependencies
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ fhs_environment_owner }}"
+
+- name: Activate environment and install BittWare tools
+  ansible.builtin.shell: |
+    . {{ (fhs_environment_path ~ '/bin/activate') | quote }}
+    {{ (fpga_bittware_sdk_root ~ '/bin/bw_pip') | quote }} install
+  args:
+    executable: /bin/bash
+    chdir: "{{ fhs_environment_path }}"
+  environment:
+    BWSDK_ROOT: "{{ fpga_bittware_sdk_root }}"
+  become: true
+  become_user: "{{ fhs_environment_owner }}"
+  when: >-
+    not fhs_bw_entrypoint.stat.executable | default(false) or
+    fhs_bw_dependencies.rc != 0 or
+    (fhs_bw_marker_content.content | default('') | b64decode | trim) !=
+    (fpga_bittware_sdk_package ~ '=' ~ fhs_sdk_version.stdout ~ ' ' ~ fpga_bittware_sdk_root)
+
+- name: Verify installed tooling
+  ansible.builtin.command:
+    argv: ["{{ fhs_environment_path }}/bin/python", -c, "import os, sys; assert os.access(sys.prefix + '/bin/bw_card_monitor', os.X_OK)"]
+  changed_when: false
+  become: true
+  become_user: "{{ fhs_environment_owner }}"
+
+- name: Verify installed dependencies
+  ansible.builtin.command:
+    argv: ["{{ fhs_environment_path }}/bin/python", -m, pip, check]
+  changed_when: false
+  become: true
+  become_user: "{{ fhs_environment_owner }}"
+
+- name: Record successful SDK installation
+  ansible.builtin.copy:
+    content: "{{ fpga_bittware_sdk_package }}={{ fhs_sdk_version.stdout }} {{ fpga_bittware_sdk_root }}\n"
+    dest: "{{ fhs_environment_path }}/.fhs-bittware-version"
+    owner: "{{ fhs_environment_owner }}"
+    group: "{{ fhs_environment_group }}"
+    mode: '0640'
+
+- name: Restore shared environment access after SDK installation
+  ansible.builtin.file:
+    path: "{{ fhs_environment_path }}"
+    owner: "{{ fhs_environment_owner }}"
+    group: "{{ fhs_environment_group }}"
+    mode: u=rwX,g=rX,o=
+    recurse: true
+    follow: false
+  when: fhs_environment_shared | bool

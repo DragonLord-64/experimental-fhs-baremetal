@@ -1,0 +1,16 @@
+---
+- name: Upgrade synthetic SDK environments
+  hosts: all
+  gather_facts: false
+  become: true
+  vars:
+    fhs_managed_usernames: [alice, bob, ubuntu, gitlab-runner]
+  tasks:
+    - name: Upgrade system prerequisite
+      ansible.builtin.include_role:
+        name: manage_users
+        tasks_from: sdk
+    - name: Refresh all shared and personal environments
+      ansible.builtin.include_role:
+        name: manage_users
+        tasks_from: environments

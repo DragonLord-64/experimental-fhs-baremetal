@@ -1,5 +1,9 @@
 # manage_venvs
 
+The site provisioning workflow now uses `manage_users`
+for accounts, system SDK and all BittWare environments. This standalone role
+remains for existing direct callers; use `--tags manage_users` with `site.yml`.
+
 Create shared Python virtual environments. Use versioned package specs
 (`name==1.2.3`) for full idempotency.
 

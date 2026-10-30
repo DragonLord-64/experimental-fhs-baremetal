@@ -1,0 +1,13 @@
+---
+- name: Resolve account home and primary group
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ fhs_environment_user }}"
+
+- name: Configure personal BittWare environment
+  ansible.builtin.include_tasks: environment.yml
+  vars:
+    fhs_environment_path: "{{ ansible_facts.getent_passwd[fhs_environment_user][4] }}/{{ fhs_user_venv_name }}"
+    fhs_environment_owner: "{{ fhs_environment_user }}"
+    fhs_environment_group: "{{ ansible_facts.getent_passwd[fhs_environment_user][2] }}"
+    fhs_environment_shared: false

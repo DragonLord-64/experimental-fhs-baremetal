@@ -1,0 +1,11 @@
+---
+fhs_keys_dir: /home/dragon-lord/fhs-user-environments-20261030/keys
+fhs_users:
+  - name: gitlab-runner
+    system: true
+    groups: [bittware]
+fhs_shared_venv_owner: ubuntu
+fhs_venv_packages: []
+fpga_update_bittware_sdk: true
+fpga_bittware_sdk_deb: /home/dragon-lord/fhs-user-environments-20261030/fhs-sdk-fixture-1.0.deb
+fpga_bittware_sdk_package: fhs-sdk-fixture

@@ -607,3 +607,18 @@ with direct folder/file copies at the user's request. No Git inspection or
 destination cleanup; matching files are overwritten, including NetBox inventory.
 Old group-vars files still require manual removal. Source/link and whitespace
 checks passed. Official was not modified.
+
+### 2026-10-30 — Combined user and BittWare environment setup
+
+The `manage_users` role now creates accounts, installs the selected system SDK
+and activates/installs tools into the shared `/opt/venvs/fhs` and each managed
+account's `.bw_venv`. GitLab runner and the existing local account are ordinary
+inventory entries; SSH/password/group settings remain configurable. Site calls
+the role after distribution access instead of separate users/venv/SDK/runner
+steps. Task files separate accounts, system package and environment setup.
+
+Disposable Ubuntu validation passed first installation, repeat installer skips,
+ownership-drift repair and SDK-version upgrade for four personal environments
+and the shared environment. Syntax, source boundaries and documentation builds
+passed. Tests used a synthetic SDK, not proprietary packages or hardware; the
+container was removed. See [results](../ops/role-tests/user-environments/VALIDATION.md).

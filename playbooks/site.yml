@@ -6,37 +6,18 @@
 # exact set of roles, for example:
 #   ansible-playbook playbooks/provision.yml --tags manage_users,setup_fhs_network
 
-- name: Foundation (users + network)
+- name: Foundation (network)
   hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [foundation]
   tasks:
-    - name: Apply users role
-      ansible.builtin.include_role:
-        name: manage_users
-        apply:
-          tags: [manage_users]
-      tags: [manage_users]
     - name: Apply network_setup role
       ansible.builtin.include_role:
         name: setup_fhs_network
         apply:
           tags: [setup_fhs_network]
       tags: [setup_fhs_network]
-
-- name: (local dev only) Setup local dev password
-  hosts: device_roles_fpga-host-server
-  become: true
-  gather_facts: false
-  tags: [local_dev]
-  tasks:
-    - name: Create or update user account with password
-      ansible.builtin.user:
-        name: "{{ local_dev_user }}"
-        password: "{{ local_dev_user_pass }}"
-        state: present
-      tags: [local_dev_user]
 
 - name: Distribution access
   hosts: device_roles_fpga-host-server
@@ -86,24 +67,12 @@
   gather_facts: false
   tags: [environment]
   tasks:
-    - name: Install venvs
+    - name: Configure users and BittWare environments
       ansible.builtin.include_role:
-        name: manage_venvs
+        name: manage_users
         apply:
-          tags: [manage_venvs]
-      tags: [manage_venvs]
-    - name: BittWare SDK install
-      ansible.builtin.include_role:
-        name: manage_bittware_sdk
-        apply:
-          tags: [manage_bittware_sdk]
-      tags: [manage_bittware_sdk]
-    - name: Create gitlab-runner user
-      ansible.builtin.include_role:
-        name: manage_gitlab-runner
-        apply:
-          tags: [manage_gitlab-runner]
-      tags: [manage_gitlab-runner]
+          tags: [manage_users]
+      tags: [manage_users]
 
 - name: DPDK, Arkville, and DOCA install
   hosts: device_roles_fpga-host-server

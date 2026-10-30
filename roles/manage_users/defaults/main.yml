@@ -1,8 +1,8 @@
 ---
-# Users to create. Each entry: {name, password (SHA-512 hash), ssh_keys: [...]}
+# Additional human/service accounts; public-key filenames also create accounts.
 fhs_users: []
 fhs_keys_dir: ""
-# Groups every managed user is added to.
+# Default human groups; explicit service users default to BittWare only.
 fhs_user_groups:
   - sudo
   - "{{ fhs_bittware_group }}"
@@ -15,11 +15,26 @@ fhs_development_passwordless_sudo: false
 fhs_sudoers_content: |
   # Managed FHS development policy
   {% if fhs_development_passwordless_sudo | bool %}
-  {% for key in found_key_files.files | sort(attribute='path') %}
-  {{ key.path | basename | regex_replace('[.]pub$', '') }} ALL=(ALL) NOPASSWD:ALL
+  {% for name in fhs_key_usernames | sort %}
+  {% if name not in (fhs_users | selectattr('system', 'defined') | selectattr('system') | map(attribute='name') | list) %}
+  {{ name }} ALL=(ALL) NOPASSWD:ALL
+  {% endif %}
   {% endfor %}
   {% endif %}
 
 # Shared identity used by the SDK and runner roles as well.
 fhs_bittware_group: bittware
 fhs_bittware_group_gid: 666
+
+# Shared and per-account SDK environments.
+fhs_setup_user_environments: true
+fhs_user_venv_name: .bw_venv
+fhs_shared_venv_path: /opt/venvs/fhs
+fhs_shared_venv_owner: root
+fhs_venv_python: /usr/bin/python3
+fhs_venv_packages: [pip, setuptools, wheel, packaging]
+fpga_bittware_sdk_deb: ""
+fpga_bittware_sdk_package: bittware-sdk
+fpga_bittware_sdk_root: /usr/share/bittware-sdk
+fpga_update_bittware_sdk: false
+fpga_apt_packages: [python3, python3-pip, python3-venv, udev, libusb-1.0-0, libffi-dev]

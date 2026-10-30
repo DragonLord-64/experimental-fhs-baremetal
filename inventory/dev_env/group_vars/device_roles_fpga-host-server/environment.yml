@@ -1,22 +1,14 @@
 ---
-venvs:
-  - path: /opt/venvs/fhs
-    python: /usr/bin/python3
-    owner: ubuntu
-    group: bittware
-    packages:
-      - pip
-      - setuptools
-      - wheel
-  - path: /home/ubuntu/.bw_venv
-    python: /usr/bin/python3
-    owner: ubuntu
-    group: ubuntu
-    packages:
-      - pip
-      - setuptools
-      - wheel
+fhs_user_venv_name: .bw_venv
+fhs_shared_venv_path: /opt/venvs/fhs
+fhs_shared_venv_owner: ubuntu
+fhs_users:
+  - name: "{{ local_dev_user }}"
+    password: "{{ local_dev_user_pass }}"
+    groups: "{{ fhs_user_groups }}"
+  - name: gitlab-runner
+    system: true
+    groups: [bittware]
 
-users_setup_venvs: true
 fpga_bittware_sdk_deb: "{{ fhs_archives_dir }}/bittware-sdk-ubuntu24.04-2026.1.0.deb"
 fpga_update_bittware_sdk: true

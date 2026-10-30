@@ -1,29 +1,54 @@
-# manage_users
+# Users and BittWare environments
 
-Creates FHS accounts from controller-local public key files, configures sudo and adds the Ansible user to the shared BittWare group. Other memberships are preserved.
+Create managed accounts, install the system SDK and prepare BittWare tools with
+one role. Each public-key account, explicit account and the Ansible account gets
+`~/.bw_venv`; the shared environment is `/opt/venvs/fhs`.
 
-## Variables
+## Configure
 
-| Var | Default | Purpose |
-|---|---|---|
-| `fhs_keys_dir` | Empty (required) | Controller directory containing `username.pub` files; at least one is required |
-| `fhs_user_groups` | `[sudo, bittware]` | Groups assigned to managed users |
-| `fhs_sudoers_file` | `/etc/sudoers.d/99-fhs-passwordless` | Sudoers drop-in, checked with visudo |
-| `fhs_development_passwordless_sudo` | `false` | Opt in only approved key-file accounts to passwordless development sudo |
-| `fhs_sudoers_content` | Generated named-user policy | Optional explicit sudo policy override |
-| `fhs_bittware_group` / `fhs_bittware_group_gid` | `bittware` / `666` | Shared SDK/runner identity |
-| `vault_user_password_<username>` | `!` | Optional protected password hash for each discovered user |
+Put `username.pub` files under `fhs_keys_dir`. In the device-role
+`environment.yml`, select the SDK and additional accounts:
 
-`fhs_users: []` remains in defaults but is not consumed by `tasks/main.yml`. Accounts and SSH keys are derived from `*.pub` filenames and contents, not that list.
+```yaml
+fpga_bittware_sdk_deb: "{{ fhs_archives_dir }}/bittware-sdk-ubuntu24.04-2026.1.0.deb"
+fpga_update_bittware_sdk: true
+fhs_user_venv_name: .bw_venv
+fhs_shared_venv_path: /opt/venvs/fhs
+fhs_shared_venv_owner: ubuntu
+fhs_users:
+  - name: gitlab-runner
+    system: true
+    groups: [bittware]
+```
 
-## Workflow
+Additional accounts accept `group`, `groups`, `home`, `shell`, protected
+`password` and `ssh_keys`. Keep the existing local account/password entry if
+required. Public-key accounts use `vault_user_password_<username>` or a locked
+password. Existing supplementary groups and SSH keys are preserved.
 
-1. Set `fhs_keys_dir` explicitly and place one `username.pub` per approved account there. The development inventory selects `/provision/files.d/dev-ssh-keys.d`; production has no default development key directory.
-2. Supply any password hashes through protected variables.
-3. From `/provision`, select the host and role:
+## Run
 
-   ```bash
-   ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_users
-   ```
+```bash
+# Configure package access first, then accounts and all SDK environments.
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution,manage_users --ask-vault-pass
+# Subsequent account or SDK updates, with package access already configured.
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_users --ask-vault-pass
+```
 
-The wrapper tag selects the whole role. Account creation defaults to a locked password. `inventory/dev_env/group_vars/all.yml` explicitly enables passwordless sudo for the accounts discovered in the approved development key directory; production must leave that option false. A custom `fhs_sudoers_content` overrides the generated policy. SSH connections reset after membership changes. The role does not remove accounts absent from the key directory.
+Set `fpga_update_bittware_sdk: false` to use an already installed SDK. The role
+activates each environment and runs `bw_pip install` as its owner with
+`BWSDK_ROOT` set. SDK version changes, missing tooling or broken dependencies
+trigger installation again. Successful environments are checked on every run.
+The shared environment is readable/executable by the BittWare group; personal
+ones belong to their users. No GitLab registration or runner service is installed.
+
+```bash
+# Activate your tools when needed; login shell startup is unchanged.
+source ~/.bw_venv/bin/activate
+```
+
+`fhs_setup_user_environments: false` selects account/access setup only.
+Development passwordless sudo remains an explicit opt-in through
+`fhs_development_passwordless_sudo`; service accounts are excluded from its
+public-key policy. `fhs_sudoers_content` can override the policy. Task files split
+accounts, SDK packages, shared/personal environments and installation checks.

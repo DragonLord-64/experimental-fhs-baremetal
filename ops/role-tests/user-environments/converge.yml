@@ -1,0 +1,7 @@
+---
+- name: Synthetic account environments
+  hosts: all
+  gather_facts: true
+  become: true
+  roles:
+    - manage_users

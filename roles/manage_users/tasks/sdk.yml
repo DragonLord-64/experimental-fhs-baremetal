@@ -1,0 +1,27 @@
+---
+- name: Install Python and SDK prerequisites
+  ansible.builtin.apt:
+    name: "{{ fpga_apt_packages }}"
+    state: present
+    cache_valid_time: 3600
+
+- name: Install the selected system SDK package
+  ansible.builtin.import_tasks: sdk_package.yml
+  when: fpga_update_bittware_sdk | bool
+
+- name: Require the BittWare installer
+  ansible.builtin.stat:
+    path: "{{ fpga_bittware_sdk_root }}/bin/bw_pip"
+  register: fhs_bw_installer
+
+- name: Validate installed BittWare SDK
+  ansible.builtin.assert:
+    that:
+      - fhs_bw_installer.stat.executable | default(false)
+    fail_msg: Install the SDK first or set fpga_update_bittware_sdk and fpga_bittware_sdk_deb.
+
+- name: Read installed SDK version for environment updates
+  ansible.builtin.command:
+    argv: [dpkg-query, -W, '-f=${Version}', "{{ fpga_bittware_sdk_package }}"]
+  register: fhs_sdk_version
+  changed_when: false

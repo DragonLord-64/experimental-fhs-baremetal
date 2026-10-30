@@ -1,84 +1,11 @@
 ---
-- name: Require an explicitly approved controller key directory
-  ansible.builtin.assert:
-    that: fhs_keys_dir | length > 0
-    fail_msg: Set fhs_keys_dir to the approved key directory for this inventory.
+- name: Create accounts and configure access
+  ansible.builtin.import_tasks: accounts.yml
 
-- name: Find all user public key files on controller
-  ansible.builtin.find:
-    paths: "{{ fhs_keys_dir }}"
-    patterns: "*.pub"
-  register: found_key_files
-  delegate_to: localhost
+- name: Install the system SDK prerequisite
+  ansible.builtin.import_tasks: sdk.yml
+  when: fhs_setup_user_environments | bool
 
-- name: Abort if no public key files are found
-  ansible.builtin.fail:
-    msg: |
-      No public key files (*.pub) were found in "{{ fhs_keys_dir }}".
-      • Ensure the directory exists on your Ansible controller.
-      • Populate it with files named after your users (e.g., aschell.pub).
-  when: found_key_files.matched == 0
-
-- name: Install sudo
-  ansible.builtin.package:
-    name: sudo
-    state: present
-  become: true
-
-- name: Ensure managed groups exist
-  ansible.builtin.group:
-    name: "{{ item }}"
-    state: present
-  become: true
-  loop: "{{ fhs_user_groups | difference([fhs_bittware_group]) }}"
-
-- name: Ensure the shared BittWare group has its configured GID
-  ansible.builtin.group:
-    name: "{{ fhs_bittware_group }}"
-    gid: "{{ fhs_bittware_group_gid }}"
-    state: present
-  become: true
-
-- name: Configure sudo group privilege
-  ansible.builtin.copy:
-    dest: "{{ fhs_sudoers_file }}"
-    content: "{{ fhs_sudoers_content }}"
-    owner: root
-    group: root
-    mode: "0440"
-    validate: /usr/sbin/visudo -cf %s
-  become: true
-
-- name: Add the current Ansible user to the bittware group
-  ansible.builtin.user:
-    name: "{{ ansible_user }}"
-    groups: "{{ fhs_bittware_group }}"
-    append: true
-  become: true
-
-- name: Create user accounts
-  ansible.builtin.user:
-    name: "{{ item.path | basename | regex_replace('\\.pub$') }}"
-    password: "{{ lookup('vars', 'vault_user_password_' ~ (item.path | basename | regex_replace('\\.pub$')), default='!') }}"
-    groups: "{{ fhs_user_groups | join(',') }}"
-    append: true
-    create_home: true
-    shell: /bin/bash
-    state: present
-  become: true
-  loop: "{{ found_key_files.files }}"
-  loop_control:
-    label: "{{ item.path | basename }}"
-
-- name: Install authorized SSH keys
-  ansible.posix.authorized_key:
-    user: "{{ item.path | basename | regex_replace('\\.pub$') }}"
-    key: "{{ lookup('file', item.path) }}"
-    state: present
-  become: true
-  loop: "{{ found_key_files.files }}"
-  loop_control:
-    label: "{{ item.path | basename }}"
-
-- name: Refresh SSH membership after all account changes
-  ansible.builtin.meta: reset_connection
+- name: Create shared and personal BittWare environments
+  ansible.builtin.import_tasks: environments.yml
+  when: fhs_setup_user_environments | bool

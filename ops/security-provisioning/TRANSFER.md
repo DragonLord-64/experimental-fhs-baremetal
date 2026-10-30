@@ -78,6 +78,11 @@ transfer. Cleanup removes the selected legacy controller/provisioning environmen
 follow [its tagged commands](../../docs/src/playbooks/certificate-update.md).
 This pass does not change throughput limits or tune production resources.
 
+Accounts and BittWare environments now use one `manage_users` role/tag. Copy its
+new task files, `playbooks/site.yml` and environment group vars together. The
+`gitlab-runner` account is an entry in `fhs_users`; the separate venv/SDK/runner
+tags are no longer selected by `site.yml`. See [user setup](../../roles/manage_users/README.md).
+
 ## Validation
 
 Lab commands/results live beside this note, outside copied source. Lab success
