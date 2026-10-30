@@ -599,3 +599,11 @@ preserves the destination NetBox token/filters and host inventory, backs up
 overwritten files and leaves official Git changes unstaged. A temporary-checkout
 fixture verified dry-run, copy/deletion, preservation, backup and dirty-target
 refusal. Source/link and whitespace checks passed; official was not modified.
+
+### 2026-10-30 — Plain copy transfer
+
+Replaced the transfer helper's history-dependent selection and merge/backup logic
+with direct folder/file copies at the user's request. No Git inspection or
+destination cleanup; matching files are overwritten, including NetBox inventory.
+Old group-vars files still require manual removal. Source/link and whitespace
+checks passed. Official was not modified.
