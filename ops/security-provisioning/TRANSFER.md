@@ -7,6 +7,24 @@ HTTPS and portable inventory; it does not require importing the old proxy images
 
 ## Copy source
 
+With the checkouts beside each other, run from experimental:
+
+```sh
+python3 ops/security-provisioning/copy-to-official.py --dry-run
+python3 ops/security-provisioning/copy-to-official.py
+git -C ../ska-mid-cbf-fhs-baremetal status --short
+git -C ../ska-mid-cbf-fhs-baremetal diff
+```
+
+Pass a destination path if its folder has another name. The script requires a
+clean destination, copies committed changes against the official comparison
+above, and applies only the recorded source deletions. It preserves the official
+NetBox token and filters while updating its URL and certificate verification.
+Original overwritten/deleted files are backed up in a private temporary directory.
+Review site group vars against that backup as well as Git before committing.
+New files appear in `git status`; ordinary `git diff` shows tracked changes.
+The script never stages, commits, pushes or deploys the official checkout.
+
 Review changes in a clean official checkout, preserving destination credentials
 and deployment overrides. Copy these source directories together, including new
 files and reviewed deletions:

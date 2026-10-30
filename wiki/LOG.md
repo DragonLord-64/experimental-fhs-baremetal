@@ -590,3 +590,12 @@ five baseline failures; broader legacy
 live acceptance stops at its existing identity assertion. No full-suite or
 production deployment claim. See [validation](../ops/security-provisioning/VALIDATION.md)
 and [official copy prerequisites](../ops/security-provisioning/TRANSFER.md).
+
+### 2026-10-30 — Copy-only official transfer helper
+
+Added [the transfer script](../ops/security-provisioning/copy-to-official.py) for
+sibling checkouts. It copies selected source changes, applies recorded deletions,
+preserves the destination NetBox token/filters and host inventory, backs up
+overwritten files and leaves official Git changes unstaged. A temporary-checkout
+fixture verified dry-run, copy/deletion, preservation, backup and dirty-target
+refusal. Source/link and whitespace checks passed; official was not modified.
