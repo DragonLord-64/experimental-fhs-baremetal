@@ -21,8 +21,9 @@ spec:
       containers:
       - name: squid
         image: {{ .Values.gitProxy.image | quote }}
-        command: [/usr/sbin/squid]
-        args: ['-N', '-f', /etc/squid/squid.conf]
+        # emptyDir survives container restarts; an old PID 1 file is not a live proxy.
+        command: [/bin/sh, -ec]
+        args: ['rm -f /tmp/squid.pid; exec /usr/sbin/squid -N -f /etc/squid/squid.conf']
         ports: [{name: proxy, containerPort: 3128}]
         securityContext:
           allowPrivilegeEscalation: false

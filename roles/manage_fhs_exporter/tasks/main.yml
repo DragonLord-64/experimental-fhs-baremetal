@@ -1,4 +1,10 @@
 ---
+- name: Require inventory artifact selections
+  ansible.builtin.assert:
+    that:
+      - manage_exporters_exporter_file | length > 0
+    fail_msg: Set the required controller artifact paths and versions in group vars.
+
 - name: Install apt packages for exporters
   ansible.builtin.apt:
     name: "{{ fhs_exporter_apt_packages }}"

@@ -6,8 +6,8 @@ settings only; add reviewed discovery credentials separately before a manual joi
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `k8s_repo_version` | `v1.31` | Kubernetes package repository minor |
-| `k8s_pkg_version` | `1.31.4` | Kubernetes package patch |
+| `k8s_repo_version` | required | Kubernetes package repository minor |
+| `k8s_pkg_version` | required | Kubernetes package patch |
 | `k8s_control_plane_version` | required | Reviewed target cluster version |
 | `containerd_pkg_version` | required | Exact Docker `containerd.io` package version, 1.7 or 2.x |
 | `k8s_labels` | `{}` | Node registration labels |
@@ -17,8 +17,7 @@ settings only; add reviewed discovery credentials separately before a manual joi
 Preflight requires matching package/repository/control-plane minors and Kubernetes
 1.31 or newer for kubeadm v1beta4. This conservative same-minor policy does not
 implement rolling cluster upgrades. Kubernetes 1.38+ requires containerd 2.x.
-The old Kubernetes default is retained for source alignment, not automatically
-upgraded or approved for a new production cluster. Set all versions deliberately;
+Deployment pins are set in inventory `runtime.yml`. Set all versions deliberately;
 package availability and target runtime compatibility require user review. See
 [Kubernetes runtime guidance](https://kubernetes.io/docs/setup/production-environment/container-runtimes/).
 

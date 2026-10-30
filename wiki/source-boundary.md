@@ -4,6 +4,10 @@ Shared source paths stay aligned with official `ska-mid-cbf-fhs-baremetal`.
 Compared against official `development2` at `0658e93` on 2026-10-24. This is a
 copy boundary, not a claim that every private change has been accepted upstream.
 
+For the 2026-10-30 update against official `2638d5b`, use the
+[current transfer prerequisites](../ops/security-provisioning/TRANSFER.md).
+The old host snapshot is not copied over current NetBox inventory.
+
 | Copy/sync as source | Keep experimental |
 |---|---|
 | `platform/` — values, bundled charts/dashboard assets, NetBox image recipe | `ops/` — lab services, orchestration, emulators, acceptance tests, captures |

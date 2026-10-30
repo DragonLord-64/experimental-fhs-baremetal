@@ -1,3 +1,11 @@
+- name: Require controller archive directory and package selections
+  ansible.builtin.assert:
+    that:
+      - manage_prometheus_file_directory | length > 0
+      - manage_prometheus_prometheus_tar | length > 0
+      - manage_prometheus_node_tar | length > 0
+    fail_msg: Set Prometheus and node exporter archive selections in monitoring group vars.
+
 - name: Require private authentication hash when enabled
   ansible.builtin.assert:
     that:

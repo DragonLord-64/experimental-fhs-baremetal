@@ -4,6 +4,10 @@ pip_index_url: ""
 
 # Hosts to mark as 'trusted' (no TLS verification — internal-only).
 pip_trusted_hosts: []
+# Explicit compatibility opt-in for isolated HTTP indexes only.
+pip_allow_insecure_http: false
+# Optional PEM bundle on the target; empty uses system trust.
+pip_ca_bundle: ""
 
 # Where to write the system-wide pip config.
 pip_config_file: /etc/pip.conf

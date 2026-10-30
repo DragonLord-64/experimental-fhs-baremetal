@@ -5,9 +5,11 @@ Read-only check for the October 2026 eMudhra/emSign certificate incident on Ubun
 again after provisioning. It reports findings before failing;
 it never updates certificates, removes venvs or installs packages.
 
+Targets `device_roles_fpga-host-server`; use the current NetBox inventory.
+
 ```sh
-ansible-playbook -i inventory/dev_env/hosts.yml playbooks/audit_python_ca.yml
-ansible-playbook -i inventory/dev_env/hosts.yml playbooks/site.yml --tags audit_python_ca
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/audit_python_ca.yml --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --tags audit_python_ca --ask-vault-pass
 ```
 
 Use `--limit <host>` for one server. Both final checks carry `always` and
@@ -15,7 +17,7 @@ Use `--limit <host>` for one server. Both final checks carry `always` and
 Use `--tags audit_python_ca` for validation alone. An intentional
 `--skip-tags audit_python_ca` skips the final audit.
 
-The role runs [files/audit.sh](files/audit.sh) using Bash and reports `changed=0`.
+The role runs [files/audit.sh](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/roles/audit_python_ca/files/audit.sh) using Bash and reports `changed=0`.
 The script checks the Ubuntu CA package against
 [USN-8944-1](https://ubuntu.com/security/notices/USN-8944-1), lists venv markers and
 pip/certifi versions, and decodes named CA bundles under `/opt`, `/home`, `/root`

@@ -1,0 +1,9 @@
+---
+dpdk_local_path: "{{ fhs_resources_dir }}/"
+dpdk_tarball_filename: "dpdk.tar.gz"
+
+arkville_release: "25.11"
+arkville_local_path: "{{ fhs_resources_dir }}/arkville/archive"
+
+doca_local_path: "{{ fhs_resources_dir }}/"
+doca_deb_filename: "doca-host_3.3.0-088000-26.01-ubuntu2404_amd64.deb"

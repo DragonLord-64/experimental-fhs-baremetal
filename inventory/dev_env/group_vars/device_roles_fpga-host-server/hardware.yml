@@ -1,0 +1,27 @@
+---
+fpga_packages:
+  - dkms
+  - linux-modules-extra-{{ ansible_kernel }}
+
+fpga_kernel_cmdline:
+  - iommu=pt
+  - amd_iommu=on
+  - hugepages=8
+
+fpga_update_grub: true
+fpga_update_bmc: true
+fpga_bmc_firmware_version: 1.3.16
+fpga_bmc_firmware_zip: "{{ fhs_archives_dir }}/bmc30-1.3.1_6.zip"
+
+# Standard BIST device names and PCI layout. Override these in host_vars only
+# when a server's physical card layout intentionally differs.
+nvme0_device_name: "nvme0n1"
+nvme1_device_name: "nvme1n1"
+nvme0_bdf: "84:00.0"
+nvme1_bdf: "86:00.0"
+
+fpga_card0_bdf_detri: "81:00.1"
+fpga_card1_bdf_detri: "c1:00.1"
+fpga_card0_bdf_ark: "81:00.0"
+fpga_card1_bdf_ark: "c1:00.0"
+terabox_nic0_bdf: "01:00.0"

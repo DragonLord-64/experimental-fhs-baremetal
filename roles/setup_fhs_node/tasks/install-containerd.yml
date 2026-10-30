@@ -28,6 +28,7 @@
 - name: Install containerd
   ansible.builtin.apt:
     name: "containerd.io={{ containerd_pkg_version }}"
+    allow_downgrades: "{{ allow_pkg_downgrades }}"
     state: present
     update_cache: true
 

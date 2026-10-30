@@ -2,8 +2,8 @@
 # roles/fhs_node_setup/defaults/main.yml
 # Defaults have LOW precedence - easily overridable by users
 # Use for values that users commonly customize
-k8s_repo_version: "v1.31"
-k8s_pkg_version: "1.31.4" # Change this patch number if needed
+k8s_repo_version: ""
+k8s_pkg_version: ""
 
 k8s_packages:
   - kubelet
@@ -16,4 +16,5 @@ k8s_labels: {}
 # Required: reviewed target cluster version and exact Docker containerd.io package.
 k8s_control_plane_version: ""
 containerd_pkg_version: ""
+allow_pkg_downgrades: false
 k8s_enable_ceph: false

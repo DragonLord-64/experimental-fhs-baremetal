@@ -5,4 +5,6 @@ argument_specs:
     options:
       pip_index_url: {type: str, required: true}
       pip_trusted_hosts: {type: list, elements: str, default: []}
+      pip_allow_insecure_http: {type: bool, default: false}
+      pip_ca_bundle: {type: path, default: ""}
       pip_config_file: {type: path, default: /etc/pip.conf}

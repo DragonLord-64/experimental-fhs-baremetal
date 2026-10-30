@@ -1,0 +1,13 @@
+---
+# Preserve reviewed deployment pins from official development2 (2638d5b).
+# These select the existing cluster versions; this update does not upgrade nodes.
+k8s_control_plane_version: "1.31.6"
+k8s_repo_version: "v1.31"
+k8s_pkg_version: "1.31.6"
+containerd_pkg_version: "2.2.5-1~ubuntu.24.04~noble"
+allow_pkg_downgrades: true
+
+k8s_taints:
+  - key: "node-type"
+    value: "fhs-worker"
+    effect: "NoSchedule"

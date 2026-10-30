@@ -13,5 +13,5 @@ data:
       devpi-init --serverdir /var/devpi --root-passwd "$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
     fi
     # This is a package cache; do not index the entire PyPI catalog for web search.
-    exec devpi-server --serverdir /var/devpi --host 0.0.0.0 --port 3141 --restrict-modify root --indexer-backend null
+    exec devpi-server --serverdir /var/devpi --host 0.0.0.0 --port 3141 --restrict-modify root --indexer-backend null{{ if .Values.devpi.ingress.enabled }} --outside-url {{ printf "https://%s" .Values.devpi.ingress.hostname | quote }}{{ end }}
 {{- end }}

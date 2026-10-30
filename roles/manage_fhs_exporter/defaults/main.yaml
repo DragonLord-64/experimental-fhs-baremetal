@@ -1,6 +1,6 @@
 ---
 # Exporter Installation Source Files (Absolute path on the control host)
-manage_exporters_exporter_file: "/provision/files.d/external_archives/ska-mid-cbf-fhs-prometheus-exporter-0.0.5-rc3.tar.gz"
+manage_exporters_exporter_file: ""
 
 # Service Configuration Options
 fhs_exporter_port: 9110

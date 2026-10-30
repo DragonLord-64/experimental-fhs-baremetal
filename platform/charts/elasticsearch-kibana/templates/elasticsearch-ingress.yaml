@@ -1,0 +1,26 @@
+{{- if .Values.elasticsearch.ingress.enabled }}
+{{- $host := required "elasticsearch.ingress.host is required for HTTPS" .Values.elasticsearch.ingress.host }}
+{{- $secret := required "elasticsearch.ingress.tlsSecretName is required for HTTPS" .Values.elasticsearch.ingress.tlsSecretName }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "elastic-small.name" . }}-api
+  annotations:
+    {{- $annotations := mergeOverwrite (dict "nginx.ingress.kubernetes.io/ssl-redirect" "true" "nginx.ingress.kubernetes.io/force-ssl-redirect" "true") (.Values.elasticsearch.ingress.annotations | deepCopy) }}
+    {{- toYaml $annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.elasticsearch.ingress.className | quote }}
+  tls:
+  - hosts: [{{ $host | quote }}]
+    secretName: {{ $secret | quote }}
+  rules:
+  - host: {{ $host | quote }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "elastic-small.name" . }}
+            port: {number: 9200}
+{{- end }}

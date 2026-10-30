@@ -1,0 +1,3 @@
+---
+platform_ca_certificates: []
+platform_ca_directory: /usr/local/share/ca-certificates

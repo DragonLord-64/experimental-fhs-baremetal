@@ -17,6 +17,7 @@ work to the [log](LOG.md).
 | Logging and installation home | [Environment evidence](test-environment-plan.md#recorded-validation) | [Logging fixture](../ops/platform/logging/README.md), [device role](../roles/filebeat/README.md), [installation home](../ops/platform/landing-page/README.md) |
 | Task execution and scope | [Task creation and focused acceptance](task-creation.md), [decisions](decisions.md#confirmed-with-the-user--2026-10-24-pipeline-cleanup) | [Task intake/scout/manager](../ops/agent-pipeline/README.md), [worker rules](../ops/AGENTS.md) |
 | Source provenance and transfer | [Source map](sources.md), [copy boundary](source-boundary.md) | [Preserved-source manifest](../ops/source-boundary/PROVENANCE.json) |
+| Provisioning security and inventory split | [Copy prerequisites](../ops/security-provisioning/TRANSFER.md) | [2026-10-30 checks and limits](../ops/security-provisioning/VALIDATION.md) |
 
 ## Decisions and history
 

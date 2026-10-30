@@ -6,17 +6,22 @@ and the installation home. Dependencies and
 dashboards are bundled. NetBox plugins install automatically; no image build
 is required.
 
-Run from the directory containing `fhs-platform/`. The installation uses release
-`mid-cbf-hw`, namespace `hw-management` and prefix `/mid-cbf-hw`.
+Run from the repository root. The installation uses release `mid-cbf-hw`,
+namespace `hw-management` and prefix `/mid-cbf-hw`.
 
 ```bash
-helm upgrade --install mid-cbf-hw ./fhs-platform \
+# Edit hostnames, certificate Secret names and site storage settings first.
+vi platform/values-provisioning.yaml
+# Install or upgrade the platform with the provisioning endpoints enabled.
+helm upgrade --install mid-cbf-hw platform/charts/fhs-platform \
   --namespace hw-management --create-namespace \
-  --set-string global.urlPrefix=/mid-cbf-hw \
+  -f platform/values-provisioning.yaml \
   --wait --wait-for-jobs --timeout 20m
 ```
 
-Add `-f site-values.yaml` for site overrides; defaults are in [values.yaml](values.yaml).
+Create the DNS records and TLS Secrets before deploying; see
+[HTTPS setup](CONFIGURATION.md#https-endpoints).
+Defaults are in [values.yaml](values.yaml).
 Use the same release, namespace, credentials and volumes for upgrades. Back up
 databases before schema/plugin changes; Helm rollback does not restore data.
 

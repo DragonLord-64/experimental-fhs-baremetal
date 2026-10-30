@@ -17,7 +17,7 @@ interfaces: true
 config_context: true
 ```
 
-The tracked development configuration uses a Vault-encrypted bearer token and disables certificate validation. Supply its Vault password privately; do not copy tokens into commands or published inventory output. Use trusted certificates where available. Install the collection from `requirements.yml` and its Python dependencies before polling.
+The tracked development configuration uses a Vault-encrypted bearer token and enables certificate validation. Install the public issuing CA in the provisioning host/container before loading inventory, or set `ca_path` to its PEM bundle. See [controller trust](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/inventory/README.md#trust-netbox-before-loading-inventory). Replace the old preserved Vault token with one issued by the new NetBox deployment. Supply its Vault password privately; do not copy tokens into commands or published inventory output. Install the collection from `requirements.yml` and its Python dependencies before polling.
 
 ## Workflow
 
@@ -71,7 +71,9 @@ ansible-playbook playbooks/netbox/bifrost_export.yml --ask-vault-pass \
   -e bifrost_output=<PRIVATE_OUTPUT_PATH>
 ```
 
-The protected files supply `netbox_url`, `netbox_token` and `redfish_credentials` (`defaults` and optional per-device entries). The default output is `playbooks/netbox/output/baremetal.yml`; always choose a protected destination. Export does not enroll, deploy or modify NetBox. Enrollment and imaging remain separate Bifrost operations. No implemented post-provisioning role-to-IP deployment export is established by this playbook.
+The existing private file `/provision/files.d/credentials/mid-cbf-hw-netbox.yml`
+must use the new deployment URL (`https://<NETBOX_HOST>/mid-cbf-hw/netbox/`) and
+a token issued there. The protected files supply `netbox_url`, `netbox_token` and `redfish_credentials` (`defaults` and optional per-device entries). The default output is `playbooks/netbox/output/baremetal.yml`; always choose a protected destination. Export does not enroll, deploy or modify NetBox. Enrollment and imaging remain separate Bifrost operations. No implemented post-provisioning role-to-IP deployment export is established by this playbook.
 
 See [development playbooks](../playbooks/development.md) for discovery/import and switch POAP, and [provisioning design](../design/provisioning-interface.md) for the intended physical sequence.
 

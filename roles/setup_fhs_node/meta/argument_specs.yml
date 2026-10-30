@@ -3,7 +3,8 @@ argument_specs:
   main:
     short_description: Configure an FHS Kubernetes node
     options:
-      k8s_repo_version: {type: str, default: v1.31}
-      k8s_pkg_version: {type: str, default: 1.31.4}
+      k8s_repo_version: {type: str, default: ""}
+      k8s_pkg_version: {type: str, default: ""}
+      allow_pkg_downgrades: {type: bool, default: false}
       k8s_packages: {type: list, elements: str, default: [kubelet, kubeadm, kubectl]}
       k8s_taints: {type: list, elements: dict, default: []}

@@ -7,7 +7,7 @@
 #   ansible-playbook playbooks/provision.yml --tags manage_users,setup_fhs_network
 
 - name: Foundation (users + network)
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [foundation]
@@ -26,7 +26,7 @@
       tags: [setup_fhs_network]
 
 - name: (local dev only) Setup local dev password
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [local_dev]
@@ -39,11 +39,23 @@
       tags: [local_dev_user]
 
 - name: Distribution access
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [distribution]
   tasks:
+    - name: Install platform CA trust
+      ansible.builtin.include_role:
+        name: setup_platform_ca
+        apply:
+          tags: [setup_platform_ca]
+      tags: [setup_platform_ca]
+    - name: Apply apt_repo_access
+      ansible.builtin.include_role:
+        name: setup_apt_source
+        apply:
+          tags: [setup_apt_source]
+      tags: [setup_apt_source]
     - name: Update Ubuntu Python tooling and certificate trust
       ansible.builtin.apt:
         name:
@@ -55,12 +67,6 @@
         state: latest
         update_cache: true
       tags: [python_ca_updates]
-    - name: Apply apt_repo_access
-      ansible.builtin.include_role:
-        name: setup_apt_source
-        apply:
-          tags: [setup_apt_source]
-      tags: [setup_apt_source]
     - name: Apply pip_index
       ansible.builtin.include_role:
         name: setup_pip_source
@@ -75,7 +81,7 @@
       tags: [setup_git_proxy]
 
 - name: Environment setup
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [environment]
@@ -100,7 +106,7 @@
       tags: [manage_gitlab-runner]
 
 - name: DPDK, Arkville, and DOCA install
-  hosts: all
+  hosts: device_roles_fpga-host-server
   gather_facts: false
   tags: [dpdk_arkville]
   tasks:
@@ -112,7 +118,7 @@
       tags: [manage_dpdk_ark_doca]
 
 - name: FHS nodes
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: true
   tags: [fhs_node]
@@ -146,7 +152,7 @@
       tags: [ubuntu24_cis]
 
 - name: FHS services
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: true
   tasks:
@@ -170,7 +176,7 @@
       tags: [filebeat]
 
 - name: FPGA hosts
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tasks:
@@ -182,7 +188,7 @@
       tags: [setup_fpga_host]
 
 - name: File transfer service
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [rsync]
@@ -198,7 +204,7 @@
         enabled: true
 
 - name: HW Management
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [hw_management]

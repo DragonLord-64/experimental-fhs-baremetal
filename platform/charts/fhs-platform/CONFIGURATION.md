@@ -1,6 +1,6 @@
 # Platform settings
 
-Set site overrides in `site-values.yaml`; install/upgrade commands are in the
+Set site overrides in `platform/values-provisioning.yaml`; install/upgrade commands are in the
 [README](README.md). Full defaults: [values.yaml](values.yaml).
 
 ## Access
@@ -61,8 +61,9 @@ tags instead. Exporters must already be installed on the selected hosts.
 
 ## Logging
 
-Filebeat setup is temporarily disabled by default because its image pull is
-unavailable. Re-enable with `logging.filebeatSetup.enabled=true` when ready.
+Run [Ansible Filebeat setup](../../../roles/filebeat/README.md) to load index
+management from the same package installed on servers. The Helm setup job is
+disabled by default; enable it only when its additional assets are wanted.
 
 `logging.filebeatSetup.enabled` runs Filebeat setup on upgrades: templates,
 system ingest pipelines, ILM and the `fhs-filebeat` Kibana data view. Retention
@@ -113,22 +114,63 @@ on 443. Defaults are `gitlab.com` and `git-collab.nrc-cnrc.gc.ca`; add required
 redirect/archive hosts deliberately. A leading dot allows subdomains. No disk
 cache or TLS interception is used. Git still verifies origin certificates.
 
-Both default to ClusterIP. Like APT, each supports `service.type` and optional
-`service.nodePort`. Set reachable addresses in inventory, rather than copying
-cluster DNS names to servers outside Kubernetes:
+The chart defaults to ClusterIP. `platform/values-provisioning.yaml` sets APT,
+devpi and Git services to LoadBalancer for the separate provisioning machines.
+Your deployment's LoadBalancer DNS integration can map service names to external
+addresses. After changing namespace/release, use the new service names and check
+resolution from the provisioning host and targets.
+
+Set these values in inventory `distribution.yml`:
 
 ```yaml
-apt_cache_url: http://<apt-proxy-host>:3142
-pip_index_url: http://<python-index-host>:3141/root/pypi/+simple/
-git_proxy_url: http://<git-proxy-host>:3128
+apt_cache_url: http://mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local:3142
+pip_index_url: https://<devpi-ingress-host>/root/pypi/+simple/
+pip_trusted_hosts: []
+git_proxy_url: http://mid-cbf-hw-git-proxy.hw-management.svc.cluster.local:3128
 ```
 
-These are unauthenticated internal endpoints, with no TLS listeners. Restrict
-reachability to approved provisioning clients; do not publish them on the
-Internet. For pip on an untrusted network, provide approved HTTPS termination
-and CA trust instead of `pip_trusted_hosts`. The latter bypasses certificate
-verification. APT keeps Signed-By verification; HTTP cache transport does not
-replace package signatures. Do not embed credentials in system-wide URLs.
+Restrict proxy access to approved provisioning clients. APT retains Signed-By
+verification over the HTTP cache. Git uses an HTTP proxy with a verified HTTPS
+connection through it to the origin; no TLS interception is needed. Do not embed
+credentials in system-wide URLs. pip uses the HTTPS endpoint below, with normal
+certificate verification and no trusted-host exception.
+
+## HTTPS endpoints
+
+The provisioning values propose dedicated devpi and Elasticsearch hostnames.
+Create DNS records pointing to your ingress address, and obtain matching
+certificates from the site CA. LoadBalancer service DNS does not automatically
+create these dedicated ingress names. Keep certificates/private keys outside
+Git. Create the Secrets on the cluster using locally supplied files:
+
+```bash
+kubectl create namespace hw-management --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n hw-management create secret tls platform-tls \
+  --cert=/path/to/platform-fullchain.pem --key=/path/to/platform.key \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n hw-management create secret tls devpi-tls \
+  --cert=/path/to/devpi-fullchain.pem --key=/path/to/devpi.key \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n hw-management create secret tls elasticsearch-tls \
+  --cert=/path/to/elasticsearch-fullchain.pem --key=/path/to/elasticsearch.key \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+`global.hostname` and `global.tlsSecretName` configure shared NetBox/Grafana/Kibana
+access. `devpi.ingress.hostname`/`tlsSecretName` configure pip HTTPS.
+`logging.elasticsearch.ingress.host`/`tlsSecretName` configure Elasticsearch API
+HTTPS. Set them in `platform/values-provisioning.yaml`, then run the README's
+Helm command. TLS terminates at ingress; traffic to these backends inside the
+cluster remains HTTP. Keep direct backend access restricted.
+
+Install the public issuing CA in the provisioning host/container trust store
+before resolving NetBox inventory, and on targets with
+[setup_platform_ca](../../../roles/setup_platform_ca/README.md). Set inventory
+`filebeat_elasticsearch_hosts` to `https://<elasticsearch-hostname>:443`.
+Filebeat defaults to port 9200 when the port is omitted. Provisioning
+credentials stay under `/provision/files.d/credentials/`; they are not retrieved
+automatically from Kubernetes Secrets. See [Filebeat](../../../roles/filebeat/README.md).
+Renew certificates and update these Secrets through the site's normal process.
 
 Images are pinned by digest in values.yaml: prebuilt
 [jonasal/devpi-server](https://github.com/JonasAlfredsson/docker-devpi) (6.20.3)

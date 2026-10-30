@@ -1,65 +1,78 @@
-# filebeat
+# Filebeat
 
-Installs a controller-local Filebeat Debian package, collects the systemd journal and publishes logs to Elasticsearch. See `tasks/main.yml` and `templates/filebeat.yml.j2`.
+Run Elasticsearch index setup from the provisioning host using the same `.deb`
+as the managed servers. Setup extracts the package temporarily; it does not
+install Filebeat or start a service on the provisioning host.
 
-## Variables
+## Configure
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `filebeat_package_path` | `/provision/files.d/external_archives/filebeat-9.5.5-amd64.deb` | Controller package |
-| `filebeat_expected_major_version` | `9` | Required installed major version |
-| `filebeat_config_path` | `/etc/filebeat/filebeat.yml` | Configuration path |
-| `filebeat_validate_output` | `true` | Test configured Elasticsearch connectivity |
-| `filebeat_journald_seek` | `since` | Initial journal position |
-| `filebeat_journald_since` | `-1h` | Initial lookback; existing registry cursor wins |
-| `filebeat_ssl_verification_mode` | `full` | TLS certificate verification |
-
-Set `filebeat_elasticsearch_hosts` for the target environment and supply `filebeat_credentials_file` privately; see `defaults/main.yml`. The original endpoint is not a VM override. Credentials are read on the controller and are not part of examples.
-
-## Command and tags
-
-```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags filebeat
-```
-
-The `filebeat` tag is supplied by the site wrapper; the role has no internal phase tags. Installation validates configuration and, by default, the output connection before starting the service. Stage-5 checks use the real pinned Debian package and validate installation,
-configuration and a process start without a live Elasticsearch endpoint. Live
-index-management compatibility, publishing and journal ingestion remain unvalidated;
-the disposable container service fixture is not systemd.
-
-## Elasticsearch setup
-
-Before starting device services, the role runs `filebeat setup --index-management`
-once per play batch on `filebeat_setup_delegate` (default `localhost`), without
-become. Use the normal linear strategy and one shared endpoint/package per play.
-The delegate needs Linux amd64, `dpkg-deb`, and access to Elasticsearch. It extracts
-the exact `filebeat_package_path` installed on devices into a private temporary
-directory; no control-host Filebeat service is installed. Temporary files are
-removed even when setup fails. Setup runs on each invocation, preserves existing
-templates and ILM policies, and reports changed; check mode skips it.
-
-Supply a separate Vault-capable `filebeat_setup_credentials_file` on the controller
-(default `/provision/files.d/credentials/filebeat-setup.yml`) containing either:
+Set these in `inventory/dev_env/group_vars/device_roles_fpga-host-server/monitoring.yml`:
 
 ```yaml
-filebeat_elasticsearch_api_key: "<id>:<api_key>"
+filebeat_package_path: "{{ fhs_archives_dir }}/filebeat-9.5.5-amd64.deb"
+filebeat_setup_credentials_file: "{{ fhs_credentials_dir }}/filebeat-setup.yml"
+filebeat_credentials_file: "{{ fhs_credentials_dir }}/filebeat.yml"
+# Filebeat defaults to port 9200; specify :443 for the HTTPS ingress.
+filebeat_elasticsearch_hosts: ["https://<elasticsearch-hostname>:443"]
 ```
 
-or `filebeat_elasticsearch_username` and `filebeat_elasticsearch_password`.
-These are setup credentials only; devices continue using the publishing credentials
-in `filebeat_credentials_file`. The role consumes existing credentials; it does
-not create users or API keys. Secret tasks suppress output and diffs.
+Place the package under `/provision/files.d/external_archives/`. The Linux amd64
+setup delegate defaults to `localhost` and needs `dpkg-deb`, CA trust and access
+to Elasticsearch. [Install controller trust first](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/inventory/README.md).
+Keep `filebeat_ssl_verification_mode: full`.
 
+Create `/provision/files.d/credentials/filebeat-setup.yml` with an existing setup
+identity:
+
+```yaml
+filebeat_elasticsearch_username: "<setup-user>"
+filebeat_elasticsearch_password: "<setup-password>"
+```
+
+Alternatively supply only `filebeat_elasticsearch_api_key: "<id>:<api_key>"`.
 The setup identity needs cluster `monitor`, `manage_ilm`, `manage_index_templates`
-and index `manage` on `filebeat-*`. See Elastic's
-[setup privileges](https://www.elastic.co/docs/reference/beats/filebeat/privileges-to-setup-beats).
-Publishers need cluster `monitor` and index `create_doc`, `auto_configure` on
-`filebeat-*`; the device configuration skips ILM existence checks. See
-[publishing privileges](https://www.elastic.co/docs/reference/beats/filebeat/privileges-to-publish-events).
-Keep setup privileges off device accounts. Use HTTPS for authenticated endpoints.
-Set `filebeat_setup_ssl_certificate_authorities` to CA paths on the delegate;
-`filebeat_ssl_certificate_authorities` contains paths on devices.
+and index `manage` on `filebeat-*`. These credentials remain on the controller.
 
-This loads the package's default versioned template, data stream and ILM policy.
-The journald input uses no module ingest pipelines or Kibana dashboards. Set
-`filebeat_setup_enabled: false` only when index management is already provisioned.
+```bash
+# Encrypt the credentials, then load the template and lifecycle policy once.
+ansible-vault encrypt /provision/files.d/credentials/filebeat-setup.yml
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST> --ask-vault-pass
+```
+
+Select one representative FPGA-role host to resolve its package/endpoint vars;
+setup itself runs on the delegate and requires no SSH connection to that host.
+Temporary package and credential files are removed after setup.
+
+## Install collectors on managed servers
+
+Create a separate `/provision/files.d/credentials/filebeat.yml`:
+
+```yaml
+filebeat_elasticsearch_username: filebeat_writer
+filebeat_elasticsearch_password: "<platform-filebeat-password>"
+```
+
+Match the platform credential's `filebeat-password` value. Encrypt this file with
+Ansible Vault too. Publishing credentials are written to root-only device
+configuration; do not give devices the setup identity.
+
+```bash
+# Install the package, configure journald collection and start the device service.
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_platform_ca,filebeat --ask-vault-pass
+```
+
+Device installation defaults to `filebeat_setup_enabled: false`: run the explicit
+setup command first. Configuration and output connectivity are checked before
+starting the service. The initial journal lookback is `filebeat_journald_since:
+-1h`; an existing registry cursor takes precedence. Change these and other tuning
+in group vars; generic defaults remain in [defaults/main.yml](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/roles/filebeat/defaults/main.yml).
+
+System CA trust is used by default. For explicit CA bundles,
+`filebeat_setup_ssl_certificate_authorities` contains delegate paths and
+`filebeat_ssl_certificate_authorities` contains device paths. Distribute public
+certificates with [setup_platform_ca](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/roles/setup_platform_ca/README.md).
+
+The optional Helm `logging.filebeatSetup.enabled` job also loads system-module
+pipelines and the Kibana data view. Leave it disabled for Ansible index setup
+alone; enable it deliberately when those additional assets are needed. Neither
+setup path installs collectors. See [platform logging](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/platform/charts/fhs-platform/CONFIGURATION.md#logging).

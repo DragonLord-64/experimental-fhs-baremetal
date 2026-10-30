@@ -1,6 +1,6 @@
 ---
 - name: Update CA trust and remove retired controller environments
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   vars:

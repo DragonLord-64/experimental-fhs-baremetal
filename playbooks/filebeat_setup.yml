@@ -1,0 +1,15 @@
+---
+- name: Set up Elasticsearch with the selected device Filebeat package
+  hosts: device_roles_fpga-host-server
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Run setup only from the provisioning host
+      ansible.builtin.include_role:
+        name: filebeat
+        tasks_from: setup
+        apply:
+          delegate_to: "{{ filebeat_setup_delegate }}"
+          become: false
+      run_once: true
+      when: not ansible_check_mode

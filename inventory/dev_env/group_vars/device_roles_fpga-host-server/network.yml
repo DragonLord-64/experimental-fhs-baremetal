@@ -1,0 +1,5 @@
+---
+network_interface_prefix: '16'
+network_dns: [172.17.0.95, 192.168.128.13]
+network_ntp: [192.168.1.6, 192.168.1.7]
+network_domains: ["hw-management.svc.cluster.local"]

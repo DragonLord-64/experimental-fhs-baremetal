@@ -1,0 +1,26 @@
+{{- if and .Values.devpi.enabled .Values.devpi.ingress.enabled }}
+{{- $host := required "devpi.ingress.hostname is required for HTTPS" .Values.devpi.ingress.hostname }}
+{{- $secret := required "devpi.ingress.tlsSecretName is required for HTTPS" .Values.devpi.ingress.tlsSecretName }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-devpi
+  annotations:
+    {{- $annotations := mergeOverwrite (dict "nginx.ingress.kubernetes.io/ssl-redirect" "true" "nginx.ingress.kubernetes.io/force-ssl-redirect" "true") (.Values.devpi.ingress.annotations | deepCopy) }}
+    {{- toYaml $annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.global.ingressClassName | quote }}
+  tls:
+  - hosts: [{{ $host | quote }}]
+    secretName: {{ $secret | quote }}
+  rules:
+  - host: {{ $host | quote }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-devpi
+            port: {number: 3141}
+{{- end }}

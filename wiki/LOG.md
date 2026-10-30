@@ -571,3 +571,22 @@ the workbook does not synchronize NetBox or retain assignment history.
 Formula checks covered shared quantities, zero overrides, new parts/roles,
 missing components and partial receipts. LibreOffice recalculation verified the
 example BOM and a changed recipe with one VCCU excluded. No hardware accessed.
+
+### 2026-10-30 — Provisioning inventory and verified platform access
+
+Split site group vars, selected current NetBox inventory explicitly and retained
+official device-role targeting/runtime inputs. Added public CA distribution,
+verified devpi/Elasticsearch ingress, new service endpoints, NetBox verification
+and a Filebeat setup-only command using the selected device package. Removed
+active role site paths/endpoints from generic defaults. Fixed Squid stale-PID
+startup after container restarts. Usage docs follow the Bifrost quickstart;
+deleted duplicate READMEs remain removed. No throughput tuning was included.
+
+Existing `fhs-test` delivered-chart tests passed for HTTPS pip install/import,
+Git proxy allow/deny and restart, APT transport and verified NetBox inventory/native
+importer smoke. The delivered logging child chart passed same-package Filebeat
+template/ILM setup without controller installation. Full importer tests retain
+five baseline failures; broader legacy
+live acceptance stops at its existing identity assertion. No full-suite or
+production deployment claim. See [validation](../ops/security-provisioning/VALIDATION.md)
+and [official copy prerequisites](../ops/security-provisioning/TRANSFER.md).

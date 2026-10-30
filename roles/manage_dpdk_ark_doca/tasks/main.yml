@@ -1,4 +1,15 @@
 ---
+- name: Require inventory artifact selections
+  ansible.builtin.assert:
+    that:
+      - dpdk_local_path | length > 0
+      - dpdk_tarball_filename | length > 0
+      - arkville_local_path | length > 0
+      - arkville_release | length > 0
+      - doca_local_path | length > 0
+      - doca_deb_filename | length > 0
+    fail_msg: Set the required controller artifact paths and versions in group vars.
+
 - name: Require at least one installation output
   ansible.builtin.assert:
     that: dpdk_install_outputs | length > 0

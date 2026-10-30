@@ -1,10 +1,9 @@
 ---
 # Controller-side paths; credentials file may be encrypted with Ansible Vault.
-filebeat_package_path: "/provision/files.d/external_archives/filebeat-9.5.5-amd64.deb"
-filebeat_credentials_file: "/provision/files.d/credentials/filebeat.yml"
+filebeat_package_path: ""
+filebeat_credentials_file: ""
 filebeat_remote_package_path: "/var/tmp/{{ filebeat_package_path | basename }}"
-filebeat_elasticsearch_hosts:
-  - "http://192.168.129.37:9200"
+filebeat_elasticsearch_hosts: []
 filebeat_config_path: /etc/filebeat/filebeat.yml
 filebeat_binary: /usr/bin/filebeat
 filebeat_path_home: /usr/share/filebeat
@@ -25,8 +24,8 @@ filebeat_journald_since: -1h
 filebeat_journald_include_matches: []
 
 # Bootstrap index management on the control host from the exact device package.
-filebeat_setup_enabled: true
+filebeat_setup_enabled: false
 filebeat_setup_delegate: localhost
-filebeat_setup_credentials_file: /provision/files.d/credentials/filebeat-setup.yml
+filebeat_setup_credentials_file: ""
 # CA paths here belong to the delegate, not the managed devices.
 filebeat_setup_ssl_certificate_authorities: []

@@ -60,3 +60,17 @@
     label: "{{ item.item.instead_of }} -> {{ item.item.target }}"
   when: item.item.instead_of not in item.stdout_lines
   changed_when: true
+
+- name: Read system Git certificate verification
+  ansible.builtin.command:
+    argv: [git, config, --system, --get, http.sslVerify]
+  register: git_ssl_verify
+  check_mode: false
+  changed_when: false
+  failed_when: git_ssl_verify.rc not in [0, 1]
+
+- name: Require Git HTTPS certificate verification
+  ansible.builtin.command:
+    argv: [git, config, --system, --replace-all, http.sslVerify, 'true']
+  when: git_ssl_verify.stdout != 'true'
+  changed_when: true

@@ -1,0 +1,32 @@
+# Site settings for release mid-cbf-hw in namespace hw-management.
+# Create the named TLS Secrets and DNS records before deploying.
+global:
+  hostname: rmdskadevdu011.mda.ca
+  urlPrefix: /mid-cbf-hw
+  scheme: https
+  tlsSecretName: platform-tls
+  ingressAnnotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+aptCacher:
+  service:
+    type: LoadBalancer
+devpi:
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: true
+    hostname: devpi.rmdskadevdu011.mda.ca
+    tlsSecretName: devpi-tls
+gitProxy:
+  service:
+    type: LoadBalancer
+logging:
+  elasticsearch:
+    ingress:
+      enabled: true
+      className: nginx
+      host: elasticsearch.rmdskadevdu011.mda.ca
+      tlsSecretName: elasticsearch-tls
+  filebeatSetup:
+    enabled: false

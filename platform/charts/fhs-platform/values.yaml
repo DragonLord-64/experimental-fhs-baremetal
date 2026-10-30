@@ -676,6 +676,11 @@ aptCacher:
 # Read-only public PyPI cache. No private upload/index administration is exposed.
 devpi:
   enabled: true
+  ingress:
+    enabled: false
+    hostname: ''
+    tlsSecretName: ''
+    annotations: {}
   # jonasal/devpi-server 6.20.3; prebuilt, no startup pip installation.
   image: docker.io/jonasal/devpi-server@sha256:5e6768442a738251a760acac91f595a07e80cfac28fcfaed098c3e0e544cf46e
   service:

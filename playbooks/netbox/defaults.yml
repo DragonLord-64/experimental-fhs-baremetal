@@ -1,6 +1,6 @@
 # Shared import/export settings. Override per run with -e key=value.
 netbox_credentials_file: /provision/files.d/credentials/mid-cbf-hw-netbox.yml
-netbox_validate_certs_default: false
+netbox_validate_certs_default: true
 hardware_command_path: '{{ ''/opt/netbox-demo/bin:/usr/sbin:/usr/bin:/sbin:/bin'' if hardware_simulation
   | default(false) | bool else ''/usr/sbin:/usr/bin:/sbin:/bin'' }}'
 bootstrap_bittware_enabled: true

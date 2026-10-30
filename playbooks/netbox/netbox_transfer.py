@@ -107,7 +107,7 @@ def credentials(path, vault_args=()):
         else:
             values = yaml.safe_load(raw)
         url, token = str(values['netbox_url']), str(values['netbox_token'])
-        verify = values.get('netbox_validate_certs', values.get('netbox_validate_certs_default', False))
+        verify = values.get('netbox_validate_certs', values.get('netbox_validate_certs_default', True))
         if '{{' in str(verify):
             raise TransferError('Certificate setting must be resolved before use')
         if isinstance(verify, str):

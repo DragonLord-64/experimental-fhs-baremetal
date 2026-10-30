@@ -1,0 +1,6 @@
+---
+# Shared configuration for FHS terabox compute nodes. Keep identity and
+# deliberate exceptions in host_vars/<hostname>.yml.
+
+local_dev_user: "terabox1501b"
+local_dev_user_pass: "$6$TYxIxZ1emBIXP0r6$vwCBROo9EEyOAyP1cQwTDhDQmfDSH3MnrXmxl0ZZNaOb1WFxZlfVDNz1W0fc/sgK6F8LRCoWpz.F6GxCuCx790"

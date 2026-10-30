@@ -4,12 +4,12 @@ Applies configuration to installed FHS servers. [provision.yml](provision.yml.md
 
 ## Roles and tags
 
-Each role include has its exact role name as a tag. Most plays target `all`, including `setup_fhs_node` and the enabled installation-only `manage_fhs_bist`; external `ubuntu24_cis` targets the independent `ubuntu24_cis_production` Linux policy group. Confirm that group exists in the resolved inventory; the current NetBox file creates `teraboxes` and device-role groups, not `fhs_nodes`.
+Each role include has its exact role name as a tag. Most plays target `device_roles_fpga-host-server`, including `setup_fhs_node` and the enabled installation-only `manage_fhs_bist`; external `ubuntu24_cis` targets the independent `ubuntu24_cis_production` Linux policy group. Confirm that group exists in the resolved inventory; the current NetBox file creates `teraboxes` and device-role groups, not `fhs_nodes`.
 
 | Play tag | Role tags |
 |---|---|
 | `foundation` | `manage_users`, `setup_fhs_network` |
-| `distribution` | `python_ca_updates` (Ubuntu packages), `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
+| `distribution` | `setup_platform_ca`, `python_ca_updates` (Ubuntu packages), `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
 | `environment` | `manage_venvs`, `manage_bittware_sdk`, `manage_gitlab-runner` |
 | `dpdk_arkville` | `manage_dpdk_ark_doca` |
 | `fhs_node` | `setup_fhs_node`, `manage_fhs_bist` |
@@ -41,7 +41,9 @@ The final command changes the host. See the role pages for defaults and explicit
 
 ## Ubuntu 24 CIS scope
 
-Use `-i inventory/dev_env` to merge explicit Linux group membership with NetBox.
+Use `-i inventory/dev_env/netbox-inv.yml` for the current NetBox inventory.
+To merge additional explicit Linux membership, pass a reviewed groups-only file
+as a second `-i`; do not load the inventory directory with the old snapshot.
 The policy group includes `linux_servers` (known FPGA server role, control servers
 and FHS nodes). The NetBox file also selects the known `fpga-host-server` role/tag;
 other Linux roles must set `fhs_linux_server: true` in NetBox config context or be
@@ -81,3 +83,24 @@ clients to use them.
 Provide the bitstream, SDK, DOCA and build archives,
 monitoring packages and protected setup/publishing
 credentials. `site.yml` and `provision.yml` are the entry points.
+
+## Package sources and logging
+
+Edit the split group vars under
+`inventory/dev_env/group_vars/device_roles_fpga-host-server/` before applying.
+`distribution.yml` selects the new platform endpoints: signed APT over the HTTP
+cache, verified HTTPS pip and an HTTP Git proxy tunnelling verified HTTPS.
+`monitoring.yml` selects the local packages and Elasticsearch endpoint.
+
+```bash
+# Configure public CA trust and distribution clients.
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution --ask-vault-pass
+# Load Elasticsearch index assets without installing a controller service.
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST> --ask-vault-pass
+# Install the selected Filebeat package on the server after setup succeeds.
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags filebeat --ask-vault-pass
+```
+
+[Controller trust and inventory](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/inventory/README.md) must be ready
+before these commands. [Filebeat](../roles/filebeat.md) documents
+the separate setup and publishing credentials.

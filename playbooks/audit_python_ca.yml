@@ -1,6 +1,6 @@
 ---
 - name: Audit Python certificate trust after provisioning
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: true
   gather_facts: false
   tags: [always, audit_python_ca]

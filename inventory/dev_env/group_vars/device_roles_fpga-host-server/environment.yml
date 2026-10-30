@@ -1,0 +1,22 @@
+---
+venvs:
+  - path: /opt/venvs/fhs
+    python: /usr/bin/python3
+    owner: ubuntu
+    group: bittware
+    packages:
+      - pip
+      - setuptools
+      - wheel
+  - path: /home/ubuntu/.bw_venv
+    python: /usr/bin/python3
+    owner: ubuntu
+    group: ubuntu
+    packages:
+      - pip
+      - setuptools
+      - wheel
+
+users_setup_venvs: true
+fpga_bittware_sdk_deb: "{{ fhs_archives_dir }}/bittware-sdk-ubuntu24.04-2026.1.0.deb"
+fpga_update_bittware_sdk: true

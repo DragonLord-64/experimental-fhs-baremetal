@@ -4,7 +4,7 @@
 #   ansible-playbook playbooks/provision.yml --tags manage_users,setup_fhs_network
 
 - name: Validate provisioning inputs
-  hosts: all
+  hosts: device_roles_fpga-host-server
   become: false
   gather_facts: false
   tasks:
@@ -20,7 +20,7 @@
   ansible.builtin.import_playbook: site.yml
 
 - name: Provisioning summary
-  hosts: all
+  hosts: device_roles_fpga-host-server
   gather_facts: false
   tasks:
     - name: Report

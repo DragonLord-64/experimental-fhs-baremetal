@@ -1,6 +1,13 @@
 # Fresh Elasticsearch/Kibana installation; Secret values are supplied separately.
 existingSecret: elastic-credentials
 elasticsearch:
+  # Dedicated root hostname for external clients; TLS terminates at ingress.
+  ingress:
+    enabled: false
+    className: nginx
+    host: ''
+    tlsSecretName: ''
+    annotations: {}
   image:
     repository: docker.io/library/elasticsearch
     tag: 9.5.5

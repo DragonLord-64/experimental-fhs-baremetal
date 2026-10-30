@@ -27,7 +27,9 @@ class SourceBoundaryTest(unittest.TestCase):
         readme = (ROOT / 'platform/charts/fhs-platform/README.md').read_text()
         self.assertIn('helm upgrade --install mid-cbf-hw', readme)
         self.assertIn('--namespace hw-management', readme)
-        self.assertIn('global.urlPrefix=/mid-cbf-hw', readme)
+        self.assertIn('-f platform/values-provisioning.yaml', readme)
+        site = yaml.safe_load((ROOT / 'platform/values-provisioning.yaml').read_text())
+        self.assertEqual('/mid-cbf-hw', site['global']['urlPrefix'])
 
     def test_shared_runtime_does_not_depend_on_lab_trees(self):
         for folder in SHARED:

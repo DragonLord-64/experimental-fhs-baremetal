@@ -1,0 +1,14 @@
+---
+manage_exporters_exporter_file: "{{ fhs_archives_dir }}/ska-mid-cbf-fhs-prometheus-exporter-0.0.5-rc3.tar.gz"
+manage_prometheus_prometheus_tar: "prometheus-3.12.0.linux-amd64"
+manage_prometheus_node_tar: "node_exporter-1.11.1.linux-amd64"
+manage_prometheus_enable_auth: true
+manage_prometheus_user_cred: $2b$12$nk3YaT9.oGhFHSFA084eWeai85B0TjTujC7fZSD9ktAOheOxfiWTO
+
+manage_prometheus_file_directory: "{{ fhs_archives_dir }}"
+filebeat_package_path: "{{ fhs_archives_dir }}/filebeat-9.5.5-amd64.deb"
+filebeat_credentials_file: "{{ fhs_credentials_dir }}/filebeat.yml"
+filebeat_setup_credentials_file: "{{ fhs_credentials_dir }}/filebeat-setup.yml"
+# Proposed ingress hostname: provision DNS and elasticsearch-tls before use.
+filebeat_elasticsearch_hosts: ["https://elasticsearch.rmdskadevdu011.mda.ca:443"]
+filebeat_expected_major_version: '9'

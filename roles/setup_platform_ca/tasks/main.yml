@@ -1,0 +1,28 @@
+---
+- name: Validate public CA certificate names
+  ansible.builtin.assert:
+    that:
+      - item.name is match('^[A-Za-z0-9_-]+$')
+      - item.src | length > 0
+  loop: "{{ platform_ca_certificates }}"
+
+- name: Ensure system trust tooling
+  ansible.builtin.apt:
+    name: ca-certificates
+    state: present
+  when: platform_ca_certificates | length > 0
+
+- name: Install public platform CA certificates
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ platform_ca_directory }}/{{ item.name }}.crt"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ platform_ca_certificates }}"
+  register: platform_ca_copy
+
+- name: Update system CA trust before configuring clients
+  ansible.builtin.command: update-ca-certificates
+  when: platform_ca_copy is changed
+  changed_when: true

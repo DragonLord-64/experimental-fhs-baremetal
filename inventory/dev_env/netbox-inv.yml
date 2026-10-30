@@ -1,11 +1,12 @@
 plugin: netbox.netbox.nb_inventory
-api_endpoint: https://rmdskadevdu011.mda.ca/netbox/
+api_endpoint: https://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
 
 interfaces: true
 ip_addresses: true
 
 # Configuration settings. See https://docs.ansible.com/projects/ansible/latest/collections/netbox/netbox/nb_inventory_inventory.html#parameters
-validate_certs: false
+validate_certs: true
+# For an internal CA, install it in controller trust or set ca_path to its PEM bundle.
 config_context: true
 use_extra_vars: true
 flatten_custom_fields: true
@@ -28,7 +29,8 @@ groups:
   teraboxes: "'fpga-host-server' in (tags | map(attribute='slug') | list) or device_role.slug == 'fpga-host-server'"
   nexus: "'nexus-switch' in (tags | map(attribute='slug') | list) or device_role.slug == 'nexus-switch'"
 
-# For access, required to have an access token set up for the user.
+# Replace the old deployment token with a token issued by the new NetBox before use.
+# Preserve Vault encryption; do not commit plaintext tokens.
 token:
   type: Bearer
   value:  !vault |

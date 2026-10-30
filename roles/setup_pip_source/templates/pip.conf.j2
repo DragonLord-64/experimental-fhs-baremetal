@@ -4,3 +4,6 @@ index-url = {{ pip_index_url }}
 {% if pip_trusted_hosts %}
 trusted-host = {{ pip_trusted_hosts | join(' ') }}
 {% endif %}
+{% if pip_ca_bundle %}
+cert = {{ pip_ca_bundle }}
+{% endif %}

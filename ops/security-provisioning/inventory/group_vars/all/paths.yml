@@ -1,0 +1,3 @@
+---
+# Same resource subdirectories as deployment; lab controller owns this root.
+fhs_resources_dir: /home/dragon-lord/fhs-security-20261030/resources
