@@ -103,7 +103,7 @@
     ansible.builtin.set_fact:
       enrollment_diagnostics: '{{ enrollment_diagnostics | default([]) + [diagnostic | from_json] }}'
     vars:
-      credentials: '{{ shared_redfish_credentials | combine((redfish_credentials | default({})).get(''defaults'', {})) | combine((redfish_credentials | default({})).get(''devices'', {}).get(item.name, {})) }}'
+      credentials: '{{ shared_redfish_credentials | combine((redfish_credentials | default({})).get(''defaults'', {})) | combine((redfish_credentials | default({})).get(''default'', {})) | combine((redfish_credentials | default({})).get(''devices'', {}).get(item.name, {})) }}'
       diagnostic: '{% set issues = [] %} {% if not item.nics %}{% set _ = issues.append(''No provisioning interfaces: tag the intended NetBox port with
         '' ~ bifrost_provisioning_tag) %}{% endif %} {% if item.nics | selectattr(''mgmt_only'', ''equalto'', true) | list %}{% set _ = issues.append(''A
         tagged provisioning interface is management-only in NetBox'') %}{% endif %} {% if item.nics | selectattr(''enabled'', ''equalto'', false) | list
@@ -135,7 +135,7 @@
     ansible.builtin.set_fact:
       bifrost_inventory: '{{ bifrost_inventory | default({}) | combine({item.name: node | from_json}) }}'
     vars:
-      credentials: '{{ shared_redfish_credentials | combine(redfish_credentials.defaults | default({})) | combine((redfish_credentials.devices | default({})).get(item.name, {})) }}'
+      credentials: '{{ shared_redfish_credentials | combine(redfish_credentials.defaults | default({})) | combine(redfish_credentials.default | default({})) | combine((redfish_credentials.devices | default({})).get(item.name, {})) }}'
       node: "{% set nics = [] %} {% for port in item.nics %} {% set _ = nics.append({'mac': port.mac}) %} {% endfor %} {{ item.extra | combine({'name':\
         \ item.name, 'driver': 'redfish',\n  'driver_info': {'redfish_address': item.redfish_address,\n                  'redfish_verify_ca': item.redfish_verify_ca}\n\
         \                 | combine(credentials)\n                 | combine({'redfish_system_id': item.redfish_system_id} if item.redfish_system_id else\

@@ -1295,3 +1295,9 @@ passed. Real BMC transport and physical hardware remain untested.
   import and Bifrost export. Earlier defaults/device overrides remain supported.
   Updated the copyable template and usage example. Validation: 52 wrapper tests,
   three transfer tests and an Ansible credential-mapping fixture passed.
+
+- 2026-10-31: User clarified the actual shared BMC schema is
+  `redfish_credentials.default.redfish_username/redfish_password` (singular
+  `default`). Import and export now accept that exact structure; templates show
+  it. Validation: 53 wrapper tests, three transfer tests and both export
+  credential expressions exercised through Ansible passed.

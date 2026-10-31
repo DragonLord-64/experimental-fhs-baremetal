@@ -386,6 +386,14 @@ class LifecycleContracts(unittest.TestCase):
         self.assertEqual(result['redfish_username'], 'fixture-user')
         self.assertEqual(result['redfish_password'], 'fixture-password')
 
+    def test_singular_redfish_credential_default(self):
+        values = {'redfish_credentials': {'default': {
+            'redfish_username': 'fixture-user', 'redfish_password': 'fixture-password'}}}
+        with patch.object(ironic.Path, 'exists', return_value=True), patch.object(ironic, 'protected_yaml', return_value=values):
+            result = ironic.credentials({'driver_info': {'redfish_password': '******'}})
+        self.assertEqual(result['redfish_username'], 'fixture-user')
+        self.assertEqual(result['redfish_password'], 'fixture-password')
+
     def test_protected_credentials_win(self):
         with patch.object(ironic.Path, 'exists', return_value=True), patch.object(ironic, 'protected_yaml', return_value={'defaults': {'ipmi_password': 'protected'}}):
             value = ironic.credentials({'driver_info': {'ipmi_password': '******'}})

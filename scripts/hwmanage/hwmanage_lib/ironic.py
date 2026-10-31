@@ -88,7 +88,7 @@ def credentials(host):
     nested = values.get('redfish', {}).get('credentials', {}).get('default', {}).get('redfish', {})
     standard = {('redfish_' + key): nested[key] for key in ('username', 'password') if key in nested}
     values = values.get('redfish_credentials', values)
-    defaults = values.get('defaults', {})
+    defaults = dict(values.get('defaults', {}), **values.get('default', {}))
     devices = values.get('devices', {})
     individual = devices.get(host.get('serial'), devices.get(host.get('name'), devices.get(host.get('uuid'), {})))
     return dict(host.get('driver_info', {}), **dict(standard, **dict(defaults, **individual)))

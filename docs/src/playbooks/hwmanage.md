@@ -114,12 +114,10 @@ ansible-vault encrypt /provision/files.d/credentials/redfish.yml
 The credential format is:
 
 ```yaml
-redfish:
-  credentials:
-    default:
-      redfish:
-        username: REPLACE_USER
-        password: REPLACE_PASSWORD
+redfish_credentials:
+  default:
+    redfish_username: REPLACE_USER
+    redfish_password: REPLACE_PASSWORD
 ```
 
 The earlier `redfish_credentials.defaults` format is also accepted.
