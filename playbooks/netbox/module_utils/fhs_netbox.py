@@ -19,7 +19,17 @@ class Sync:
         token=params['netbox_token'];self.session.headers.update(Authorization=('Bearer ' if token.startswith('nbt_') else 'Token ')+token)
     def request(self,method,path,**kwargs):
         response=self.session.request(method,self.url+path,timeout=30,**kwargs)
-        if not response.ok:raise ValueError(f'NetBox {method} {path} failed with HTTP {response.status_code}; inspect the plan and parent journal before retrying')
+        if not response.ok:
+            detail = ''
+            # These endpoints contain catalog metadata, never BMC/API credentials.
+            if response.status_code == 400 and path in (
+                    'dcim/sites/', 'dcim/device-roles/', 'dcim/device-types/', 'dcim/manufacturers/'):
+                try:
+                    detail = '; validation: ' + json.dumps(response.json(), ensure_ascii=True)[:2000]
+                except ValueError:
+                    pass
+            raise ValueError(f'NetBox {method} {path} failed with HTTP {response.status_code}' +
+                             (detail or '; inspect the plan and parent journal before retrying'))
         if method not in ('GET', 'OPTIONS'): self.cache.clear()
         if response.status_code == 204: return None
         return response.json()

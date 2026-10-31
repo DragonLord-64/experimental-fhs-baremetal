@@ -662,6 +662,18 @@ class MinimalImportContracts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'name or slug'):
             self.helper.new_device_defaults(sync, dict(site=None))
 
+    def test_catalog_validation_error_is_visible(self):
+        import fhs_netbox
+        sync = fhs_netbox.Sync(dict(netbox_url='https://fixture.invalid', netbox_token='fixture', validate_certs=True), False)
+        response = Mock(ok=False, status_code=400)
+        response.json.return_value = {'slug': ['Device type with this slug already exists.']}
+        with patch.object(sync.session, 'request', return_value=response):
+            with self.assertRaisesRegex(ValueError, 'slug.*already exists'):
+                sync.request('POST', 'dcim/device-types/', json={})
+            with self.assertRaises(ValueError) as caught:
+                sync.request('POST', 'dcim/devices/', json={})
+            self.assertNotIn('already exists', str(caught.exception))
+
     def test_missing_defaults_created_with_observed_manufacturer(self):
         import fhs_netbox
         sync = Mock()

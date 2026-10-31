@@ -52,6 +52,7 @@ if args.diagnostics_only:
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'playbooks/netbox/bifrost_export.yml',
                  'playbooks/netbox/library/fhs_provisioning_interface.py',
+                 'playbooks/netbox/module_utils/fhs_netbox.py',
                  'playbooks/netbox/tasks/compare.yml', 'playbooks/netbox/tasks/apply.yml',
                  'docs/src/playbooks/hwmanage.md', 'ansible.cfg',
                  'inventory/README.md',

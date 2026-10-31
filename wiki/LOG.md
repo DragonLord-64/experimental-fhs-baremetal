@@ -1318,3 +1318,10 @@ passed. Real BMC transport and physical hardware remain untested.
   Existing device placement/type is preserved. Validation: 55 wrapper tests
   and 24 native lab acceptance assertions passed, including preview without
   writes, creation with manufacturer and repeat reuse.
+
+- 2026-10-31: Operator's device-type creation returns HTTP 400. Catalog creation
+  failures now include NetBox's validation response for site, role, device type
+  and manufacturer endpoints, instead of discarding the actionable field error.
+  Other endpoint response bodies remain hidden. Added the shared API helper to
+  diagnostics copy scope. Validation: 56 wrapper and 19 importer tests passed.
+  The operator's precise device-type rejection remains unknown until retried.
