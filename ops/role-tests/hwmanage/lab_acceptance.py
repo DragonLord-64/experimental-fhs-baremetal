@@ -64,15 +64,54 @@ def main():
                 return record
         def run():
             return minimal.import_nodes({node_uuid: node}, Ironic(), settings, sync, probe=lambda *_: fru)[0]
+        port_uuid = str(uuid.uuid4())
+        node_updates = []
         class Handler(BaseHTTPRequestHandler):
             def log_message(self, *_):
                 pass
+            def do_PATCH(self):
+                if self.path.rstrip('/') != '/v1/nodes/'+node_uuid:
+                    self.send_error(404)
+                    return
+                changes = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                for change in changes:
+                    parts = change['path'].strip('/').split('/')
+                    assert parts[0] != 'uuid'
+                    target = node
+                    for part in parts[:-1]:
+                        target = target.setdefault(part, {})
+                    target[parts[-1]] = change['value']
+                node_updates.append(changes)
+                body = json.dumps(dict(node, provision_state='enroll', maintenance=False)).encode()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
             def do_GET(self):
                 path = self.path.split('?')[0].rstrip('/')
                 if path.endswith('/inventory'):
                     data = record
                 elif path.endswith('/nodes') or path.endswith('/nodes/detail'):
-                    data = {'nodes': [dict(node, provision_state='enroll', maintenance=False)]}
+                    from urllib.parse import parse_qs, urlsplit
+                    query = parse_qs(urlsplit(self.path).query)
+                    matched = 'name' not in query or query['name'] == [node.get('name')]
+                    data = {'nodes': [dict(node, provision_state='enroll', maintenance=False)] if matched else []}
+                elif path.endswith('/ports') or path.endswith('/ports/detail'):
+                    from urllib.parse import parse_qs, urlsplit
+                    query = parse_qs(urlsplit(self.path).query)
+                    ports = [dict(uuid=port_uuid, node_uuid=node_uuid,
+                                  address='02:ba:00:00:ee:37', pxe_enabled=True),
+                             dict(uuid=str(uuid.UUID(int=1)), node_uuid=str(uuid.UUID(int=2)),
+                                  address='02:ba:00:00:ee:38', pxe_enabled=True)]
+                    if 'address' in query:
+                        ports = [p for p in ports if p['address'] in query['address']]
+                    if 'node' in query or 'node_uuid' in query:
+                        owners = query.get('node', query.get('node_uuid'))
+                        ports = [p for p in ports if p['node_uuid'] in owners]
+                    if not path.endswith('/detail'):
+                        ports = [{k: p[k] for k in ('uuid', 'address')} for p in ports]
+                    data = {'ports': ports}
                 elif path.endswith('/nodes/'+node_uuid):
                     data = dict(node, provision_state='enroll', maintenance=False)
                 elif path in ('', '/v1'):
@@ -155,6 +194,18 @@ def main():
                     print(wrapper.stderr)
                     raise AssertionError('Wrapper import plan failed')
                 check(True, 'Wrapper import plan runs native playbook with resolved UUID snapshot')
+                from hwmanage_lib.settings import activated
+                from hwmanage_lib.ironic import Ironic as NativeIronic
+                with activated(controller_config):
+                    client = NativeIronic()
+                    host = dict(uuid=node_uuid, name=prefix, serial=prefix,
+                                nics=[dict(mac='02:ba:00:00:ee:37')])
+                    planned = client.reconcile(host, create=True, plan=True)
+                    check(planned['uuid'] == node_uuid and not node_updates,
+                          'Linked discovery plan reads detailed ownership and filters unrelated node ports')
+                    renamed = client.reconcile(host, create=True)
+                    check(renamed['uuid'] == node_uuid and renamed['name'] == prefix and len(node_updates) == 1,
+                          'Native SDK renames linked discovery with UUID and existing ports preserved')
         finally:
             server.shutdown()
             server.server_close()

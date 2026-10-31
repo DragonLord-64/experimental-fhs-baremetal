@@ -130,14 +130,18 @@ class Ironic:
         addresses = [str(n['mac']).lower() for n in nics]
         if len(set(addresses)) != len(addresses):
             raise Error('Duplicate provisioning MAC')
+        # Summary port responses omit ownership; request details for identity checks.
         owned_ports = {}
         for address in addresses:
-            ports = [normalize(p) for p in self.api.ports(address=address)]
-            if len(ports) > 1 or ports and (not old or ports[0].get('node_id', ports[0].get('node_uuid')) != old['uuid']):
-                raise Error('Provisioning MAC belongs to another registration')
+            ports = [normalize(p) for p in self.api.ports(details=True, address=address)]
+            if len(ports) > 1 or ports and (not old or (ports[0].get('node_id') or ports[0].get('node_uuid')) != old['uuid']):
+                raise Error('Provisioning MAC '+address+' has '+str(len(ports))+' matching port(s); owner(s) '+
+                            ', '.join(str(p.get('node_id') or p.get('node_uuid')) for p in ports)+
+                            '; selected Ironic UUID '+str((old or {}).get('uuid'))+'; ownership preserved')
             owned_ports[address] = ports
         if old and addresses:
-            existing = [normalize(p) for p in self.api.ports(node_uuid=old['uuid'])]
+            # Use the SDK query name, not the resource body's node_uuid field.
+            existing = [normalize(p) for p in self.api.ports(details=True, node=old['uuid'])]
             pxe = {str(p['address']).lower() for p in existing if p.get('is_pxe_enabled', p.get('pxe_enabled', True))}
             if pxe and pxe != set(addresses):
                 raise Error('Provisioning MAC conflicts with existing boot ports')

@@ -253,6 +253,30 @@ class LifecycleContracts(unittest.TestCase):
             ironic.Ironic(api).reconcile(dict(uuid='missing', name='a'), create=True)
         api.create_node.assert_not_called()
 
+    def test_linked_unnamed_discovery_uses_detailed_ports_and_native_node_filter(self):
+        api = Mock()
+        discovery = dict(uuid='discovered', name=None, provision_state='enroll',
+                         properties={'serial_number': 'SYS1412'})
+        api.find_node.side_effect = lambda value: discovery if value == 'discovered' else None
+        def ports(**query):
+            self.assertTrue(query.get('details'))
+            self.assertNotIn('node_uuid', query)
+            self.assertTrue(query.get('address') or query.get('node') == 'discovered')
+            return [dict(node_id=None, node_uuid='discovered',
+                         address='a8:a1:59:fb:a6:bb', pxe_enabled=True)]
+        api.ports.side_effect = ports
+        api.update_node.return_value = dict(discovery, name='SYS1412')
+        host = dict(uuid='discovered', name='SYS1412', serial='SYS1412',
+                    nics=[dict(mac='a8:a1:59:fb:a6:bb')])
+        client = ironic.Ironic(api)
+        self.assertEqual(client.reconcile(host, create=True, plan=True)['uuid'], 'discovered')
+        api.update_node.assert_not_called()
+        client.reconcile(host, create=True)
+        self.assertEqual(api.update_node.call_args.args[0], 'discovered')
+        self.assertEqual(api.update_node.call_args.kwargs['name'], 'SYS1412')
+        api.create_node.assert_not_called()
+        api.create_port.assert_not_called()
+
     def test_native_clean_argv_and_final_state(self):
         client = ironic.Ironic(Mock())
         client.get = Mock(return_value=dict(provision_state='manageable'))

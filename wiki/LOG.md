@@ -1185,3 +1185,21 @@ old-location cleanup. JSON parsed and its deployment fields matched existing
 Bifrost source values; credential-field and whitespace checks passed. This copies
 the configured checksum, not a new image-byte verification. No deployment or
 hardware operation was performed.
+
+### 2026-10-31 — correct native Ironic port ownership queries
+
+The user confirmed NetBox already holds the discovered Ironic UUID. Native SDK
+inspection found two issues: ownership checks requested summary port responses,
+and node-port filtering used `node_uuid` rather than an SDK-supported query key.
+[Reconciliation](../scripts/hwmanage/hwmanage_lib/ironic.py) now requests detailed
+ports and uses `node=UUID`, with a non-null owner alias fallback and actionable
+owner/selected-UUID errors. Existing UUID/name resolution and ownership rejection
+are retained. No MAC-based takeover or missing-link fallback was shipped.
+
+Validation: 43 focused tests passed. All 14 chart/importer/native-SDK acceptance
+assertions passed with a linked unnamed synthetic node, summary responses that
+omit ownership, and an unrelated node's port. Plan performed no updates; sync
+renamed the linked node through native PATCH without UUID changes or new ports.
+The healthy existing chart was inspected with explicit `fhs-test`; fixture objects
+and temporary forwarding were cleaned up. Whitespace checks passed. Actual user
+port ownership remains unverified until retry; no physical node was changed.

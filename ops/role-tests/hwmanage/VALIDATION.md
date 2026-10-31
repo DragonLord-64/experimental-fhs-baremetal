@@ -89,3 +89,9 @@ no longer relies on per-setting environment overrides. Local focused suite:
 device-role slug and device-type model replacing numeric fixture IDs. Focused
 suite: 41 passed, including exact matching, ambiguous/missing names and config
 loading for unrelated commands. Existing device assignments remain unchanged.
+
+2026-10-31 linked discovery reconciliation: all 14 assertions passed, including
+real SDK requests against synthetic summary/detail port endpoints and an unrelated
+port. A linked unnamed node was planned without writes and renamed through PATCH
+with its original UUID and ports. Focused suite: 43 passed. This does not establish
+ownership of the user's actual Ironic ports; explicit conflicts remain rejected.
