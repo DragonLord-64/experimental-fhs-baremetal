@@ -486,7 +486,7 @@ class MinimalImportContracts(unittest.TestCase):
     def test_batch_continues_after_read_conflict_and_apply_failures(self):
         nodes = {u: {'uuid': u} for u in ('missing', 'conflict', 'write-fail', 'good')}
         client = Mock()
-        client.inspection.side_effect = lambda u: (_ for _ in ()).throw(ValueError('missing inventory')) if u == 'missing' else u
+        client.inspection.side_effect = lambda u: (_ for _ in ()).throw(ValueError('missing inventory')) if u == 'missing' else dict(inventory=dict(boot={'pxe_interface': '02:00:00:00:00:01'}, interfaces=[dict(name='eno1', mac_address='02:00:00:00:00:01')]))
         def observed(node, record, settings, probe):
             return dict(uuid=node['uuid'], serial=node['uuid'], bmc=node['uuid'])
         def resolve(sync, item):
@@ -514,7 +514,9 @@ class MinimalImportContracts(unittest.TestCase):
                 patch.object(self.helper, 'resolve_device'), patch.object(self.helper, 'apply', return_value={}) as write, \
                 contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(self.helper.ImportFailures) as caught:
-                self.helper.import_nodes(nodes, Mock(), {}, Mock())
+                client = Mock()
+                client.inspection.return_value = dict(inventory=dict(boot={'pxe_interface': '02:00:00:00:00:01'}, interfaces=[dict(name='eno1', mac_address='02:00:00:00:00:01')]))
+                self.helper.import_nodes(nodes, client, {}, Mock())
         self.assertEqual(caught.exception.failures, ['a', 'b'])
         self.assertEqual(write.call_count, 1)
         self.assertEqual(write.call_args.args[1]['uuid'], 'c')
@@ -560,11 +562,49 @@ class MinimalImportContracts(unittest.TestCase):
                    if call.args[0] == 'dcim/devices/']
         self.assertEqual(updates[0], {})
         self.assertTrue(all('custom_fields' not in update for update in updates))
+        sync.list.side_effect = lambda path, **query: [dict(id=30, name='eno1', primary_mac_address={'mac_address': '02:00:00:00:00:01'}, tags=[{'slug':'provisioning-interface','id':1}])] if path == 'dcim/interfaces/' else [old] if path == 'dcim/devices/' else []
+        fallback = dict(item, port=dict(name='provisioning', mac='02:00:00:00:00:01', synthetic_name=True))
+        self.helper.apply(sync, fallback, {})
+        self.assertTrue(any(call.args[0] == 'dcim/interfaces/' and call.args[2].get('name') == 'eno1' for call in sync.ensure.call_args_list))
         self.assertFalse(any(call.args[0] == 'extras/custom-fields/' for call in sync.ensure.call_args_list))
         sync.ensure.reset_mock()
         item['uuid'] = 'different'
         self.helper.apply(sync, item, {})  # Rediscovery UUID is not physical identity.
         self.assertFalse(any('custom_fields' in call.args[2] for call in sync.ensure.call_args_list))
+
+    def test_missing_saved_inventory_uses_pxe_port_redfish_ip_and_fru(self):
+        client = Mock()
+        client.inspection.side_effect = ironic.InventoryUnavailable('absent')
+        client.provisioning_ports.return_value = [dict(address='02:00:00:00:00:01', is_pxe_enabled=True),
+                                                  dict(address='02:00:00:00:00:02', is_pxe_enabled=False)]
+        node = dict(uuid='node', driver_info={'redfish_address': 'https://192.0.2.20:443/redfish/v1'})
+        with contextlib.redirect_stdout(io.StringIO()):
+            record = self.helper.saved_or_minimal_record(node, client, {})
+        with patch.object(self.helper, 'fru_identity', return_value=dict(serial='SYS1412')):
+            item = self.helper.observation(node, record, {}, lambda *_: 'synthetic-fru')
+        self.assertEqual(item['bmc'], '192.0.2.20')
+        self.assertEqual(item['serial'], 'SYS1412')
+        self.assertEqual(item['port'], dict(name='provisioning', mac='02:00:00:00:00:01', synthetic_name=True))
+        client.provisioning_ports.return_value.append(dict(address='02:00:00:00:00:03', is_pxe_enabled=True))
+        with contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(ValueError, 'exactly one'):
+            self.helper.saved_or_minimal_record(node, client, {})
+
+    def test_partial_inventory_preserves_known_interface_name(self):
+        client = Mock()
+        client.inspection.return_value = dict(inventory=dict(interfaces=[dict(name='eno1', mac_address='02:00:00:00:00:01')]))
+        client.provisioning_ports.return_value = [dict(address='02:00:00:00:00:01', pxe_enabled=True)]
+        with contextlib.redirect_stdout(io.StringIO()):
+            record = self.helper.saved_or_minimal_record(dict(uuid='node'), client, {})
+        self.assertEqual(self.helper.boot_port(record)['name'], 'eno1')
+        client.inspection.return_value = dict(inventory=dict(interfaces=None))
+        with contextlib.redirect_stdout(io.StringIO()):
+            record = self.helper.saved_or_minimal_record(dict(uuid='node'), client, {})
+        self.assertEqual(self.helper.boot_port(record)['name'], 'provisioning')
+        client.inspection.side_effect = common.Error('HTTP 403')
+        client.provisioning_ports.reset_mock()
+        with self.assertRaises(common.Error):
+            self.helper.saved_or_minimal_record(dict(uuid='node'), client, {})
+        client.provisioning_ports.assert_not_called()
 
     def test_defaults_resolve_names_slugs_and_model_without_writes(self):
         sync = Mock()

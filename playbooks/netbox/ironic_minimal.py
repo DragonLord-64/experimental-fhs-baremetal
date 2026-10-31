@@ -5,6 +5,7 @@ from pathlib import Path
 import re
 import sys
 import traceback
+from urllib.parse import urlsplit
 
 # Reuse native importer API, serial validation, manufacturer and FRU parsers.
 HERE = Path(__file__).resolve().parent
@@ -34,6 +35,59 @@ def boot_port(record, provisioning_interface=None):
     return {'name': port['name'], 'mac': mac}
 
 
+def bmc_address(node, inventory):
+    driver = node.get('driver_info') or {}
+    address = inventory.get('bmc_address') or driver.get('ipmi_address')
+    if not address and driver.get('redfish_address'):
+        address = urlsplit(driver['redfish_address']).hostname
+    return str(ipaddress.ip_address(address or ''))
+
+
+def saved_or_minimal_record(node, ironic, settings):
+    from hwmanage_lib.ironic import InventoryUnavailable
+    try:
+        record = ironic.inspection(node['uuid'])
+    except InventoryUnavailable:
+        record = {}
+        print(node['uuid']+': no saved inventory; using registered PXE port and BMC FRU', flush=True)
+    inventory = dict(record.get('inventory', record) or {})
+    boot = dict(inventory.get('boot') or {})
+    mac = str(boot.get('pxe_interface') or '').lower().replace('-', ':')
+    interfaces = [dict(p) for p in (inventory.get('interfaces') or [])]
+    matching = [p for p in interfaces if str(p.get('mac_address', '')).lower() == mac] if mac else []
+    if mac and len(matching) == 1 and matching[0].get('name'):
+        return record
+    if mac and (not re.fullmatch(r'(?:[0-9a-f]{2}:){5}[0-9a-f]{2}', mac) or mac == '00:00:00:00:00:00'):
+        raise ValueError('Invalid inspected boot MAC; existing inventory preserved')
+    if len(matching) > 1:
+        raise ValueError('Boot MAC matches multiple inspected interfaces')
+    candidates = []
+    for port in ironic.provisioning_ports(node['uuid']):
+        enabled = port.get('is_pxe_enabled')
+        if enabled is None:
+            enabled = port.get('pxe_enabled', True)
+        address = str(port.get('address') or '').lower().replace('-', ':')
+        if enabled and (not mac or address == mac):
+            candidates.append(address)
+    if len(candidates) != 1:
+        raise ValueError('Minimal import requires exactly one matching registered PXE port')
+    mac = candidates[0]
+    matching = [p for p in interfaces if str(p.get('mac_address', '')).lower() == mac]
+    if len(matching) > 1:
+        raise ValueError('Registered PXE MAC matches multiple inspected interfaces')
+    actual_name = matching[0].get('name') if matching else None
+    name = actual_name or settings.get('provisioning_interface') or 'provisioning'
+    if matching:
+        matching[0]['name'] = name
+    else:
+        interfaces.append(dict(name=name, mac_address=mac))
+    boot['pxe_interface'] = mac
+    inventory.update(boot=boot, interfaces=interfaces,
+                     _synthetic_port_name=not actual_name and not settings.get('provisioning_interface'))
+    print(node['uuid']+': provisioning MAC from registered Ironic port', flush=True)
+    return dict(record, inventory=inventory)
+
+
 def fru_identity(text, fru_id='0'):
     from fhs_netbox import physical_serial
     import importlib.util
@@ -50,13 +104,15 @@ def observation(node, record, settings, probe):
     from fhs_netbox import physical_serial
     inventory = record.get('inventory', record)
     port = boot_port(record, settings.get('provisioning_interface'))
+    if inventory.get('_synthetic_port_name'):
+        port['synthetic_name'] = True
     # SMBIOS system_vendor.serial_number is not proof of FRU Product Serial.
     # A controller IPMI FRU read remains the default, independent of Linux/SSH.
     identity = fru_identity(probe(node, inventory), str(settings.get('system_fru_id', '0')))
     observed = inventory.get('system_vendor', {}).get('serial_number')
     if observed and physical_serial(observed) != identity['serial']:
         raise ValueError('Inspection serial conflicts with verified FRU Product Serial')
-    bmc = str(ipaddress.ip_address(inventory.get('bmc_address') or node.get('driver_info', {}).get('ipmi_address', '')))
+    bmc = bmc_address(node, inventory)
     return dict(uuid=node['uuid'], serial=identity['serial'], name=identity['serial'],
                 manufacturer=identity.get('manufacturer'), model=identity.get('model'),
                 bmc=bmc, port=port)
@@ -67,7 +123,7 @@ def remote_fru(node, inventory):
     from hwmanage_lib.common import Error, run
     from hwmanage_lib.ironic import credentials
     driver = credentials(node)
-    address = inventory.get('bmc_address') or driver.get('ipmi_address')
+    address = bmc_address(dict(node, driver_info=driver), inventory)
     username = driver.get('ipmi_username') or driver.get('redfish_username')
     password = driver.get('ipmi_password') or driver.get('redfish_password')
     if not address or not username or not password or set(str(password)) == {'*'}:
@@ -127,6 +183,13 @@ def apply(sync, item, settings):
     defaults = new_device_defaults(sync, settings) if not old else None
     ports = sync.list('dcim/interfaces/', device_id=old['id']) if old else []
     tagged = [p for p in ports if any(t.get('slug') == 'provisioning-interface' for t in p.get('tags', []))]
+    if item['port'].get('synthetic_name'):
+        matching = [p for p in ports if ((p.get('primary_mac_address') or {}).get('mac_address') or p.get('mac_address') or '').lower() == item['port']['mac']]
+        if len(matching) > 1:
+            raise ValueError('Provisioning MAC matches multiple existing NetBox interfaces')
+        prior = matching or (tagged if len(tagged) == 1 else [])
+        if prior:
+            item = dict(item, port=dict(item['port'], name=prior[0]['name']))
     if len(tagged) > 1 or tagged and tagged[0]['name'] != item['port']['name']:
         raise ValueError('Existing provisioning interface differs; preserve operator inventory')
     for port in ports:
@@ -194,7 +257,7 @@ def import_nodes(nodes, ironic, settings, sync, probe=remote_fru):
         uuid = node['uuid']
         print(uuid+': reading inspection and verifying identity', flush=True)
         try:
-            items.append(observation(node, ironic.inspection(uuid), settings, probe))
+            items.append(observation(node, saved_or_minimal_record(node, ironic, settings), settings, probe))
         except Exception:
             failed(uuid)
     # Check the whole observed batch before writes; reject every duplicate owner.

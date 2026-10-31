@@ -67,6 +67,7 @@ def main():
                 return dict(selected, name=name)
         def run():
             return minimal.import_nodes({node_uuid: node}, Ironic(), settings, sync, probe=lambda *_: fru)[0]
+        inventory_missing = False
         port_uuid = str(uuid.uuid4())
         node_updates = []
         class Handler(BaseHTTPRequestHandler):
@@ -94,6 +95,9 @@ def main():
             def do_GET(self):
                 path = self.path.split('?')[0].rstrip('/')
                 if path.endswith('/inventory'):
+                    if inventory_missing:
+                        self.send_error(404)
+                        return
                     data = record
                 elif path.endswith('/nodes') or path.endswith('/nodes/detail'):
                     from urllib.parse import parse_qs, urlsplit
@@ -221,6 +225,24 @@ def main():
                     renamed = client.reconcile(host, create=False)
                     check(renamed['uuid'] == node_uuid and renamed['name'] == prefix and len(node_updates) == previous_updates+1,
                           'Native SDK sync names the discovery without new registrations or ports')
+                inventory_missing = True
+                node['name'] = prefix+'-old-name'
+                node.setdefault('driver_info', {})['redfish_address'] = 'https://192.0.2.237'
+                previous_updates = len(node_updates)
+                fallback = subprocess.run([sys.executable, str(root/'scripts/hwmanage/hwmanage'),
+                    'inventory', 'import', '-i', 'ironic', '--all'],
+                    env=env, capture_output=True, text=True, timeout=180)
+                if fallback.returncode:
+                    print(fallback.stdout)
+                    print(fallback.stderr)
+                    raise AssertionError('Minimal BMC/port fallback failed')
+                check(node['name'] == prefix and len(node_updates) == previous_updates+1,
+                      'Missing inventory fallback verifies BMC FRU and corrects the old Ironic name')
+                sync.cache.clear()
+                preserved = sync.find('dcim/devices/', serial=prefix)
+                interfaces = sync.list('dcim/interfaces/', device_id=preserved['id'])
+                check(preserved['id'] == created['id'] and {p['name'] for p in interfaces} == {'eno1', 'bmc'},
+                      'Registered PXE fallback preserves existing NetBox interface name and device')
         finally:
             server.shutdown()
             server.server_close()

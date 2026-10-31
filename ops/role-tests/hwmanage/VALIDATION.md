@@ -108,3 +108,10 @@ Import preview changes neither NetBox nor Ironic; actual import names the existi
 node with its verified serial. Sync finds an unnamed discovery through its port
 and names it, without creating registrations or moving ports. A harness cache
 failure was corrected and its retained fixture cleaned before the final pass.
+
+2026-10-31 minimum fallback: 51 focused tests and 18 lab assertions passed.
+A missing saved inventory (HTTP 404) used the registered PXE port, Redfish BMC IP
+and synthetic controller FRU, preserved the existing NetBox interface/device,
+and corrected an old Ironic name. No SSH or lifecycle/power action was invoked.
+The final null-interface case was covered locally; physical BMC behaviour remains
+outside the synthetic acceptance.

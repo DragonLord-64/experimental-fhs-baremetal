@@ -9,6 +9,10 @@ STATES = {'manage': {'enroll', 'available'}, 'inspect': {'manageable'},
           'clean': {'manageable'}, 'provide': {'manageable'},
           'deploy': {'available'}, 'adopt': {'manageable'}}
 
+class InventoryUnavailable(Error):
+    """No saved inspection exists; registered ports and BMC remain usable."""
+
+
 
 def registration_name(host):
     """NetBox product serial is the Ironic name; native input may already be named."""
@@ -119,10 +123,20 @@ class Ironic:
 
     def inspection(self, uuid):
         # Native Ironic saved inventory endpoint (API 1.81+), before OS/SSH.
-        response = self.api.get('/nodes/'+uuid+'/inventory', microversion='1.82')
+        try:
+            response = self.api.get('/nodes/'+uuid+'/inventory', microversion='1.82')
+        except Exception as error:
+            if getattr(error, 'status_code', None) == 404:
+                raise InventoryUnavailable('No saved Ironic inspection inventory') from None
+            raise
+        if response.status_code == 404:
+            raise InventoryUnavailable('No saved Ironic inspection inventory')
         if response.status_code != 200:
-            raise Error('Saved Ironic inventory unavailable; inspect the node before import')
+            raise Error('Ironic inventory request failed with HTTP '+str(response.status_code))
         return response.json()
+
+    def provisioning_ports(self, node):
+        return [normalize(p) for p in self.api.ports(details=True, node=node)]
 
     def ensure_name(self, node, name, *, plan=False):
         """Name this discovery with its verified serial; never replace another node."""

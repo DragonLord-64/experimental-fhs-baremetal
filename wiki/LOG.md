@@ -1253,3 +1253,29 @@ cache and discovers owned objects during cleanup. The retained synthetic fixture
 and parents were removed before the successful rerun; final cleanup and temporary
 forward removal completed. Whitespace checks passed. No physical hardware or
 user deployment was changed; the existing copy manifest includes changed files.
+
+### 2026-10-31 — minimum BMC/port fallback without saved inspection
+
+The user clarified the required IP is the BMC IP, not the running OS address.
+When saved Ironic inventory is absent or boot-interface details are incomplete,
+the minimal importer uses one registered PXE port plus controller-side BMC FRU
+verification. It derives the BMC IP from saved data or the Ironic IPMI/Redfish
+connection. No SSH, inspection ramdisk, deployment transition or power command
+is used. Authentication/service failures are not masked as missing inventory.
+Missing or ambiguous PXE ports still fail per node.
+
+Unknown OS interface names use a clearly synthetic `provisioning` NetBox name,
+or the configured expected name. Existing matching NetBox interface names are
+retained. The BMC IP remains out-of-band; no Linux primary address is inferred.
+Normal verified-serial naming runs on fallback success too, including replacing
+an old Ironic name while preserving registration and ports. Existing copy scopes
+already include all affected application/importer files.
+
+Validation: 51 focused tests passed, covering missing/partial/null inspection
+interfaces, Redfish BMC address extraction, FRU identity, disabled/ambiguous PXE
+ports, authentication errors and existing interface-name preservation. All 18
+chart/importer/native-SDK acceptance assertions passed against the healthy chart
+in explicit `fhs-test`, including HTTP-404 fallback and old-name correction.
+Final null-interface handling was additionally covered by the focused suite.
+Synthetic objects and temporary forwarding were cleaned up. Whitespace checks
+passed. Real BMC transport and physical hardware remain untested.

@@ -52,6 +52,19 @@ its diagnostic before retrying.
 `node sync` updates Ironic registration settings and ports from the selected
 inventory. It does not collect or refresh saved inspection inventory.
 
+When saved inspection is absent or lacks boot-interface details, import uses the
+BMC IP from Ironic's IPMI/Redfish connection, one registered PXE port and a fresh
+controller-side FRU product serial. It needs no SSH and performs no power or
+deployment operation. Missing or ambiguous registered PXE ports fail per node;
+API authentication/service failures are reported rather than treated as missing
+data. The MAC is the provisioning NIC MAC, not the BMC MAC.
+
+Without an inspected interface name, new NetBox records use `provisioning` (or
+`import.provisioning_interface` when configured). Existing matching interface
+names are retained. BMC IP goes to the out-of-band IP field; no OS primary IP is
+inferred. The same serial naming step runs for normal and fallback imports,
+including correction of an old Ironic name.
+
 Initial import needs no installed OS or SSH. It creates the minimal NetBox device,
 verified serial, BMC addressing and provisioning interface/MAC. It also names
 the existing Ironic discovery with the verified product serial. Plans rename
