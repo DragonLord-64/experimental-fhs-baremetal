@@ -38,6 +38,7 @@ if not args.full:
     )
     files = (
         'scripts/hwmanage',
+        'scripts/install-hwmanage.sh',
         'playbooks/site.yml',
         'playbooks/provision.yml',
         'playbooks/switch-poap/configure_nexus.yml',
@@ -69,7 +70,8 @@ for name in ('roles', 'playbooks', 'platform', 'docs/src',
                                                  'platform-secrets.yml', 'platform-endpoints.yml'))
     print(f'Copied {name}/')
 
-for name in ('scripts/hwmanage', 'inventory/dev_env/hwmanage-vars.yml',
+for name in ('scripts/hwmanage', 'scripts/install-hwmanage.sh',
+             'inventory/dev_env/hwmanage-vars.yml',
              'bifrost-infra/Dockerfile', 'bifrost-infra/prepare-python-constraints.py',
              'scripts/patch-bifrost-environment.py', 'scripts/deploy-bifrost-container.sh', 'ansible.cfg', 'inventory/README.md',
              'inventory/dev_env/netbox-inv.yml'):

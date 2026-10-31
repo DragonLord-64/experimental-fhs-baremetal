@@ -930,3 +930,19 @@ Final lab rerun passed 11 assertions, including wrapper-to-native-playbook UUID
 selection and environment paths. Nine additional focused checks for root-device
 criteria and native password compatibility passed. Physical lifecycle and
 controller package-installation limits above still apply.
+
+### 2026-10-31 — hwmanage PATH installer
+
+Added [install-hwmanage.sh](../scripts/install-hwmanage.sh) to link the checkout's
+command into `/usr/local/bin`, with an optional bindir. The
+[operator guide](../docs/src/playbooks/hwmanage.md) retains `/provision` for
+Ansible configuration and documents installation after container recreation.
+Both targeted and full [transfer scopes](../ops/security-provisioning/copy-to-official.py)
+include the executable installer; no image rebuild is needed.
+
+Focused disposable-directory checks passed: resolved symlink, repeat install,
+PATH `hwmanage --help`, refusal to replace a regular file, unrelated symlink or
+dangling symlink, and executable installer content in targeted/full copies.
+These cover runtime/link and copy behavior beyond the controller's syntax/policy
+checks, which are left to the controller. No container or hardware operations
+were run; `/usr/local/bin` on the host was not changed.

@@ -6,13 +6,21 @@ YAML inventories remain available independently.
 
 ```bash
 cd /provision
-scripts/hwmanage --help
-scripts/hwmanage node --help
-scripts/hwmanage provision --help
+scripts/install-hwmanage.sh
+hwmanage --help
+hwmanage node --help
+hwmanage provision --help
 ```
 
-Use `scripts/hwmanage` in these commands, or place a symlink named `hwmanage` on
-your executable search path. Every command and subcommand supports `--help`.
+Run the installer as root inside the provisioning container; no `sudo` or
+container rebuild is needed. It links `/usr/local/bin/hwmanage` to this checkout,
+so source updates apply immediately. Repeat it after recreating the container.
+It refuses to overwrite an existing file or a link to another tool.
+
+For a user-owned directory, run `scripts/install-hwmanage.sh "$HOME/.local/bin"`
+and add that directory to `PATH`. Keep running commands from `/provision` so
+Ansible uses the repository configuration. Every command and subcommand supports
+`--help`.
 
 ## Select inventory and targets
 
@@ -26,8 +34,8 @@ host key. Device roles are inventory groups, not hostnames. Names can change;
 the imported Ironic UUID identifies the same registration.
 
 ```bash
-scripts/hwmanage node list -i ironic
-scripts/hwmanage inventory import -i ironic --all
+hwmanage node list -i ironic
+hwmanage inventory import -i ironic --all
 ```
 
 Initial import needs no installed OS or SSH. It creates the minimal NetBox device,
@@ -135,14 +143,14 @@ NetBox is the default source except for `node list`, which defaults to Ironic.
 Operations resolve the existing UUID rather than create a duplicate discovery.
 
 ```bash
-scripts/hwmanage node show --limit SYS1412
-scripts/hwmanage node enroll --limit SYS1412
-scripts/hwmanage node sync --limit SYS1412
-scripts/hwmanage node manage --limit SYS1412
-scripts/hwmanage node inspect --limit SYS1412
-scripts/hwmanage node clean --limit SYS1412
-scripts/hwmanage node provide --limit SYS1412
-scripts/hwmanage node deploy --limit SYS1412
+hwmanage node show --limit SYS1412
+hwmanage node enroll --limit SYS1412
+hwmanage node sync --limit SYS1412
+hwmanage node manage --limit SYS1412
+hwmanage node inspect --limit SYS1412
+hwmanage node clean --limit SYS1412
+hwmanage node provide --limit SYS1412
+hwmanage node deploy --limit SYS1412
 ```
 
 `enroll` creates a missing registration without resetting an existing node's
@@ -154,7 +162,7 @@ Manual cleaning defaults to partition/filesystem metadata removal. Supply native
 clean steps as JSON, a JSON file or `-` for standard input:
 
 ```bash
-scripts/hwmanage node clean --limit SYS1412 \
+hwmanage node clean --limit SYS1412 \
   --clean-steps '[{"interface":"deploy","step":"erase_devices_metadata"}]'
 ```
 
@@ -164,9 +172,9 @@ operation. A plan can still read selected services or hardware identity.
 ## Provision an installed system
 
 ```bash
-scripts/hwmanage provision -i netbox --limit SYS1412
-scripts/hwmanage provision -i netbox --limit SYS1412 --tags manage_users
-scripts/hwmanage provision -i netbox --limit SYS1412 --tags inventory
+hwmanage provision -i netbox --limit SYS1412
+hwmanage provision -i netbox --limit SYS1412 --tags manage_users
+hwmanage provision -i netbox --limit SYS1412 --tags inventory
 ```
 
 `provision` runs the repository's provisioning playbook. Role tags pass through
@@ -178,16 +186,16 @@ Individual playbook commands accept `-e KEY=VALUE` and protected extra-variable
 files. Target identity and scope cannot be overridden through extra variables:
 
 ```bash
-scripts/hwmanage provision -i /provision/files.d/hosts.yml --limit SYS1412 \
+hwmanage provision -i /provision/files.d/hosts.yml --limit SYS1412 \
   -e @/provision/files.d/overrides.yml
 ```
 
 ## Fixed runbooks
 
 ```bash
-scripts/hwmanage run inspect-host -i ironic --limit <IRONIC_UUID>
-scripts/hwmanage run provide-node -i netbox --limit SYS1412
-scripts/hwmanage run full-provision -i netbox --limit SYS1412
+hwmanage run inspect-host -i ironic --limit <IRONIC_UUID>
+hwmanage run provide-node -i netbox --limit SYS1412
+hwmanage run full-provision -i netbox --limit SYS1412
 ```
 
 `inspect-host` prepares and inspects a node. `provide-node` metadata-cleans and
@@ -205,7 +213,7 @@ Export reviewed configuration before depending on it offline. The destination
 must be a new directory:
 
 ```bash
-scripts/hwmanage inventory export -i netbox --limit SYS1412 \
+hwmanage inventory export -i netbox --limit SYS1412 \
   --output-dir /provision/files.d/manual
 ```
 
@@ -247,9 +255,9 @@ asset, not just the web server root:
 
 ```bash
 export HWMANAGE_BOOT_URL=http://192.168.1.7:8080/ipa.kernel
-scripts/hwmanage check systems
-scripts/hwmanage check hosts -i netbox --limit SYS1412
-scripts/hwmanage check hosts -i netbox --all
+hwmanage check systems
+hwmanage check hosts -i netbox --limit SYS1412
+hwmanage check hosts -i netbox --all
 ```
 
 System checks read Ironic API/readiness, effective automatic-cleaning policy,
@@ -260,16 +268,16 @@ or Nexus management connectivity, rather than ICMP alone.
 ## Configure provisioning services
 
 ```bash
-scripts/hwmanage config ironic --automated-clean false
-scripts/hwmanage config dnsmasq add-host -i netbox --limit switch01
-scripts/hwmanage config dnsmasq list-hosts
-scripts/hwmanage config dnsmasq remove-host -i netbox --limit switch01
+hwmanage config ironic --automated-clean false
+hwmanage config dnsmasq add-host -i netbox --limit switch01
+hwmanage config dnsmasq list-hosts
+hwmanage config dnsmasq remove-host -i netbox --limit switch01
 ```
 
 Explicit switch overrides use the boot-file path and boot-server address:
 
 ```bash
-scripts/hwmanage config dnsmasq add-host -i netbox --limit switch01 \
+hwmanage config dnsmasq add-host -i netbox --limit switch01 \
   --mac 02:00:00:00:00:02 --ip 192.0.2.40 --group real-nexus-poap \
   --boot-server 192.0.2.10 --boot-file poap_script.py
 ```
