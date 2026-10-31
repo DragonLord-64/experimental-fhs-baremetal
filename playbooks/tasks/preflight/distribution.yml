@@ -24,7 +24,7 @@
     port: "{{ (item | urlsplit('port')) | default(80, true) }}"
     timeout: "{{ preflight_timeout | default(10) }}"
     connect_timeout: 3
-  loop: "{{ [apt_cache_url, git_proxy_url] }}"
+  loop: "{{ [apt_cache_url, git_proxy_url] + ([pip_index_url] if pip_index_url is match('^http://') else []) }}"
   changed_when: false
   check_mode: false
   when: preflight_check_endpoints | default(true) | bool

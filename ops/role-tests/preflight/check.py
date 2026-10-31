@@ -38,6 +38,8 @@ with tempfile.TemporaryDirectory(prefix='fhs-preflight-') as folder:
  run('all')
  run('missing-artifact',{'preflight_checks':['users'],'fpga_bittware_sdk_deb':str(root/'missing.deb')},False)
  run('unknown-ca',{'preflight_checks':['distribution'],'pip_ca_bundle':''},False)
+ run('development-http',{'pip_index_url':f'http://localhost:{plain.server_port}/','pip_allow_insecure_http':True,'pip_trusted_hosts':['localhost'],'pip_ca_bundle':'','platform_ca_certificates':[],'filebeat_elasticsearch_hosts':[f'http://localhost:{plain.server_port}'],'filebeat_setup_ssl_certificate_authorities':[],'filebeat_ssl_certificate_authorities':[]})
+ run('http-unrelated-trust',{'preflight_checks':['distribution'],'pip_index_url':f'http://localhost:{plain.server_port}/','pip_allow_insecure_http':True,'pip_trusted_hosts':['other-host']},False)
  run('insecure-pip',{'preflight_checks':['distribution'],'pip_index_url':'http://localhost/'},False)
  run('http-redirect',{'preflight_checks':['distribution'],'pip_index_url':f'https://localhost:{port}/downgrade'},False)
  run('bootstrap',{'preflight_checks':['distribution'],'pip_ca_bundle':str(root/'not-yet-installed.crt'),'preflight_check_endpoints':False})

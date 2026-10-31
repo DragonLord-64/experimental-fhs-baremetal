@@ -4,9 +4,9 @@
     that:
       - pip_index_url | length > 0
       - pip_index_url is match('^https://') or (pip_allow_insecure_http | bool and pip_index_url is match('^http://'))
-      - pip_trusted_hosts | length == 0 or pip_allow_insecure_http | bool
+      - pip_trusted_hosts | length == 0 or (pip_allow_insecure_http | bool and pip_index_url is match('^http://'))
+      - pip_index_url is match('^https://') or pip_trusted_hosts == [pip_index_url | urlsplit('hostname')]
     fail_msg: >-
-      Set pip_index_url to the HTTPS devpi +simple URL and trust its issuing CA
-      through system trust or pip_ca_bundle. Leave pip_trusted_hosts empty for
-      verified HTTPS. Isolated HTTP compatibility requires explicit
-      pip_allow_insecure_http=true.
+      Set pip_index_url to the devpi +simple URL. HTTP on the development LAN
+      requires pip_allow_insecure_http=true and a matching pip_trusted_hosts entry.
+      For HTTPS, leave pip_trusted_hosts empty and use verified certificates.

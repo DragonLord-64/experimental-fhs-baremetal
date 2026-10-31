@@ -67,3 +67,41 @@ The first local runs could not bind loopback sockets in the sandbox. Rerunning
 with network permission allowed the mock HTTP tests; those permission errors are
 not counted as application failures. Temporary logs remain under
 `/tmp/fhs-security-*.log` on the orchestration host.
+
+## Development HTTP decision — 2026-10-30
+
+Supersedes the HTTPS deployment prerequisites above. The user accepts internal
+HTTP on the trusted development LAN and has no assumed control over shared DNS
+or ingress. Site values disable dedicated devpi/Elasticsearch ingresses, remove
+the proposed hostnames/TLS Secrets, disable shared HTTP-to-HTTPS redirects and
+expose Elasticsearch on a LoadBalancer alongside APT/devpi/Git. Existing service
+DNS integration must still be verified at the deployment site. Upstream HTTPS
+verification and APT package signatures remain enabled.
+
+Observed checks for this revision:
+
+- Helm provisioning lint/render passed. Assertions checked four LoadBalancer
+  services/ports, absent dedicated TLS ingresses and no shared TLS/redirect.
+  Existing Grafana probe coalesce warnings remain.
+- Scoped delivered-chart upgrade passed on existing dragonvm `fhs-test` release
+  `fhs-inventory-alignment`, preserving values, credentials and PVCs. Devpi now
+  serves HTTP without its prior HTTPS outside URL; NetBox uses HTTP ingress.
+- Actual pip role wrote a temporary configuration with the HTTP exception limited
+  to the cache host. A fresh venv installed/imported packaging using that config
+  through a temporary forward to the real devpi Service.
+- Actual setup-only Filebeat playbook passed against the existing lab
+  Elasticsearch HTTP Service using the retained 9.5.5 package/private credentials;
+  no Filebeat service was installed. Temporary port forwards were stopped.
+- Authenticated HTTP NetBox API, dynamic inventory and native manufacturer
+  importer check mode passed against the delivered chart. No physical equipment
+  was contacted; the importer check did not create the synthetic manufacturer.
+- Focused preflight fixture passed HTTP use, unrelated trusted-host rejection,
+  HTTPS CA validation/downgrade checks, credential/input failures and unchanged
+  input hashes. Preflight/Filebeat syntax and source/link checks passed.
+- Sphinx HTML passed with the existing unavailable external-inventory warning.
+  Corrected one local role-document link exposed by the build.
+
+Private runtime files/logs remain under
+`/home/dragon-lord/fhs-security-20261030/http-check` on dragonvm. These checks do
+not establish production DNS, externally assigned LoadBalancer addresses,
+network ACLs or the full hardware provisioning/importer suite.

@@ -121,7 +121,9 @@ Set these values in `inventory/dev_env/group_vars/device_roles_fpga-host-server/
 
 ```yaml
 apt_cache_url: http://mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local:3142
-pip_index_url: https://<devpi-ingress-host>/root/pypi/+simple/
+pip_index_url: http://mid-cbf-hw-devpi.hw-management.svc.cluster.local:3141/root/pypi/+simple/
+pip_allow_insecure_http: true
+pip_trusted_hosts: [mid-cbf-hw-devpi.hw-management.svc.cluster.local]
 pip_trusted_hosts: []
 git_proxy_url: http://mid-cbf-hw-git-proxy.hw-management.svc.cluster.local:3128
 ```
@@ -129,69 +131,60 @@ git_proxy_url: http://mid-cbf-hw-git-proxy.hw-management.svc.cluster.local:3128
 Restrict proxy access to approved provisioning clients. APT retains Signed-By
 verification over the HTTP cache. Git uses an HTTP proxy with a verified HTTPS
 connection through it to the origin; no TLS interception is needed. Do not embed
-credentials in system-wide URLs. pip uses the HTTPS endpoint below, with normal
-certificate verification and no trusted-host exception.
+credentials in system-wide URLs. The pip HTTP exception is limited to the
+configured cache hostname; do not disable upstream HTTPS verification.
 
-## HTTPS endpoints
+## Development HTTP endpoints
 
-The provisioning values propose dedicated devpi and Elasticsearch hostnames.
-Create DNS records pointing to your ingress address, and obtain matching
-certificates from the site CA. LoadBalancer service DNS does not automatically
-create these dedicated ingress names. Keep certificates/private keys outside
-Git. Create the Secrets on the cluster using locally supplied files:
+`platform/values-provisioning.yaml` uses HTTP for the existing platform hostname
+and disables dedicated devpi/Elasticsearch ingresses. It exposes these services
+through LoadBalancer:
 
-```bash
-kubectl create namespace hw-management --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n hw-management create secret tls platform-tls \
-  --cert=/path/to/platform-fullchain.pem --key=/path/to/platform.key \
-  --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n hw-management create secret tls devpi-tls \
-  --cert=/path/to/devpi-fullchain.pem --key=/path/to/devpi.key \
-  --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n hw-management create secret tls elasticsearch-tls \
-  --cert=/path/to/elasticsearch-fullchain.pem --key=/path/to/elasticsearch.key \
-  --dry-run=client -o yaml | kubectl apply -f -
-```
+| Service DNS name | Port | Client setting |
+|---|---|---|
+| `mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local` | 3142 | `apt_cache_url` |
+| `mid-cbf-hw-devpi.hw-management.svc.cluster.local` | 3141 | `pip_index_url` |
+| `mid-cbf-hw-git-proxy.hw-management.svc.cluster.local` | 3128 | `git_proxy_url` |
+| `mid-cbf-hw-elastic.hw-management.svc.cluster.local` | 9200 | `filebeat_elasticsearch_hosts` |
 
-Set the endpoint names and Secrets in `platform/values-provisioning.yaml`:
+Verify these names resolve and are reachable from the provisioning host and
+managed servers using the site's existing service DNS integration. Kubernetes
+alone does not make cluster service DNS available outside the cluster.
+
+Set Elasticsearch in
+`inventory/dev_env/group_vars/device_roles_fpga-host-server/monitoring.yml`:
 
 ```yaml
-global:
-  hostname: <platform-hostname>
-  scheme: https
-  urlPrefix: /mid-cbf-hw
-  tlsSecretName: platform-tls
-devpi:
-  service:
-    type: LoadBalancer
-  ingress:
-    enabled: true
-    hostname: <devpi-hostname>
-    tlsSecretName: devpi-tls
-logging:
-  elasticsearch:
-    ingress:
-      enabled: true
-      className: nginx
-      host: <elasticsearch-hostname>
-      tlsSecretName: elasticsearch-tls
+filebeat_elasticsearch_hosts:
+  - http://mid-cbf-hw-elastic.hw-management.svc.cluster.local:9200
 ```
 
-`global.hostname` and `global.tlsSecretName` configure shared NetBox/Grafana/Kibana
-access. `devpi.ingress.hostname`/`tlsSecretName` configure pip HTTPS.
-`logging.elasticsearch.ingress.host`/`tlsSecretName` configure Elasticsearch API
-HTTPS. Set them in `platform/values-provisioning.yaml`, then run the README's
-Helm command. TLS terminates at ingress; traffic to these backends inside the
-cluster remains HTTP. Keep direct backend access restricted.
+Set NetBox in `inventory/dev_env/netbox-inv.yml` and in the protected import/export
+credentials file:
 
-Install the public issuing CA in the provisioning host/container trust store
-before resolving NetBox inventory, and on targets with
-[setup_platform_ca](../../../roles/setup_platform_ca/README.md). Set inventory
-`filebeat_elasticsearch_hosts` to `https://<elasticsearch-hostname>:443`.
-Filebeat defaults to port 9200 when the port is omitted. Provisioning
-credentials stay under `/provision/files.d/credentials/`; they are not retrieved
-automatically from Kubernetes Secrets. See [Filebeat](../../../roles/filebeat/README.md).
-Renew certificates and update these Secrets through the site's normal process.
+```yaml
+# inventory/dev_env/netbox-inv.yml
+api_endpoint: http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
+validate_certs: true
+```
+
+```yaml
+# /provision/files.d/credentials/mid-cbf-hw-netbox.yml
+netbox_url: http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
+netbox_token: "<NetBox API token>"
+netbox_validate_certs: true
+```
+
+Certificate validation settings remain enabled for a future HTTPS URL; they do
+not encrypt HTTP. No internal CA installation or TLS Secret is needed for HTTP.
+Keep credential files Vault-encrypted and restrict service access to the trusted
+development LAN. NetBox tokens and Elasticsearch credentials cross that LAN
+unencrypted. HTTP is an accepted development tradeoff, not a production policy.
+Elasticsearch authentication and APT signature verification remain enabled.
+
+HTTPS may be enabled later using a TLS proxy or an approved ingress, matching
+certificates and client CA trust. The optional chart ingress settings and
+`setup_platform_ca` role remain available; they are not required by this setup.
 
 Images are pinned by digest in values.yaml: prebuilt
 [jonasal/devpi-server](https://github.com/JonasAlfredsson/docker-devpi) (6.20.3)

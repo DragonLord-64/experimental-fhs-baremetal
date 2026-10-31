@@ -10,7 +10,7 @@ Run from the repository root. The installation uses release `mid-cbf-hw`,
 namespace `hw-management` and prefix `/mid-cbf-hw`.
 
 ```bash
-# Edit hostnames, certificate Secret names and service types.
+# Review the existing platform hostname and LoadBalancer service types.
 vi platform/values-provisioning.yaml
 # Install or upgrade the platform with the provisioning endpoints enabled.
 helm upgrade --install mid-cbf-hw platform/charts/fhs-platform \
@@ -21,13 +21,13 @@ helm upgrade --install mid-cbf-hw platform/charts/fhs-platform \
 
 Storage class and capacity overrides live in `aptCacher.persistence`,
 `devpi.persistence` and the application settings in [values.yaml](values.yaml).
-Create the DNS records and TLS Secrets before deploying; see
-[HTTPS setup](CONFIGURATION.md#https-endpoints).
+The development overrides use HTTP without additional DNS records or TLS Secrets; see
+[endpoint settings](CONFIGURATION.md#development-http-endpoints).
 Defaults are in [values.yaml](values.yaml).
 Use the same release, namespace, credentials and volumes for upgrades. Back up
 databases before schema/plugin changes; Helm rollback does not restore data.
 
-Open <https://rmdskadevdu011.mda.ca/mid-cbf-hw/>. Application paths below it are
+Open <http://rmdskadevdu011.mda.ca/mid-cbf-hw/>. Application paths below it are
 `netbox/`, `grafana/` and `mid-cbf-kibana/`. Change the host with `global.hostname`.
 
 | Default resource | Name |

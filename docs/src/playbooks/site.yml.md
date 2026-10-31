@@ -107,11 +107,11 @@ credentials. `site.yml` and `provision.yml` are the entry points.
 Edit the split group vars under
 `inventory/dev_env/group_vars/device_roles_fpga-host-server/` before applying.
 `distribution.yml` selects the platform endpoints: signed APT over the HTTP
-cache, verified HTTPS pip and an HTTP Git proxy tunnelling verified HTTPS.
+cache, HTTP pip and an HTTP Git proxy tunnelling verified upstream HTTPS.
 `monitoring.yml` selects the local packages and Elasticsearch endpoint.
 
 ```bash
-# Configure public CA trust and distribution clients.
+# Configure development LAN distribution clients.
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution
 # Load Elasticsearch index assets without installing a controller service.
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST>

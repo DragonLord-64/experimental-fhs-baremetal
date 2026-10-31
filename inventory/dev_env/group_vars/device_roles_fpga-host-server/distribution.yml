@@ -4,11 +4,12 @@ apt_repo_url_base: "http://archive.ubuntu.com"
 apt_repo_url: "{{ apt_repo_url_base }}/ubuntu/"
 apt_repo_release: noble
 
-# Proposed ingress hostname: create DNS pointing to ingress and a matching TLS certificate.
-# LoadBalancer service DNS does not create this dedicated ingress hostname.
-pip_index_url: "https://devpi.rmdskadevdu011.mda.ca/root/pypi/+simple/"
-pip_trusted_hosts: []
-pip_ca_bundle: /etc/ssl/certs/ca-certificates.crt
+# Trusted development LAN only; HTTPS can be configured later.
+pip_index_url: "http://mid-cbf-hw-devpi.hw-management.svc.cluster.local:3141/root/pypi/+simple/"
+pip_allow_insecure_http: true
+# Limit pip's HTTP exception to this one cache host.
+pip_trusted_hosts: [mid-cbf-hw-devpi.hw-management.svc.cluster.local]
+pip_ca_bundle: ""
 
 apt_cache_url: "http://mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local:3142"
 git_proxy_url: "http://mid-cbf-hw-git-proxy.hw-management.svc.cluster.local:3128"

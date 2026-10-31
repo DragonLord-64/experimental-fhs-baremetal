@@ -717,3 +717,17 @@ manage_users and removed the obsolete migration-message fixture cases.
 The transfer script deletes those destination roles/pages as well as the old
 Kubernetes role name. Disposable transfer and rerun checks passed, preserving
 active users/gRPC roles; source/link and whitespace checks passed.
+
+### 2026-10-30 — Internal HTTP for the trusted development LAN
+
+The user accepts HTTP for internal platform/provisioning endpoints; HTTPS may
+be enabled later. Removed proposed devpi/Elasticsearch DNS names and mandatory
+TLS/CA prerequisites. Updated NetBox, pip and Filebeat inventory, validation and
+operator docs while preserving upstream HTTPS checks, package signatures and
+private credential storage. Optional future TLS support remains available.
+
+Scoped delivered-chart upgrade, real HTTP pip install/import, setup-only
+Filebeat, authenticated NetBox API/inventory and native importer check mode
+passed on the existing lab. Focused preflight, Helm render/lint, syntax and docs
+checks passed with existing Grafana/external-inventory warnings. See
+[validation and boundaries](../ops/security-provisioning/VALIDATION.md#development-http-decision--2026-10-30).

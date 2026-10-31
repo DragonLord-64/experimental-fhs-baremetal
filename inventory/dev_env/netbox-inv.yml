@@ -1,5 +1,5 @@
 plugin: netbox.netbox.nb_inventory
-api_endpoint: https://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
+api_endpoint: http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
 
 interfaces: true
 ip_addresses: true

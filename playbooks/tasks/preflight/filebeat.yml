@@ -11,13 +11,13 @@
       ansible.builtin.fail:
         msg: Filebeat input/credential validation failed; check the selected credential file, required fields and endpoint settings.
 
-- name: Require HTTPS Elasticsearch endpoints
+- name: Require HTTP(S) Elasticsearch endpoints
   ansible.builtin.assert:
     that:
       - filebeat_elasticsearch_hosts is sequence and filebeat_elasticsearch_hosts is not string
       - filebeat_elasticsearch_hosts | length > 0
-      - filebeat_elasticsearch_hosts | select('match', '^https://') | list | length == filebeat_elasticsearch_hosts | length
-    fail_msg: Configure verified HTTPS Elasticsearch URLs, including explicit ingress port 443 where required.
+      - filebeat_elasticsearch_hosts | select('match', '^https?://') | list | length == filebeat_elasticsearch_hosts | length
+    fail_msg: Configure HTTP(S) Elasticsearch URLs with an explicit service port.
 
 - name: Check selected Filebeat package
   ansible.builtin.include_tasks: file.yml
@@ -39,3 +39,18 @@
     preflight_https_host: "{{ filebeat_setup_delegate if preflight_filebeat_scope == 'filebeat_setup' else inventory_hostname }}"
     preflight_https_ca_files: "{{ filebeat_setup_ssl_certificate_authorities if preflight_filebeat_scope == 'filebeat_setup' else filebeat_ssl_certificate_authorities }}"
   loop: "{{ filebeat_elasticsearch_hosts }}"
+  when: item is match('^https://')
+
+- name: Check Elasticsearch HTTP listener from its actual client
+  ansible.builtin.wait_for:
+    host: "{{ item | urlsplit('hostname') }}"
+    port: "{{ (item | urlsplit('port')) | default(80, true) }}"
+    timeout: "{{ preflight_timeout | default(10) }}"
+    connect_timeout: 3
+  delegate_to: "{{ filebeat_setup_delegate if preflight_filebeat_scope == 'filebeat_setup' else inventory_hostname }}"
+  loop: "{{ filebeat_elasticsearch_hosts }}"
+  changed_when: false
+  check_mode: false
+  when:
+    - preflight_check_endpoints | default(true) | bool
+    - item is match('^http://')

@@ -12,13 +12,14 @@ Set these in `inventory/dev_env/group_vars/device_roles_fpga-host-server/monitor
 filebeat_package_path: "{{ fhs_archives_dir }}/filebeat-9.5.5-amd64.deb"
 filebeat_setup_credentials_file: "{{ fhs_credentials_dir }}/filebeat-setup.yml"
 filebeat_credentials_file: "{{ fhs_credentials_dir }}/filebeat.yml"
-# Filebeat defaults to port 9200; specify :443 for the HTTPS ingress.
-filebeat_elasticsearch_hosts: ["https://<elasticsearch-hostname>:443"]
+# Development LAN Elasticsearch service endpoint.
+filebeat_elasticsearch_hosts: ["http://mid-cbf-hw-elastic.hw-management.svc.cluster.local:9200"]
 ```
 
 Place the package under `/provision/files.d/external_archives/`. The Linux amd64
-setup delegate defaults to `localhost` and needs `dpkg-deb`, CA trust and access
-to Elasticsearch. [Install controller trust first](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/inventory/README.md).
+setup delegate defaults to `localhost` and needs `dpkg-deb` and access to
+Elasticsearch. Development HTTP needs no internal CA installation. Credentials
+travel unencrypted on the trusted LAN. HTTPS may be enabled later with CA trust.
 Keep `filebeat_ssl_verification_mode: full`.
 
 Create the private credential directory and edit the setup file:
@@ -88,7 +89,7 @@ starting the service. The initial journal lookback is `filebeat_journald_since:
 -1h`; an existing registry cursor takes precedence. Change these and other tuning
 in group vars; generic defaults remain in [defaults/main.yml](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/roles/filebeat/defaults/main.yml).
 
-System CA trust is used by default. For explicit CA bundles,
+For a future HTTPS endpoint, system CA trust is used by default. For explicit CA bundles,
 `filebeat_setup_ssl_certificate_authorities` contains delegate paths and
 `filebeat_ssl_certificate_authorities` contains device paths. Distribute public
 certificates with [setup_platform_ca](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/roles/setup_platform_ca/README.md).

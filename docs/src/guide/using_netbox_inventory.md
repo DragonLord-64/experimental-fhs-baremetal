@@ -18,7 +18,7 @@ filters/grouping already in that file:
 
 ```yaml
 plugin: netbox.netbox.nb_inventory
-api_endpoint: https://<NETBOX_HOST>/mid-cbf-hw/netbox/
+api_endpoint: http://<NETBOX_HOST>/mid-cbf-hw/netbox/
 validate_certs: true
 interfaces: true
 config_context: true
@@ -56,7 +56,9 @@ volumes:
 The inventory plugin token is separate from the credentials file used by
 import/export playbooks below.
 
-If NetBox uses an internal CA, install its public certificate inside the
+The development endpoint uses HTTP and needs no CA installation. Tokens travel
+unencrypted within the trusted LAN. For a future HTTPS endpoint using an internal
+CA, install its public certificate inside the
 provisioning container before loading inventory:
 
 ```bash
@@ -110,7 +112,7 @@ vi /provision/files.d/credentials/mid-cbf-hw-netbox.yml
 Use these exact variable names in that file:
 
 ```yaml
-netbox_url: https://<NETBOX_HOST>/mid-cbf-hw/netbox/
+netbox_url: http://<NETBOX_HOST>/mid-cbf-hw/netbox/
 netbox_token: "<NetBox API token>"
 netbox_validate_certs: true
 ```

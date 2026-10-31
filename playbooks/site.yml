@@ -31,6 +31,7 @@
         apply:
           tags: [setup_platform_ca]
       tags: [setup_platform_ca]
+      when: platform_ca_certificates | default([]) | length > 0
     - name: Apply apt_repo_access
       ansible.builtin.include_role:
         name: setup_apt_source

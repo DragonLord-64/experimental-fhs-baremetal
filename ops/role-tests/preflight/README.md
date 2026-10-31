@@ -10,7 +10,8 @@ Uses temporary files and local HTTP/HTTPS servers. It runs the actual preflight
 playbook against a local synthetic inventory, without provisioning a host.
 Checks success with zero changes, missing artifacts, bad credential fields,
 untrusted certificates, insecure pip URLs, HTTPS downgrade redirects, input-only
-bootstrap. Input file hashes remain intact;
+bootstrap, explicit development HTTP and rejection of unrelated trusted hosts.
+Input file hashes remain intact;
 secret values must not appear in output. Logs are `/tmp/fhs-preflight-*.log`.
 
 2026-10-30: all cases passed. Provisioning/preflight/Filebeat setup syntax and

@@ -50,34 +50,27 @@ ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-h
 
 Keep switches out of Linux policy groups.
 
-## Trust NetBox before loading inventory
+## Configure NetBox inventory
 
-Install the public issuing CA inside the provisioning container first. Inventory
-loads before any target role can run, so the target CA role cannot bootstrap
-this connection.
+Set `api_endpoint: http://<NETBOX_HOST>/mid-cbf-hw/netbox/` and a Vault-encrypted
+`token` in `netbox-inv.yml`. The development platform uses HTTP; no internal CA
+installation is required. Keep `validate_certs: true` for a future HTTPS endpoint.
+The [NetBox guide](../docs/src/guide/using_netbox_inventory.md) shows the token
+format and separate import/export credentials.
 
 ```bash
-sudo install -m 0644 /provision/files.d/certificates/platform-ca.crt \
-  /usr/local/share/ca-certificates/platform-ca.crt
-sudo update-ca-certificates
 ansible-inventory -i inventory/dev_env/netbox-inv.yml --graph
 ```
-
-Keep `validate_certs: true` in `netbox-inv.yml`. Alternatively set its `ca_path`
-to the controller's PEM CA bundle. Set `api_endpoint: https://<NETBOX_HOST>/mid-cbf-hw/netbox/` and a Vault-encrypted
-`token` in that inventory file. The [NetBox guide](../docs/src/guide/using_netbox_inventory.md)
-shows the token format and separate import/export credentials.
 
 ## Configure clients
 
 Edit `inventory/dev_env/group_vars/device_roles_fpga-host-server/distribution.yml`
 for APT/pip/Git settings and `monitoring.yml` in the same directory for package
-paths and Elasticsearch. Dedicated HTTPS ingress hostnames in the
-example require matching DNS records and certificates.
+paths and Elasticsearch. Internal endpoints use HTTP on the trusted development LAN.
 The site's LoadBalancer DNS integration supplies external service addresses;
 verify the configured release/namespace names from the provisioning host and targets.
 
-To install the public CA on managed servers, set this in `all/paths.yml`:
+For a future HTTPS deployment only, public CA distribution can be configured in `all/paths.yml`:
 
 ```yaml
 platform_ca_certificates:
@@ -86,7 +79,7 @@ platform_ca_certificates:
 ```
 
 ```bash
-# Inspect scope, then configure CA trust and package/Git access.
+# Inspect scope, then configure package/Git access.
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts --tags distribution
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution
 ```

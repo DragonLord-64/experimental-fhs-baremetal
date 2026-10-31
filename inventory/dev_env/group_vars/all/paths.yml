@@ -4,7 +4,7 @@ fhs_resources_dir: /provision/files.d
 fhs_archives_dir: "{{ fhs_resources_dir }}/external_archives"
 fhs_credentials_dir: "{{ fhs_resources_dir }}/credentials"
 fhs_keys_dir: "{{ fhs_resources_dir }}/dev-ssh-keys.d"
-# Install public internal-CA certificates on the controller before loading NetBox.
-# The distribution play installs these same certificates on managed servers.
+# Optional for future internal HTTPS; development HTTP requires no CA files.
+# For HTTPS, install controller trust before loading inventory.
 platform_ca_certificates: []
 # Example: [{src: "{{ fhs_resources_dir }}/certificates/platform-ca.crt", name: platform-ca}]

@@ -2,6 +2,5 @@
 filebeat_package_path: "{{ fhs_resources_dir }}/external_archives/filebeat-9.5.5-amd64.deb"
 filebeat_setup_credentials_file: "{{ fhs_resources_dir }}/credentials/filebeat-setup.yml"
 filebeat_setup_delegate: localhost
-filebeat_elasticsearch_hosts: [https://elastic.fhs.test:443]
-filebeat_setup_ssl_certificate_authorities:
-  - "{{ fhs_resources_dir }}/certificates/fhs-test.crt"
+filebeat_elasticsearch_hosts: [http://127.0.0.1:19200]
+filebeat_setup_ssl_certificate_authorities: []

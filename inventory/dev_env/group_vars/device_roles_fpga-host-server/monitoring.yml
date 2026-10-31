@@ -9,6 +9,6 @@ manage_prometheus_file_directory: "{{ fhs_archives_dir }}"
 filebeat_package_path: "{{ fhs_archives_dir }}/filebeat-9.5.5-amd64.deb"
 filebeat_credentials_file: "{{ fhs_credentials_dir }}/filebeat.yml"
 filebeat_setup_credentials_file: "{{ fhs_credentials_dir }}/filebeat-setup.yml"
-# Proposed ingress hostname: provision DNS and elasticsearch-tls before use.
-filebeat_elasticsearch_hosts: ["https://elasticsearch.rmdskadevdu011.mda.ca:443"]
+# Development LAN service endpoint; HTTPS can be configured later.
+filebeat_elasticsearch_hosts: ["http://mid-cbf-hw-elastic.hw-management.svc.cluster.local:9200"]
 filebeat_expected_major_version: '9'

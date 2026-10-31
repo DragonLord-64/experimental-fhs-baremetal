@@ -8,7 +8,7 @@ controller cleanup.
 FSP/VCC gRPC controllers are supported services. The `remove_fhs_grpc` block
 removes affected installations and stops the controllers; it does not reinstall
 them. Plan controller redeployment separately using
-[`manage_fhs_grpc`](../../../roles/manage_fhs_grpc/README.md). Recreating the
+[`manage_fhs_grpc`](../roles/manage_fhs_grpc.md). Recreating the
 provisioning venvs alone does not restore the controller services.
 
 Targets `device_roles_fpga-host-server`; use the current NetBox inventory.

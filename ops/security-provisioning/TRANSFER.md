@@ -3,7 +3,7 @@
 Official comparison: `development2` at `2638d5bd1533654bb8edb750fe29e4f4fb47c3b1`,
 confirmed remotely on 2026-10-30. Official already contains the APT/devpi/Git
 services and client roles. This update configures the new deployment, trusted
-HTTPS and portable inventory; it does not require importing the old proxy images.
+development HTTP and portable inventory; it does not require importing the old proxy images.
 
 ## Copy source
 
@@ -55,19 +55,19 @@ or the untracked session handoff. Never copy `.git/` or experimental Git history
 
 1. Review split connection/identity group vars; existing development sudo and
    account settings are not automatic production policy.
-2. Edit `platform/values-provisioning.yaml` for storage, ingress class, DNS and
-   TLS Secret names. Dedicated devpi/Elasticsearch hostnames are proposed and
-   require DNS records pointing at ingress, plus site-issued certificates.
-3. Create TLS Secrets in `hw-management`; install public CA trust on the
-   provisioning host/container before loading NetBox inventory. Set
-   `platform_ca_certificates` to distribute the public CA to managed servers.
+2. Review `platform/values-provisioning.yaml` for storage, the existing platform
+   hostname and LoadBalancer service types. Internal development endpoints use
+   HTTP; no additional DNS names, TLS Secrets or internal CA installation are
+   required. HTTPS may be configured later.
+3. Update the protected NetBox import/export credentials file to use
+   `http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/`. Keep its token Vault-encrypted.
 4. Put the selected Filebeat `.deb` and other reviewed artifacts in the resource
    directory mounted at `/provision/files.d`. Supply separate Vault-capable
    `credentials/filebeat-setup.yml` and `credentials/filebeat.yml`; the latter
    matches the platform publisher password. No role retrieves cluster Secrets.
 5. Install/upgrade the platform with the site values. Confirm the new APT/Git
    service DNS names resolve to reachable LoadBalancer addresses, and that devpi,
-   NetBox and Elasticsearch HTTPS verify from the controller and targets.
+   NetBox, devpi and Elasticsearch HTTP endpoints are reachable from their clients.
 6. Run Filebeat setup explicitly using `playbooks/filebeat_setup.yml`, then
    provision selected device-role hosts. Setup extracts the same package without
    installing a controller service. Device log collection is a separate role run.
@@ -76,8 +76,7 @@ Use the commands in [inventory usage](../../inventory/README.md),
 [platform installation](../../platform/charts/fhs-platform/README.md) and
 [Filebeat usage](../../roles/filebeat/README.md).
 
-The newer certificate cleanup/audit and gRPC retirement are also pending official
-transfer. Cleanup removes the selected legacy controller/provisioning environments;
+The one-off certificate cleanup/audit is also pending official transfer. Cleanup removes the selected legacy controller/provisioning environments;
 follow [its tagged commands](../../docs/src/playbooks/certificate-update.md).
 This pass does not change throughput limits or tune production resources.
 
