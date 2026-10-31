@@ -8,7 +8,7 @@ Historical entry points retained for reference; they are not part of the current
 | `run_ubuntu_cis.yml` | Former standalone prototype remediation. Review the current `site.yml` CIS scope and policy before selecting its `ubuntu24_cis` tag. |
 | `node_setup.yml` | Former node wrapper; current wrapper: `site.yml --tags setup_fhs_node`. |
 | `install_bist.yml` | Former BIST wrapper; current wrapper: `site.yml --tags manage_fhs_bist`. |
-| `install_grpc.yml` | Retired Poetry/gRPC installer; removed from `site.yml`. Use `development/certificate-update.yml` for cleanup. |
+| `install_grpc.yml` | Archived controller installation wrapper. FSP/VCC services remain supported by `manage_fhs_grpc`; certificate-update is separate one-off security remediation. |
 | `install_prometheus.yml` | Former exporter/Prometheus wrapper; current wrapper: `site.yml --tags manage_fhs_exporter,manage_prometheus`. |
 | `exds_configure.yaml` | Former machine-specific EXDS Netplan/Puppet setup, including fixed network settings and a private Puppet backup path. No general replacement is claimed. |
 | `filebeat_setup.yml` | Former development wrapper; current wrapper: `site.yml --tags filebeat`. |

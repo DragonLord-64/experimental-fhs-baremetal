@@ -668,3 +668,11 @@ NetBox inventory selects `ubuntu24_cis_production` through the
 site-playbook usage instructions. Five local expression cases passed: tagged
 FPGA/other servers included; untagged FPGA, legacy context and missing tags
 excluded. Source/link and whitespace checks passed. No deployment was run.
+
+### 2026-10-30 — Clarify supported FSP/VCC services
+
+Corrected operator documentation: FSP/VCC gRPC services remain supported.
+Certificate-update is one-off security remediation, and its removal block
+requires separate controller redeployment. Documented that the current site
+playbook does not include the installer without calling the role historical.
+Five documentation/link checks and whitespace checks passed; no runtime changes.

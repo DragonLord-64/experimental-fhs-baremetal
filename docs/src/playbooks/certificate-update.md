@@ -1,8 +1,15 @@
-# Certificate cleanup
+# Certificate security remediation
 
 `playbooks/development/certificate-update.yml` updates CA trust and removes
-selected Python environments. Use its tags to choose CA updates, environment
-resets or FSP/VCC controller cleanup.
+selected Python environments as a one-off response to the certificate security
+issue. Use its tags to choose CA updates, environment resets or FSP/VCC
+controller cleanup.
+
+FSP/VCC gRPC controllers are supported services. The `remove_fhs_grpc` block
+removes affected installations and stops the controllers; it does not reinstall
+them. Plan controller redeployment separately using
+[`manage_fhs_grpc`](../../../roles/manage_fhs_grpc/README.md). Recreating the
+provisioning venvs alone does not restore the controller services.
 
 Targets `device_roles_fpga-host-server`; use the current NetBox inventory.
 

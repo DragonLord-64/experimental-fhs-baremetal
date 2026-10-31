@@ -1,8 +1,11 @@
 # Manage FHS gRPC
 
-Retired from `site.yml`. The installer remains as historical reference; use
-[the tagged certificate cleanup](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/docs/src/playbooks/certificate-update.md)
-to stop/remove existing FSP/VCC controllers and their environments.
+FSP/VCC gRPC controllers are supported services. This role installs and manages
+them; `site.yml` currently does not include the role. The
+[certificate-update playbook](../../docs/src/playbooks/certificate-update.md)
+is a one-off security remediation that can remove affected controller
+installations and environments. Its cleanup is not a retirement of the services
+or a replacement for controller installation.
 
 Installs one controller selected by NetBox `grpc-fsp` or `grpc-vcc` tag.
 Neither tag skips installation; both fail before filesystem/account changes.

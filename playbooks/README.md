@@ -33,9 +33,12 @@ The full site run ends with the read-only [Python CA audit](../roles/audit_pytho
 Run `playbooks/audit_python_ca.yml` separately or select `--tags audit_python_ca`.
 The final audit also runs after tagged cleanup/provisioning; an explicit
 `--skip-tags audit_python_ca` defers validation.
-FSP/VCC gRPC installation is retired. Use the
-[tagged certificate cleanup](../docs/src/playbooks/certificate-update.md) to remove old services
-and their environments before recreating the provisioning venvs.
+FSP/VCC gRPC controllers are supported services; see
+[`manage_fhs_grpc`](../roles/manage_fhs_grpc/README.md). `site.yml` currently does
+not include their installation. The
+[certificate-update playbook](../docs/src/playbooks/certificate-update.md) is a
+one-off security remediation. Its controller cleanup requires separate
+controller redeployment; recreating provisioning venvs does not restore them.
 
 ## Operational NetBox and switch playbooks
 

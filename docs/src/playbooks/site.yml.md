@@ -18,10 +18,11 @@ Each role include has its exact role name as a tag. Most plays target `device_ro
 | No play tag | `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
 | `always`, `audit_python_ca` | Final read-only Python/CA audit, including tagged provisioning runs |
 
-`site.yml` does not install FSP/VCC gRPC controllers. Use
-[the tagged certificate cleanup](certificate-update.md) in
-`playbooks/development/certificate-update.yml` to remove controller services and
-environments when needed. `manage_fhs_bist` only
+FSP/VCC gRPC controllers are supported services managed by `manage_fhs_grpc`;
+`site.yml` currently does not include their installation. The
+[certificate-update playbook](certificate-update.md) is a one-off security
+remediation. Its optional controller cleanup stops and removes affected
+installations; controller redeployment is a separate step. `manage_fhs_bist` only
 installs/configures its placeholder and does not start hardware tests.
 
 Additional accounts, including the local development account and `gitlab-runner`, are configured in `fhs_users` in environment group vars. Use `--tags manage_users` to configure those accounts and their SDK environments. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. Firmware requires both its flag and explicit `firmware` selection; `never` alone is not a safety boundary.
