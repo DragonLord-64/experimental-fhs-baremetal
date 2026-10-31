@@ -198,6 +198,9 @@ class Ironic:
         for kind in ('deploy', 'inspect', 'management', 'power', 'network', 'raid'):
             if kind+'_interface' in host:
                 attrs[kind+'_interface'] = host[kind+'_interface']
+        # Older Bifrost profiles used "none"; the native Ironic driver is no-raid.
+        if str(attrs.get('raid_interface', '')).lower() == 'none':
+            attrs['raid_interface'] = 'no-raid'
         # Database-only settings: explicit cleaning is a separate operation.
         attrs['automated_clean'] = False
         if old:

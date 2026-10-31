@@ -1325,3 +1325,10 @@ passed. Real BMC transport and physical hardware remain untested.
   Other endpoint response bodies remain hidden. Added the shared API helper to
   diagnostics copy scope. Validation: 56 wrapper and 19 importer tests passed.
   The operator's precise device-type rejection remains unknown until retried.
+
+- 2026-10-31: Operator enrollment exposed the legacy profile RAID value `none`
+  being forwarded literally to Ironic, which requires `no-raid`. Native
+  reconciliation now translates that alias after resolving interface overrides;
+  copyable YAML/JSON profiles use `no-raid`. Tests cover nested and direct
+  legacy settings and the current value. All 56 wrapper and three transfer
+  tests passed; no physical deployment was run.

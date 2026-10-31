@@ -5,7 +5,7 @@ example-node:
   driver: redfish
   boot_interface: ipxe
   driver_interfaces:
-    raid: none
+    raid: no-raid
   driver_info:
     redfish_address: https://192.0.2.20
     redfish_system_id: /redfish/v1/Systems/1

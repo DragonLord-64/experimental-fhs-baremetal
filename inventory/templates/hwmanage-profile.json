@@ -2,7 +2,7 @@
   "driver": "redfish",
   "boot_interface": "ipxe",
   "driver_interfaces": {
-    "raid": "none"
+    "raid": "no-raid"
   },
   "ipv4_subnet_mask": "255.255.0.0",
   "ipv4_nameserver": "192.168.128.13",

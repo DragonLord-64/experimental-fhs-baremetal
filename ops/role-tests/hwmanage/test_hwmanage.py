@@ -279,6 +279,11 @@ class LifecycleContracts(unittest.TestCase):
         api.create_node.assert_not_called()
         api.create_port.assert_not_called()
         self.assertEqual({c.args[0] for c in api.find_node.call_args_list}, {'SYS1412'})
+        for extra in ({'driver_interfaces': {'raid': 'none'}}, {'raid_interface': 'none'},
+                      {'driver_interfaces': {'raid': 'no-raid'}}):
+            client.reconcile(dict(host, **extra), create=True)
+            self.assertEqual(api.update_node.call_args.kwargs['raid_interface'], 'no-raid')
+
 
     def test_enroll_creates_serial_name_without_supplied_uuid(self):
         api = Mock()
