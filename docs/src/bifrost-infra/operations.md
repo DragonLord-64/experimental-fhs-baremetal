@@ -249,3 +249,51 @@ Deleted node sys1354
 +--------------------------------------+---------------+---------------+-------------+-----------------+-------------+
 ()[root@rmdskadevdu002 playbooks]# 
 ```
+
+
+## Patch the running container environment
+
+Run inside `bifrost_deploy`. The script is mounted from the repository's
+`scripts/` folder into `/provision/scripts/`.
+
+```bash
+# Read versions, dependency conflicts and OpenSSL/Ironic import failures.
+python3 /provision/scripts/patch-bifrost-environment.py diagnose
+
+# Update system CA certificates, pip and certifi; then repeat diagnostics.
+python3 /provision/scripts/patch-bifrost-environment.py update
+```
+
+Diagnostics return nonzero for outdated pip/certifi, broken imports or dependency
+conflicts. Update saves package versions under `/var/tmp/bifrost-environment-patches/`,
+installs the hash-verified pip 26.2.2 bootstrap wheel and certifi >= 2026.10.19
+through `https://pypi.org/simple`. It does not restart services or change Ironic
+configuration, node records or databases. The version snapshot is a diagnostic
+record, not a complete environment backup or automatic rollback.
+
+For an OpenSSL/cryptography import failure, use the **local upper-constraints file
+matching the installed OpenStack release**. Diagnostics list common candidate
+locations. Do not substitute constraints from another release.
+
+```bash
+python3 /provision/scripts/patch-bifrost-environment.py repair-openssl \
+  --constraints /path/to/release/upper-constraints.txt
+```
+
+This separately updates only pyOpenSSL/cryptography and dependencies selected by
+pip under those constraints, then runs diagnostics. It may still fail if the
+release pins are incompatible with the installed environment. Keep Ironic running
+until its imports pass and any current inspection/deployment has finished. Restart
+only the actual Ironic service afterward.
+
+These commands patch the container's system CA package and Kolla environment,
+not other virtualenvs, IPA ramdisks or deployment images. The Python runtime itself
+also needs the distributor's security updates. See the
+[Python security announcement](https://discuss.python.org/t/109576).
+
+A fresh container image is the durable fix, but the current Compose file does
+not explicitly persist the Ironic database or `/etc/ironic`. Before replacing a
+container, back up its database, configuration and credentials; retain the mounted
+SSH keys and `/var/lib/ironic` images. An image build alone does not update the
+running container, and rebuilding the existing Dockerfile alone does not guarantee
+updated Python trust bundles. This patch script does not build or replace it.

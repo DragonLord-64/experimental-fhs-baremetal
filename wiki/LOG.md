@@ -806,3 +806,19 @@ unreachable documentation addresses and runs the actual three IPMI tasks with a
 synthetic client. All three execute locally and parse their results successfully.
 Seven focused tests and wrapper syntax validation passed. No physical BMC or
 NetBox changes were needed for this transport-only correction.
+
+### 2026-10-31 — Running Bifrost environment diagnostics and CA patch helper
+
+Added scripts/patch-bifrost-environment.py with read-only diagnostics, explicit
+CA/pip/certifi updates and a separate release-constrained pyOpenSSL/cryptography
+repair. It checks the GEN_EMAIL import path, records private package-version
+snapshots, authenticates the pip bootstrap wheel using the Python security team's
+published SHA256 and never restarts services or replaces containers. The transfer
+script includes it; deployment operations show usage and container-state limits.
+
+Five focused tests passed with package commands mocked; a real read-only probe
+against an incomplete local venv correctly reported missing packages and returned
+failure. Source/link checks and a disposable transfer passed. No deployed Kolla
+environment was patched and no rebuild or database migration was performed.
+Rebuilding remains separate work: the present Compose mounts do not explicitly
+persist the Ironic database/config, and IPA/OS image trust requires its own update.

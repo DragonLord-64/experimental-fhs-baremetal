@@ -18,7 +18,7 @@ for name in ('roles', 'playbooks', 'platform', 'docs/src',
                                                  'platform-secrets.yml', 'platform-endpoints.yml'))
     print(f'Copied {name}/')
 
-for name in ('ansible.cfg', 'inventory/README.md',
+for name in ('scripts/patch-bifrost-environment.py', 'ansible.cfg', 'inventory/README.md',
              'inventory/dev_env/netbox-inv.yml'):
     target = destination / name
     target.parent.mkdir(parents=True, exist_ok=True)
