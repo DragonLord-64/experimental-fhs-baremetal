@@ -1,7 +1,0 @@
----
-- name: Explain retired role migration
-  ansible.builtin.fail:
-    msg: >-
-      This standalone role is retired. Use manage_users for accounts, the system
-      SDK and shared/personal BittWare environments. Select --tags manage_users
-      in playbooks/site.yml and configure environment group vars.

@@ -46,11 +46,6 @@ with tempfile.TemporaryDirectory(prefix='fhs-preflight-') as folder:
  run('bad-credentials',{'preflight_checks':['filebeat_setup']},False)
  creds.write_text('filebeat_elasticsearch_username: fixture\nfilebeat_elasticsearch_password: NEVER-PRINT-THIS\n')
  assert all(hashlib.sha256(p.read_bytes()).hexdigest()==digest for p,digest in before.items())
- # Legacy callers fail before any account or package action.
- for role in ('manage_venvs','manage_bittware_sdk','manage_gitlab-runner'):
-  play=root/'retired.yml';play.write_text('- hosts: fixture\n  gather_facts: false\n  roles:\n    - '+role+'\n')
-  result=subprocess.run([ansible,'-i',str(inv),str(play)],env=env,capture_output=True,text=True,timeout=30)
-  assert result.returncode!=0 and 'standalone role is retired' in result.stdout,(role,result.stdout)
- print('PASS unchanged input hashes and all retired entry points')
+ print('PASS unchanged input hashes')
  server.shutdown()
  plain.shutdown()

@@ -18,8 +18,9 @@ git -C ../ska-mid-cbf-fhs-baremetal diff
 Pass a destination path if its folder has another name. The script copies the
 listed source folders/files and overwrites matching files. It does not use Git,
 merge settings or create backups. After copying, it removes the obsolete
-`roles/setup_fhs_node/` directory and `docs/src/roles/setup_fhs_node.md` if present;
-the replacement is `setup_k8s_node`. Other destination files are retained. NetBox inventory is
+`roles/setup_fhs_node/`, `roles/manage_venvs/`, `roles/manage_bittware_sdk/` and
+`roles/manage_gitlab-runner/` directories and their role documentation pages if
+present. Their replacements are `setup_k8s_node` and `manage_users`. Other destination files are retained. NetBox inventory is
 copied verbatim; review its token and site settings in Git. Host inventory and
 host vars are not copied. Remove obsolete files listed below manually.
 
@@ -91,9 +92,7 @@ Lab commands/results live beside this note, outside copied source. Lab success
 does not establish production DNS, certificate issuance, credentials, hardware
 behavior or a completed official deployment.
 
-The old `manage_venvs`, `manage_bittware_sdk` and `manage_gitlab-runner` entry
-points now stop with migration instructions. Copy their replacement main task
-files too; the plain-copy script leaves any obsolete files on disk, but those
-entry points no longer run duplicate implementations. The optional
+Account, SDK and environment setup use `manage_users`. The obsolete standalone
+roles and their documentation pages are deleted by the copy script. The optional
 `playbooks/preflight.yml` command is documented in
 [preflight usage](../../docs/src/playbooks/preflight.md).

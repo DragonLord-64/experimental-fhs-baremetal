@@ -1,7 +1,7 @@
 # setup_fpga_host
 
 Installs VFIO udev rules and optionally writes GRUB settings or programs BMC
-firmware. SDK/package and venv installation belong to `manage_bittware_sdk`.
+firmware. SDK/package and venv installation belong to `manage_users`.
 Select `--tags setup_fpga_host` in `playbooks/site.yml` for the default udev path.
 
 | Variable | Default | Purpose |

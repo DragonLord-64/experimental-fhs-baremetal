@@ -708,3 +708,12 @@ Recorded current-system, operator-first documentation preferences in
 index and repository instructions. Includes concrete configuration/command
 examples, role-focused scope, deployed-environment context and preservation of
 intentional README deletions. Source/link and whitespace checks passed.
+
+### 2026-10-30 — Delete obsolete standalone user/SDK roles
+
+Deleted the retired manage_venvs, manage_bittware_sdk and manage_gitlab-runner
+role placeholders and documentation includes. Updated SDK guidance to
+manage_users and removed the obsolete migration-message fixture cases.
+The transfer script deletes those destination roles/pages as well as the old
+Kubernetes role name. Disposable transfer and rerun checks passed, preserving
+active users/gRPC roles; source/link and whitespace checks passed.

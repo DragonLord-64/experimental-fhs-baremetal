@@ -24,7 +24,7 @@ def main():
     if actual_user != p['user']: finish('SDK user mismatch; configure become_user for the BittWare account')
     python = Path(p['venv']) / 'bin/python3'
     if not python.is_file() or not os.access(python, os.X_OK): finish('SDK venv Python missing or not executable; provision the configured venv')
-    if not Path(p['sdk_root']).is_dir(): finish('BWSDK_ROOT is missing; provision the SDK with manage_bittware_sdk')
+    if not Path(p['sdk_root']).is_dir(): finish('BWSDK_ROOT is missing; provision the SDK with manage_users')
     environment = dict(os.environ, BWSDK_ROOT=p['sdk_root'], PATH=str(Path(p['venv'])/'bin')+':'+p['command_path'], LC_ALL='C')
     def executable(argv):
         tool = Path(argv[0]) if '/' in argv[0] else Path(p['venv']) / 'bin' / argv[0]

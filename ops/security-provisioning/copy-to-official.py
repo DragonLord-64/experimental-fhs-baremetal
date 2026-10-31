@@ -24,12 +24,13 @@ for name in ('ansible.cfg', 'inventory/README.md',
     shutil.copy2(source / name, target)
     print(f'Copied {name}')
 
-old_role = destination / 'roles/setup_fhs_node'
-if old_role.exists():
-    shutil.rmtree(old_role)
-    print('Removed roles/setup_fhs_node/')
-
-old_role_doc = destination / 'docs/src/roles/setup_fhs_node.md'
-if old_role_doc.exists():
-    old_role_doc.unlink()
-    print('Removed docs/src/roles/setup_fhs_node.md')
+for name in ('setup_fhs_node', 'manage_venvs', 'manage_bittware_sdk',
+             'manage_gitlab-runner'):
+    old_role = destination / 'roles' / name
+    if old_role.exists():
+        shutil.rmtree(old_role)
+        print(f'Removed roles/{name}/')
+    old_role_doc = destination / 'docs/src/roles' / f'{name}.md'
+    if old_role_doc.exists():
+        old_role_doc.unlink()
+        print(f'Removed docs/src/roles/{name}.md')
