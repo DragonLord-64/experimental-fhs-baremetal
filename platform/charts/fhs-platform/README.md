@@ -10,7 +10,7 @@ Run from the repository root. The installation uses release `mid-cbf-hw`,
 namespace `hw-management` and prefix `/mid-cbf-hw`.
 
 ```bash
-# Edit hostnames, certificate Secret names and site storage settings first.
+# Edit hostnames, certificate Secret names and service types.
 vi platform/values-provisioning.yaml
 # Install or upgrade the platform with the provisioning endpoints enabled.
 helm upgrade --install mid-cbf-hw platform/charts/fhs-platform \
@@ -19,6 +19,8 @@ helm upgrade --install mid-cbf-hw platform/charts/fhs-platform \
   --wait --wait-for-jobs --timeout 20m
 ```
 
+Storage class and capacity overrides live in `aptCacher.persistence`,
+`devpi.persistence` and the application settings in [values.yaml](values.yaml).
 Create the DNS records and TLS Secrets before deploying; see
 [HTTPS setup](CONFIGURATION.md#https-endpoints).
 Defaults are in [values.yaml](values.yaml).

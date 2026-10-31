@@ -2,24 +2,61 @@
 
 NetBox owns device, interface, address and selected configuration facts. Protected controller files own authentication. The dynamic Ansible inventory and Bifrost export are separate consumers.
 
-## Polling NetBox for Inventory
+## 1. Configure Ansible inventory
 
-`inventory/dev_env/netbox-inv.yml` uses `netbox.netbox.nb_inventory`. It enables interfaces, IP addresses, config context, flattened custom fields and extra variables. It selects active devices with primary IPs, groups by device role and adds `teraboxes` / `nexus` from the `fpga-host-server` / `nexus-switch` category tags (legacy role grouping remains supported).
+Run these commands inside the provisioning container, from `/provision`.
+Install the declared NetBox collections and Python requirements:
 
-A minimal private configuration is:
+```bash
+ansible-galaxy collection install -r playbooks/netbox/requirements.yml -p collections
+python3 -m pip install -r playbooks/netbox/requirements.txt
+```
+
+Create a NetBox API token for the account used by Ansible. In
+`inventory/dev_env/netbox-inv.yml`, set the endpoint and retain the device-role
+filters/grouping already in that file:
 
 ```yaml
 plugin: netbox.netbox.nb_inventory
-api_endpoint: https://<NETBOX_HOST>/netbox/
-token: <TOKEN_FROM_PROTECTED_CONFIGURATION>
+api_endpoint: https://<NETBOX_HOST>/mid-cbf-hw/netbox/
 validate_certs: true
 interfaces: true
 config_context: true
 ```
 
-The tracked development configuration uses a Vault-encrypted bearer token and enables certificate validation. Install the public issuing CA in the provisioning host/container before loading inventory, or set `ca_path` to its PEM bundle. See [controller trust](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/inventory/README.md#trust-netbox-before-loading-inventory). Replace the old preserved Vault token with one issued by the new NetBox deployment. Supply its Vault password privately; do not copy tokens into commands or published inventory output. Install the collection from `requirements.yml` and its Python dependencies before polling.
+The inventory plugin reads its token from this same inventory file. Encrypt the
+token interactively; this keeps it out of shell history:
 
-## Workflow
+```bash
+ansible-vault encrypt_string --stdin-name value
+```
+
+Enter the token, then press Ctrl-D to finish input. Paste the resulting `value: !vault |` block
+under `token` in `inventory/dev_env/netbox-inv.yml`, indented as follows:
+
+```yaml
+token:
+  type: Bearer
+  value: !vault |
+    <encrypted output from encrypt_string>
+```
+
+Use `--ask-vault-pass` when running inventory or playbooks. This plugin token is
+separate from the credentials file used by import/export playbooks below.
+
+If NetBox uses an internal CA, install its public certificate inside the
+provisioning container before loading inventory:
+
+```bash
+sudo install -m 0644 /provision/files.d/certificates/platform-ca.crt \
+  /usr/local/share/ca-certificates/platform-ca.crt
+sudo update-ca-certificates
+```
+
+Alternatively set `ca_path: /provision/files.d/certificates/platform-ca.crt`
+in `netbox-inv.yml`. Keep `validate_certs: true`.
+
+### Read inventory and configure a server
 
 1. Confirm the endpoint, device role groups and selected host scope.
 2. Resolve the inventory privately. These commands contact NetBox but do not provision hosts:
@@ -47,33 +84,75 @@ inventory. Neither Topology Views filters nor an Inventory API prerequisite
 failure establish a physical connection.
 
 
-## Inventory consumers
+## 2. Configure import/export credentials
 
-```{mermaid}
-flowchart TD
-    N[NetBox records] -->|inventory plugin| A[Ansible inventory]
-    A -->|selected hosts and roles| C[Installed OS configuration]
-    N -->|device and interface facts| X[Bifrost export playbook]
-    R[Protected Redfish credentials] -->|authentication| X
-    X -->|mode 0600| Y[Private Bifrost YAML]
-```
-
-The two outputs have different consumers. Writing YAML does not enroll or image a server.
-
-## Provisioning export ownership
-
-`playbooks/netbox/bifrost_export.yml` reads NetBox and writes Bifrost-compatible YAML. It selects a device type (default `TeraBox1501b`) and interfaces tagged `provisioning-interface`, reads native out-of-band and primary IPv4 addresses, and combines approved custom fields with protected Redfish credentials. Simulated devices are rejected. It validates MAC uniqueness and required fields before writing mode `0600` output; a newly created output directory is mode `0700`.
+Import/export playbooks read a separate YAML file. Create it on the provisioning
+host's resource mount (inside the container it is `/provision/files.d`):
 
 ```bash
-ansible-playbook playbooks/netbox/bifrost_export.yml --ask-vault-pass \
-  -e netbox_credentials_file=<PRIVATE_NETBOX_VARS> \
-  -e redfish_credentials_file=<PRIVATE_REDFISH_VARS> \
-  -e bifrost_output=<PRIVATE_OUTPUT_PATH>
+install -d -m 0700 /provision/files.d/credentials
+umask 077
+vi /provision/files.d/credentials/mid-cbf-hw-netbox.yml
 ```
 
-The existing private file `/provision/files.d/credentials/mid-cbf-hw-netbox.yml`
-must use the new deployment URL (`https://<NETBOX_HOST>/mid-cbf-hw/netbox/`) and
-a token issued there. The protected files supply `netbox_url`, `netbox_token` and `redfish_credentials` (`defaults` and optional per-device entries). The default output is `playbooks/netbox/output/baremetal.yml`; always choose a protected destination. Export does not enroll, deploy or modify NetBox. Enrollment and imaging remain separate Bifrost operations. No implemented post-provisioning role-to-IP deployment export is established by this playbook.
+Use these exact variable names in that file:
+
+```yaml
+netbox_url: https://<NETBOX_HOST>/mid-cbf-hw/netbox/
+netbox_token: "<NetBox API token>"
+netbox_validate_certs: true
+```
+
+Encrypt the file after saving it:
+
+```bash
+ansible-vault encrypt /provision/files.d/credentials/mid-cbf-hw-netbox.yml
+```
+
+`playbooks/netbox/defaults.yml` assigns the credentials file for import and
+export plays:
+
+```yaml
+netbox_credentials_file: /provision/files.d/credentials/mid-cbf-hw-netbox.yml
+```
+
+To select another file for one run, add
+`-e netbox_credentials_file=/provision/files.d/credentials/<name>.yml`.
+The inventory plugin does not load this file.
+
+## 3. Export servers for Bifrost
+
+Create `/provision/files.d/credentials/redfish.yml` for BMC authentication:
+
+```yaml
+redfish_credentials:
+  defaults:
+    redfish_username: "<BMC username>"
+    redfish_password: "<BMC password>"
+  devices:
+    <NetBox-device-name>:
+      redfish_username: "<override username>"
+      redfish_password: "<override password>"
+```
+
+Omit `devices` when all selected servers use the defaults. Encrypt this file:
+
+```bash
+ansible-vault encrypt /provision/files.d/credentials/redfish.yml
+# Write a private YAML inventory for Bifrost; no enrollment or imaging occurs.
+ansible-playbook -i localhost, playbooks/netbox/bifrost_export.yml --ask-vault-pass \
+  -e netbox_credentials_file=/provision/files.d/credentials/mid-cbf-hw-netbox.yml \
+  -e redfish_credentials_file=/provision/files.d/credentials/redfish.yml \
+  -e bifrost_output=/provision/files.d/bifrost/baremetal.yml
+```
+
+The export selects NetBox device type `TeraBox1501b` and interfaces tagged
+`provisioning-interface`. Set `bifrost_device_type` in `playbooks/netbox/defaults.yml`
+or pass `-e bifrost_device_type=<device-type>` to select another type. Devices
+need native out-of-band/primary addresses and valid unique provisioning MACs.
+The output contains BMC credentials: its mode is `0600`, and a newly created
+output directory is `0700`. Keep it outside Git. Enrollment and imaging are
+separate Bifrost commands.
 
 See [development playbooks](../playbooks/development.md) for discovery/import and switch POAP, and [provisioning design](../design/provisioning-interface.md) for the intended physical sequence.
 

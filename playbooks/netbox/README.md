@@ -355,7 +355,7 @@ python3 playbooks/netbox/netbox_transfer.py import \
 ```
 
 Vars use `netbox_url`, `netbox_token` and `netbox_validate_certs` (fallback
-`netbox_validate_certs_default: false`, matching the playbooks). URLs may include
+`netbox_validate_certs_default: true`, matching the playbooks). URLs may include
 a deployment prefix. Values must be resolved YAML, without Jinja expressions.
 Tokens use `Bearer` for `nbt_` tokens and `Token` otherwise. Vault files use
 `ansible-vault view`; inline `!vault` uses Ansible's DataLoader. Pass

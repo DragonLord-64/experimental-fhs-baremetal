@@ -18,13 +18,13 @@ Each role include has its exact role name as a tag. Most plays target `device_ro
 | No play tag | `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
 | `always`, `audit_python_ca` | Final read-only Python/CA audit, including tagged provisioning runs |
 
-FSP/VCC gRPC installation is retired. Use
+`site.yml` does not install FSP/VCC gRPC controllers. Use
 [the tagged certificate cleanup](certificate-update.md) in
-`playbooks/development/certificate-update.yml` to remove existing services and
-environments before recreating the provisioning venvs. `manage_fhs_bist` only
+`playbooks/development/certificate-update.yml` to remove controller services and
+environments when needed. `manage_fhs_bist` only
 installs/configures its placeholder and does not start hardware tests.
 
-Additional accounts, including the local development account and `gitlab-runner`, are configured in `fhs_users` in environment group vars. The former separate venv/SDK/runner role tags are replaced by `manage_users`. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. Firmware requires both its flag and explicit `firmware` selection; `never` alone is not a safety boundary.
+Additional accounts, including the local development account and `gitlab-runner`, are configured in `fhs_users` in environment group vars. Use `--tags manage_users` to configure those accounts and their SDK environments. Review the selected scope before applying the whole playbook. Multiple tags use OR selection. Firmware requires both its flag and explicit `firmware` selection; `never` alone is not a safety boundary.
 
 ## Commands
 
@@ -39,19 +39,27 @@ ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-h
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_prometheus
 ```
 
-The final command changes the host. See the role pages for defaults and explicit functional/safety tags. Dynamic includes mean `--list-tasks` and `--list-tags` do not enumerate all internal tasks. Development `config.yml` and `syntax_check.yml` retain stale imports; they are not verified validation entry points.
+The final command changes the host. Use the table above to select a role tag;
+`--list-tasks` and `--list-tags` do not enumerate every nested task. Each role's
+README shows its settings and commands.
 
 ## Ubuntu 24 CIS scope
 
-Use `-i inventory/dev_env/netbox-inv.yml` for the current NetBox inventory.
-To merge additional explicit Linux membership, pass a reviewed groups-only file
-as a second `-i`; do not load the inventory directory with the old snapshot.
-The policy group includes `linux_servers` (known FPGA server role, control servers
-and FHS nodes). The NetBox file also selects the known `fpga-host-server` role/tag;
-other Linux roles must set `fhs_linux_server: true` in NetBox config context or be
-explicitly placed in `linux_servers` in `hosts.yml`. No platform names are guessed.
-Switches must not be placed in this group. Confirm `--list-hosts --tags ubuntu24_cis`
-contains every intended Linux host before applying; the role requires Ubuntu 24.04.
+The NetBox inventory assigns the `fpga-host-server` device role/tag to
+`ubuntu24_cis_production`. For other Linux servers, assign this NetBox config
+context to the intended devices:
+
+```json
+{"fhs_linux_server": true}
+```
+
+Confirm the policy scope before applying it:
+
+```bash
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts --tags ubuntu24_cis --ask-vault-pass
+```
+
+The role requires Ubuntu 24.04. Keep switches out of this policy group.
 
 `inventory/dev_env/group_vars/ubuntu24_cis_production.yml` supplies the effective
 policy to every selected host, including non-Kubernetes servers. Enforcement
@@ -90,7 +98,7 @@ credentials. `site.yml` and `provision.yml` are the entry points.
 
 Edit the split group vars under
 `inventory/dev_env/group_vars/device_roles_fpga-host-server/` before applying.
-`distribution.yml` selects the new platform endpoints: signed APT over the HTTP
+`distribution.yml` selects the platform endpoints: signed APT over the HTTP
 cache, verified HTTPS pip and an HTTP Git proxy tunnelling verified HTTPS.
 `monitoring.yml` selects the local packages and Elasticsearch endpoint.
 

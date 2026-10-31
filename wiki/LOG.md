@@ -641,3 +641,15 @@ downgrade rejection, bootstrap and retired-entry-point cases. Input hashes staye
 intact. Syntax, source boundaries and documentation builds passed. CI and
 dependency declarations were unchanged; temporary importer failures were not
 repaired or rerun. No production deployment was performed.
+
+### 2026-10-30 — Operator instructions without change-history assumptions
+
+Reworked NetBox inventory/import/export instructions around file locations,
+credential formats, variable assignments, URL prefixes and commands. Added
+concrete user-key, Filebeat credential and HTTPS values examples. Core usage
+guides describe the current setup; transfer history stays in experimental notes.
+Recorded this writing rule in the repository instructions.
+
+The documentation agent drafted the focused changes; parent review corrected
+the requirements-file path and export inventory selection. Local source/link
+checks and Sphinx HTML passed. No runtime or deployment changes were made.

@@ -21,8 +21,15 @@ setup delegate defaults to `localhost` and needs `dpkg-deb`, CA trust and access
 to Elasticsearch. [Install controller trust first](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/inventory/README.md).
 Keep `filebeat_ssl_verification_mode: full`.
 
-Create `/provision/files.d/credentials/filebeat-setup.yml` with an existing setup
-identity:
+Create the private credential directory and edit the setup file:
+
+```bash
+install -d -m 0700 /provision/files.d/credentials
+umask 077
+vi /provision/files.d/credentials/filebeat-setup.yml
+```
+
+Use an Elasticsearch identity with the setup privileges listed below:
 
 ```yaml
 filebeat_elasticsearch_username: "<setup-user>"
@@ -52,8 +59,22 @@ filebeat_elasticsearch_username: filebeat_writer
 filebeat_elasticsearch_password: "<platform-filebeat-password>"
 ```
 
-Match the platform credential's `filebeat-password` value. Encrypt this file with
-Ansible Vault too. Publishing credentials are written to root-only device
+Use the value stored under `filebeat-password` in Kubernetes Secret
+`fhs-platform-credentials`, namespace `hw-management`. From the cluster management
+host, read that value privately:
+
+```bash
+kubectl -n hw-management get secret fhs-platform-credentials \
+  -o jsonpath='{.data.filebeat-password}' | base64 --decode
+```
+
+Transfer it into the publishing YAML above, then encrypt the file:
+
+```bash
+ansible-vault encrypt /provision/files.d/credentials/filebeat.yml
+```
+
+Publishing credentials are written to root-only device
 configuration; do not give devices the setup identity.
 
 ```bash

@@ -1,8 +1,8 @@
 # Certificate cleanup
 
-`playbooks/development/certificate-update.yml` updates CA trust and removes old
-Python environments before normal provisioning recreates them. FSP/VCC gRPC
-installation is retired from `site.yml`; cleanup is a block in this playbook.
+`playbooks/development/certificate-update.yml` updates CA trust and removes
+selected Python environments. Use its tags to choose CA updates, environment
+resets or FSP/VCC controller cleanup.
 
 Targets `device_roles_fpga-host-server`; use the current NetBox inventory.
 

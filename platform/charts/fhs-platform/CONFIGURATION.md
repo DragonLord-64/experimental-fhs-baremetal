@@ -93,10 +93,8 @@ For NodePort use the assigned node port instead of 3142. HTTPS CONNECT is
 allowed only for archive.ubuntu.com, security.ubuntu.com, deb.debian.org,
 download.docker.com, rmdlinuxrepo.mda.ca and pkgs.k8s.io on port 443.
 HTTPS tunnels are passed through; HTTP package downloads are cached.
-The five overrides are in `templates/apt-cacher-config.yaml`; other settings
-use the image's packaged apt-cacher-ng defaults. The pinned
-[container source](https://github.com/mbentley/docker-apt-cacher-ng) supplies
-the package; its broad CONNECT override is replaced by this chart.
+To change the allowed HTTPS destinations, edit `PassThroughPattern` in
+`templates/apt-cacher-config.yaml`, then run the Helm upgrade command.
 
 ## Python and Git proxies
 
@@ -117,10 +115,9 @@ cache or TLS interception is used. Git still verifies origin certificates.
 The chart defaults to ClusterIP. `platform/values-provisioning.yaml` sets APT,
 devpi and Git services to LoadBalancer for the separate provisioning machines.
 Your deployment's LoadBalancer DNS integration can map service names to external
-addresses. After changing namespace/release, use the new service names and check
-resolution from the provisioning host and targets.
+addresses. Use the configured service names and check resolution from the provisioning host and targets.
 
-Set these values in inventory `distribution.yml`:
+Set these values in `inventory/dev_env/group_vars/device_roles_fpga-host-server/distribution.yml`:
 
 ```yaml
 apt_cache_url: http://mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local:3142
@@ -154,6 +151,30 @@ kubectl -n hw-management create secret tls devpi-tls \
 kubectl -n hw-management create secret tls elasticsearch-tls \
   --cert=/path/to/elasticsearch-fullchain.pem --key=/path/to/elasticsearch.key \
   --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Set the endpoint names and Secrets in `platform/values-provisioning.yaml`:
+
+```yaml
+global:
+  hostname: <platform-hostname>
+  scheme: https
+  urlPrefix: /mid-cbf-hw
+  tlsSecretName: platform-tls
+devpi:
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: true
+    hostname: <devpi-hostname>
+    tlsSecretName: devpi-tls
+logging:
+  elasticsearch:
+    ingress:
+      enabled: true
+      className: nginx
+      host: <elasticsearch-hostname>
+      tlsSecretName: elasticsearch-tls
 ```
 
 `global.hostname` and `global.tlsSecretName` configure shared NetBox/Grafana/Kibana

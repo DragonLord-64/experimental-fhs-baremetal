@@ -10,7 +10,7 @@ there; keep site settings in group vars.
 ```text
 inventory/dev_env/
   netbox-inv.yml                 # current NetBox API and vaulted token
-  hosts.yml                      # old snapshot; do not merge without review
+  hosts.yml                      # reference snapshot; runtime hosts come from NetBox
   group_vars/
     all/
       connections.yml
@@ -31,14 +31,13 @@ Ansible loads every YAML file in a group's directory. Put a variable in one
 file; use host vars only when a server needs a different value. Review the
 existing connection and identity settings before copying them to another site.
 
-The checked-in host files describe the old NetBox inventory. They are not an
-export of the new deployment. Use NetBox for current hosts and role membership.
+`hosts.yml` contains reference snapshots. Use NetBox for runtime hosts and role
+membership.
 
 `hosts.yml` defines `ubuntu24_cis_production → linux_servers →
 device_roles_fpga-host-server`, with additional explicit Linux server groups.
-The standard commands below load only the current NetBox plugin. If you need
-additional static inheritance, first replace the old snapshot with an explicitly
-reviewed groups-only file and pass that file as a second `-i` argument. Site plays
+The standard commands below load only the NetBox plugin. If you need
+additional static inheritance, use an explicitly reviewed groups-only file and pass that file as a second `-i` argument. Site plays
 target `device_roles_fpga-host-server`; CIS targets `ubuntu24_cis_production`.
 Keep switches out of Linux policy groups.
 
@@ -56,15 +55,18 @@ ansible-inventory -i inventory/dev_env/netbox-inv.yml --graph --ask-vault-pass
 ```
 
 Keep `validate_certs: true` in `netbox-inv.yml`. Alternatively set its `ca_path`
-to the controller's PEM CA bundle. Use the current NetBox API URL and token.
+to the controller's PEM CA bundle. Set `api_endpoint: https://<NETBOX_HOST>/mid-cbf-hw/netbox/` and a Vault-encrypted
+`token` in that inventory file. The [NetBox guide](../docs/src/guide/using_netbox_inventory.md)
+shows the token format and separate import/export credentials.
 
 ## Configure clients
 
-Change `distribution.yml` to match the deployed platform and `monitoring.yml`
-to select packages and Elasticsearch. Dedicated HTTPS ingress hostnames in the
-example are proposed site names: create DNS and certificates before using them.
-Your existing LoadBalancer DNS integration supplies external service addresses;
-verify the new release/namespace names from the provisioning host and targets.
+Edit `inventory/dev_env/group_vars/device_roles_fpga-host-server/distribution.yml`
+for APT/pip/Git settings and `monitoring.yml` in the same directory for package
+paths and Elasticsearch. Dedicated HTTPS ingress hostnames in the
+example require matching DNS records and certificates.
+The site's LoadBalancer DNS integration supplies external service addresses;
+verify the configured release/namespace names from the provisioning host and targets.
 
 To install the public CA on managed servers, set this in `all/paths.yml`:
 

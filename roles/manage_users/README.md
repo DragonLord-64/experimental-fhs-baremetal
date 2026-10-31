@@ -6,8 +6,21 @@ one role. Each public-key account, explicit account and the Ansible account gets
 
 ## Configure
 
-Put `username.pub` files under `fhs_keys_dir`. In the device-role
-`environment.yml`, select the SDK and additional accounts:
+Set the key directory in `inventory/dev_env/group_vars/all/paths.yml`:
+
+```yaml
+fhs_keys_dir: "{{ fhs_resources_dir }}/dev-ssh-keys.d"
+```
+
+Place one OpenSSH public key in `<username>.pub` for each approved account:
+
+```bash
+install -d -m 0700 /provision/files.d/dev-ssh-keys.d
+install -m 0644 /path/to/alice.pub /provision/files.d/dev-ssh-keys.d/alice.pub
+```
+
+In `inventory/dev_env/group_vars/device_roles_fpga-host-server/environment.yml`,
+select the SDK and additional accounts:
 
 ```yaml
 fpga_bittware_sdk_deb: "{{ fhs_archives_dir }}/bittware-sdk-ubuntu24.04-2026.1.0.deb"
@@ -22,8 +35,7 @@ fhs_users:
 ```
 
 Additional accounts accept `group`, `groups`, `home`, `shell`, protected
-`password` and `ssh_keys`. Keep the existing local account/password entry if
-required. Public-key accounts use `vault_user_password_<username>` or a locked
+`password` and `ssh_keys`. Set account passwords through protected inventory variables when needed. Public-key accounts use `vault_user_password_<username>` or a locked
 password. Existing supplementary groups and SSH keys are preserved.
 
 ## Run
