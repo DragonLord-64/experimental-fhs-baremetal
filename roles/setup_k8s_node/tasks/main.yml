@@ -1,5 +1,5 @@
 ---
-# roles/fhs_node_setup/tasks/main.yml
+# roles/setup_k8s_node/tasks/main.yml
 
 - name: Validate node preparation inputs
   ansible.builtin.import_tasks: validate.yml

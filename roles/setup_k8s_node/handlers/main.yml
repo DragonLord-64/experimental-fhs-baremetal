@@ -1,5 +1,5 @@
 ---
-# roles/fhs_node_setup/handlers/main.yml
+# roles/setup_k8s_node/handlers/main.yml
 
 - name: Restart containerd
   ansible.builtin.systemd:

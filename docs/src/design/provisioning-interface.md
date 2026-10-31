@@ -230,4 +230,4 @@ Ansible allows for simultaneous configuration of multiple servers. **Variables**
 
 Cluster joining is a subsequent operational step; the documented source does not establish an automatic completed join.
 
-`setup_fhs_node` prepares node dependencies; do not infer a completed cluster join from `site.yml`. Cluster joining and placement require a separately verified operational procedure.
+`setup_k8s_node` prepares node dependencies; do not infer a completed cluster join from `site.yml`. Cluster joining and placement require a separately verified operational procedure.

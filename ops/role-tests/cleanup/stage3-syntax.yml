@@ -3,9 +3,9 @@
   hosts: all
   gather_facts: false
   roles:
-    - setup_fhs_node
+    - setup_k8s_node
     - setup_fhs_network
   tasks:
-    - ansible.builtin.import_tasks: ../../../roles/setup_fhs_node/tasks/install-containerd.yml
-    - ansible.builtin.import_tasks: ../../../roles/setup_fhs_node/tasks/install-k8s-packages.yml
+    - ansible.builtin.import_tasks: ../../../roles/setup_k8s_node/tasks/install-containerd.yml
+    - ansible.builtin.import_tasks: ../../../roles/setup_k8s_node/tasks/install-k8s-packages.yml
     - ansible.builtin.import_tasks: ../../../playbooks/tasks/cis-policy-preflight.yml

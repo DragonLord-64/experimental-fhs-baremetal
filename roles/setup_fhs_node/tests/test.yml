@@ -1,8 +1,0 @@
----
-# roles/fhs_node_setup/tests/test.yml
-
-- name: Test fhs node setup
-  hosts: localhost
-  remote_user: root
-  roles:
-    - fhs_node_setup

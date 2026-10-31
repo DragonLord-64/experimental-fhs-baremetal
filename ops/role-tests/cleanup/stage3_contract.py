@@ -33,15 +33,15 @@ assert service['ansible.builtin.systemd_service']['enabled'] is True
 assert service['ansible.builtin.systemd_service']['state'] == 'started'
 assert next(t for t in network if t['name'] == 'Use resolved stub resolver')['ansible.builtin.file']['src'] == '/run/systemd/resolve/stub-resolv.conf'
 node_tasks = []
-for path in (ROOT / 'roles/setup_fhs_node/tasks').glob('*.yml'):
+for path in (ROOT / 'roles/setup_k8s_node/tasks').glob('*.yml'):
     node_tasks += list(walk(yaml.safe_load(path.read_text())))
 assert not any(t.get('ignore_errors') for t in node_tasks)
 assert not any('ansible.builtin.reboot' in t for t in node_tasks)
 assert not any('kubeadm join' in str(t.get('ansible.builtin.command', '')) + str(t.get('ansible.builtin.shell', '')) for t in node_tasks)
-node = load('roles/setup_fhs_node/tasks/main.yml')
+node = load('roles/setup_k8s_node/tasks/main.yml')
 cleanup = next(t for t in node if t['name'] == 'Cleanup previous Kubernetes installation')
 assert cleanup['tags'] == ['cleanup', 'never'] and cleanup['when'] == "'cleanup' in ansible_run_tags"
-assert load('roles/setup_fhs_node/defaults/main.yml')['k8s_enable_ceph'] is False
+assert load('roles/setup_k8s_node/defaults/main.yml')['k8s_enable_ceph'] is False
 
 site = load('playbooks/site.yml')
 cis = next(p for p in site if p['name'] == 'Ubuntu 24 Linux server policy')

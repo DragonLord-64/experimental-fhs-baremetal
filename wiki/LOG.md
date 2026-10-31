@@ -676,3 +676,11 @@ Certificate-update is one-off security remediation, and its removal block
 requires separate controller redeployment. Documented that the current site
 playbook does not include the installer without calling the role historical.
 Five documentation/link checks and whitespace checks passed; no runtime changes.
+
+### 2026-10-30 — Name Kubernetes node preparation explicitly
+
+Renamed `setup_fhs_node` to `setup_k8s_node`, including the role tag, documentation
+include and executable references/fixtures. The site play retains its `fhs_node`
+umbrella tag, which also includes BIST. Corrected the role README's site target
+ to `device_roles_fpga-host-server`. Focused Ansible syntax and source/link checks
+passed; no host configuration was applied.

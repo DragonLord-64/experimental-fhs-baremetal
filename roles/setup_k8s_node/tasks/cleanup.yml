@@ -1,5 +1,5 @@
 ---
-# roles/fhs_node_setup/tasks/cleanup.yml
+# roles/setup_k8s_node/tasks/cleanup.yml
 # Uninstall Kubernetes
 
 - name: Reset existing Kubernetes installation

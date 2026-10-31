@@ -1,4 +1,4 @@
-# setup_fhs_node
+# setup_k8s_node
 
 Prepares Ubuntu 24.04 for later Kubernetes registration. Never runs `kubeadm join`.
 The generated `/etc/kubernetes/kubeadm/kubeadm-join.yaml` contains registration
@@ -29,10 +29,10 @@ The role owns the complete containerd config. Ceph is optional, not a prerequisi
 for every node. Affinity/tolerations belong to workloads.
 
 ```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_fhs_node
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_k8s_node
 ```
 
-Targets `fhs_nodes`; ensure the inventory supplies that group. Cleanup resets and
+The `site.yml` invocation targets `device_roles_fpga-host-server`. Cleanup resets and
 removes Kubernetes state only with an explicit `cleanup` tag; `never` alone or
 role-tag inheritance cannot enable it. No host reboot is performed.
 

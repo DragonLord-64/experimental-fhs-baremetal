@@ -92,12 +92,12 @@
   gather_facts: true
   tags: [fhs_node]
   tasks:
-    - name: Set up FHS node
+    - name: Set up Kubernetes node
       ansible.builtin.include_role:
-        name: setup_fhs_node
+        name: setup_k8s_node
         apply:
-          tags: [setup_fhs_node]
-      tags: [setup_fhs_node]
+          tags: [setup_k8s_node]
+      tags: [setup_k8s_node]
     - name: Install FHS BIST
       ansible.builtin.include_role:
         name: manage_fhs_bist

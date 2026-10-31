@@ -4,7 +4,7 @@
   gather_facts: false
   vars_files:
     - ../../../roles/setup_fhs_network/defaults/main.yml
-    - ../../../roles/setup_fhs_node/defaults/main.yml
+    - ../../../roles/setup_k8s_node/defaults/main.yml
     - stage3-inputs.yml
   vars:
     ansible_remote_tmp: /tmp/fhs-stage3-ansible-tmp
@@ -109,10 +109,10 @@
           - "'NTP=192.0.2.123' in lookup('template', repo ~ '/roles/setup_fhs_network/templates/timesyncd.conf.j2')"
           - "'FallbackNTP=' in lookup('template', repo ~ '/roles/setup_fhs_network/templates/timesyncd.conf.j2')"
     - name: Validate node configuration without executing setup
-      ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_node/tasks/validate.yml"
+      ansible.builtin.include_tasks: "{{ repo }}/roles/setup_k8s_node/tasks/validate.yml"
     - name: Reject mismatched cluster versions
       block:
-        - ansible.builtin.include_tasks: "{{ repo }}/roles/setup_fhs_node/tasks/validate.yml"
+        - ansible.builtin.include_tasks: "{{ repo }}/roles/setup_k8s_node/tasks/validate.yml"
           vars:
             k8s_control_plane_version: '1.37.1'
         - ansible.builtin.fail:
@@ -121,7 +121,7 @@
         - ansible.builtin.assert:
             that: ansible_failed_task.name == 'Require reviewed runtime and cluster versions before writes'
     - ansible.builtin.set_fact:
-        registration: "{{ lookup('template', repo ~ '/roles/setup_fhs_node/templates/kubeadm-join.yaml.j2') | from_yaml }}"
+        registration: "{{ lookup('template', repo ~ '/roles/setup_k8s_node/templates/kubeadm-join.yaml.j2') | from_yaml }}"
     - name: Check real kubeadm registration template
       ansible.builtin.assert:
         that:

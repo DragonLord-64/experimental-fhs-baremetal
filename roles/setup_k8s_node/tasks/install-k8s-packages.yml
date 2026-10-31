@@ -1,5 +1,5 @@
 ---
-# roles/fhs_node_setup/tasks/install-k8s-packages.yml
+# roles/setup_k8s_node/tasks/install-k8s-packages.yml
 # Install Kubernetes packages
 
 - name: Create local temporary directory for GPG key

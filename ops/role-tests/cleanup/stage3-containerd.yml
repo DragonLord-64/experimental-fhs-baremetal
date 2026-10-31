@@ -2,7 +2,7 @@
 - ansible.builtin.set_fact:
     containerd_config:
       stdout: "{{ runtime_table }}\nSystemdCgroup = false"
-    final_config_task: "{{ lookup('file', repo ~ '/roles/setup_fhs_node/tasks/install-containerd.yml') | from_yaml | selectattr('name', 'equalto', 'Write final containerd configuration') | first }}"
+    final_config_task: "{{ lookup('file', repo ~ '/roles/setup_k8s_node/tasks/install-containerd.yml') | from_yaml | selectattr('name', 'equalto', 'Write final containerd configuration') | first }}"
 - name: Extract actual content expression for Ansible template evaluation
   ansible.builtin.copy:
     dest: "{{ scratch.path }}/containerd-content.j2"

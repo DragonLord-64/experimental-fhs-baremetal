@@ -1,5 +1,5 @@
 ---
-# roles/fhs_node_setup/tasks/prereqs.yml
+# roles/setup_k8s_node/tasks/prereqs.yml
 # Configure prerequisites for all FHS nodes
 
 - name: Install required Ceph packages

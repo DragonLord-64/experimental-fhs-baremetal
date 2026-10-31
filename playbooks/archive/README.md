@@ -6,7 +6,7 @@ Historical entry points retained for reference; they are not part of the current
 |---|---|
 | `audit_ubuntu_cis.yml` | Former standalone CIS audit; its existing artifacts remain under `playbooks/artifacts/`. No new audit workflow is claimed. |
 | `run_ubuntu_cis.yml` | Former standalone prototype remediation. Review the current `site.yml` CIS scope and policy before selecting its `ubuntu24_cis` tag. |
-| `node_setup.yml` | Former node wrapper; current wrapper: `site.yml --tags setup_fhs_node`. |
+| `node_setup.yml` | Former node wrapper; current wrapper: `site.yml --tags setup_k8s_node`. |
 | `install_bist.yml` | Former BIST wrapper; current wrapper: `site.yml --tags manage_fhs_bist`. |
 | `install_grpc.yml` | Archived controller installation wrapper. FSP/VCC services remain supported by `manage_fhs_grpc`; certificate-update is separate one-off security remediation. |
 | `install_prometheus.yml` | Former exporter/Prometheus wrapper; current wrapper: `site.yml --tags manage_fhs_exporter,manage_prometheus`. |

@@ -1,5 +1,5 @@
 ---
-# roles/fhs_node_setup/defaults/main.yml
+# roles/setup_k8s_node/defaults/main.yml
 # Defaults have LOW precedence - easily overridable by users
 # Use for values that users commonly customize
 k8s_repo_version: ""

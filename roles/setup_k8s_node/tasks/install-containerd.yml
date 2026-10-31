@@ -1,5 +1,5 @@
 ---
-# roles/fhs_node_setup/tasks/install-containerd.yml
+# roles/setup_k8s_node/tasks/install-containerd.yml
 # Install and configure containerd runtime
 
 - name: Install containerd prerequisites

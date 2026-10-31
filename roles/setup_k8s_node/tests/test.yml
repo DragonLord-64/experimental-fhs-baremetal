@@ -1,0 +1,8 @@
+---
+# roles/setup_k8s_node/tests/test.yml
+
+- name: Test Kubernetes node setup
+  hosts: localhost
+  remote_user: root
+  roles:
+    - setup_k8s_node
