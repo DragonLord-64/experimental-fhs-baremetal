@@ -822,3 +822,14 @@ failure. Source/link checks and a disposable transfer passed. No deployed Kolla
 environment was patched and no rebuild or database migration was performed.
 Rebuilding remains separate work: the present Compose mounts do not explicitly
 persist the Ironic database/config, and IPA/OS image trust requires its own update.
+
+### 2026-10-31 — Correct Bifrost patch diagnostics for overlapping distributions
+
+Operator output showed successful certifi installation followed by an older
+reported version. Fixed last-wins distribution enumeration to use the active
+metadata lookup precedence and display relevant installation locations. Replaced
+the obsolete hardcoded ironic.cmd.dbsync import with loading the installed
+ironic-dbsync entry point without invoking it. Six focused checks passed,
+including real duplicate dist-info precedence and a newer Ironic entry point.
+The reported pyOpenSSL/cryptography dependency conflict remains a separate real
+repair requirement; no deployment package updates were run here.

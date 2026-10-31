@@ -19,21 +19,34 @@ PIP_WHEEL = (
 )
 METADATA = '''
 import json, sys
-from importlib.metadata import distributions
-packages = {d.metadata['Name']: d.version for d in distributions() if d.metadata['Name']}
+from importlib.metadata import distribution, distributions, version
+names = {d.metadata['Name'] for d in distributions() if d.metadata['Name']}
+# version(name) uses Python's active search precedence, unlike a last-wins dict.
+packages = {name: version(name) for name in names}
+locations = {name: str(distribution(name).locate_file('')) for name in names
+             if name.lower() in ('pip', 'certifi', 'pyopenssl', 'cryptography', 'ironic')}
 print(json.dumps({'python': sys.version, 'executable': sys.executable,
-                  'packages': packages}, indent=2, sort_keys=True))
+                  'packages': packages, 'locations': locations}, indent=2, sort_keys=True))
 '''
 IMPORTS = '''
 import importlib, sys
+from importlib.metadata import distribution
 failed = False
-for name in ('OpenSSL.crypto', 'eventlet', 'oslo_service.backend', 'ironic.cmd.dbsync'):
+for name in ('OpenSSL.crypto', 'eventlet', 'oslo_service.backend'):
     try:
         importlib.import_module(name)
         print('PASS import ' + name)
     except Exception as exc:
         failed = True
         print('FAIL import ' + name + ': ' + type(exc).__name__ + ': ' + str(exc))
+try:
+    entry = next(ep for ep in distribution('ironic').entry_points
+                 if ep.group == 'console_scripts' and ep.name == 'ironic-dbsync')
+    entry.load()  # Import only; never call main() or perform a migration.
+    print('PASS ironic-dbsync entry point: ' + entry.value)
+except Exception as exc:
+    failed = True
+    print('FAIL ironic-dbsync entry point: ' + type(exc).__name__ + ': ' + str(exc))
 sys.exit(1 if failed else 0)
 '''
 
@@ -52,6 +65,8 @@ def diagnose(python):
     packages = {k.lower().replace('_', '-'): v for k, v in info['packages'].items()}
     for name in ('pip', 'certifi', 'pyopenssl', 'cryptography', 'eventlet', 'oslo.service', 'ironic'):
         print(name + ': ' + packages.get(name, 'not installed'), flush=True)
+    for name, location in sorted(info.get('locations', {}).items()):
+        print(name + ' location: ' + location, flush=True)
     print('Release constraints candidates (use the file matching this installation):', flush=True)
     for parent in (Path('/requirements'), Path('/opt/stack/requirements')):
         for file in sorted(parent.glob('*constraints*.txt')):

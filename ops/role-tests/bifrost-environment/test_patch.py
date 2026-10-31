@@ -31,12 +31,31 @@ class PatchTest(unittest.TestCase):
                 return object()
             return real_import(name)
         output = io.StringIO()
-        with patch('importlib.import_module', side_effect=broken), patch('sys.stdout', output):
+        from types import SimpleNamespace
+        entry = SimpleNamespace(group='console_scripts', name='ironic-dbsync',
+            value='ironic.command.dbsync:main', load=lambda: object())
+        with patch('importlib.import_module', side_effect=broken), patch('sys.stdout', output), \
+             patch('importlib.metadata.distribution', return_value=SimpleNamespace(entry_points=[entry])):
             with self.assertRaises(SystemExit) as result:
                 exec(module.IMPORTS, {})
         self.assertEqual(1, result.exception.code)
         self.assertIn('GEN_EMAIL', output.getvalue())
-        self.assertIn('PASS import ironic.cmd.dbsync', output.getvalue())
+        self.assertIn('PASS ironic-dbsync entry point: ironic.command.dbsync:main', output.getvalue())
+
+    def test_duplicate_metadata_reports_active_distribution(self):
+        with tempfile.TemporaryDirectory() as folder:
+            paths = []
+            for name, version in [('active', '2026.10.23'), ('fallback', '2023.11.17')]:
+                site = Path(folder)/name
+                metadata = site/('certifi-' + version + '.dist-info')
+                metadata.mkdir(parents=True)
+                (metadata/'METADATA').write_text('Name: certifi\nVersion: ' + version + '\n')
+                paths.append(str(site))
+            probe = 'import sys; sys.path[:0] = ' + repr(paths) + '\n' + module.METADATA
+            result = subprocess.run([sys.executable, '-c', probe], check=True, capture_output=True, text=True)
+            info = json.loads(result.stdout)
+            self.assertEqual('2026.10.23', info['packages']['certifi'])
+            self.assertEqual(paths[0], info['locations']['certifi'])
 
     def test_snapshot_has_private_mode_and_only_versions(self):
         with tempfile.TemporaryDirectory() as folder, patch.object(module, 'metadata', return_value={'packages':{'certifi':'old'}}):
