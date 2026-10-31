@@ -138,6 +138,14 @@
     delay: '{{ netbox_api_retry_delay }}'
     when:
     - fhs_stage == "servers"
+  - name: Rename temporary provisioning interface in place
+    fhs_provisioning_interface:
+      netbox_url: '{{ netbox_url }}'
+      netbox_token: '{{ netbox_token }}'
+      validate_certs: '{{ netbox_validate_certs | default(netbox_validate_certs_default) | bool }}'
+      device_id: '{{ desired_device_id }}'
+      interfaces: '{{ discovered_interfaces }}'
+    when: fhs_stage == "interfaces"
   - name: Ensure discovered interfaces
     netbox.netbox.netbox_device_interface:
       data:

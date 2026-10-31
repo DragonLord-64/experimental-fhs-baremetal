@@ -257,6 +257,26 @@ def main():
         check(boot['primary_mac_address']['mac_address'].lower() == '02:ba:00:00:ee:37', 'Native NetBox primary MAC persisted')
         check(device['oob_ip']['address'] == '192.0.2.237/32' and not device['primary_ip4'], 'BMC assigned out-of-band; no Linux IP inferred')
         primary = create('ipam/ip-addresses/', dict(address='192.0.2.238/32', assigned_object_type='dcim.interface', assigned_object_id=boot['id']))
+        # Exercise the later detailed inventory adoption against native NetBox objects.
+        import fhs_netbox
+        sys.modules['ansible.module_utils.fhs_netbox'] = fhs_netbox
+        spec = importlib.util.spec_from_file_location('adoption', root / 'playbooks/netbox/library/fhs_provisioning_interface.py')
+        adoption = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(adoption)
+        sync.request('PATCH', f'dcim/interfaces/{boot["id"]}/', json={'name': 'provisioning'})
+        observed = [{'name': 'eno1', 'mac': '02:ba:00:00:ee:37'}]
+        preview = minimal.Sync(dict(netbox_url=credentials['url'].replace('https://', 'http://'),
+                                    netbox_token=credentials['token'], validate_certs=True), True)
+        check(adoption.reconcile(preview, device['id'], observed) == {'eno1': 'provisioning'}
+              and sync.request('GET', f'dcim/interfaces/{boot["id"]}/')['name'] == 'provisioning',
+              'Detailed inventory previews temporary interface rename without writes')
+        adoption.reconcile(sync, device['id'], observed)
+        renamed = sync.request('GET', f'dcim/interfaces/{boot["id"]}/')
+        check(renamed['name'] == 'eno1' and renamed['tags'] == boot['tags']
+              and renamed['primary_mac_address']['id'] == boot['primary_mac_address']['id']
+              and sync.request('GET', f'ipam/ip-addresses/{primary["id"]}/')['assigned_object_id'] == boot['id'],
+              'Detailed inventory renames in place preserving tags, MAC and assigned IP')
+        check(adoption.reconcile(sync, device['id'], observed) == {}, 'Detailed interface adoption is idempotent')
         approved = prefix+'-approved'
         sync.request('PATCH', f'dcim/devices/{device["id"]}/', json=dict(name=approved, primary_ip4=primary['id'], tags=[tag['id']], status='active'))
         again = run()

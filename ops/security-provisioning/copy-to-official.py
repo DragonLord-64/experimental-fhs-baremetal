@@ -51,6 +51,8 @@ if args.diagnostics_only:
                  'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'playbooks/netbox/bifrost_export.yml',
+                 'playbooks/netbox/library/fhs_provisioning_interface.py',
+                 'playbooks/netbox/tasks/compare.yml', 'playbooks/netbox/tasks/apply.yml',
                  'docs/src/playbooks/hwmanage.md', 'ansible.cfg',
                  'inventory/README.md',
         'inventory/dev_env/netbox-inv.yml', 'inventory/dev_env/group_vars/all/paths.yml',

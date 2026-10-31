@@ -1279,3 +1279,13 @@ in explicit `fhs-test`, including HTTP-404 fallback and old-name correction.
 Final null-interface handling was additionally covered by the focused suite.
 Synthetic objects and temporary forwarding were cleaned up. Whitespace checks
 passed. Real BMC transport and physical hardware remain untested.
+
+- 2026-10-31: Full Linux interface inventory now adopts the minimal import's
+  tagged temporary `provisioning` interface by MAC, renaming it in place before
+  detailed writes. Preview permits this planned ownership match without writes;
+  existing-name collisions still fail. See
+  [interface adoption](../playbooks/netbox/library/fhs_provisioning_interface.py).
+  Validation: 51 wrapper tests, three transfer tests, lab playbook syntax and
+  21 native lab acceptance assertions passed, including rename preview,
+  relationship preservation and repeat-run idempotence. Physical hardware was
+  not exercised.

@@ -25,3 +25,8 @@ that name and does not require an Ironic UUID custom field in NetBox. Import
 names the discovery with its verified serial; sync can find and name an existing
 discovery through its provisioning port. Conflicting registrations fail for
 manual cleanup; they are never automatically removed.
+
+When the minimal import creates a temporary `provisioning` interface, the later
+full interface inventory matches its MAC and renames that same NetBox interface
+to the observed Linux name. Its provisioning tag, MAC and assigned addresses stay
+attached. A conflicting existing interface name requires operator review.
