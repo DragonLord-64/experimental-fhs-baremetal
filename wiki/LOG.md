@@ -653,3 +653,10 @@ Recorded this writing rule in the repository instructions.
 The documentation agent drafted the focused changes; parent review corrected
 the requirements-file path and export inventory selection. Local source/link
 checks and Sphinx HTML passed. No runtime or deployment changes were made.
+
+### 2026-10-30 — Use the configured Vault password file
+
+Verified that the official checkout retains the Bifrost Compose Vault password
+file mount and environment variable, and its quickstart documents creating the
+file. Removed interactive Vault password flags from documentation commands and
+documented the existing Compose configuration in the NetBox inventory guide.

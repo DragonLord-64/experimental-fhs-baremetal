@@ -3,7 +3,7 @@
 Use `manage_users` for accounts, the system SDK and BittWare environments:
 
 ```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_users --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_users
 ```
 
 Configure `fhs_users` and SDK/environment settings in environment group vars.

@@ -12,7 +12,7 @@ platform_ca_certificates:
 ```
 
 ```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_platform_ca --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_platform_ca
 ```
 
 Use one public PEM CA certificate per entry. Names use letters, numbers, `_` or

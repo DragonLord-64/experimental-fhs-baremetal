@@ -7,8 +7,8 @@ Validates `ansible_host` and `sys_mac_address`, imports `site.yml`, then reports
 Run from `/provision` in the configured provisioning container, or the repository root with its dependencies installed. Select the inventory and host limit explicitly.
 
 ```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/provision.yml --list-hosts --ask-vault-pass
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/provision.yml --limit <HOST> --tags manage_users --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/provision.yml --list-hosts
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/provision.yml --limit <HOST> --tags manage_users
 ```
 
 Run the optional [preflight](preflight.md) first to check selected inputs without provisioning changes.

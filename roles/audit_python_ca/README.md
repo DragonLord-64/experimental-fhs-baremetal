@@ -8,8 +8,8 @@ it never updates certificates, removes venvs or installs packages.
 Targets `device_roles_fpga-host-server`; use the current NetBox inventory.
 
 ```sh
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/audit_python_ca.yml --ask-vault-pass
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --tags audit_python_ca --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/audit_python_ca.yml
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --tags audit_python_ca
 ```
 
 Use `--limit <host>` for one server. Both final checks carry `always` and

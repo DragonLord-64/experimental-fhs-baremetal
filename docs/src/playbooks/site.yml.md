@@ -56,7 +56,7 @@ context to the intended devices:
 Confirm the policy scope before applying it:
 
 ```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts --tags ubuntu24_cis --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts --tags ubuntu24_cis
 ```
 
 The role requires Ubuntu 24.04. Keep switches out of this policy group.
@@ -104,11 +104,11 @@ cache, verified HTTPS pip and an HTTP Git proxy tunnelling verified HTTPS.
 
 ```bash
 # Configure public CA trust and distribution clients.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution
 # Load Elasticsearch index assets without installing a controller service.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST> --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST>
 # Install the selected Filebeat package on the server after setup succeeds.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags filebeat --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags filebeat
 ```
 
 [Controller trust and inventory](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/inventory/README.md) must be ready

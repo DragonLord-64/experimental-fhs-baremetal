@@ -7,8 +7,8 @@ resets or FSP/VCC controller cleanup.
 Targets `device_roles_fpga-host-server`; use the current NetBox inventory.
 
 ```sh
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/development/certificate-update.yml --limit <HOST> --ask-vault-pass
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/development/certificate-update.yml --limit <HOST> --ask-vault-pass --tags remove_fhs_grpc
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/development/certificate-update.yml --limit <HOST>
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/development/certificate-update.yml --limit <HOST> --tags remove_fhs_grpc
 ```
 
 An untagged run selects all blocks, in this order:
@@ -45,5 +45,5 @@ PASS means no known incident findings in the audit's documented scan scope.
 After cleanup, recreate the provisioning venvs and rerun the audit:
 
 ```sh
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --ask-vault-pass --tags python_ca_updates,manage_users,audit_python_ca
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags python_ca_updates,manage_users,audit_python_ca
 ```

@@ -42,9 +42,9 @@ password. Existing supplementary groups and SSH keys are preserved.
 
 ```bash
 # Configure package access first, then accounts and all SDK environments.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution,manage_users --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution,manage_users
 # Subsequent account or SDK updates, with package access already configured.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_users --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags manage_users
 ```
 
 Set `fpga_update_bittware_sdk: false` to use an already installed SDK. The role

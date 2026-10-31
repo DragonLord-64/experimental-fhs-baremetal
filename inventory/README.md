@@ -51,7 +51,7 @@ this connection.
 sudo install -m 0644 /provision/files.d/certificates/platform-ca.crt \
   /usr/local/share/ca-certificates/platform-ca.crt
 sudo update-ca-certificates
-ansible-inventory -i inventory/dev_env/netbox-inv.yml --graph --ask-vault-pass
+ansible-inventory -i inventory/dev_env/netbox-inv.yml --graph
 ```
 
 Keep `validate_certs: true` in `netbox-inv.yml`. Alternatively set its `ca_path`
@@ -78,8 +78,8 @@ platform_ca_certificates:
 
 ```bash
 # Inspect scope, then configure CA trust and package/Git access.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts --tags distribution --ask-vault-pass
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts --tags distribution
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags distribution
 ```
 
 See [platform installation](../platform/charts/fhs-platform/README.md),

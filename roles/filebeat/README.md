@@ -43,7 +43,7 @@ and index `manage` on `filebeat-*`. These credentials remain on the controller.
 ```bash
 # Encrypt the credentials, then load the template and lifecycle policy once.
 ansible-vault encrypt /provision/files.d/credentials/filebeat-setup.yml
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST> --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST>
 ```
 
 Select one representative FPGA-role host to resolve its package/endpoint vars;
@@ -79,7 +79,7 @@ configuration; do not give devices the setup identity.
 
 ```bash
 # Install the package, configure journald collection and start the device service.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_platform_ca,filebeat --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_platform_ca,filebeat
 ```
 
 Device installation defaults to `filebeat_setup_enabled: false`: run the explicit

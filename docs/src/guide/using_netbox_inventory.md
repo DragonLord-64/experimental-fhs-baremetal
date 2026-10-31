@@ -41,8 +41,20 @@ token:
     <encrypted output from encrypt_string>
 ```
 
-Use `--ask-vault-pass` when running inventory or playbooks. This plugin token is
-separate from the credentials file used by import/export playbooks below.
+Create the host `.vault_pass` file as described in the
+[Bifrost quickstart](../bifrost-infra/QUICKSTART.md).
+`bifrost-infra/docker-compose.yml` mounts this file at `/root/.vault_pass` and
+configures Ansible to read it automatically:
+
+```yaml
+environment:
+  - ANSIBLE_VAULT_PASSWORD_FILE=/root/.vault_pass
+volumes:
+  - ${VAULT_PASS_FILE:-../.vault_pass}:/root/.vault_pass:ro
+```
+
+The inventory plugin token is separate from the credentials file used by
+import/export playbooks below.
 
 If NetBox uses an internal CA, install its public certificate inside the
 provisioning container before loading inventory:
@@ -62,15 +74,15 @@ in `netbox-inv.yml`. Keep `validate_certs: true`.
 2. Resolve the inventory privately. These commands contact NetBox but do not provision hosts:
 
    ```bash
-   ansible-inventory -i inventory/dev_env/netbox-inv.yml --ask-vault-pass --graph
+   ansible-inventory -i inventory/dev_env/netbox-inv.yml --graph
    umask 077
-   ansible-inventory -i inventory/dev_env/netbox-inv.yml --ask-vault-pass --list --output <PRIVATE_OUTPUT_PATH>
+   ansible-inventory -i inventory/dev_env/netbox-inv.yml --list --output <PRIVATE_OUTPUT_PATH>
    ```
 
 3. Inspect host/group membership privately, then select an exact role and host:
 
    ```bash
-   ansible-playbook -i inventory/dev_env/netbox-inv.yml --ask-vault-pass playbooks/provision.yml --limit <HOST> --tags manage_users
+   ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/provision.yml --limit <HOST> --tags manage_users
    ```
 
 Inventory output can contain secrets. Keep it outside Git and build artifacts. Config context does not override every Ansible variable source; confirm resolved precedence. The inventory does not create `fhs_nodes` automatically.
@@ -140,7 +152,7 @@ Omit `devices` when all selected servers use the defaults. Encrypt this file:
 ```bash
 ansible-vault encrypt /provision/files.d/credentials/redfish.yml
 # Write a private YAML inventory for Bifrost; no enrollment or imaging occurs.
-ansible-playbook -i localhost, playbooks/netbox/bifrost_export.yml --ask-vault-pass \
+ansible-playbook -i localhost, playbooks/netbox/bifrost_export.yml \
   -e netbox_credentials_file=/provision/files.d/credentials/mid-cbf-hw-netbox.yml \
   -e redfish_credentials_file=/provision/files.d/credentials/redfish.yml \
   -e bifrost_output=/provision/files.d/bifrost/baremetal.yml

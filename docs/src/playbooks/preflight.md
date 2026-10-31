@@ -6,9 +6,9 @@ configure services or run Filebeat setup.
 
 ```bash
 # Default: distribution access plus user/SDK inputs on selected servers.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/preflight.yml --limit <HOST> --ask-vault-pass
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/preflight.yml --limit <HOST>
 # Check only Filebeat setup inputs and controller-to-Elasticsearch HTTPS.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/preflight.yml --limit <HOST> --ask-vault-pass -e '{"preflight_checks":["filebeat_setup"]}'
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/preflight.yml --limit <HOST> -e '{"preflight_checks":["filebeat_setup"]}'
 ```
 
 Select one or more names in `preflight_checks`:
@@ -27,7 +27,7 @@ output. Public CA files and artifacts must be readable by the provisioning user.
 For new hosts whose CA trust or endpoints are not ready, check inputs only:
 
 ```bash
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/preflight.yml --limit <HOST> --ask-vault-pass -e preflight_check_endpoints=false
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/preflight.yml --limit <HOST> -e preflight_check_endpoints=false
 ```
 
 This skips network probes and client CA-file checks. Then configure
