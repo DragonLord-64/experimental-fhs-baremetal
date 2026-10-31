@@ -745,3 +745,10 @@ Actual cluster export/repeat, Vault inventory, Filebeat setup, publishing-only
 render and native importer check mode passed. Restored temporary lab mappings.
 The source transfer script excludes generated export files. See
 [validation evidence](../ops/security-provisioning/VALIDATION.md#shared-platform-handoff-files--2026-10-30).
+
+### 2026-10-30 — Copyable platform password lookups
+
+Added direct kubectl/base64 commands for NetBox, Grafana, Elasticsearch/Kibana
+and Filebeat writer passwords to the copyable platform chart README, linked
+from the platform entry page. Checked key names against the credentials template;
+documentation/link and whitespace checks passed. No passwords were retrieved.

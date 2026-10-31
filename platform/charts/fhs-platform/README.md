@@ -48,6 +48,33 @@ kubectl -n hw-management get pods,pvc,ingress
 [Discovery, home and logging settings](CONFIGURATION.md).
 [Optional prebuilt NetBox image](netbox-image/README.md).
 
+## Get passwords
+
+Run on the cluster management machine. These commands print the passwords for
+the deployed platform:
+
+```bash
+# NetBox login: admin
+kubectl -n hw-management get secret fhs-platform-credentials \
+  -o jsonpath='{.data.password}' | base64 --decode
+printf '\n'
+
+# Grafana login: admin
+kubectl -n hw-management get secret fhs-platform-credentials \
+  -o jsonpath='{.data.admin-password}' | base64 --decode
+printf '\n'
+
+# Elasticsearch / Kibana login: elastic
+kubectl -n hw-management get secret fhs-platform-credentials \
+  -o jsonpath='{.data.elastic-password}' | base64 --decode
+printf '\n'
+
+# Filebeat publishing user: filebeat_writer
+kubectl -n hw-management get secret fhs-platform-credentials \
+  -o jsonpath='{.data.filebeat-password}' | base64 --decode
+printf '\n'
+```
+
 ## Export Ansible settings
 
 On the cluster management machine, after Helm finishes:
