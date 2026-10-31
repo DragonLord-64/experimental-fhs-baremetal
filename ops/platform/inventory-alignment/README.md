@@ -9,8 +9,9 @@ preserve-unobserved policy. See the [current result](VALIDATION.md#incremental-t
 
 Pinned NetBox `4.7.0` + MIT Inventory `2.7.1`; shared image/configuration in the
 [portable chart](../../../platform/charts/fhs-platform/README.md). The chart uses
-the public base image and installs the pinned plugin at startup; the legacy lab
-[deployment entrypoint](../deploy.sh) uses the optional prebuilt image.
+the public base image and installs the pinned plugin at startup. Use the
+[provisioning values](../../../platform/values-provisioning.yaml) with reviewed
+lab overrides for the selected namespace and retained storage.
 Never use the default Kubernetes context (`monitoring`) for these tests.
 
 ```bash

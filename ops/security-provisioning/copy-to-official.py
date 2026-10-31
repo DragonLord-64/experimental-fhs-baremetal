@@ -35,3 +35,11 @@ for name in ('setup_fhs_node', 'manage_venvs', 'manage_bittware_sdk',
     if old_role_doc.exists():
         old_role_doc.unlink()
         print(f'Removed docs/src/roles/{name}.md')
+
+for name in ('elasticsearch.yaml', 'grafana.yaml', 'kibana.yaml',
+             'netbox-postgresql.yaml', 'netbox-valkey.yaml', 'netbox.yaml',
+             'prometheus.yaml', 'telegraf.yaml'):
+    old_values = destination / 'platform' / name
+    if old_values.exists():
+        old_values.unlink()
+        print(f'Removed platform/{name}')

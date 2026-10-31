@@ -20,7 +20,11 @@ listed source folders/files and overwrites matching files. It does not use Git,
 merge settings or create backups. After copying, it removes the obsolete
 `roles/setup_fhs_node/`, `roles/manage_venvs/`, `roles/manage_bittware_sdk/` and
 `roles/manage_gitlab-runner/` directories and their role documentation pages if
-present. Their replacements are `setup_k8s_node` and `manage_users`. Other destination files are retained. NetBox inventory is
+present. Their replacements are `setup_k8s_node` and `manage_users`.
+It also removes the eight obsolete standalone platform values files
+(`elasticsearch`, `grafana`, `kibana`, `netbox-postgresql`, `netbox-valkey`,
+`netbox`, `prometheus`, `telegraf`, all `.yaml`). Other destination files are retained.
+NetBox inventory is
 copied verbatim; review its token and site settings in Git. Host inventory and
 host vars are not copied. Remove obsolete files listed below manually.
 

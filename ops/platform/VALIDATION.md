@@ -1,3 +1,5 @@
+> Historical separate-release lab results. The scripts recorded below were removed; use [current lab checks](README.md).
+
 # Platform validation
 
 2026-10-21 Vancouver / 2026-10-22 UTC, dragonvm, context `fhs-test`, namespace `fhs-platform`.

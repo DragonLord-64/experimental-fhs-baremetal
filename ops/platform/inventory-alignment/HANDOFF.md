@@ -62,9 +62,9 @@ behavior; config/render checks alone do not complete this task.
   modules by device+bay and serial. Its
   [normalizer](../../../playbooks/netbox/filter_plugins/nexus_inventory.py)
   records omissions and local DAC ends but does not discover cable peers.
-- [Canonical values](../../../platform/netbox.yaml) and
+- [Canonical values](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/466522bf2dff260ab8f76c1a9c999331233125b1/platform/netbox.yaml) and
   [umbrella values](../../../platform/charts/fhs-platform/values.yaml) load no
-  plugins. The [lab overlay](../dragonvm/netbox.yaml) pins the base image, so
+  plugins. The [lab overlay](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/466522bf2dff260ab8f76c1a9c999331233125b1/ops/platform/dragonvm/netbox.yaml) pins the base image, so
   changing only a parent image setting can leave the lab using an unextended
   image. Web, worker and housekeeping must all use the plugin-bearing image.
 - [Trial Dockerfile](../inventory-trial/Dockerfile) installs the pinned plugin

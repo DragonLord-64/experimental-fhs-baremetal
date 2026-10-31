@@ -1,39 +1,34 @@
-# Modular platform lab
+# Platform lab
 
-Run on dragonvm from the repository root:
+Use the existing `fhs-test` cluster on dragonvm. Inspect it before running a
+scoped test; the default context is unrelated:
 
-```sh
-./ops/kubernetes/lifecycle.sh up
-./ops/platform/deploy.sh          # independent installs, readiness, functional checks
-./ops/platform/deploy.sh test
-./ops/platform/deploy.sh deploy --with-bifrost  # also isolated Ironic API smoke
-python3 ops/platform/netbox-test.py --lifecycle # object survives full down/up
-python3 ops/platform/netbox-resource-test.py   # read-only API + Django shell concurrency
-./ops/kubernetes/lifecycle.sh down
+```bash
+minikube -p fhs-test kubectl -- --context=fhs-test get pods,svc -A
 ```
 
-Requires Python 3, minikube and Helm (`~/.local/bin/helm`, or `HELM_BIN`). Every operation names context `fhs-test`, namespace `fhs-platform`. Releases: NetBox, PostgreSQL, Valkey, Prometheus, Telegraf, Grafana and the local Elasticsearch/Kibana chart. The optional Bifrost flag runs the separate Docker project and API smoke (no guest provisioning); an absent pinned image gets a bounded 300-second pull. Provisioning stays separate: [Bifrost](../provisioning/README.md).
+The delivered source is the [single-release platform chart](../../platform/charts/fhs-platform/README.md).
+Site overrides are in [values-provisioning.yaml](../../platform/values-provisioning.yaml).
+Keep lab namespace, storage/resource overrides and private credentials outside
+that copied source. Review those overrides before applying a chart to the lab.
 
-`platform/` was copied from official development `87dc794`; `netbox.yaml` originally dropped only the `COMPUTED VALUES:` CLI heading; it now
-also enables the shared [Inventory image](../../platform/charts/fhs-platform/netbox-image/README.md),
-plugin settings and prefixed static launcher. PostgreSQL/Valkey shared files are extracted subtrees of those NetBox computed values. The byte-identical legacy `monitoring/` configuration was removed; use top-level `platform/` as the canonical source. Source image pins, settings and recording rules are reused before `dragonvm/` and `monitoring-values/` overrides. No real inventory was imported.
+## Checks
 
-Upstream versions: NetBox `8.3.67` (NetBox `v4.7.0`), PostgreSQL `18.8.13`, Valkey `6.2.16`, Prometheus `29.35.0`, Telegraf `1.8.77`, Grafana `13.2.7`. NetBox chart version was absent from the source capture; `8.3.67` was selected and fetched from the official [NetBox chart](https://github.com/netbox-community/netbox-chart), OCI digest `sha256:b44ee411c125076547a498162035731a56863c40bf97aa5ba0bc2c09c2a4385a`. Its dependencies are separate releases here. Source blank NetBox image tag is resolved to `v4.7.0` and an amd64 digest; source rolling PostgreSQL/Valkey images are pinned to verified amd64 digests. VM overrides disable ingress, LoadBalancers and production scrape targets, lower resource/storage requests, and replace `nfss1`/`bds1` with `fhs-retain`. Legacy flat NetBox probe paths are removed; chart-generated HTTP paths follow `/netbox/`. Recreate strategy prevents concurrent schema migrations. The pinned image no longer creates the chart's legacy `api_token` automatically; `netbox-bootstrap.sh` creates one named lab validation token from the mounted Secret, inside the pod. It preserves existing tokens and uses the source-compatible v1 API scheme; v2 token rollout is outside this lab change.
+```bash
+python3 -m unittest discover -s ops/platform/umbrella -p 'test_*.py' -v
+python3 -m unittest discover -s ops/platform/inventory-alignment -p 'test_deployment.py' -v
+```
 
-Preparation creates fresh lab secrets only if absent; no credentials are printed or stored in Git. Test API objects are disposable. NetBox checks authenticated CRUD and reads the object after PostgreSQL pod recreation; monitoring checks synthetic PDU metrics through Telegraf, Prometheus and Grafana, plus authenticated Elasticsearch/Kibana health.
+These render the delivered chart; they do not deploy it. For live checks, use
+[native importer acceptance](inventory-alignment/README.md),
+[logging checks](logging/README.md) and the current
+[provisioning/security validation](../security-provisioning/VALIDATION.md).
+The [cluster operations guide](../kubernetes/README.md) covers access and retained
+storage. Preserve existing releases, PVCs, credentials and node storage when
+changing test source.
 
-The VM NetBox web uses two Granian workers and a 2 GiB limit, with a 768 MiB
-request. Four default workers plus a management command exceeded the old 1536 MiB
-limit. The resource check runs read-only API traffic beside one Django shell and
-checks inventory count, pod restarts and cgroup OOM events.
-
-Native importer/real chart acceptance: [Inventory alignment](inventory-alignment/README.md).
-Earlier standalone signal test: [Inventory trial](inventory-trial/README.md).
-
-Storage uses twelve static `Retain` hostPath volumes in `/data/fhs-platform/` inside the minikube node. This avoids the default provisioner's changing identity after restart. Each PV's `8Gi` is nominal scheduling capacity, not a disk quota or reservation; all share the VM disk. Deleted claims leave retained data/PVs for explicit operator recovery; there is no automatic reset/reclaim command. This is a single-node lab without HA or a backup guarantee. `down`/`up` retains objects and data; never delete the minikube profile to stop work.
-
-The fhs-test Docker container was increased from 4 GiB to 6 GiB using `docker update --memory=6g --memory-swap=8g fhs-test`; minikube cannot resize an existing profile itself. `lifecycle.sh up` requests 6 GiB for new profiles. Kubernetes reports host memory rather than the container cgroup limit, so watch actual `docker stats` use. No unrelated container or default context is changed.
-
-Live evidence and initial corrections: [VALIDATION.md](VALIDATION.md).
-
-Bounded one-server logging fixture and reviewed execution commands: [logging/README.md](logging/README.md). Real Filebeat ingest and inspected Kibana Discover proof passed using the explicit filestream fallback; see [evidence and limitations](logging/validation.md).
+Dated results from the former separate-release lab remain in
+[platform validation](VALIDATION.md) and
+[monitoring validation](monitoring-validation.md). Those historical commands
+are not current deployment instructions. Removing their source scripts does
+not uninstall running releases or remove stored data.

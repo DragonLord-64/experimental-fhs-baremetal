@@ -29,7 +29,7 @@ remains available for legacy/offline use.
   referenced CSS/JS paths returned HTTP 200. Runtime plugin version/sync settings
   were read back. Web/worker share node `fhs-test`; multi-node CSI attachment
   behavior is not established by a single-node run.
-- Main read-only [resource check](../netbox-resource-test.py): **62 API requests**
+- Main read-only [resource check](https://github.com/DragonLord-64/experimental-fhs-baremetal/blob/466522bf2dff260ab8f76c1a9c999331233125b1/ops/platform/netbox-resource-test.py): **62 API requests**
   with a concurrent Django read, 19 overlapping pairs, 186 devices, unchanged
   pod UID/restarts and zero OOM events. Web limit 2 GiB, two workers; measured
   cgroup peak 889,077,760 bytes. Elasticsearch/Kibana remain at zero replicas.
