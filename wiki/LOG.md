@@ -878,3 +878,11 @@ anchor warnings and unavailable external Python inventory. No production system
 was modified; the full image build/configuration and production MySQL migration
 remain unverified. The disposable test container was removed. See
 ops/role-tests/bifrost-environment/VALIDATION.md for evidence and scope.
+
+### 2026-10-31 — Make the focused Bifrost transfer the default
+
+Corrected the transfer default to match the requested current-work-only copy.
+Running copy-to-official.py without a scope flag now copies six Bifrost files;
+--full explicitly selects the prior broad transfer/cleanup. --bifrost-only remains
+an alias. Disposable default/full checks passed: default preserves unrelated
+inventory/docs/role edits and cleanup candidates; full retains its cleanup.

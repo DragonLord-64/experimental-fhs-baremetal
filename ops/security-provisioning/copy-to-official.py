@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy provisioning source into the sibling official repository."""
+"""Copy the current Bifrost changes into the sibling official repository."""
 import argparse
 from pathlib import Path
 import shutil
@@ -8,12 +8,15 @@ source = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('destination', nargs='?', type=Path,
                     default=source.parent / 'ska-mid-cbf-fhs-baremetal')
-parser.add_argument('--bifrost-only', action='store_true',
-                    help='Copy only the Bifrost environment repair/build files; no cleanup deletions')
+scope = parser.add_mutually_exclusive_group()
+scope.add_argument('--full', action='store_true',
+                   help='Copy the full provisioning update and perform its legacy cleanup')
+scope.add_argument('--bifrost-only', action='store_true',
+                   help='Copy only the Bifrost environment files (the default)')
 args = parser.parse_args()
 destination = args.destination.resolve()
 
-if args.bifrost_only:
+if not args.full:
     for name in ('scripts/patch-bifrost-environment.py',
                  'scripts/deploy-bifrost-container.sh',
                  'bifrost-infra/Dockerfile',

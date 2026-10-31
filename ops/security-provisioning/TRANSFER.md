@@ -7,10 +7,11 @@ development HTTP and portable inventory; it does not require importing the old p
 
 ## Copy source
 
-With the checkouts beside each other, run from experimental:
+For the full provisioning/security transfer, with checkouts beside each other,
+run from experimental:
 
 ```sh
-python3 ops/security-provisioning/copy-to-official.py
+python3 ops/security-provisioning/copy-to-official.py --full
 git -C ../ska-mid-cbf-fhs-baremetal status --short
 git -C ../ska-mid-cbf-fhs-baremetal diff
 ```
@@ -18,9 +19,10 @@ git -C ../ska-mid-cbf-fhs-baremetal diff
 For only the current Bifrost environment repair/build changes:
 
 ```sh
-python3 ops/security-provisioning/copy-to-official.py --bifrost-only
+python3 ops/security-provisioning/copy-to-official.py
 ```
 
+The default is the focused Bifrost copy (`--bifrost-only` is also accepted).
 This copies only the patch script, launcher script, Bifrost Dockerfile, constraints
 helper, Bifrost operations guide and quickstart. It does not copy inventory/group vars, roles, platform
 files or other docs, and performs no cleanup deletions. Review those six files
@@ -28,7 +30,7 @@ in official; matching files are overwritten. A destination path is also accepted
 The patch script's `configure` action supplies the configuration-only guards
 without overwriting your mounted `target` variables.
 
-Pass a destination path if its folder has another name. The script copies the
+Pass a destination path if its folder has another name. With `--full`, the script copies the
 listed source folders/files and overwrites matching files. It does not use Git,
 merge settings or create backups. After copying, it removes the obsolete
 `roles/setup_fhs_node/`, `roles/manage_venvs/`, `roles/manage_bittware_sdk/` and
