@@ -46,7 +46,7 @@
     when: netbox_manufacturer | length == 0 or netbox_device_type | length == 0
   - name: Read existing custom field definitions without changing their types
     ansible.builtin.uri:
-      url: '{{ netbox_url }}/api/extras/custom-fields/?limit=1000'
+      url: '{{ netbox_url | regex_replace("/+$", "") }}/api/extras/custom-fields/?limit=1000'
       headers:
         Authorization: '{{ netbox_auth }}'
       return_content: true
@@ -105,7 +105,7 @@
         ''defined'') | map(attribute=''bmc_address'') | list) }}'
   - name: Read ownership of desired IP addresses
     ansible.builtin.uri:
-      url: '{{ netbox_url }}/api/ipam/ip-addresses/?address={{ (item.1.address ~ ''/'' ~ item.1.prefix) | urlencode }}'
+      url: '{{ netbox_url | regex_replace("/+$", "") }}/api/ipam/ip-addresses/?address={{ (item.1.address ~ ''/'' ~ item.1.prefix) | urlencode }}'
       headers:
         Authorization: '{{ netbox_auth }}'
       return_content: true
@@ -147,7 +147,7 @@
     - fhs_stage | default("all") in ["ips", "all"]
   - name: Read ownership of desired MAC addresses
     ansible.builtin.uri:
-      url: '{{ netbox_url }}/api/dcim/mac-addresses/?mac_address={{ item.mac | urlencode }}'
+      url: '{{ netbox_url | regex_replace("/+$", "") }}/api/dcim/mac-addresses/?mac_address={{ item.mac | urlencode }}'
       headers:
         Authorization: '{{ netbox_auth }}'
       return_content: true
@@ -194,7 +194,7 @@
         fields first.
   - name: Read existing interfaces addresses and components for preview
     ansible.builtin.uri:
-      url: '{{ netbox_url }}/api/{{ item }}/?device_id={{ desired_device_id }}&limit=1000'
+      url: '{{ netbox_url | regex_replace("/+$", "") }}/api/{{ item }}/?device_id={{ desired_device_id }}&limit=1000'
       headers:
         Authorization: '{{ netbox_auth }}'
       return_content: true

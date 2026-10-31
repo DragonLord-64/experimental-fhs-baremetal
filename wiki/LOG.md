@@ -767,3 +767,13 @@ The copy script removes those eight old platform files in the destination.
 Ten umbrella tests, two NetBox render tests, disposable copy cleanup/rerun and
 source/link/whitespace checks passed. No running release, PVC or stored test
 data was removed.
+
+### 2026-10-30 — Normalize NetBox compare request URLs
+
+The exported NetBox base URL includes a trailing slash. Four direct URI requests
+in compare.yml appended another slash before api, producing a 404 although native
+helpers succeeded. Reproduced 404 for the double-slash custom-field URL and 200
+for the normalized URL on the existing fhs-test NetBox. All four corrected
+requests passed through actual Ansible URI tasks for zero, one and repeated
+trailing slashes (12 HTTP reads). No hardware or inventory writes were performed.
+Private fixture/logs remain under fhs-security-20261030/url-check on dragonvm.
