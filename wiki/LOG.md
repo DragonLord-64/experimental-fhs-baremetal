@@ -684,3 +684,12 @@ include and executable references/fixtures. The site play retains its `fhs_node`
 umbrella tag, which also includes BIST. Corrected the role README's site target
  to `device_roles_fpga-host-server`. Focused Ansible syntax and source/link checks
 passed; no host configuration was applied.
+
+### 2026-10-30 — Remove umbrella tag and obsolete transfer paths
+
+Removed the `fhs_node` play tag; Kubernetes preparation and BIST retain their
+individual role tags. The plain transfer script removes the destination's old
+`roles/setup_fhs_node/` directory and its obsolete documentation include after
+copying. A disposable transfer check passed with obsolete paths present and on
+rerun without them, preserving an unrelated file. Tag-selection source checks,
+source/link checks and whitespace checks passed. No deployment was run.

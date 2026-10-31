@@ -90,7 +90,6 @@
   hosts: device_roles_fpga-host-server
   become: true
   gather_facts: true
-  tags: [fhs_node]
   tasks:
     - name: Set up Kubernetes node
       ansible.builtin.include_role:

@@ -17,7 +17,9 @@ git -C ../ska-mid-cbf-fhs-baremetal diff
 
 Pass a destination path if its folder has another name. The script copies the
 listed source folders/files and overwrites matching files. It does not use Git,
-merge settings, create backups or delete destination files. NetBox inventory is
+merge settings or create backups. After copying, it removes the obsolete
+`roles/setup_fhs_node/` directory and `docs/src/roles/setup_fhs_node.md` if present;
+the replacement is `setup_k8s_node`. Other destination files are retained. NetBox inventory is
 copied verbatim; review its token and site settings in Git. Host inventory and
 host vars are not copied. Remove obsolete files listed below manually.
 

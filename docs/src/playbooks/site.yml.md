@@ -12,7 +12,7 @@ Each role include has its exact role name as a tag. Most plays target `device_ro
 | `distribution` | `setup_platform_ca`, `python_ca_updates` (Ubuntu packages), `setup_apt_source`, `setup_pip_source`, `setup_git_proxy` |
 | `environment` | `manage_users` (accounts, SDK, shared and personal venvs) |
 | `dpdk_arkville` | `manage_dpdk_ark_doca` |
-| `fhs_node` | `setup_k8s_node`, `manage_fhs_bist` |
+| No play tag | `setup_k8s_node`, `manage_fhs_bist` |
 | `ubuntu24_cis` | `ubuntu24_cis` |
 | `rsync` | Final package/service tasks (no role) |
 | No play tag | `manage_fhs_exporter`, `manage_prometheus`, `filebeat`, `setup_fpga_host` |
