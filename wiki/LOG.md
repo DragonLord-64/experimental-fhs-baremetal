@@ -968,3 +968,20 @@ Ansible import syntax passed using a writable `/tmp` local-temp override after
 the default home temp path was blocked by the sandbox. `git diff --check` passed.
 No lab or physical import was run; the photographed import's cause remains
 unconfirmed until the updated command exposes its error.
+
+### 2026-10-31 — split NetBox endpoint and token loading
+
+The [wrapper connection loader](../scripts/hwmanage_lib/inventory.py) now supplies
+`platform-endpoints.yml`'s URL to the shared credential loader before validation.
+This accepts the actual platform export: endpoint in the public endpoint file,
+token in protected `platform-secrets.yml`. Previously the loader required a URL
+in secrets before applying the endpoint override. Legacy combined credentials
+remain supported when the endpoint file is absent. Override URLs now pass the
+same validation as URLs loaded from secrets.
+
+The [focused copy scope](../ops/security-provisioning/copy-to-official.py) includes
+both affected loaders. The operator guide documents the separate files.
+Hwmanage suite: 33 tests run, one skipped; transfer suite: three passed.
+New cases cover split plain/Vault credentials, invalid endpoint rejection and
+legacy combined files. `git diff --check` passed. No lab or physical import run;
+the site deployment still needs the updated files and an import retry.

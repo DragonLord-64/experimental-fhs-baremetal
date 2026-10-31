@@ -20,6 +20,7 @@ destination = args.destination.resolve()
 
 if args.diagnostics_only:
     for name in ('scripts/hwmanage_lib/common.py', 'scripts/hwmanage_lib/cli.py',
+                 'scripts/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'docs/src/playbooks/hwmanage.md'):
         target = destination / name

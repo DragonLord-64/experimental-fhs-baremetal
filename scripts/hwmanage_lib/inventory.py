@@ -15,10 +15,10 @@ def netbox_api():
     # Existing credential loader supports whole-file and inline Vault values.
     vault_file = os.environ.get('ANSIBLE_VAULT_PASSWORD_FILE')
     vault_args = ['--vault-password-file', vault_file] if vault_file else []
-    values = transfer.credentials(secrets, vault_args)
+    url = None
     if os.path.exists(endpoint):
-        url = yaml_load(endpoint).get('netbox_url', values[0])
-        values = (url, values[1], values[2])
+        url = yaml_load(endpoint)['netbox_url']
+    values = transfer.credentials(secrets, vault_args, netbox_url=url)
     return transfer.API(*values)
 
 

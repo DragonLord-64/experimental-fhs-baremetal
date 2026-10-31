@@ -324,6 +324,24 @@ Lifecycle waits default to 1,800 seconds, allowing for slow firmware boots.
 provisioning execution. A timeout stops the workflow: inspect native application
 state before repeating a cleaning or deployment operation.
 
+## NetBox connection files
+
+Inside Bifrost, the platform export supplies two separate files:
+
+```yaml
+# /provision/files.d/platform-endpoints.yml
+netbox_url: http://YOUR_NETBOX_HOST/mid-cbf-hw/netbox/
+```
+
+```yaml
+# /provision/files.d/credentials/platform-secrets.yml
+netbox_token: YOUR_NETBOX_API_TOKEN
+```
+
+Keep the secrets file protected with Ansible Vault. Override the paths using
+`FHS_PLATFORM_ENDPOINTS_FILE` and `FHS_PLATFORM_SECRETS_FILE` when needed.
+The URL is read from the endpoint file; it does not belong in the secrets file.
+
 ## Command output
 
 Ansible output is shown as it runs. Import failures show their error or Python

@@ -85,7 +85,7 @@ def private_json(path, value):
         stream.write('\n')
 
 
-def credentials(path, vault_args=()):
+def credentials(path, vault_args=(), *, netbox_url=None):
     try:
         # ansible-vault understands both whole-file and inline Vault encryption.
         # DataLoader supports inline values; the CLI supports password/identity prompts.
@@ -106,7 +106,8 @@ def credentials(path, vault_args=()):
             values = loader.load(raw.decode())
         else:
             values = yaml.safe_load(raw)
-        url, token = str(values['netbox_url']), str(values['netbox_token'])
+        url = str(netbox_url if netbox_url is not None else values['netbox_url'])
+        token = str(values['netbox_token'])
         verify = values.get('netbox_validate_certs', values.get('netbox_validate_certs_default', True))
         if '{{' in str(verify):
             raise TransferError('Certificate setting must be resolved before use')

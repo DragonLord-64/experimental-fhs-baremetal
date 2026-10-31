@@ -58,6 +58,35 @@ class DiagnosticContracts(unittest.TestCase):
             finally:
                 path.unlink()
 
+    def test_netbox_split_credentials_and_legacy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            secrets = Path(directory)/'secrets.yml'
+            endpoints = Path(directory)/'endpoints.yml'
+            secrets.write_text('netbox_token: test-token\n')
+            endpoints.write_text('netbox_url: http://netbox.example/mid-cbf-hw/netbox/\n')
+            with patch.dict(os.environ, {'FHS_PLATFORM_SECRETS_FILE': str(secrets),
+                                         'FHS_PLATFORM_ENDPOINTS_FILE': str(endpoints)}):
+                api = inventory.netbox_api()
+                self.assertEqual(api.base, 'http://netbox.example/mid-cbf-hw/netbox/api/')
+                self.assertEqual(api.session.headers['Authorization'], 'Token test-token')
+                # Endpoint override is validated before constructing the API.
+                endpoints.write_text('netbox_url: invalid-url\n')
+                with self.assertRaises(Exception):
+                    inventory.netbox_api()
+                endpoints.unlink()
+                secrets.write_text('netbox_token: test-token\nnetbox_url: https://legacy.example/\n')
+                self.assertEqual(inventory.netbox_api().base, 'https://legacy.example/api/')
+
+    def test_vault_secrets_with_separate_endpoint(self):
+        transfer = common.load_module('test_split_transfer', ROOT/'playbooks/netbox/netbox_transfer.py')
+        with tempfile.TemporaryDirectory() as directory:
+            secrets = Path(directory)/'secrets.yml'
+            secrets.write_text('$ANSIBLE_VAULT;1.1;AES256\nplaceholder\n')
+            decrypted = subprocess.CompletedProcess([], 0, b'netbox_token: test-token\n', b'')
+            with patch.object(transfer.subprocess, 'run', return_value=decrypted):
+                self.assertEqual(transfer.credentials(secrets, netbox_url='https://netbox.example/'),
+                                 ('https://netbox.example/', 'test-token', True))
+
     def test_verbose_parser_positions(self):
         for argv in (['-v', 'inventory', 'import', '--all'],
                      ['inventory', 'import', '--all', '-vv']):
@@ -65,6 +94,7 @@ class DiagnosticContracts(unittest.TestCase):
 
     def test_diagnostics_copy_scope(self):
         names = ('scripts/hwmanage_lib/common.py', 'scripts/hwmanage_lib/cli.py',
+                 'scripts/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'docs/src/playbooks/hwmanage.md')
         with tempfile.TemporaryDirectory() as directory:

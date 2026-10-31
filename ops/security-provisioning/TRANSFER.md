@@ -36,8 +36,8 @@ For only the wrapper/import diagnostics update on an existing hwmanage checkout:
 python3 ops/security-provisioning/copy-to-official.py --diagnostics-only
 ```
 
-This copies the command runner, CLI, standalone Ironic importer, import playbook
-and usage page. The default and full scopes also include these files.
+This copies the command runner, CLI, NetBox connection/credential loaders,
+standalone Ironic importer, import playbook and usage page. The default and full scopes also include these files.
 
 For only the six Bifrost environment repair/build files:
 
