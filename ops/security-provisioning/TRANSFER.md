@@ -29,11 +29,16 @@ The default copies the `scripts/hwmanage/` application folder, installer, portab
 native NetBox playbooks and their dependencies, the affected provisioning entry
 points and their exact usage pages. It also copies `ansible.cfg`, the NetBox
 inventory source and shared `group_vars/all/paths.yml` for central configuration.
-Other site group vars, roles, platform values and credentials are retained, and performs no cleanup deletions. Matching files
+Other site group vars, roles, platform values and credentials are retained.
+Matching files
 are overwritten; unrelated destination files are retained. Review the explicit
 manifest in [copy-to-official.py](copy-to-official.py) and the official Git diff.
 The original `scripts/hwmanage` executable, if present, is preserved as
 `scripts/hwmanage.legacy` before creating the application directory.
+After a successful application copy, the helper deletes old `import.yml` files
+under `scripts/hwmanage/`, `hwmanage/` and `bifrost-infra/hwmanage/`, plus the old
+`bifrost-infra/templates/hwmanage-import.yml` template. `config.yml` is the single
+application configuration. External resource/site files are retained.
 This is a file copy, not a merge or a deployment.
 
 For only the wrapper/import diagnostics update on an existing hwmanage checkout:

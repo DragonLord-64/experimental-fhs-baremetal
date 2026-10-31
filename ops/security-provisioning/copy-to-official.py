@@ -18,6 +18,17 @@ scope.add_argument('--diagnostics-only', action='store_true',
 args = parser.parse_args()
 destination = args.destination.resolve()
 
+def remove_old_import_settings():
+    # Only obsolete application-owned files; external site settings are untouched.
+    for name in ('scripts/hwmanage/import.yml', 'hwmanage/import.yml',
+                 'bifrost-infra/hwmanage/import.yml',
+                 'bifrost-infra/templates/hwmanage-import.yml'):
+        old = destination / name
+        if old.is_file() or old.is_symlink():
+            old.unlink()
+            print(f'Removed {name}')
+
+
 # Preserve the original executable when upgrading to the application directory.
 legacy = destination / 'scripts/hwmanage'
 if not args.bifrost_only and legacy.exists() and not legacy.is_dir():
@@ -41,6 +52,7 @@ if args.diagnostics_only:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source / name, target)
         print(f'Copied {name}')
+    remove_old_import_settings()
     raise SystemExit(0)
 
 if args.bifrost_only:
@@ -94,6 +106,7 @@ if not args.full:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source / name, target)
         print(f'Copied {name}')
+    remove_old_import_settings()
     raise SystemExit(0)
 
 for name in ('roles', 'playbooks', 'platform', 'docs/src',
@@ -133,3 +146,5 @@ for name in ('elasticsearch.yaml', 'grafana.yaml', 'kibana.yaml',
     if old_values.exists():
         old_values.unlink()
         print(f'Removed platform/{name}')
+
+remove_old_import_settings()

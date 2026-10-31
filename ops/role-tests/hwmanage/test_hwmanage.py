@@ -58,6 +58,23 @@ class DiagnosticContracts(unittest.TestCase):
             finally:
                 path.unlink()
 
+    def test_copy_removes_only_obsolete_application_import_settings(self):
+        obsolete = ('scripts/hwmanage/import.yml', 'hwmanage/import.yml',
+                    'bifrost-infra/hwmanage/import.yml',
+                    'bifrost-infra/templates/hwmanage-import.yml')
+        for flags in ([], ['--diagnostics-only']):
+            with tempfile.TemporaryDirectory() as directory:
+                destination = Path(directory)
+                for name in (*obsolete, 'files.d/hwmanage-import.yml'):
+                    path = destination/name
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text('old settings')
+                subprocess.run([sys.executable, str(ROOT/'ops/security-provisioning/copy-to-official.py'),
+                                directory, *flags], check=True, capture_output=True)
+                self.assertTrue((destination/'scripts/hwmanage/config.yml').is_file())
+                self.assertTrue(all(not (destination/name).exists() for name in obsolete))
+                self.assertEqual((destination/'files.d/hwmanage-import.yml').read_text(), 'old settings')
+
     def test_netbox_split_credentials_and_legacy(self):
         with tempfile.TemporaryDirectory() as directory:
             secrets = Path(directory)/'secrets.yml'

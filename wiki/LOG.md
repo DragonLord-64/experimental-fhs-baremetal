@@ -1152,3 +1152,16 @@ wrapper/inventory assertions passed against the existing healthy chart in explic
 Synthetic objects and the temporary forward were cleaned up. Whitespace checks
 passed. No physical hardware or official checkout was changed; the existing copy
 manifest already includes all changed application/importer files.
+
+### 2026-10-31 — remove obsolete import YAML during transfer
+
+The source `import.yml` was already removed when central config landed. The
+[copy helper](../ops/security-provisioning/copy-to-official.py) now removes old
+application-owned import settings after successful default, diagnostics-only or
+full transfers, including the prior application locations and Bifrost template.
+External site/resource files and the Bifrost-only transfer remain untouched.
+
+Validation: 42 focused tests passed. New disposable default/diagnostics copy
+checks verify all four obsolete paths are removed, central config is delivered,
+and an external resource override is preserved. Whitespace checks passed.
+No official checkout or lab deployment was changed.
