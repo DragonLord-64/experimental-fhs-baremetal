@@ -657,10 +657,22 @@ class MinimalImportContracts(unittest.TestCase):
         rows['dcim/sites/'].append(dict(id=4, name='MDA', slug='another-site'))
         with self.assertRaisesRegex(ValueError, 'ambiguous'):
             self.helper.new_device_defaults(sync, dict(site='MDA'))
-        with self.assertRaisesRegex(ValueError, 'not found'):
+        with self.assertRaisesRegex(ValueError, 'name or slug'):
             self.helper.new_device_defaults(sync, dict(site='missing'))
         with self.assertRaisesRegex(ValueError, 'name or slug'):
             self.helper.new_device_defaults(sync, dict(site=None))
+
+    def test_missing_defaults_created_with_observed_manufacturer(self):
+        import fhs_netbox
+        sync = Mock()
+        sync.list.return_value = []
+        sync.ensure.side_effect = lambda path, key, data, label: dict(id=7, **data)
+        with patch.object(fhs_netbox, 'ensure_manufacturers', return_value={'BittWare': {'id': 8}}):
+            result = self.helper.new_device_defaults(sync, dict(site='My Site', role='Server', device_type='Terabox'), 'BittWare')
+        self.assertEqual(result, dict(site=7, role=7, device_type=7))
+        created = {call.args[0]: call.args[2] for call in sync.ensure.call_args_list}
+        self.assertEqual(created['dcim/sites/']['slug'], 'my-site')
+        self.assertEqual(created['dcim/device-types/']['manufacturer'], 8)
 
     def test_boot_mac_automatically_selects_unique_interface(self):
         record = dict(inventory=dict(boot={'pxe_interface': 'a8:a1:59:fb:a6:bb'},

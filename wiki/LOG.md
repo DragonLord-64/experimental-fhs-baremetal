@@ -1311,3 +1311,10 @@ passed. Real BMC transport and physical hardware remain untested.
   the operator's Python environment remains unverified. All 54 wrapper tests
   passed, including real whole-file encryption/decryption and wrong-password
   rejection.
+
+- 2026-10-31: Ironic import now creates missing configured sites, roles and device
+  types, reuses exact name/slug matches and retains ambiguity rejection. New
+  types use verified FRU manufacturer (or Unknown) and zero rack height.
+  Existing device placement/type is preserved. Validation: 55 wrapper tests
+  and 24 native lab acceptance assertions passed, including preview without
+  writes, creation with manufacturer and repeat reuse.

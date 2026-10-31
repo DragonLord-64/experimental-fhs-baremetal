@@ -88,9 +88,10 @@ import:
   provisioning_interface: null
 ```
 
-Use existing NetBox names or slugs for site and device role, and the model name
-or slug for device type. The values above are examples. Resolution is exact;
-missing or ambiguous matches fail before writes for that node. Use a unique slug
+Use NetBox names or slugs for site and device role, and the model name
+or slug for device type. Missing records are created; new device types use the observed FRU manufacturer
+(or `Unknown` when unavailable). The values above are examples. Resolution is exact;
+Empty settings or ambiguous matches fail before creating the defaults. Use a unique slug
 when names/models repeat. Existing devices retain their site, role and device type.
 These defaults are resolved only when creating a device; unrelated commands do
 not query or validate their NetBox matches. Numeric IDs remain supported for

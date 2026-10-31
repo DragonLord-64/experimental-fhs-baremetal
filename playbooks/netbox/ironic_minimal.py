@@ -153,26 +153,42 @@ def resolve_device(sync, item):
     return old
 
 
-def new_device_defaults(sync, settings):
+def new_device_defaults(sync, settings, manufacturer=None):
     resolved = {}
+    missing = []
     for key, path, field in [('site', 'dcim/sites/', 'name'),
                              ('role', 'dcim/device-roles/', 'name'),
                              ('device_type', 'dcim/device-types/', 'model')]:
         value = settings.get(key)
         if type(value) is int and value > 0:
-            resolved[key] = value  # Compatibility with existing numeric settings.
+            resolved[key] = value
             continue
         if not isinstance(value, str) or not value.strip():
             raise ValueError('New devices require a NetBox name or slug for '+key)
+        value = value.strip()
         matches = {}
         for attribute in (field, 'slug'):
             for row in sync.list(path, **{attribute: value}):
                 if row.get(attribute) == value:
                     matches[row['id']] = row
-        if len(matches) != 1:
-            reason = 'not found' if not matches else 'ambiguous; use a unique slug'
-            raise ValueError('NetBox '+key+' '+repr(value)+' '+reason)
-        resolved[key] = next(iter(matches))
+        if len(matches) > 1:
+            raise ValueError('NetBox '+key+' '+repr(value)+' ambiguous; use a unique slug')
+        if matches:
+            resolved[key] = next(iter(matches))
+        else:
+            slug = re.sub('[^a-z0-9]+', '-', value.lower()).strip('-')[:100]
+            if not slug:
+                raise ValueError('Cannot derive NetBox slug for '+key)
+            missing.append((key, path, field, value, slug))
+    # Resolve all configured values before creating anything.
+    for key, path, field, value, slug in missing:
+        data = {field: value, 'slug': slug}
+        if key == 'device_type':
+            from fhs_netbox import ensure_manufacturers
+            maker = manufacturer or 'Unknown'
+            data['manufacturer'] = ensure_manufacturers(sync, [maker])[maker]['id']
+            data['u_height'] = 0
+        resolved[key] = sync.ensure(path, {field: value}, data, 'discovered '+key)['id']
     return resolved
 
 
@@ -180,7 +196,6 @@ def apply(sync, item, settings):
     from fhs_netbox import scalar
     old = resolve_device(sync, item)
     # Validate configuration/ownership before any write, including on repeated import.
-    defaults = new_device_defaults(sync, settings) if not old else None
     ports = sync.list('dcim/interfaces/', device_id=old['id']) if old else []
     tagged = [p for p in ports if any(t.get('slug') == 'provisioning-interface' for t in p.get('tags', []))]
     if item['port'].get('synthetic_name'):
@@ -214,7 +229,7 @@ def apply(sync, item, settings):
         data = {}
         key = {'id': old['id']}
     else:
-        data = dict(defaults)
+        data = new_device_defaults(sync, settings, item.get('manufacturer'))
         data.update(name=item['name'], serial=item['serial'], status='planned')
         key = {'name': item['name']}
     device = sync.ensure('dcim/devices/', key, data, 'discovered chassis')

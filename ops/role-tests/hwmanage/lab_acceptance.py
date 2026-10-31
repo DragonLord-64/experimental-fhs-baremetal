@@ -42,10 +42,20 @@ def main():
         print('PASS:', label, flush=True)
 
     try:
-        site = create('dcim/sites/', dict(name=prefix, slug=prefix.lower()))
         maker = create('dcim/manufacturers/', dict(name=prefix, slug=prefix.lower()))
-        dtype = create('dcim/device-types/', dict(model=prefix, slug=prefix.lower(), manufacturer=maker['id']))
-        role = create('dcim/device-roles/', dict(name=prefix, slug=prefix.lower(), color='123456'))
+        configured = dict(site=prefix, role=prefix, device_type=prefix)
+        preview = minimal.Sync(dict(netbox_url=credentials['url'].replace('https://', 'http://'),
+                                    netbox_token=credentials['token'], validate_certs=True), True)
+        minimal.new_device_defaults(preview, configured, prefix)
+        check(not sync.list('dcim/sites/', name=prefix), 'Missing defaults preview creates no site')
+        defaults = minimal.new_device_defaults(sync, configured, prefix)
+        for key, path in [('site', 'dcim/sites/'), ('role', 'dcim/device-roles/'), ('device_type', 'dcim/device-types/')]:
+            owned.append((path, defaults[key]))
+        site = sync.request('GET', f'dcim/sites/{defaults["site"]}/')
+        role = sync.request('GET', f'dcim/device-roles/{defaults["role"]}/')
+        dtype = sync.request('GET', f'dcim/device-types/{defaults["device_type"]}/')
+        check(dtype['manufacturer']['id'] == maker['id'], 'Missing site role and device type created with observed manufacturer')
+        check(minimal.new_device_defaults(sync, configured, prefix) == defaults, 'Created defaults reused on repeat')
         tag = create('extras/tags/', dict(name=prefix, slug=prefix.lower()))
         node_uuid = str(uuid.uuid4())
         node = dict(uuid=node_uuid, name=None, driver_info={})
