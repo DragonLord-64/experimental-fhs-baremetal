@@ -10,6 +10,7 @@ work to the [log](LOG.md).
 | Topic | Current note | Commands and evidence |
 |---|---|---|
 | Test environment and remaining gaps | [Environment plan](test-environment-plan.md) | [VM access/lifecycle](../ops/kubernetes/README.md), [platform lab](../ops/platform/README.md), [Bifrost isolation](../ops/provisioning/README.md) |
+| TerraBox discovery-to-provisioning goal | [Operator workflow and delivery plan](provisioning-workflow-vision.md) | Explicit-target CLI, minimal import, deployment profiles, optional enrichment and YAML fallback; proposed, not implemented |
 | Working physical NetBox import | [Accepted baseline](netbox-import-baseline.md) | Code `b966fb7`; user-confirmed hardware run; change discipline and remaining limits |
 | NetBox identity, assets and controller resources | [Ownership and reconciliation](resource-layout.md) | [Importer](../playbooks/netbox/README.md), [asset/FRU acceptance](../ops/platform/inventory-alignment/VALIDATION.md) |
 | LLDP and FPGA DAC connections | [Topology import](topology-import.md) | [Native acceptance](../ops/platform/inventory-alignment/README.md#lldp-and-dac-topology) |

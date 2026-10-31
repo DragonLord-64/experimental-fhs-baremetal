@@ -844,3 +844,12 @@ Explicit --constraints remains available. Diagnostics also report jwcrypto.
 Eight focused tests passed, including fallback past a broken link, conflict
 rejection and a combined constrained pip transaction. Live deployment updates
 remain operator-run; no service restart or database changes were performed here.
+
+### 2026-10-31 — Record the operator's discovery-to-provisioning vision
+
+Captured the confirmed TerraBox workflow, explicit target/cleaning gates,
+NetBox review ownership, shared deployment profiles, mixed Nexus/FHS provisioning,
+optional detailed inventory and YAML fallback in provisioning-workflow-vision.md.
+Mapped existing code to implementation gaps and ordered acceptance slices.
+Indexed the note and recorded the decision. Documentation only: no runtime,
+inventory, network, device or lifecycle changes. CLI examples are proposals.

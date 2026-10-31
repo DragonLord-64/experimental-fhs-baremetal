@@ -67,3 +67,16 @@ The user confirmed the hardware import worked after `b966fb7` and requested that
 we lock it in and make further changes carefully. Preserve the
 [accepted baseline](netbox-import-baseline.md): small, explicit changes, hardware
 validation by the user, and no unsolicited refactor or new test harness work.
+
+
+## Confirmed with the user — 2026-10-31 provisioning workflow
+
+The [TerraBox workflow vision](provisioning-workflow-vision.md) is the target:
+Bifrost discovery, minimal pre-OS NetBox import, operator review of primary IP/name/
+tags, then explicit enroll/optional-clean, deploy and provision commands. A combined
+command may chain those stages. Every operation requires a host selection or
+explicit `--all`; no implicit fleet action. Detailed inventory is opt-in after
+provisioning. NetBox/Ironic integration remains additive to an explicit YAML
+fallback. Cleaning is disabled by default and only requested deliberately.
+The CLI spelling and deployment-profile schema remain proposals; see the note
+for current source gaps and focused acceptance sequence.
