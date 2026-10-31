@@ -1,6 +1,6 @@
 # Hardware management
 
-Application entry point: `hwmanage/hwmanage`. Install it inside Bifrost from the
+Application entry point: `bifrost-infra/hwmanage/hwmanage`. Install it inside Bifrost from the
 repository root:
 
 ```bash
@@ -12,6 +12,6 @@ Edit [import.yml](import.yml) with existing NetBox site, role and device-type ID
 and approved onboard interface names. These are tracked, non-secret settings;
 credentials stay in `/provision/files.d/credentials/`.
 
-See the [operator guide](../docs/src/playbooks/hwmanage.md) for file formats,
+See the [operator guide](../../docs/src/playbooks/hwmanage.md) for file formats,
 credential paths and commands. Native import playbooks remain in
 `playbooks/netbox/`.

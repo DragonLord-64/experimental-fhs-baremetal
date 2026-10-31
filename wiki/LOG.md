@@ -1006,3 +1006,20 @@ The existing lab chart's services were Ready. After replacing an expired local
 forward, [lab acceptance](../ops/role-tests/hwmanage/VALIDATION.md) passed all 11
 assertions through the relocated wrapper/native importer; synthetic objects and
 the temporary forward were cleaned up. No physical hardware was contacted.
+
+### 2026-10-31 — hwmanage under Bifrost infrastructure
+
+Moved the application and tracked settings to
+[bifrost-infra/hwmanage/](../bifrost-infra/hwmanage/README.md), updated repository
+root resolution, import paths, transfer scopes and the existing scripts installer.
+The installer migrates links from either previous location. Compose now mounts
+this folder at `/provision/bifrost-infra/hwmanage`. Existing containers can use
+the documented `docker cp` procedure without an image rebuild or recreation;
+source updates require another copy until the new mount is active.
+
+Validation: 35 focused tests passed, including both link migrations, copied files
+and default settings. Ansible import syntax, shell syntax, Compose YAML/mount
+inspection and whitespace checks passed. All 11 native importer/wrapper lab
+assertions passed against the existing healthy chart in explicit `fhs-test`
+context, with synthetic fixture cleanup and temporary forward removal. No
+physical hardware, host lifecycle or user container operations were performed.

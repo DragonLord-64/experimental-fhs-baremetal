@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'hwmanage'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'bifrost-infra/hwmanage'))
 from hwmanage_lib import cli, common, inventory, ironic, provision
 
 

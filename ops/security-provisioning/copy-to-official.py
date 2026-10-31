@@ -19,10 +19,11 @@ args = parser.parse_args()
 destination = args.destination.resolve()
 
 if args.diagnostics_only:
-    shutil.copytree(source / 'hwmanage', destination / 'hwmanage', dirs_exist_ok=True,
+    shutil.copytree(source / 'bifrost-infra/hwmanage', destination / 'bifrost-infra/hwmanage', dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
-    print('Copied hwmanage/')
-    for name in ('scripts/install-hwmanage.sh', 'playbooks/netbox/netbox_transfer.py',
+    print('Copied bifrost-infra/hwmanage/')
+    for name in ('scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
+                 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'docs/src/playbooks/hwmanage.md'):
         target = destination / name
@@ -47,12 +48,13 @@ if args.bifrost_only:
 # Exact feature manifest: preserve destination roles, site overrides and unrelated docs.
 if not args.full:
     directories = (
-        'hwmanage',
+        'bifrost-infra/hwmanage',
         'bifrost-infra/templates',
         'playbooks/netbox',
     )
     files = (
         'scripts/install-hwmanage.sh',
+        'bifrost-infra/docker-compose.yml',
         'playbooks/site.yml',
         'playbooks/provision.yml',
         'playbooks/switch-poap/configure_nexus.yml',
@@ -76,7 +78,7 @@ if not args.full:
     raise SystemExit(0)
 
 for name in ('roles', 'playbooks', 'platform', 'docs/src',
-             'hwmanage', 'bifrost-infra/templates',
+             'bifrost-infra/hwmanage', 'bifrost-infra/templates',
              'inventory/dev_env/group_vars/all',
              'inventory/dev_env/group_vars/device_roles_fpga-host-server'):
     shutil.copytree(source / name, destination / name, dirs_exist_ok=True,
@@ -84,7 +86,7 @@ for name in ('roles', 'playbooks', 'platform', 'docs/src',
                                                  'platform-secrets.yml', 'platform-endpoints.yml'))
     print(f'Copied {name}/')
 
-for name in ('scripts/install-hwmanage.sh',
+for name in ('scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
              'inventory/dev_env/hwmanage-vars.yml',
              'bifrost-infra/Dockerfile', 'bifrost-infra/prepare-python-constraints.py',
              'scripts/patch-bifrost-environment.py', 'scripts/deploy-bifrost-container.sh', 'ansible.cfg', 'inventory/README.md',

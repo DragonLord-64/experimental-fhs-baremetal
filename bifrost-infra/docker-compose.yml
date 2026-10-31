@@ -55,6 +55,8 @@ services:
       - ${PLAYBOOKS_DIR:-../playbooks}:/provision/playbooks
       # resources
       - ${RESOURCES_DIR:-/shared/midcbf_provision_files.d}:/provision/files.d
+      # hardware management application (source; no image rebuild required)
+      - ${BIFROST_DIR:-./}hwmanage:/provision/bifrost-infra/hwmanage
       # helper scripts
       - ${SCRIPTS_DIR:-../scripts}:/provision/scripts
       # Makefile

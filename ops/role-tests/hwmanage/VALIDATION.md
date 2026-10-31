@@ -59,3 +59,9 @@ The harness cleaned up its synthetic objects. The tracked default settings and
 explicit local override were separately covered by the focused contract suite
 (35 passed under the Ansible environment). This does not establish physical
 BMC behavior or select the site's NetBox IDs/onboard interfaces.
+
+2026-10-31 Bifrost folder follow-up: all 11 assertions passed with the application
+under `bifrost-infra/hwmanage/`. The same chart, explicit `fhs-test` context,
+synthetic fixtures and temporary service forward were used and cleaned up.
+This validates nested path resolution, not the user's Docker mount; Compose
+YAML and the configured mount were checked locally, without recreating a container.
