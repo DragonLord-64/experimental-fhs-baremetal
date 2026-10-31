@@ -18,10 +18,19 @@ scope.add_argument('--diagnostics-only', action='store_true',
 args = parser.parse_args()
 destination = args.destination.resolve()
 
+# Preserve the original executable when upgrading to the application directory.
+legacy = destination / 'scripts/hwmanage'
+if not args.bifrost_only and legacy.exists() and not legacy.is_dir():
+    backup = legacy.with_name('hwmanage.legacy')
+    if backup.exists() or backup.is_symlink():
+        parser.error('scripts/hwmanage.legacy already exists; preserve the old command before copying')
+    legacy.rename(backup)
+    print('Preserved scripts/hwmanage as scripts/hwmanage.legacy')
+
 if args.diagnostics_only:
-    shutil.copytree(source / 'bifrost-infra/hwmanage', destination / 'bifrost-infra/hwmanage', dirs_exist_ok=True,
+    shutil.copytree(source / 'scripts/hwmanage', destination / 'scripts/hwmanage', dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
-    print('Copied bifrost-infra/hwmanage/')
+    print('Copied scripts/hwmanage/')
     for name in ('scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
                  'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
@@ -48,7 +57,7 @@ if args.bifrost_only:
 # Exact feature manifest: preserve destination roles, site overrides and unrelated docs.
 if not args.full:
     directories = (
-        'bifrost-infra/hwmanage',
+        'scripts/hwmanage',
         'bifrost-infra/templates',
         'playbooks/netbox',
     )
@@ -78,7 +87,7 @@ if not args.full:
     raise SystemExit(0)
 
 for name in ('roles', 'playbooks', 'platform', 'docs/src',
-             'bifrost-infra/hwmanage', 'bifrost-infra/templates',
+             'scripts/hwmanage', 'bifrost-infra/templates',
              'inventory/dev_env/group_vars/all',
              'inventory/dev_env/group_vars/device_roles_fpga-host-server'):
     shutil.copytree(source / name, destination / name, dirs_exist_ok=True,

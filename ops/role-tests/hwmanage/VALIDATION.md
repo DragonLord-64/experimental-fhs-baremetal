@@ -65,3 +65,7 @@ under `bifrost-infra/hwmanage/`. The same chart, explicit `fhs-test` context,
 synthetic fixtures and temporary service forward were used and cleaned up.
 This validates nested path resolution, not the user's Docker mount; Compose
 YAML and the configured mount were checked locally, without recreating a container.
+
+2026-10-31 scripts mount follow-up: all 11 lab assertions passed with the final
+application path `scripts/hwmanage/`, using the same existing chart and synthetic
+fixture cleanup. The extra application mount has been removed from Compose.

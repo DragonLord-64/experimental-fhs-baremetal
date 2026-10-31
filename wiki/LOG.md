@@ -1023,3 +1023,19 @@ inspection and whitespace checks passed. All 11 native importer/wrapper lab
 assertions passed against the existing healthy chart in explicit `fhs-test`
 context, with synthetic fixture cleanup and temporary forward removal. No
 physical hardware, host lifecycle or user container operations were performed.
+
+### 2026-10-31 — use the existing scripts mount for hwmanage
+
+At the user's request, moved the application to
+[scripts/hwmanage/](../scripts/hwmanage/README.md) and removed the extra Compose
+mount. The existing scripts bind mount exposes source updates immediately;
+no Docker copy, image rebuild or container recreation is needed. The installer
+remains `scripts/install-hwmanage.sh` and migrates links from previous locations.
+The copy helper preserves the original file-form command as `hwmanage.legacy`
+when upgrading an older checkout to the new directory layout.
+
+Validation: 35 focused tests passed, including old-link migrations and transfer
+from the original executable layout; Ansible syntax, shell syntax and whitespace
+checks passed. All 11 synthetic native importer/wrapper assertions passed against
+the existing healthy chart in explicit `fhs-test` context. Fixture objects and
+the temporary forward were cleaned up; user containers were not changed.

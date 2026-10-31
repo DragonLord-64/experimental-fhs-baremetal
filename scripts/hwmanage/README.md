@@ -1,6 +1,6 @@
 # Hardware management
 
-Application entry point: `bifrost-infra/hwmanage/hwmanage`. Install it inside Bifrost from the
+Application entry point: `scripts/hwmanage/hwmanage`. Install it inside Bifrost from the
 repository root:
 
 ```bash

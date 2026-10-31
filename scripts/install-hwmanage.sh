@@ -9,7 +9,7 @@ fi
 
 script_path=$(readlink -f -- "${BASH_SOURCE[0]}")
 repo_path=$(dirname -- "$(dirname -- "$script_path")")
-source_path="$repo_path/bifrost-infra/hwmanage/hwmanage"
+source_path="$repo_path/scripts/hwmanage/hwmanage"
 bindir=${1:-/usr/local/bin}
 if [[ ! -x "$source_path" ]]; then
     echo "hwmanage is missing or not executable: $source_path" >&2
@@ -19,7 +19,7 @@ mkdir -p -- "$bindir"
 link_path="$bindir/hwmanage"
 if [[ -L "$link_path" ]] && [[ $(readlink -f -- "$link_path") == "$source_path" ]]; then
     echo "Already installed: $link_path -> $source_path"
-elif [[ -L "$link_path" ]] && [[ $(readlink -m -- "$link_path") == "$repo_path/scripts/hwmanage" || $(readlink -m -- "$link_path") == "$repo_path/hwmanage/hwmanage" ]]; then
+elif [[ -L "$link_path" ]] && [[ $(readlink -m -- "$link_path") == "$repo_path/scripts/hwmanage" || $(readlink -m -- "$link_path") == "$repo_path/bifrost-infra/hwmanage/hwmanage" || $(readlink -m -- "$link_path") == "$repo_path/hwmanage/hwmanage" ]]; then
     ln -sfn -- "$source_path" "$link_path"
     echo "Updated: $link_path -> $source_path"
 elif [[ -e "$link_path" || -L "$link_path" ]]; then

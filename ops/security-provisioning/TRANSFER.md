@@ -22,12 +22,14 @@ For the current hardware-management workflow only:
 python3 ops/security-provisioning/copy-to-official.py
 ```
 
-The default copies the `bifrost-infra/hwmanage/` application folder, installer, portable Bifrost templates,
+The default copies the `scripts/hwmanage/` application folder, installer, portable Bifrost templates,
 native NetBox playbooks and their dependencies, the affected provisioning entry
 points and their exact usage pages. It does not copy roles, inventory/group vars,
 platform values or credentials, and performs no cleanup deletions. Matching files
 are overwritten; unrelated destination files are retained. Review the explicit
 manifest in [copy-to-official.py](copy-to-official.py) and the official Git diff.
+The original `scripts/hwmanage` executable, if present, is preserved as
+`scripts/hwmanage.legacy` before creating the application directory.
 This is a file copy, not a merge or a deployment.
 
 For only the wrapper/import diagnostics update on an existing hwmanage checkout:
@@ -36,11 +38,11 @@ For only the wrapper/import diagnostics update on an existing hwmanage checkout:
 python3 ops/security-provisioning/copy-to-official.py --diagnostics-only
 ```
 
-This copies the complete `bifrost-infra/hwmanage/` application folder, installer, Compose mount, NetBox
+This copies the complete `scripts/hwmanage/` application folder, installer, NetBox
 credential loader, standalone Ironic importer, import playbook and usage page.
 Run `scripts/install-hwmanage.sh` inside Bifrost after copying to update the PATH
-link. Old destination `scripts/hwmanage*` files are retained but are no longer
-used by the installed command. Review `bifrost-infra/hwmanage/import.yml` before importing. The default and full scopes also include these files.
+link. The application uses the existing scripts bind mount; no container recreation
+is required. Review `scripts/hwmanage/import.yml` before importing. The default and full scopes also include these files.
 
 For only the six Bifrost environment repair/build files:
 

@@ -23,7 +23,7 @@
       ansible.builtin.command:
         argv: "{{ [ansible_playbook_python, ironic_import_script] + (['--selected-uuids', hwmanage_selected_uuids | to_json] if hwmanage_selected_uuids is defined else (['--limit', hwmanage_limit] if hwmanage_limit | default('') | length > 0 else ['--all'])) + (['--plan'] if ansible_check_mode else []) }}"
       environment:
-        HWMANAGE_IMPORT_DEFAULTS: "{{ hwmanage_import_defaults | default(lookup('ansible.builtin.env', 'HWMANAGE_IMPORT_DEFAULTS') | default(playbook_dir ~ '/../../bifrost-infra/hwmanage/import.yml', true)) }}"
+        HWMANAGE_IMPORT_DEFAULTS: "{{ hwmanage_import_defaults | default(lookup('ansible.builtin.env', 'HWMANAGE_IMPORT_DEFAULTS') | default(playbook_dir ~ '/../../scripts/hwmanage/import.yml', true)) }}"
         HWMANAGE_BMC_SECRETS: "{{ hwmanage_bmc_secrets | default(lookup('ansible.builtin.env', 'HWMANAGE_BMC_SECRETS') | default('/provision/files.d/credentials/redfish.yml', true)) }}"
       check_mode: false
       changed_when: not ansible_check_mode

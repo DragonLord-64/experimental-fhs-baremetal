@@ -14,24 +14,12 @@ hwmanage provision --help
 
 Run the installer as root inside the provisioning container; no `sudo` or
 container rebuild is needed. It links `/usr/local/bin/hwmanage` to this checkout,
-at `/provision/bifrost-infra/hwmanage/hwmanage`, so source updates apply immediately. Repeat it after recreating the container.
-It updates an existing link to either old `scripts/hwmanage` or
-`hwmanage/hwmanage` location, and refuses
+at `/provision/scripts/hwmanage/hwmanage`, so source updates apply immediately. Repeat it after recreating the container.
+It updates existing links from the previous application locations, and refuses
 to overwrite a file or a link to another tool.
 
-The Compose application mount is
-`bifrost-infra/hwmanage` → `/provision/bifrost-infra/hwmanage`.
-For a running container created before this mount was added, copy the source
-from the host without rebuilding or recreating it:
-
-```bash
-docker exec bifrost_deploy mkdir -p /provision/bifrost-infra
-docker cp bifrost-infra/hwmanage bifrost_deploy:/provision/bifrost-infra/
-docker exec -w /provision bifrost_deploy scripts/install-hwmanage.sh
-```
-
-Repeat the copy after source changes until the container is recreated with the
-new mount. The installer remains in the existing `scripts/` mount.
+The application lives in the existing `scripts/` bind mount. Source updates are
+visible immediately; no image rebuild, container recreation or file copy is needed.
 
 For a user-owned directory, run `scripts/install-hwmanage.sh "$HOME/.local/bin"`
 and add that directory to `PATH`. Keep running commands from `/provision` so
@@ -62,7 +50,7 @@ address assignment.
 
 ## Prepare import settings
 
-Edit the tracked `/provision/bifrost-infra/hwmanage/import.yml` with existing NetBox object IDs
+Edit the tracked `/provision/scripts/hwmanage/import.yml` with existing NetBox object IDs
 and reviewed motherboard interface names from inspection. These settings are not
 secrets; keep the reviewed values in your repository. The supplied IDs are unset
 and must be filled in before creating devices:

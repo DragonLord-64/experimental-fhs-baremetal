@@ -13,13 +13,13 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(ROOT/'bifrost-infra/hwmanage'))
+sys.path.insert(0, str(ROOT/'scripts/hwmanage'))
 from hwmanage_lib import cli, common, inventory, ironic, provision
 
 
 class ParserContracts(unittest.TestCase):
     def test_help_has_no_optional_imports(self):
-        code = "import sys; sys.path.insert(0, 'bifrost-infra/hwmanage'); from hwmanage_lib.cli import main; main(['--help'])"
+        code = "import sys; sys.path.insert(0, 'scripts/hwmanage'); from hwmanage_lib.cli import main; main(['--help'])"
         result = subprocess.run([sys.executable, '-S', '-c', code], cwd=ROOT, capture_output=True)
         self.assertEqual(result.returncode, 0)
         for argv in (['node', 'deploy', '--help'], ['inventory', 'export', '--help'], ['config', 'dnsmasq', 'add-host', '--help']):
@@ -91,11 +91,11 @@ class DiagnosticContracts(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             bindir = Path(directory)
             link = bindir/'hwmanage'
-            for old in ('scripts/hwmanage', 'hwmanage/hwmanage'):
+            for old in ('scripts/hwmanage', 'hwmanage/hwmanage', 'bifrost-infra/hwmanage/hwmanage'):
                 link.symlink_to(ROOT/old)
                 subprocess.run(['bash', str(ROOT/'scripts/install-hwmanage.sh'), directory],
                                check=True, capture_output=True)
-                self.assertEqual(link.resolve(), ROOT/'bifrost-infra/hwmanage/hwmanage')
+                self.assertEqual(link.resolve(), ROOT/'scripts/hwmanage/hwmanage')
                 subprocess.run([str(link), '--help'], check=True, capture_output=True)
                 link.unlink()
             link.symlink_to(bindir/'unrelated')
@@ -110,21 +110,24 @@ class DiagnosticContracts(unittest.TestCase):
             self.assertGreater(cli.parser().parse_args(argv).verbose, 0)
 
     def test_diagnostics_copy_scope(self):
-        names = ('bifrost-infra/hwmanage/hwmanage', 'bifrost-infra/hwmanage/import.yml', 'bifrost-infra/hwmanage/README.md',
+        names = ('scripts/hwmanage/hwmanage', 'scripts/hwmanage/import.yml', 'scripts/hwmanage/README.md',
                  'scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
-                 'bifrost-infra/hwmanage/hwmanage_lib/common.py', 'bifrost-infra/hwmanage/hwmanage_lib/cli.py',
-                 'bifrost-infra/hwmanage/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
+                 'scripts/hwmanage/hwmanage_lib/common.py', 'scripts/hwmanage/hwmanage_lib/cli.py',
+                 'scripts/hwmanage/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'docs/src/playbooks/hwmanage.md')
         with tempfile.TemporaryDirectory() as directory:
             destination = Path(directory)
             sentinel = destination/'site-settings'
             sentinel.write_text('preserve')
+            (destination/'scripts').mkdir()
+            (destination/'scripts/hwmanage').write_text('old executable')
             subprocess.run([sys.executable, str(ROOT/'ops/security-provisioning/copy-to-official.py'),
                             '--diagnostics-only', directory], check=True, capture_output=True)
             for name in names:
                 self.assertEqual((destination/name).read_bytes(), (ROOT/name).read_bytes())
             self.assertEqual(sentinel.read_text(), 'preserve')
+            self.assertEqual((destination/'scripts/hwmanage.legacy').read_text(), 'old executable')
 
 
 class LifecycleContracts(unittest.TestCase):
