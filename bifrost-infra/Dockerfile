@@ -7,6 +7,9 @@ FROM quay.io/openstack.kolla/bifrost-deploy:2026.1-ubuntu-noble
 # qemu-utils provides qemu-img for qcow2 image creation/conversion.
 # qemu-kvm, ovmf, ebtables, libvirt-dev are needed for the libvirt test environment.
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    python3.12 \
+    python3.12-venv \
     mdadm \
     dracut \
     qemu-utils \
@@ -32,8 +35,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN ln -sf /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd \
  && ln -sf /usr/share/OVMF/OVMF_VARS_4M.fd /usr/share/OVMF/OVMF_VARS.fd
 
-# Ensure diskimage-builder is current so all elements and block-device plugins are available.
-RUN pip install --upgrade diskimage-builder
+# Keep the Kolla release dependency set, replacing only the advisory's trust pins.
+COPY prepare-python-constraints.py /usr/local/bin/prepare-python-constraints.py
+RUN /var/lib/kolla/venv/bin/python /usr/local/bin/prepare-python-constraints.py \
+ && update-ca-certificates \
+ && /var/lib/kolla/venv/bin/python -m pip --isolated install --no-cache-dir --no-deps --upgrade \
+    'pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70' \
+ && /var/lib/kolla/venv/bin/python -m pip --isolated install --no-cache-dir \
+    --index-url https://pypi.org/simple --constraint /etc/bifrost/python-constraints.txt \
+    --upgrade certifi
+
+# DIB must match the tested OpenStack release instead of pulling master dependencies.
+RUN /var/lib/kolla/venv/bin/python -m pip --isolated install --no-cache-dir \
+    --index-url https://pypi.org/simple --constraint /etc/bifrost/python-constraints.txt \
+    diskimage-builder
 
 # Install the custom block-device-efi-lvm DIB element.
 # This element is not in upstream DIB; it enables the YAML-based EFI+LVM partitioning
@@ -82,4 +97,7 @@ RUN apt-get update && apt-get install -y \
     nano \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install ansible-dev-tools
+RUN /var/lib/kolla/venv/bin/python -m pip --isolated install --no-cache-dir \
+    --index-url https://pypi.org/simple --constraint /etc/bifrost/python-constraints.txt \
+    ansible-dev-tools \
+ && /var/lib/kolla/venv/bin/python -m pip check

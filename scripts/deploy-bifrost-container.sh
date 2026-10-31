@@ -21,7 +21,7 @@ echo "--> Installing Ansible roles from requirements.yml..."
 docker exec -w /provision bifrost_deploy ansible-galaxy role install -r requirements.yml -p ./roles/
 
 echo "--> Running Bifrost Install playbook..."
-docker exec -w /bifrost/playbooks bifrost_deploy ansible-playbook -i inventory/target install.yaml
+docker exec -w /bifrost/playbooks bifrost_deploy python3 /provision/scripts/patch-bifrost-environment.py configure --build-images
 
 # Drop into the container only if running in an interactive terminal (human user)
 if [ -t 0 ]; then

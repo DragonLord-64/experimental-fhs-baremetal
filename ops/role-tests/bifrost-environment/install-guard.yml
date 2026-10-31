@@ -1,0 +1,28 @@
+---
+# Run only in the isolated Bifrost dependency fixture; no hardware inventory.
+- name: Verify the delivered Bifrost roles honor configuration-only guards
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    skip_install: true
+    skip_package_install: true
+    skip_bootstrap: true
+    skip_start: true
+    skip_migrations: true
+    skip_validation: true
+  tasks:
+    - name: Skip source checkout in configuration mode
+      ansible.builtin.include_role:
+        name: bifrost-prep-for-install
+      when: not skip_install | bool
+    - name: Verify pip role does not install an impossible package
+      ansible.builtin.include_role:
+        name: bifrost-pip-install
+      vars:
+        package: fhs-intentionally-nonexistent-package
+        source_install: true
+        sourcedir: /fhs-intentionally-nonexistent-source
+    - name: Verify Ironic runtime installation is skipped
+      ansible.builtin.include_role:
+        name: bifrost-ironic-install

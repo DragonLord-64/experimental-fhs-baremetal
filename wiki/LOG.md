@@ -853,3 +853,28 @@ optional detailed inventory and YAML fallback in provisioning-workflow-vision.md
 Mapped existing code to implementation gaps and ordered acceptance slices.
 Indexed the note and recorded the decision. Documentation only: no runtime,
 inventory, network, device or lifecycle changes. CLI examples are proposals.
+
+### 2026-10-31 — Stop Bifrost configuration from reinstalling a drifting runtime
+
+Traced the delivered Kolla/Bifrost installer: prep defaults to master/source
+updates and install.yml reinstalls Ironic. The cached release has Ironic 35.1.1,
+whereas the operator reported 39.1.0.dev114. Configuration must preserve the
+installed runtime instead of silently mixing releases or downgrading its DB.
+
+Added the patch helper's guarded configure action, configuration-only defaults
+in experimental target vars, a guarded launcher and constrained Dockerfile Python
+installs with the pip/certifi security pins. Optional --build-images retains the
+mounted image settings for initial setup; normal configure reuses existing images.
+The focused transfer copies six Bifrost-related files, leaves destination target
+vars/unrelated edits alone and performs no legacy cleanup.
+
+Reproduced GEN_EMAIL in a disposable cached Kolla container, ran the real repair,
+passed pip/import diagnostics, obtained real Ironic API HTTP 200 and ran the actual
+schema-upgrade command against disposable SQLite. Constrained DIB/tooling installs
+also passed subsequent diagnostics. The real role fixture skipped source/package
+changes with changed=0. Twelve focused unit tests, source/link/whitespace checks,
+launcher shell syntax and the focused transfer passed. Sphinx built with existing
+anchor warnings and unavailable external Python inventory. No production system
+was modified; the full image build/configuration and production MySQL migration
+remain unverified. The disposable test container was removed. See
+ops/role-tests/bifrost-environment/VALIDATION.md for evidence and scope.

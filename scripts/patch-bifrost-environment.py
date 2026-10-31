@@ -118,11 +118,17 @@ def snapshot(python, folder):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('diagnose', 'update', 'repair-openssl'))
+    parser.add_argument('action', choices=('diagnose', 'update', 'repair-openssl', 'configure'))
     parser.add_argument('--python', type=Path, default=Path('/var/lib/kolla/venv/bin/python'))
     parser.add_argument('--snapshot-dir', type=Path, default=Path('/var/tmp/bifrost-environment-patches'))
     parser.add_argument('--constraints', type=Path, help='Local release constraints; repair otherwise checks /opt/stack/requirements and /requirements')
+    parser.add_argument('--playbooks', type=Path, default=Path('/bifrost/playbooks'),
+                        help='Installed Bifrost playbook directory for configure')
+    parser.add_argument('--build-images', action='store_true',
+                        help='With configure, retain the image-build settings from mounted target vars')
     args = parser.parse_args()
+    if args.build_images and args.action != 'configure':
+        parser.error('--build-images is only valid with configure')
     if not args.python.is_file():
         parser.error('Python executable does not exist: ' + str(args.python))
     if args.action == 'repair-openssl':
@@ -134,9 +140,24 @@ def main():
     if args.action == 'diagnose':
         return diagnose(args.python)
     if os.geteuid() != 0:
-        parser.error('Run update/repair inside the Bifrost container as root')
+        parser.error('Run update/repair/configure inside the Bifrost container as root')
     if args.action == 'update' and not Path('/var/lib/kolla/venv/pyvenv.cfg').is_file():
         parser.error('Kolla environment not found; run inside the Bifrost container')
+    if args.action == 'configure':
+        if diagnose(args.python):
+            return 1
+        if not (args.playbooks / 'install.yaml').is_file():
+            parser.error('Bifrost install.yaml not found under --playbooks')
+        # Preserve the running Ironic version; configuration is not an upgrade.
+        env = dict(os.environ, VENV=str(args.python.parent.parent), OS_CLOUD='')
+        command = [args.python.parent / 'ansible-playbook', '-i', 'inventory/target', 'install.yaml',
+                   '-e', 'skip_install=true', '-e', 'skip_package_install=true',
+                   '-e', 'update_repos=false']
+        if not args.build_images:
+            command += ['-e', 'create_image_via_dib=false', '-e', 'create_ipa_image=false',
+                        '-e', 'download_ipa=false']
+        run(command, cwd=args.playbooks, env=env)
+        return diagnose(args.python)
     snapshot(args.python, args.snapshot_dir)
     if args.action == 'update':
         run(['apt-get', 'update'])

@@ -8,7 +8,23 @@ source = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('destination', nargs='?', type=Path,
                     default=source.parent / 'ska-mid-cbf-fhs-baremetal')
-destination = parser.parse_args().destination.resolve()
+parser.add_argument('--bifrost-only', action='store_true',
+                    help='Copy only the Bifrost environment repair/build files; no cleanup deletions')
+args = parser.parse_args()
+destination = args.destination.resolve()
+
+if args.bifrost_only:
+    for name in ('scripts/patch-bifrost-environment.py',
+                 'scripts/deploy-bifrost-container.sh',
+                 'bifrost-infra/Dockerfile',
+                 'bifrost-infra/prepare-python-constraints.py',
+                 'docs/src/bifrost-infra/operations.md',
+                 'docs/src/bifrost-infra/QUICKSTART.md'):
+        target = destination / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source / name, target)
+        print(f'Copied {name}')
+    raise SystemExit(0)
 
 for name in ('roles', 'playbooks', 'platform', 'docs/src',
              'inventory/dev_env/group_vars/all',
@@ -18,7 +34,8 @@ for name in ('roles', 'playbooks', 'platform', 'docs/src',
                                                  'platform-secrets.yml', 'platform-endpoints.yml'))
     print(f'Copied {name}/')
 
-for name in ('scripts/patch-bifrost-environment.py', 'ansible.cfg', 'inventory/README.md',
+for name in ('bifrost-infra/Dockerfile', 'bifrost-infra/prepare-python-constraints.py',
+             'scripts/patch-bifrost-environment.py', 'scripts/deploy-bifrost-container.sh', 'ansible.cfg', 'inventory/README.md',
              'inventory/dev_env/netbox-inv.yml'):
     target = destination / name
     target.parent.mkdir(parents=True, exist_ok=True)

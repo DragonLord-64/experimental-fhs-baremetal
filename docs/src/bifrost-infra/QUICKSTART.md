@@ -60,7 +60,7 @@ sudo docker exec -it bifrost_deploy bash
 
 # Inside the container, run the install playbook
 cd /bifrost/playbooks
-ansible-playbook -i inventory/target install.yaml
+python3 /provision/scripts/patch-bifrost-environment.py configure --build-images
 ```
 
 ## 3. Verify the Installation

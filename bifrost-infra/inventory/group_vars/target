@@ -4,6 +4,12 @@
 # group_vars/baremetal and group_vars/localhost do NOT apply to those plays,
 # so anything the build needs must be declared here.
 
+# The Kolla image supplies the OpenStack runtime. Configuration must not fetch
+# master or reinstall its dependencies; upgrade software through a tested image.
+skip_install: true
+skip_package_install: true
+update_repos: false
+
 network_interface: "eno2"
 internal_ip: 192.168.1.7
 

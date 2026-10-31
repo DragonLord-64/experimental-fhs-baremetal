@@ -112,7 +112,7 @@ dhcp_pool_end: "192.168.1.250"
 Bifrsot provides an installation playbook to setup and configure the bifrost environment and supporting services (ngninx, dhcp, ironic)
 
 ```bash
-ansible-playbook -i inventory/target install.yaml
+python3 /provision/scripts/patch-bifrost-environment.py configure
 ```
 
 The variables in /bifrost/playbooks/inventory define the bifrost installation. See the bifrost documentation for details:
@@ -267,8 +267,9 @@ python3 /provision/scripts/patch-bifrost-environment.py update
 Diagnostics return nonzero for outdated pip/certifi, broken imports or dependency
 conflicts. Update saves package versions under `/var/tmp/bifrost-environment-patches/`,
 installs the hash-verified pip 26.2.2 bootstrap wheel and certifi >= 2026.10.19
-through `https://pypi.org/simple`. It does not restart services or change Ironic
-configuration, node records or databases. The version snapshot is a diagnostic
+through `https://pypi.org/simple`. The update and repair actions do not restart services or change Ironic
+configuration, node records or databases. The separate `configure` action applies
+the installed Bifrost configuration and may restart application services. The version snapshot is a diagnostic
 record, not a complete environment backup or automatic rollback.
 
 For an OpenSSL/cryptography import failure, repair pyOpenSSL, cryptography and
@@ -291,6 +292,43 @@ release pins are incompatible with the installed environment. Keep Ironic runnin
 until its imports pass and any current inspection/deployment has finished. Restart
 only the actual Ironic service afterward.
 
+After a successful repair, apply the mounted installation variables without
+reinstalling the OpenStack runtime:
+
+```bash
+python3 /provision/scripts/patch-bifrost-environment.py configure
+```
+
+`configure` checks dependencies/imports first and refuses to continue on failure.
+It runs the installed `install.yaml` with source/package installation disabled,
+repository updates disabled and image builds/downloads disabled. It applies
+configuration, database schema/online migrations and application service changes;
+run it when no hardware operation is in progress. It checks the environment again
+on success. It never changes a host's OS power state. For initial installation or a deliberate
+image build, retain the image settings from your mounted target vars:
+
+```bash
+python3 /provision/scripts/patch-bifrost-environment.py configure --build-images
+```
+
+The container launcher uses this image-build mode while retaining the runtime
+installation guards.
+
+For direct Ansible configuration runs, put these settings in the mounted
+`bifrost-infra/inventory/group_vars/target`:
+
+```yaml
+skip_install: true
+skip_package_install: true
+update_repos: false
+```
+
+The Kolla image supplies the runtime. An unrestricted Bifrost installation defaults
+to cloning `master` and reinstalling dependencies; it is not a configuration-only
+operation and can undo an environment repair. Do software upgrades through a
+consistent, tested image rather than mixing its release constraints with newer
+source checkouts.
+
 These commands patch the container's system CA package and Kolla environment,
 not other virtualenvs, IPA ramdisks or deployment images. The Python runtime itself
 also needs the distributor's security updates. See the
@@ -299,6 +337,9 @@ also needs the distributor's security updates. See the
 A fresh container image is the durable fix, but the current Compose file does
 not explicitly persist the Ironic database or `/etc/ironic`. Before replacing a
 container, back up its database, configuration and credentials; retain the mounted
-SSH keys and `/var/lib/ironic` images. An image build alone does not update the
-running container, and rebuilding the existing Dockerfile alone does not guarantee
-updated Python trust bundles. This patch script does not build or replace it.
+SSH keys and `/var/lib/ironic` images. The Dockerfile snapshots the base image's constraints with pip/certifi security
+pins and uses them for additional Python installs. It updates system CA/Python
+packages during the build. The base image and its release must be compatible with
+the existing database: a container upgraded to newer Ironic source must not be
+replaced by an older Ironic image against that database. An image build alone does
+not update the running container. This patch script does not build or replace it.

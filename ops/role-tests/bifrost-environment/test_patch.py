@@ -98,6 +98,54 @@ class PatchTest(unittest.TestCase):
                 self.assertEqual(constraints, args[args.index('--constraint') + 1])
                 self.assertEqual(1, commands.call_count)
 
+    def test_configure_refuses_broken_environment_before_install(self):
+        with patch.object(sys, 'argv', ['script', 'configure', '--python', sys.executable]), \
+             patch.object(module.os, 'geteuid', return_value=0), \
+             patch.object(module, 'diagnose', return_value=1), patch.object(module, 'run') as commands:
+            self.assertEqual(1, module.main())
+            commands.assert_not_called()
+
+    def test_configure_disables_source_and_package_installs(self):
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder)/'install.yaml').write_text('[]')
+            with patch.object(sys, 'argv', ['script', 'configure', '--python', sys.executable, '--playbooks', folder]), \
+                 patch.object(module.os, 'geteuid', return_value=0), \
+                 patch.object(module, 'diagnose', return_value=0), patch.object(module, 'run') as commands:
+                self.assertEqual(0, module.main())
+                args = commands.call_args.args[0]
+                for value in ('skip_install=true', 'skip_package_install=true', 'update_repos=false',
+                              'create_image_via_dib=false', 'create_ipa_image=false', 'download_ipa=false'):
+                    self.assertIn(value, args)
+                self.assertEqual(folder, str(commands.call_args.kwargs['cwd']))
+
+    def test_explicit_image_build_keeps_runtime_guards(self):
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder)/'install.yaml').write_text('[]')
+            with patch.object(sys, 'argv', ['script', 'configure', '--build-images', '--python', sys.executable, '--playbooks', folder]), \
+                 patch.object(module.os, 'geteuid', return_value=0), \
+                 patch.object(module, 'diagnose', return_value=0), patch.object(module, 'run') as commands:
+                self.assertEqual(0, module.main())
+                args = commands.call_args.args[0]
+                self.assertIn('skip_install=true', args)
+                self.assertIn('skip_package_install=true', args)
+                self.assertNotIn('create_ipa_image=false', args)
+
+    def test_image_constraints_preserve_release_except_trust_updates(self):
+        spec = importlib.util.spec_from_file_location('prepare', ROOT/'bifrost-infra/prepare-python-constraints.py')
+        prepare = importlib.util.module_from_spec(spec); spec.loader.exec_module(prepare)
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder)/'upper-constraints.txt'
+            baseline = 'ironic===35.1.1\npyOpenSSL===24.2.1\ncryptography===43.0.3\njwcrypto===1.5.6\n'
+            source.write_text(baseline + 'certifi===2026.7.22\npip===26.2.1\n')
+            result = prepare.prepare(source)
+            self.assertTrue(result.startswith(baseline))
+            self.assertNotIn('2026.7.22', result)
+            self.assertIn('pip===26.2.2', result)
+            self.assertIn('certifi===2026.10.23', result)
+            source.write_text('cryptography===43.0.3')
+            with self.assertRaises(ValueError):
+                prepare.prepare(source)
+
     def test_update_stops_if_bootstrap_fails_without_touching_openssl(self):
         commands = []
         def failing(argv, **kwargs):
