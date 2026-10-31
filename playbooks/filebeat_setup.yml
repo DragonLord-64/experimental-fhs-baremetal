@@ -9,7 +9,7 @@
         name: filebeat
         tasks_from: setup
         apply:
-          delegate_to: "{{ filebeat_setup_delegate }}"
+          delegate_to: "{{ filebeat_setup_delegate | default('localhost') }}"
           become: false
       run_once: true
       when: not ansible_check_mode

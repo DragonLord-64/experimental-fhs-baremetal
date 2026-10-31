@@ -26,6 +26,7 @@
   any_errors_fatal: false
   vars_files:
   - defaults.yml
+  - '{{ platform_endpoints_file }}'
   - '{{ netbox_credentials_file }}'
   vars:
     facts: '{{ hostvars[inventory_hostname].ansible_facts }}'
@@ -56,6 +57,7 @@
   connection: ansible.netcommon.network_cli
   vars_files:
   - defaults.yml
+  - '{{ platform_endpoints_file }}'
   - '{{ netbox_credentials_file }}'
   vars:
     ansible_network_os: cisco.nxos.nxos
@@ -82,6 +84,7 @@
   become: false
   vars_files:
   - defaults.yml
+  - '{{ platform_endpoints_file }}'
   - '{{ netbox_credentials_file }}'
   tasks:
   - name: Collect only this run's selected topology observations

@@ -4,6 +4,7 @@
   gather_facts: false
   vars_files:
   - defaults.yml
+  - '{{ platform_endpoints_file }}'
   - '{{ netbox_credentials_file }}'
   - '{{ redfish_credentials_file }}'
   tasks:

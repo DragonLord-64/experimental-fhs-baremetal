@@ -1,5 +1,6 @@
 # Shared import/export settings. Override per run with -e key=value.
-netbox_credentials_file: /provision/files.d/credentials/mid-cbf-hw-netbox.yml
+platform_endpoints_file: "{{ lookup('env', 'FHS_PLATFORM_ENDPOINTS_FILE') | default('/provision/files.d/platform-endpoints.yml', true) }}"
+netbox_credentials_file: "{{ lookup('env', 'FHS_PLATFORM_SECRETS_FILE') | default('/provision/files.d/credentials/platform-secrets.yml', true) }}"
 netbox_validate_certs_default: true
 hardware_command_path: '{{ ''/opt/netbox-demo/bin:/usr/sbin:/usr/bin:/sbin:/bin'' if hardware_simulation
   | default(false) | bool else ''/usr/sbin:/usr/bin:/sbin:/bin'' }}'

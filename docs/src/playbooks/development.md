@@ -85,9 +85,10 @@ ansible-playbook -i <PRIVATE_INVENTORY> playbooks/netbox/netbox_import.yml \
   --limit <HOST_OR_GROUP> --tags apply
 ```
 
-Both use the default protected credentials file
-`/provision/files.d/credentials/mid-cbf-hw-netbox.yml`; override
-`netbox_credentials_file` when needed. SDK discovery uses the configured
+Both read `/provision/files.d/platform-endpoints.yml` and the encrypted
+`/provision/files.d/credentials/platform-secrets.yml`. Set
+`FHS_PLATFORM_ENDPOINTS_FILE` / `FHS_PLATFORM_SECRETS_FILE` to select other
+controller locations. SDK discovery uses the configured
 BittWare venv/root/account and never installs packages. Dynamic QSFP ports retain
 empty interfaces; only verified FPGA DAC identities supplement LLDP.
 

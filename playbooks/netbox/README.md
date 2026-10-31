@@ -5,11 +5,13 @@ NetBox variables and a selected inventory scope. See the
 [development playbooks](../../docs/src/playbooks/development.md) for commands,
 asset reconciliation and Nexus routing.
 
-Change `netbox_credentials_file` in [defaults.yml](defaults.yml) to set
-one credentials path for all import plays and the Bifrost export. The same file
+The default endpoint/credential file locations are set in [defaults.yml](defaults.yml).
+Import plays and Bifrost export read the shared `platform-endpoints.yml` and
+Vault-encrypted `platform-secrets.yml`. Override controller paths with
+`FHS_PLATFORM_ENDPOINTS_FILE` / `FHS_PLATFORM_SECRETS_FILE`. The defaults file
 holds SDK/NIC discovery, topology commands, API retries, certificate validation,
-site/role defaults and Bifrost export settings. Override it
-per run with `-e netbox_credentials_file=/private/netbox.yml`.
+site/role defaults and Bifrost export settings. Override individual settings
+per run with `-e key=value`.
 
 ## Import stages
 

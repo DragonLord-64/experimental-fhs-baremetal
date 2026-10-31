@@ -8,3 +8,8 @@ fhs_keys_dir: "{{ fhs_resources_dir }}/dev-ssh-keys.d"
 # For HTTPS, install controller trust before loading inventory.
 platform_ca_certificates: []
 # Example: [{src: "{{ fhs_resources_dir }}/certificates/platform-ca.crt", name: platform-ca}]
+
+# Exported platform files on the Ansible controller (secrets may be Vault encrypted).
+platform_endpoints_file: "{{ lookup('env', 'FHS_PLATFORM_ENDPOINTS_FILE') | default(fhs_resources_dir ~ '/platform-endpoints.yml', true) }}"
+platform_secrets_file: "{{ lookup('env', 'FHS_PLATFORM_SECRETS_FILE') | default(fhs_credentials_dir ~ '/platform-secrets.yml', true) }}"
+platform_endpoints: "{{ lookup('file', platform_endpoints_file) | from_yaml }}"

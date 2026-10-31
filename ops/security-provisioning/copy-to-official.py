@@ -14,7 +14,8 @@ for name in ('roles', 'playbooks', 'platform', 'docs/src',
              'inventory/dev_env/group_vars/all',
              'inventory/dev_env/group_vars/device_roles_fpga-host-server'):
     shutil.copytree(source / name, destination / name, dirs_exist_ok=True,
-                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc', 'platform-export',
+                                                 'platform-secrets.yml', 'platform-endpoints.yml'))
     print(f'Copied {name}/')
 
 for name in ('ansible.cfg', 'inventory/README.md',

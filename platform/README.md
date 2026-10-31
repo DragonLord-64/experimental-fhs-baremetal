@@ -12,3 +12,5 @@ to the cluster management host.
 
 HTTPS may be enabled later when certificates and a suitable TLS endpoint are
 available. Upstream PyPI and Git HTTPS certificate verification remains enabled.
+
+[Export platform secrets and endpoints for Ansible](charts/fhs-platform/README.md#export-ansible-settings).

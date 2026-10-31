@@ -16,11 +16,14 @@ Select `--tags setup_pip_source` in `playbooks/site.yml`.
 Set these values in the inventory's distribution group vars:
 
 ```yaml
-pip_index_url: http://mid-cbf-hw-devpi.hw-management.svc.cluster.local:3141/root/pypi/+simple/
+pip_index_url: "{{ platform_endpoints.pip_index_url }}"
 pip_allow_insecure_http: true
-pip_trusted_hosts: [mid-cbf-hw-devpi.hw-management.svc.cluster.local]
+pip_trusted_hosts: "{{ [pip_index_url | urlsplit('hostname')] }}"
 pip_ca_bundle: ""
 ```
+
+`platform_endpoints` is loaded from the generated controller-side
+`platform-endpoints.yml` file by the inventory paths settings.
 
 This permits HTTP only for the selected development cache. Restrict access to
 the trusted LAN and keep credentials out of this system-wide configuration.

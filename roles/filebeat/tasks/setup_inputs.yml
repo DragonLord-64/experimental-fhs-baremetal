@@ -13,7 +13,12 @@
 - name: Load separate controller-side setup credentials (Vault supported)
   ansible.builtin.include_vars:
     file: "{{ filebeat_setup_credentials_file }}"
-    name: filebeat_setup_credentials
+    name: _filebeat_setup_file
+  no_log: true
+
+- name: Select setup credentials from the platform secrets file
+  ansible.builtin.set_fact:
+    filebeat_setup_credentials: "{{ _filebeat_setup_file.filebeat_setup_credentials | default(_filebeat_setup_file) }}"
   no_log: true
 
 - name: Validate setup authentication

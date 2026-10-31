@@ -1,4 +1,5 @@
 plugin: netbox.netbox.nb_inventory
+# Copy netbox_url from platform-endpoints.yml here.
 api_endpoint: http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
 
 interfaces: true
@@ -29,16 +30,8 @@ groups:
   teraboxes: "'fpga-host-server' in (tags | map(attribute='slug') | list) or device_role.slug == 'fpga-host-server'"
   nexus: "'nexus-switch' in (tags | map(attribute='slug') | list) or device_role.slug == 'nexus-switch'"
 
-# Replace the old deployment token with a token issued by the new NetBox before use.
-# Preserve Vault encryption; do not commit plaintext tokens.
+
+# Read the shared Vault file before dynamic inventory loads.
 token:
-  type: Bearer
-  value:  !vault |
-          $ANSIBLE_VAULT;1.1;AES256
-          38363938346462333533616335343033343530313662623432383932653562653534303736623938
-          6661393433623663356437636632306537383536666362640a373634343062366562343262633865
-          36626165633062656437323233623861383930663738636264396639363561373330376136656630
-          6331633861386462340a623230633033373663333136373964346431636232646462373931333835
-          36363961373838656662653437326231333465386335326532336464333632336362316336613839
-          36326262313666336537316639613431616165366565376462343530653636383063663565623532
-          326561663937656232313839323836343232
+  type: Token
+  value: "{{ (lookup('ansible.builtin.unvault', lookup('env', 'FHS_PLATFORM_SECRETS_FILE') | default('/provision/files.d/credentials/platform-secrets.yml', true)) | from_yaml).netbox_token }}"

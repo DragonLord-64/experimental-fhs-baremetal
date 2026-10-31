@@ -117,7 +117,7 @@ devpi and Git services to LoadBalancer for the separate provisioning machines.
 Your deployment's LoadBalancer DNS integration can map service names to external
 addresses. Use the configured service names and check resolution from the provisioning host and targets.
 
-Set these values in `inventory/dev_env/group_vars/device_roles_fpga-host-server/distribution.yml`:
+The distribution variables in `inventory/dev_env/group_vars/device_roles_fpga-host-server/distribution.yml` read the generated endpoints:
 
 ```yaml
 apt_cache_url: http://mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local:3142
@@ -151,29 +151,22 @@ Verify these names resolve and are reachable from the provisioning host and
 managed servers using the site's existing service DNS integration. Kubernetes
 alone does not make cluster service DNS available outside the cluster.
 
-Set Elasticsearch in
-`inventory/dev_env/group_vars/device_roles_fpga-host-server/monitoring.yml`:
+Use the [export command](README.md#export-ansible-settings) to generate
+`platform-endpoints.yml` and `platform-secrets.yml`. The endpoints file contains
+only cluster service URLs:
 
 ```yaml
-filebeat_elasticsearch_hosts:
-  - http://mid-cbf-hw-elastic.hw-management.svc.cluster.local:9200
+netbox_url: "http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/"
+apt_cache_url: "http://mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local:3142"
+pip_index_url: "http://mid-cbf-hw-devpi.hw-management.svc.cluster.local:3141/root/pypi/+simple/"
+git_proxy_url: "http://mid-cbf-hw-git-proxy.hw-management.svc.cluster.local:3128"
+filebeat_elasticsearch_hosts: ["http://mid-cbf-hw-elastic.hw-management.svc.cluster.local:9200"]
 ```
 
-Set NetBox in `inventory/dev_env/netbox-inv.yml` and in the protected import/export
-credentials file:
-
-```yaml
-# inventory/dev_env/netbox-inv.yml
-api_endpoint: http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
-validate_certs: true
-```
-
-```yaml
-# /provision/files.d/credentials/mid-cbf-hw-netbox.yml
-netbox_url: http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/
-netbox_token: "<NetBox API token>"
-netbox_validate_certs: true
-```
+Copy `netbox_url` into `api_endpoint` in `inventory/dev_env/netbox-inv.yml`.
+The standard NetBox plugin does not template its API URL; it does read its token
+from the shared Vault file. The distribution/monitoring group vars read the
+other URLs directly from the endpoints file. Machine paths stay in inventory.
 
 Certificate validation settings remain enabled for a future HTTPS URL; they do
 not encrypt HTTP. No internal CA installation or TLS Secret is needed for HTTP.

@@ -59,12 +59,14 @@ or the untracked session handoff. Never copy `.git/` or experimental Git history
    hostname and LoadBalancer service types. Internal development endpoints use
    HTTP; no additional DNS names, TLS Secrets or internal CA installation are
    required. HTTPS may be configured later.
-3. Update the protected NetBox import/export credentials file to use
-   `http://rmdskadevdu011.mda.ca/mid-cbf-hw/netbox/`. Keep its token Vault-encrypted.
-4. Put the selected Filebeat `.deb` and other reviewed artifacts in the resource
-   directory mounted at `/provision/files.d`. Supply separate Vault-capable
-   `credentials/filebeat-setup.yml` and `credentials/filebeat.yml`; the latter
-   matches the platform publisher password. No role retrieves cluster Secrets.
+3. After Helm installation, run `python3 platform/charts/export-platform.py`
+   on the cluster host. Copy `platform-secrets.yml` to the controller resource
+   mount's `credentials/` directory and `platform-endpoints.yml` to its root.
+   Encrypt the whole secrets file using Vault. Copy only the exported `netbox_url`
+   into the inventory plugin's `api_endpoint`; its token lookup reads the shared file.
+4. Put Filebeat and the other configured archives under `external_archives/`.
+   Generated platform secrets contain separate setup/publishing identities;
+   no platform password needs to be assembled by hand.
 5. Install/upgrade the platform with the site values. Confirm the new APT/Git
    service DNS names resolve to reachable LoadBalancer addresses, and that devpi,
    NetBox, devpi and Elasticsearch HTTP endpoints are reachable from their clients.

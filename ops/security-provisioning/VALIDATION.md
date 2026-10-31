@@ -105,3 +105,45 @@ Private runtime files/logs remain under
 `/home/dragon-lord/fhs-security-20261030/http-check` on dragonvm. These checks do
 not establish production DNS, externally assigned LoadBalancer addresses,
 network ACLs or the full hardware provisioning/importer suite.
+
+## Shared platform handoff files — 2026-10-30
+
+Ran the actual `platform/charts/export-platform.py` against the existing
+`fhs-test` cluster on dragonvm, using release/namespace
+`fhs-inventory-alignment`. The scoped release lacks logging, so the fixture
+provided a temporary Service/EndpointSlice to the existing Elasticsearch child
+chart, temporarily aligned its two unused scoped logging Secret keys, and used
+local DNS entries/port forwards to exercise service-domain URLs. All temporary
+mappings, forwards and Secret-key changes were restored afterward. This does not
+prove the deployment site's external DNS/LoadBalancer integration.
+
+Passed against real chart services:
+
+- Exported the two files, with secrets mode 0600 and no secrets printed.
+- Registered the chart's stable legacy NetBox API token; repeat export reused
+  exactly the same credentials without rotation.
+- Checked DNS/TCP for APT/Git and DNS/TCP plus HTTP responses for NetBox, devpi and
+  Elasticsearch, including the standalone endpoint-file checking command.
+- Vault-encrypted the entire exported secrets file and loaded real dynamic
+  NetBox inventory through the standard plugin's `unvault` token lookup.
+- Completed actual Filebeat 9.5.5 setup with the shared encrypted file and real
+  Elasticsearch. Fixed the default setup delegate resolution exposed by a clean
+  inventory: include-role arguments must default to localhost before role
+  defaults are available.
+- Resolved the delivered paths/distribution/monitoring vars and rendered the
+  real Filebeat publishing template. It contains only the writer password,
+  without the setup password or NetBox token.
+- Ran the native manufacturer importer in check mode with the two shared files.
+  No manufacturer was created and no physical equipment was contacted.
+
+The isolated inventory tooling initially lacked the collection and `pytz`;
+selected the installed collection and added the inventory's required `pytz`
+runtime dependency to the existing Python requirements file. A fixture initially
+expected an FPGA-only group absent from this synthetic inventory; corrected it
+to require parsed device-role groups and no inventory parse errors.
+
+Preflight regression cases, Filebeat syntax, source/link and whitespace checks
+passed. Disposable copy-script fixture confirmed generated export files are not
+transferred with source and obsolete roles are still removed. Sphinx HTML built
+with only the existing unavailable external-inventory warning. Private test
+files/logs are under `/home/dragon-lord/fhs-security-20261030/export-check`.

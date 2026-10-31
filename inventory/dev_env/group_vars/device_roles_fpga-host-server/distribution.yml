@@ -5,14 +5,14 @@ apt_repo_url: "{{ apt_repo_url_base }}/ubuntu/"
 apt_repo_release: noble
 
 # Trusted development LAN only; HTTPS can be configured later.
-pip_index_url: "http://mid-cbf-hw-devpi.hw-management.svc.cluster.local:3141/root/pypi/+simple/"
+pip_index_url: "{{ platform_endpoints.pip_index_url }}"
 pip_allow_insecure_http: true
 # Limit pip's HTTP exception to this one cache host.
-pip_trusted_hosts: [mid-cbf-hw-devpi.hw-management.svc.cluster.local]
+pip_trusted_hosts: "{{ [pip_index_url | urlsplit('hostname')] }}"
 pip_ca_bundle: ""
 
-apt_cache_url: "http://mid-cbf-hw-apt-cacher.hw-management.svc.cluster.local:3142"
-git_proxy_url: "http://mid-cbf-hw-git-proxy.hw-management.svc.cluster.local:3128"
+apt_cache_url: "{{ platform_endpoints.apt_cache_url }}"
+git_proxy_url: "{{ platform_endpoints.git_proxy_url }}"
 git_url_rewrites:
   - target: "https://blocked-by-policy.invalid"
     instead_of: "https://gitlab.com"

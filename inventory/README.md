@@ -52,11 +52,13 @@ Keep switches out of Linux policy groups.
 
 ## Configure NetBox inventory
 
-Set `api_endpoint: http://<NETBOX_HOST>/mid-cbf-hw/netbox/` and a Vault-encrypted
-`token` in `netbox-inv.yml`. The development platform uses HTTP; no internal CA
+Use the [platform exporter](../platform/charts/fhs-platform/README.md#export-ansible-settings)
+and copy its two files to the controller. Encrypt `credentials/platform-secrets.yml`.
+Copy `netbox_url` from `platform-endpoints.yml` into `api_endpoint` in
+`netbox-inv.yml`; its token lookup reads the shared secrets file. The development platform uses HTTP; no internal CA
 installation is required. Keep `validate_certs: true` for a future HTTPS endpoint.
-The [NetBox guide](../docs/src/guide/using_netbox_inventory.md) shows the token
-format and separate import/export credentials.
+The [NetBox guide](../docs/src/guide/using_netbox_inventory.md) shows the shared-file
+format and import/export settings.
 
 ```bash
 ansible-inventory -i inventory/dev_env/netbox-inv.yml --graph

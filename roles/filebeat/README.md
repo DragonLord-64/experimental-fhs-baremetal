@@ -10,10 +10,10 @@ Set these in `inventory/dev_env/group_vars/device_roles_fpga-host-server/monitor
 
 ```yaml
 filebeat_package_path: "{{ fhs_archives_dir }}/filebeat-9.5.5-amd64.deb"
-filebeat_setup_credentials_file: "{{ fhs_credentials_dir }}/filebeat-setup.yml"
-filebeat_credentials_file: "{{ fhs_credentials_dir }}/filebeat.yml"
+filebeat_setup_credentials_file: "{{ platform_secrets_file }}"
+filebeat_credentials_file: "{{ platform_secrets_file }}"
 # Development LAN Elasticsearch service endpoint.
-filebeat_elasticsearch_hosts: ["http://mid-cbf-hw-elastic.hw-management.svc.cluster.local:9200"]
+filebeat_elasticsearch_hosts: "{{ platform_endpoints.filebeat_elasticsearch_hosts }}"
 ```
 
 Place the package under `/provision/files.d/external_archives/`. The Linux amd64
@@ -22,30 +22,31 @@ Elasticsearch. Development HTTP needs no internal CA installation. Credentials
 travel unencrypted on the trusted LAN. HTTPS may be enabled later with CA trust.
 Keep `filebeat_ssl_verification_mode: full`.
 
-Create the private credential directory and edit the setup file:
-
-```bash
-install -d -m 0700 /provision/files.d/credentials
-umask 077
-vi /provision/files.d/credentials/filebeat-setup.yml
-```
-
-Use an Elasticsearch identity with the setup privileges listed below:
+Use the generated `platform-secrets.yml` on the controller. Its setup credentials
+are separate from the publishing identity within that one file:
 
 ```yaml
-filebeat_elasticsearch_username: "<setup-user>"
-filebeat_elasticsearch_password: "<setup-password>"
+filebeat_elasticsearch_username: "filebeat_writer"
+filebeat_elasticsearch_password: "<publishing-password>"
+filebeat_setup_credentials:
+  filebeat_elasticsearch_username: "elastic"
+  filebeat_elasticsearch_password: "<setup-password>"
 ```
 
-Alternatively supply only `filebeat_elasticsearch_api_key: "<id>:<api_key>"`.
-The setup identity needs cluster `monitor`, `manage_ilm`, `manage_index_templates`
-and index `manage` on `filebeat-*`. These credentials remain on the controller.
+The [platform exporter](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/platform/charts/fhs-platform/README.md#export-ansible-settings)
+writes these values from the installed platform. Encrypt the whole file and run
+setup once:
 
 ```bash
-# Encrypt the credentials, then load the template and lifecycle policy once.
-ansible-vault encrypt /provision/files.d/credentials/filebeat-setup.yml
+ansible-vault encrypt /provision/files.d/credentials/platform-secrets.yml
 ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/filebeat_setup.yml --limit <HOST>
 ```
+
+The exported setup identity is Elasticsearch's administrator. A separately
+managed setup identity can instead use cluster `monitor`, `manage_ilm`,
+`manage_index_templates` and index `manage` on `filebeat-*`, or a setup API key.
+Only the publishing identity is rendered onto managed servers; the shared
+secrets file and setup password remain on the controller.
 
 Select one representative FPGA-role host to resolve its package/endpoint vars;
 setup itself runs on the delegate and requires no SSH connection to that host.
@@ -53,34 +54,16 @@ Temporary package and credential files are removed after setup.
 
 ## Install collectors on managed servers
 
-Create a separate `/provision/files.d/credentials/filebeat.yml`:
+The publishing tasks read the top-level `filebeat_elasticsearch_username` and
+`filebeat_elasticsearch_password` from the same encrypted platform secrets file.
 
-```yaml
-filebeat_elasticsearch_username: filebeat_writer
-filebeat_elasticsearch_password: "<platform-filebeat-password>"
-```
-
-Use the value stored under `filebeat-password` in Kubernetes Secret
-`fhs-platform-credentials`, namespace `hw-management`. From the cluster management
-host, read that value privately:
-
-```bash
-kubectl -n hw-management get secret fhs-platform-credentials \
-  -o jsonpath='{.data.filebeat-password}' | base64 --decode
-```
-
-Transfer it into the publishing YAML above, then encrypt the file:
-
-```bash
-ansible-vault encrypt /provision/files.d/credentials/filebeat.yml
-```
 
 Publishing credentials are written to root-only device
 configuration; do not give devices the setup identity.
 
 ```bash
 # Install the package, configure journald collection and start the device service.
-ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags setup_platform_ca,filebeat
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags filebeat
 ```
 
 Device installation defaults to `filebeat_setup_enabled: false`: run the explicit

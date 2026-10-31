@@ -104,3 +104,8 @@ roles/ubuntu24_cis
 
 # Private raw hardware reference captures
 playbooks/netbox/raw-reference/
+
+# Generated platform handoff files (private site data)
+platform-secrets.yml
+platform-endpoints.yml
+platform-export/

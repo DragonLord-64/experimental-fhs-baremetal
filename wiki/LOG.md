@@ -731,3 +731,17 @@ Filebeat, authenticated NetBox API/inventory and native importer check mode
 passed on the existing lab. Focused preflight, Helm render/lint, syntax and docs
 checks passed with existing Grafana/external-inventory warnings. See
 [validation and boundaries](../ops/security-provisioning/VALIDATION.md#development-http-decision--2026-10-30).
+
+### 2026-10-30 — Export shared platform secrets and endpoints
+
+Added a local exporter beside the Helm deployment script. It checks service
+connectivity, registers/reuses the chart's NetBox token and writes
+platform-secrets.yml plus platform-endpoints.yml. No rotation, automatic copying
+or encryption. Ansible inventory/importers and Filebeat share the Vault secrets;
+distribution/monitoring read exported endpoints. Machine paths stay in inventory.
+The standard NetBox plugin's API URL remains the one manual inventory assignment.
+
+Actual cluster export/repeat, Vault inventory, Filebeat setup, publishing-only
+render and native importer check mode passed. Restored temporary lab mappings.
+The source transfer script excludes generated export files. See
+[validation evidence](../ops/security-provisioning/VALIDATION.md#shared-platform-handoff-files--2026-10-30).
