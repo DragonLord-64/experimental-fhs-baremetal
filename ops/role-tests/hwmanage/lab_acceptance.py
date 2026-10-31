@@ -101,23 +101,28 @@ def main():
                     path.write_text(json.dumps(value))
                     path.chmod(0o600)
                     return str(path)
-                secret = private('secrets.json', dict(netbox_url=sync.url[:-5], netbox_token=credentials['token']))
+                secret = private('secrets.json', dict(netbox_token=credentials['token']))
                 endpoint = private('endpoints.json', dict(netbox_url=sync.url[:-5]))
-                defaults = private('defaults.json', settings)
+
                 bmc = private('bmc.json', dict(defaults=dict(ipmi_username='synthetic', ipmi_password='synthetic-only')))
                 binary = folder/'ipmitool'
                 binary.write_text('#!'+sys.executable+'\nprint('+repr(fru)+')\n')
                 binary.chmod(0o700)
+                from hwmanage_lib.settings import load
+                config = load()[1]
+                config['ironic']['endpoint'] = 'http://127.0.0.1:'+str(server.server_port)+'/v1'
+                config['platform'].update(endpoints_file=endpoint, secrets_file=secret)
+                config['credentials'].update(bmc_file=bmc, vault_password_file=None)
+                config['import']['new_device_defaults'] = {k: settings[k] for k in ('site', 'role', 'device_type')}
+                controller_config = private('controller.json', config)
                 env = dict(os.environ, PATH=str(folder)+':'+str(Path(sys.executable).parent)+':'+os.environ['PATH'],
-                    OS_AUTH_TYPE='none', OS_ENDPOINT='http://127.0.0.1:'+str(server.server_port)+'/v1',
-                    FHS_PLATFORM_SECRETS_FILE=secret, FHS_PLATFORM_ENDPOINTS_FILE=endpoint,
-                    HWMANAGE_IMPORT_DEFAULTS=defaults, HWMANAGE_BMC_SECRETS=bmc,
+                    HWMANAGE_CONFIG_FILE=controller_config, ANSIBLE_CONFIG=str(root/'ansible.cfg'),
                     ANSIBLE_LOCAL_TEMP=str(folder/'ansible-tmp'))
                 env.pop('OS_CLOUD', None)
                 result = subprocess.run([str(Path(sys.executable).parent/'ansible-playbook'), '-i', 'localhost,',
                     str(root/'playbooks/netbox/ironic_import.yml'), '--start-at-task',
                     'Import saved inspection and verified remote FRU identity', '-e',
-                    json.dumps(dict(hwmanage_selected_uuids=[node_uuid], hwmanage_import_defaults=defaults, hwmanage_bmc_secrets=bmc))],
+                    json.dumps(dict(hwmanage_selected_uuids=[node_uuid], hwmanage_config_file=controller_config))],
                     env=env, capture_output=True, text=True, timeout=180)
                 if result.returncode:
                     print(result.stdout)
@@ -127,6 +132,21 @@ def main():
                 created = sync.request('GET', f'dcim/devices/{created["id"]}/')
                 owned.append(('ipam/ip-addresses/', created['oob_ip']['id']))
                 check(True, 'Standalone Ansible import task uses immutable UUID selection, native SDK and controller FRU')
+                # Native inventory deliberately keeps a copied, plain endpoint.
+                import yaml
+                native_options = yaml.safe_load((root/'inventory/dev_env/netbox-inv.yml').read_text())
+                native_options['api_endpoint'] = sync.url[:-5]
+                native_source = private('netbox.yml', native_options)
+                native_inventory = subprocess.run([str(Path(sys.executable).parent/'ansible-inventory'),
+                    '-i', native_source, '--list', '-e', json.dumps(dict(hwmanage_config_file=controller_config))],
+                    env=env, capture_output=True, text=True, timeout=180)
+                if native_inventory.returncode or 'Failed to parse' in native_inventory.stderr:
+                    descriptor, log = tempfile.mkstemp(prefix='hwmanage-inventory-', suffix='.log')
+                    with os.fdopen(descriptor, 'w') as stream:
+                        stream.write(native_inventory.stderr)
+                    raise AssertionError('Native NetBox inventory failed; inspect private lab log')
+                check('_meta' in json.loads(native_inventory.stdout),
+                      'Direct native NetBox inventory uses copied endpoint and central credential path')
                 wrapper = subprocess.run([sys.executable, str(root/'scripts/hwmanage/hwmanage'),
                     'inventory', 'import', '-i', 'ironic', '--all', '--plan'],
                     env=env, capture_output=True, text=True, timeout=180)

@@ -16,6 +16,7 @@ RUNBOOKS = {
 class Parser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.add_argument('--config', default=argparse.SUPPRESS, help='Controller YAML file (default: application config.yml)')
         self.add_argument('-v', '--verbose', action='count', default=argparse.SUPPRESS,
                           help='Show application output and increase Ansible verbosity (repeat for more detail)')
 
@@ -25,7 +26,7 @@ class Parser(argparse.ArgumentParser):
         self.exit(2, 'Invalid or missing arguments; use --help for this command.\n')
 
 
-def target(parser, default='netbox', required=True):
+def target(parser, default=None, required=True):
     parser.add_argument('-i', '--inventory', default=default, help='netbox, ironic, or explicit native YAML inventory')
     group = parser.add_mutually_exclusive_group(required=required)
     group.add_argument('--limit', help='Ansible host pattern, or exact Ironic name/UUID')
@@ -47,7 +48,7 @@ def parser():
     commands = node.add_subparsers(dest='action', required=True)
     for action in ('list', 'show', 'enroll', 'sync', 'manage', 'inspect', 'clean', 'provide', 'deploy', 'adopt'):
         child = commands.add_parser(action, help='Native node '+action)
-        target(child, default='ironic' if action == 'list' else 'netbox', required=action != 'list')
+        target(child, default='ironic' if action == 'list' else None, required=action != 'list')
         individual(child, ansible=action == 'deploy')
         if action == 'clean':
             child.add_argument('--clean-steps', help='JSON list, JSON file, or - for stdin; default erase_devices_metadata')
@@ -55,7 +56,7 @@ def parser():
     commands = inventory.add_subparsers(dest='action', required=True)
     for action in ('import', 'export'):
         child = commands.add_parser(action)
-        target(child, default='ironic' if action == 'import' else 'netbox')
+        target(child, default='ironic' if action == 'import' else None)
         individual(child)
         if action == 'export':
             output = child.add_mutually_exclusive_group(required=True)
@@ -72,6 +73,8 @@ def parser():
         target(child)
     config = groups.add_parser('config', help='Validate explicit configuration edits; no service restarts')
     commands = config.add_subparsers(dest='action', required=True)
+    commands.add_parser('show', help='Show effective controller settings (no secret contents)')
+    commands.add_parser('validate', help='Validate controller settings and referenced paths')
     ironic = commands.add_parser('ironic', help='Set effective conductor cleaning policy; report restart needed')
     ironic.add_argument('--automated-clean', choices=['false'], required=True)
     individual(ironic)
@@ -190,6 +193,17 @@ def dispatch(args):
     if args.group == 'check' and args.action == 'systems':
         from .checks import systems
         return systems()
+    if args.group == 'config' and args.action in ('show', 'validate'):
+        from .settings import load, validate_paths
+        source, values = load()
+        if args.action == 'show':
+            import yaml
+            print('# '+str(source))
+            print(yaml.safe_dump(values, sort_keys=False), end='')
+        else:
+            validate_paths(values)
+            print('Configuration and referenced paths are valid: '+str(source))
+        return
     if args.group == 'config' and args.action == 'ironic':
         from .config import set_ironic
         return set_ironic(args.plan)
@@ -241,7 +255,11 @@ def main(argv=None):
     if verbosity:
         os.environ['HWMANAGE_VERBOSE'] = str(verbosity)
     try:
-        dispatch(args)
+        from .settings import activated
+        with activated(getattr(args, 'config', None)) as settings:
+            if hasattr(args, 'inventory') and args.inventory is None:
+                args.inventory = settings['inventory']['default']
+            dispatch(args)
         return 0
     except Error as error:
         print('hwmanage: '+str(error), file=sys.stderr)

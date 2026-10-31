@@ -24,8 +24,9 @@ python3 ops/security-provisioning/copy-to-official.py
 
 The default copies the `scripts/hwmanage/` application folder, installer, portable Bifrost templates,
 native NetBox playbooks and their dependencies, the affected provisioning entry
-points and their exact usage pages. It does not copy roles, inventory/group vars,
-platform values or credentials, and performs no cleanup deletions. Matching files
+points and their exact usage pages. It also copies `ansible.cfg`, the NetBox
+inventory source and shared `group_vars/all/paths.yml` for central configuration.
+Other site group vars, roles, platform values and credentials are retained, and performs no cleanup deletions. Matching files
 are overwritten; unrelated destination files are retained. Review the explicit
 manifest in [copy-to-official.py](copy-to-official.py) and the official Git diff.
 The original `scripts/hwmanage` executable, if present, is preserved as
@@ -38,11 +39,15 @@ For only the wrapper/import diagnostics update on an existing hwmanage checkout:
 python3 ops/security-provisioning/copy-to-official.py --diagnostics-only
 ```
 
+This scope also transfers `ansible.cfg`, the NetBox inventory source, shared path
+group vars and NetBox defaults for the central-config Ansible bridge. Those are
+matching-file overwrites: review destination changes before using the helper.
+
 This copies the complete `scripts/hwmanage/` application folder, installer, NetBox
 credential loader, standalone Ironic importer, import playbook and usage page.
 Run `scripts/install-hwmanage.sh` inside Bifrost after copying to update the PATH
 link. The application uses the existing scripts bind mount; no container recreation
-is required. Review `scripts/hwmanage/import.yml` before importing. The default and full scopes also include these files.
+is required. Review `scripts/hwmanage/config.yml` before importing. The default and full scopes also include these files.
 
 For only the six Bifrost environment repair/build files:
 

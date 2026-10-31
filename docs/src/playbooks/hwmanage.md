@@ -59,31 +59,25 @@ address assignment.
 
 ## Prepare import settings
 
-Edit the tracked `/provision/scripts/hwmanage/import.yml` with existing NetBox object IDs
-for new devices. These settings are not
-secrets; keep the reviewed values in your repository. The supplied IDs are unset
-and must be filled in before creating devices:
+Edit the `import` section of `/provision/scripts/hwmanage/config.yml`:
 
 ```yaml
-site: 1
-role: 1
-device_type: 1
-system_fru_id: '0'
-provisioning_interface: null
+import:
+  new_device_defaults:
+    site: 1
+    role: 1
+    device_type: 1
+  system_fru_id: '0'
+  provisioning_interface: null
 ```
 
-`site`, `role` and `device_type` are IDs of existing NetBox objects assigned to
-new devices. Existing devices retain their site, role and device type. The IDs
-above are examples, not automatic selections. `system_fru_id` selects the IPMI
-FRU record for chassis manufacturer/model/serial verification; normally use `'0'`.
+The numeric IDs are existing NetBox objects for new devices; existing devices keep
+their site, role and device type. Replace these example IDs with your site's IDs.
+`system_fru_id` selects the IPMI FRU record for chassis identity, normally `'0'`.
+The provisioning interface is the unique inspected boot-MAC match. Set a name
+only to require that interface; missing, ambiguous or conflicting matches fail.
+No `onboard_interfaces` declaration is needed.
 
-`provisioning_interface: null` selects the interface whose MAC uniquely matches
-Ironic's inspected boot PXE MAC. No onboard declaration is needed. Set a name such
-as `enp2s0f0` only to require that interface; a conflicting boot MAC is rejected.
-Missing or ambiguous boot MAC matches are rejected. Old `onboard_interfaces`
-settings are no longer used.
-
-Set `HWMANAGE_IMPORT_DEFAULTS=/path/to/import.yml` for a local settings file.
 The importer verifies identity through a controller-side IPMI FRU read.
 The import playbook installs `ipmitool` on the provisioning host, not the target OS.
 The controller therefore needs package-install privileges for the first run.
@@ -267,11 +261,10 @@ remains available for lifecycle operations outside this wrapper.
 
 ## Check services and connectivity
 
-Run system checks on the provisioning host. Set the URL to a real served boot
-asset, not just the web server root:
+Run system checks on the provisioning host. Set `checks.boot_url` in `config.yml`
+to a real served boot asset, such as `http://192.168.1.7:8080/ipa.kernel`:
 
 ```bash
-export HWMANAGE_BOOT_URL=http://192.168.1.7:8080/ipa.kernel
 hwmanage check systems
 hwmanage check hosts -i netbox --limit SYS1412
 hwmanage check hosts -i netbox --all
@@ -311,35 +304,53 @@ include and validate syntax. Neither command restarts services automatically;
 follow its activation message. Existing Cisco POAP files are retained. A switch
 boot file is the POAP script, not its NX-OS image.
 
-## Local settings
+## Controller configuration
 
-The existing platform files are read on the Ansible/provisioning host:
+The command and direct Ansible runs read `/provision/scripts/hwmanage/config.yml`.
+Paths may be absolute or relative to that file. No shell exports are required.
+The YAML sections select Ironic authentication/endpoint, platform file paths,
+BMC/Vault credential paths, inventory source, Bifrost playbooks, new-device import
+defaults, timeouts and service checks. `ironic.cloud` optionally selects an existing
+OpenStack `clouds.yaml` entry; keep authentication secrets there.
 
-```text
-/provision/files.d/platform-endpoints.yml
-/provision/files.d/credentials/platform-secrets.yml
+```bash
+hwmanage config show
+hwmanage config validate
+hwmanage --config /provision/files.d/site-controller.yml config show
+hwmanage --config /provision/files.d/site-controller.yml inventory import --all --plan
 ```
 
-Keep the secrets file encrypted with Ansible Vault using the configured password
-file. `FHS_PLATFORM_ENDPOINTS_FILE` and `FHS_PLATFORM_SECRETS_FILE` select other
-paths. `HWMANAGE_BMC_SECRETS` selects protected BMC credentials; the default is
-`/provision/files.d/credentials/redfish.yml`.
+`show` prints resolved settings without opening credential files. `validate`
+checks schema and referenced paths, not service reachability or token validity.
+Missing paths fail with their setting name. All keys are explicit; unknown keys
+are rejected. Set `credentials.vault_password_file: null` only when no Vault
+password file is needed. A `--config` file uses the full schema, not a partial overlay.
 
-The empty `inventory/dev_env/hwmanage-vars.yml` source loads the adjacent
-`group_vars`/`host_vars` alongside generated hosts. It does not load the NetBox
-inventory plugin. Set `HWMANAGE_SITE_INVENTORY` to another equivalent static
-inventory source if your site variables live elsewhere. Exported snapshots
-materialize those variables for direct offline use.
+For direct Ansible, the same optional file is selected with an extra variable:
 
-`HWMANAGE_IRONIC_CONFIG` selects the effective Ironic config file(s), separated
-by `:` in service order. `HWMANAGE_DNSMASQ_CONFIG` selects dnsmasq's main config;
-`HWMANAGE_DNSMASQ_INCLUDE` selects its dedicated `hwmanage.conf` include.
-`HWMANAGE_SERVICES` selects space-separated application service names for checks.
+```bash
+ansible-playbook -i localhost, playbooks/netbox/ironic_import.yml \
+  -e hwmanage_all=true -e hwmanage_config_file=/provision/files.d/site-controller.yml
+ansible-inventory -i inventory/dev_env/netbox-inv.yml --graph \
+  -e hwmanage_config_file=/provision/files.d/site-controller.yml
+```
 
-Lifecycle waits default to 1,800 seconds, allowing for slow firmware boots.
-`HWMANAGE_TIMEOUT` adjusts lifecycle waits; `HWMANAGE_ANSIBLE_TIMEOUT` adjusts
-provisioning execution. A timeout stops the workflow: inspect native application
-state before repeating a cleaning or deployment operation.
+The native NetBox inventory keeps a plain `api_endpoint` in
+`inventory/dev_env/netbox-inv.yml`. Copy `netbox_url` from the platform endpoint
+file there when it changes. This is the one deliberate duplicate connection
+value; the wrapper reads the exported endpoint file. The inventory's token lookup
+uses the credential-file path from central config.
+
+`inventory.site_variables` selects the empty static inventory that loads adjacent
+`group_vars`/`host_vars` alongside generated hosts. Roles, playbook selection and
+provisioning settings stay in their existing files. Shared group vars and NetBox
+playbook defaults reference central paths using the Ansible lookup bridge.
+Normal explicit Ansible variable overrides still apply. Wrapper `--config` wins
+over inherited connection environment settings; generated environment variables
+are an internal interface to native tools and are restored after the command.
+
+Lifecycle timeouts stop the workflow, not the underlying hardware operation.
+Inspect state before repeating cleaning or deployment.
 
 ## NetBox connection files
 
@@ -355,8 +366,7 @@ netbox_url: http://YOUR_NETBOX_HOST/mid-cbf-hw/netbox/
 netbox_token: YOUR_NETBOX_API_TOKEN
 ```
 
-Keep the secrets file protected with Ansible Vault. Override the paths using
-`FHS_PLATFORM_ENDPOINTS_FILE` and `FHS_PLATFORM_SECRETS_FILE` when needed.
+Keep the secrets file protected with Ansible Vault. Select both file paths in the `platform` section of `config.yml`.
 The URL is read from the endpoint file; it does not belong in the secrets file.
 
 ## Command output

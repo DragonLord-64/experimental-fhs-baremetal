@@ -137,7 +137,7 @@ def site_vars_source():
     """Empty static source loads adjacent group_vars/host_vars without NetBox."""
     source = Path(os.environ.get('HWMANAGE_SITE_INVENTORY', ROOT/'inventory/dev_env/hwmanage-vars.yml'))
     if not source.is_file():
-        raise Error('Site variables inventory is unavailable; set HWMANAGE_SITE_INVENTORY')
+        raise Error('Site variables inventory is unavailable; check inventory.site_variables in config.yml')
     return source
 
 

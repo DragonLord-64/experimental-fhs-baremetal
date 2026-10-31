@@ -110,8 +110,10 @@ class DiagnosticContracts(unittest.TestCase):
             self.assertGreater(cli.parser().parse_args(argv).verbose, 0)
 
     def test_diagnostics_copy_scope(self):
-        names = ('scripts/hwmanage/hwmanage', 'scripts/hwmanage/import.yml', 'scripts/hwmanage/README.md',
+        names = ('scripts/hwmanage/hwmanage', 'scripts/hwmanage/config.yml', 'scripts/hwmanage/README.md',
                  'scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
+                 'ansible.cfg', 'inventory/dev_env/netbox-inv.yml', 'inventory/dev_env/group_vars/all/paths.yml',
+                 'scripts/hwmanage/lookup_plugins/hwmanage_config.py', 'scripts/hwmanage/hwmanage_lib/settings.py',
                  'scripts/hwmanage/hwmanage_lib/common.py', 'scripts/hwmanage/hwmanage_lib/cli.py',
                  'scripts/hwmanage/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
@@ -128,6 +130,80 @@ class DiagnosticContracts(unittest.TestCase):
                 self.assertEqual((destination/name).read_bytes(), (ROOT/name).read_bytes())
             self.assertEqual(sentinel.read_text(), 'preserve')
             self.assertEqual((destination/'scripts/hwmanage.legacy').read_text(), 'old executable')
+
+
+class CentralConfigContracts(unittest.TestCase):
+    def test_relative_paths_validation_and_environment_restoration(self):
+        from hwmanage_lib import settings
+        source, values = settings.load()
+        self.assertEqual(values['inventory']['site_variables'], str(ROOT/'inventory/dev_env/hwmanage-vars.yml'))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'config.yml'
+            values['platform']['endpoints_file'] = 'endpoints.yml'
+            values['ironic']['endpoint'] = 'http://ironic.example:6385'
+            path.write_text(json.dumps(values))
+            with patch.dict(os.environ, {'OS_ENDPOINT': 'http://old.example'}):
+                with settings.activated(path):
+                    self.assertEqual(os.environ['OS_ENDPOINT'], 'http://ironic.example:6385')
+                    self.assertEqual(os.environ['FHS_PLATFORM_ENDPOINTS_FILE'], str(Path(directory)/'endpoints.yml'))
+                self.assertEqual(os.environ['OS_ENDPOINT'], 'http://old.example')
+            values['platform']['token'] = 'must-not-be-in-config'
+            path.write_text(json.dumps(values))
+            with self.assertRaises(common.Error):
+                settings.load(path)
+            del values['platform']['token']
+            values['timeouts']['node_operation'] = 0
+            path.write_text(json.dumps(values))
+            with self.assertRaises(common.Error):
+                settings.load(path)
+
+    def test_config_show_and_default_inventory_without_service_access(self):
+        from hwmanage_lib import settings
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'config.yml'
+            values = settings.load()[1]
+            values['inventory']['default'] = 'ironic'
+            path.write_text(json.dumps(values))
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(cli.main(['config', 'show', '--config', str(path)]), 0)
+            with patch.object(cli, 'dispatch') as dispatch:
+                self.assertEqual(cli.main(['provision', '--all', '--plan', '--config', str(path)]), 0)
+            self.assertEqual(dispatch.call_args.args[0].inventory, 'ironic')
+
+    def test_direct_ansible_uses_same_config(self):
+        if not Path(sys.executable).with_name('ansible-playbook').is_file():
+            self.skipTest('Native Ansible unavailable')
+        from hwmanage_lib import settings
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            values = settings.load()[1]
+            values['platform']['endpoints_file'] = str(folder/'endpoints.yml')
+            password = folder/'vault-password'
+            password.write_text('synthetic-test-password')
+            secrets = folder/'secrets.yml'
+            secrets.write_text('netbox_token: synthetic-token\n')
+            values['credentials']['vault_password_file'] = str(password)
+            values['platform']['secrets_file'] = str(secrets)
+            subprocess.run([str(Path(sys.executable).with_name('ansible-vault')), 'encrypt',
+                '--vault-password-file', str(password), str(secrets)],
+                env=dict(os.environ, ANSIBLE_LOCAL_TEMP=str(folder/'ansible-tmp'), ANSIBLE_LOG_PATH='/dev/null'),
+                capture_output=True, check=True, timeout=30)
+            config = folder/'config.yml'
+            config.write_text(json.dumps(values))
+            play = folder/'check.yml'
+            play.write_text(json.dumps([dict(hosts='localhost', gather_facts=False,
+                vars_files=["{{ lookup('hwmanage_config', hwmanage_config_file).platform.secrets_file }}"], tasks=[
+                {'ansible.builtin.assert': {'that': [
+                    "lookup('hwmanage_config', hwmanage_config_file).platform.endpoints_file == expected",
+                    "platform_endpoints_file == expected", "netbox_token == 'synthetic-token'",
+                    "lookup('hwmanage_config', hwmanage_config_file, mode='environment').FHS_PLATFORM_ENDPOINTS_FILE == expected"]}}])]))
+            result = subprocess.run([str(Path(sys.executable).with_name('ansible-playbook')),
+                '-i', 'localhost,', '-i', str(ROOT/'inventory/dev_env/hwmanage-vars.yml'), str(play),
+                '-e', json.dumps(dict(hwmanage_config_file=str(config),
+                    expected=str(folder/'endpoints.yml')))], cwd=ROOT,
+                env=dict(os.environ, ANSIBLE_LOCAL_TEMP=str(folder/'ansible-tmp'), ANSIBLE_LOG_PATH='/dev/null'),
+                capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
 
 
 class LifecycleContracts(unittest.TestCase):
@@ -335,8 +411,12 @@ class MinimalImportContracts(unittest.TestCase):
             self.assertEqual(settings['provisioning_interface'], None)
             with tempfile.TemporaryDirectory() as directory:
                 override = Path(directory)/'custom.yml'
-                override.write_text('site: 42\nprovisioning_interface: eno1\n')
-                os.environ['HWMANAGE_IMPORT_DEFAULTS'] = str(override)
+                from hwmanage_lib.settings import load
+                values = load()[1]
+                values['import']['new_device_defaults']['site'] = 42
+                values['import']['provisioning_interface'] = 'eno1'
+                override.write_text(json.dumps(values))
+                os.environ['HWMANAGE_CONFIG_FILE'] = str(override)
                 self.helper.import_selected({}, Mock(), plan=True)
                 self.assertEqual(apply.call_args.args[2]['site'], 42)
                 self.assertEqual(apply.call_args.args[2]['provisioning_interface'], 'eno1')

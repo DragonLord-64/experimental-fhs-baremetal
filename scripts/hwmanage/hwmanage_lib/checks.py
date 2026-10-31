@@ -38,7 +38,7 @@ def systems():
 def boot_http():
     url = os.environ.get('HWMANAGE_BOOT_URL')
     if not url:
-        raise Error('Set HWMANAGE_BOOT_URL to an actual boot asset URL')
+        raise Error('Set checks.boot_url in hwmanage config.yml to an actual boot asset URL')
     parsed = urlsplit(url)
     if parsed.scheme not in ('http', 'https') or parsed.username or parsed.password:
         raise Error('Boot URL must be HTTP(S) without credentials')

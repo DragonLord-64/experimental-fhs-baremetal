@@ -1,0 +1,33 @@
+---
+ironic:
+  endpoint: http://localhost:6385
+  auth_type: none
+  cloud: null
+  config_files: [/etc/ironic/ironic.conf]
+platform:
+  endpoints_file: /provision/files.d/platform-endpoints.yml
+  secrets_file: /provision/files.d/credentials/platform-secrets.yml
+credentials:
+  bmc_file: /provision/files.d/credentials/redfish.yml
+  vault_password_file: /root/.vault_pass
+inventory:
+  default: netbox
+  site_variables: ../../inventory/dev_env/hwmanage-vars.yml
+bifrost:
+  playbooks_directory: /bifrost/playbooks
+import:
+  new_device_defaults:
+    site: null
+    role: null
+    device_type: null
+  system_fru_id: '0'
+  provisioning_interface: null
+timeouts:
+  node_operation: 1800
+  ansible: 7200
+checks:
+  boot_url: null
+  services: [ironic-api, ironic-conductor, dnsmasq]
+dnsmasq:
+  config_file: /etc/dnsmasq.conf
+  include_file: /etc/dnsmasq.d/hwmanage.conf

@@ -1,6 +1,6 @@
 # Shared import/export settings. Override per run with -e key=value.
-platform_endpoints_file: "{{ lookup('env', 'FHS_PLATFORM_ENDPOINTS_FILE') | default('/provision/files.d/platform-endpoints.yml', true) }}"
-netbox_credentials_file: "{{ lookup('env', 'FHS_PLATFORM_SECRETS_FILE') | default('/provision/files.d/credentials/platform-secrets.yml', true) }}"
+platform_endpoints_file: "{{ lookup('hwmanage_config', hwmanage_config_file | default('')).platform.endpoints_file }}"
+netbox_credentials_file: "{{ lookup('hwmanage_config', hwmanage_config_file | default('')).platform.secrets_file }}"
 netbox_validate_certs_default: true
 hardware_command_path: '{{ ''/opt/netbox-demo/bin:/usr/sbin:/usr/bin:/sbin:/bin'' if hardware_simulation
   | default(false) | bool else ''/usr/sbin:/usr/bin:/sbin:/bin'' }}'
@@ -83,7 +83,7 @@ allowed_extra:
 - inspect_interface
 - automated_clean
 - host_groups
-redfish_credentials_file: /provision/files.d/credentials/redfish.yml
+redfish_credentials_file: "{{ lookup('hwmanage_config', hwmanage_config_file | default('')).credentials.bmc_file }}"
 bootstrap_topology_enabled: true
 bootstrap_lldp_argv:
 - lldpcli

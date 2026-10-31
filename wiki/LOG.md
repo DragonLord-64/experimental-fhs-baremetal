@@ -1077,3 +1077,43 @@ MACs and missing/invalid boot MACs. All 11 native importer/wrapper assertions
 passed against the existing healthy chart in explicit `fhs-test` context with
 no onboard setting in the synthetic fixture. Synthetic objects and the temporary
 forward were cleaned up. Whitespace checks passed; physical hardware is untested.
+
+### 2026-10-31 — central hwmanage controller YAML
+
+Added [config.yml](../scripts/hwmanage/config.yml) for controller connections,
+credential-file paths, inventory selection/site variables, Bifrost playbooks,
+import defaults, timeouts and system checks. It replaces `import.yml`; paths
+resolve relative to the selected config. `--config`, `config show` and
+`config validate` expose selection, effective values and path/schema checks.
+The wrapper translates YAML into native-tool environment settings within a
+restored command context; operators need no shell exports.
+
+A small [Ansible lookup](../scripts/hwmanage/lookup_plugins/hwmanage_config.py)
+shares configuration and Vault password access with direct playbooks. Shared
+path group vars and NetBox defaults retain their existing variable names.
+At the user's request, native NetBox inventory keeps its plain copied endpoint;
+only its credential-file lookup uses central config. No inventory adapter was
+retained. Roles and provisioning group vars remain otherwise unchanged.
+The copy helper includes config, lookup registration and its shared consumers.
+
+Validation: 40 focused tests and three transfer tests passed; import playbook
+syntax and whitespace checks passed. Direct Ansible test verified selected
+config, shared group-var paths and decryption using a YAML-selected Vault password
+file. Final live lab acceptance passed 12 assertions against the healthy existing
+chart in explicit `fhs-test` context: direct import, wrapper plan, native NetBox
+inventory with copied endpoint and central credential path, identity/persistence
+and conflict protection. Fixtures and temporary forward were cleaned up. An earlier
+trial exposed empty Vault-password environment handling, corrected before the
+final pass. Physical hardware remains untested.
+
+Read-only official comparison: `development2` at `f13c26a` (no `development-2`
+branch). Existing roles, platform content and controller-side IPMI tasks match
+our pre-change source. Official retains the legacy flat `group_vars/all.yml` and
+`group_vars/device_roles_fpga-host-server.yml` alongside split directories; the
+copy helper retains them. Official discovery group vars and `bootstrap_inv.yml`
+are also retained by the helper. Full/Bifrost-only scopes overwrite the differing
+`patch-bifrost-environment.py`; its official security update exists here, but
+our version additionally changes constraints/runtime handling and configuration.
+The central-config transfer intentionally changes ansible.cfg, shared paths and
+the native inventory's token lookup. No official checkout edits, reconciliation
+or pushes were made; these differences were flagged for user review only.

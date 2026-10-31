@@ -206,10 +206,10 @@ def import_nodes(nodes, ironic, settings, sync, probe=remote_fru):
 def import_selected(nodes, ironic, *, plan=False):
     """Shared import service for the optional wrapper and standalone entry point."""
     from fhs_netbox import Sync
-    from hwmanage_lib.common import yaml_load
     from hwmanage_lib.inventory import netbox_api
     api = netbox_api()
-    settings = yaml_load(os.environ.get('HWMANAGE_IMPORT_DEFAULTS', str(HERE.parents[1]/'scripts/hwmanage/import.yml')))
+    from hwmanage_lib.settings import load, import_settings
+    settings = import_settings(load()[1])
     token = api.session.headers['Authorization'].split(' ', 1)[1]
     sync = Sync({'netbox_url': api.base[:-5], 'netbox_token': token,
                  'validate_certs': api.session.verify}, plan)
@@ -228,6 +228,7 @@ def main(argv=None):
     targets.add_argument('--limit', help='One exact Ironic UUID or name')
     targets.add_argument('--all', action='store_true', help='Import all Ironic discoveries, including unnamed nodes')
     targets.add_argument('--selected-uuids', help=argparse.SUPPRESS)
+    parser.add_argument('--config', help='Controller YAML file')
     parser.add_argument('-v', '--verbose', action='count', default=0, help='Show remote application output')
     parser.add_argument('--plan', action='store_true', help='Validate without NetBox writes')
     args = parser.parse_args(argv)
@@ -236,6 +237,17 @@ def main(argv=None):
     sys.path.insert(0, str(HERE.parents[1]/'scripts/hwmanage'))
     from hwmanage_lib.common import Error
     from hwmanage_lib.ironic import Ironic
+    from hwmanage_lib.settings import activated
+    try:
+        with activated(args.config):
+            return execute(args, Ironic)
+    except Exception:
+        traceback.print_exc()
+        return 1
+
+
+def execute(args, Ironic):
+    from hwmanage_lib.common import Error
     try:
         ironic = Ironic()
         if args.selected_uuids is not None:

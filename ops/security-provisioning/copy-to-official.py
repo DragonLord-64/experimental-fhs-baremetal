@@ -34,7 +34,9 @@ if args.diagnostics_only:
     for name in ('scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
                  'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
-                 'docs/src/playbooks/hwmanage.md'):
+                 'docs/src/playbooks/hwmanage.md', 'ansible.cfg',
+                 'inventory/dev_env/netbox-inv.yml', 'inventory/dev_env/group_vars/all/paths.yml',
+                 'playbooks/netbox/defaults.yml'):
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source / name, target)
@@ -70,6 +72,9 @@ if not args.full:
         'playbooks/hwmanage_check_hosts.yml',
         'playbooks/hwmanage_wait.yml',
         'inventory/dev_env/hwmanage-vars.yml',
+        'inventory/dev_env/netbox-inv.yml',
+        'inventory/dev_env/group_vars/all/paths.yml',
+        'ansible.cfg',
         'docs/src/playbooks/hwmanage.md',
         'docs/src/playbooks/site.yml.md',
         'docs/src/playbooks/usage.md',

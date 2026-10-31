@@ -8,7 +8,10 @@ scripts/install-hwmanage.sh
 hwmanage --help
 ```
 
-Edit [import.yml](import.yml) with existing NetBox site, role and device-type IDs.
+Edit [config.yml](config.yml) for controller paths, endpoints, inventory and import
+defaults. Set existing NetBox site, role and device-type IDs under
+`import.new_device_defaults`.
+Use `hwmanage config show` or `hwmanage config validate` to inspect settings.
 The provisioning interface is selected from the inspected boot MAC. These are
 tracked, non-secret settings;
 credentials stay in `/provision/files.d/credentials/`.

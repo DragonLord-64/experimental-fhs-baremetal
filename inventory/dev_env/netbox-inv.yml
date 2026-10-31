@@ -34,4 +34,4 @@ groups:
 # Read the shared Vault file before dynamic inventory loads.
 token:
   type: Token
-  value: "{{ (lookup('ansible.builtin.unvault', lookup('env', 'FHS_PLATFORM_SECRETS_FILE') | default('/provision/files.d/credentials/platform-secrets.yml', true)) | from_yaml).netbox_token }}"
+  value: "{{ (lookup('ansible.builtin.unvault', lookup('hwmanage_config', hwmanage_config_file | default('')).platform.secrets_file) | from_yaml).netbox_token }}"

@@ -78,3 +78,9 @@ persistence and wrapper execution, not physical hardware failures.
 2026-10-31 automatic boot-port selection: all 11 lab assertions passed with
 `onboard_interfaces` removed from fixture settings. Unique inspected boot-MAC
 selection is covered by the focused multi-NIC test; 37 focused tests passed.
+
+2026-10-31 central controller YAML: final acceptance passed 12 assertions, adding
+native NetBox inventory with a plain copied endpoint and central credential path.
+Direct import and wrapper plan both use the same selected config; the fixture
+no longer relies on per-setting environment overrides. Local focused suite:
+40 passed, including direct Ansible/Vault and shared group-var path resolution.

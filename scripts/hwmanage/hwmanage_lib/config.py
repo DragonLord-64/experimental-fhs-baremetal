@@ -19,7 +19,7 @@ def ironic_policy(paths=None):
     parser = configparser.ConfigParser(interpolation=None)
     for path in paths:
         if not path.is_file():
-            raise Error('Effective Ironic config unavailable; set HWMANAGE_IRONIC_CONFIG to the ordered service config files')
+            raise Error('Effective Ironic config unavailable; check ironic.config_files in config.yml')
         parser.read(path)
     return parser.getboolean('conductor', 'automated_clean', fallback=None)
 
