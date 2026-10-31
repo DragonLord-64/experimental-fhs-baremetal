@@ -795,3 +795,14 @@ needs verification on the deployment network. Private fixture logs are under
 fhs-bifrost-ipmi-check/private on dragonvm. Sphinx built successfully; external
 Python inventory fetching was unavailable, and a clean build also reported an
 existing platform export-anchor warning. Source/link and whitespace checks passed.
+
+### 2026-10-31 — Keep controller IPMI delegation local
+
+Explicit localhost inventory could retain SSH transport when the importer
+switched to its SSH server play. FRU and both BMC metadata tasks now explicitly
+select local transport for localhost delegates, retaining SSH for an explicitly
+remote delegate. A regression fixture declares both inventory hosts as SSH to
+unreachable documentation addresses and runs the actual three IPMI tasks with a
+synthetic client. All three execute locally and parse their results successfully.
+Seven focused tests and wrapper syntax validation passed. No physical BMC or
+NetBox changes were needed for this transport-only correction.
