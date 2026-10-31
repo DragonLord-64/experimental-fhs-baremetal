@@ -65,11 +65,38 @@ class PatchTest(unittest.TestCase):
             self.assertEqual({'packages':{'certifi':'old'}}, json.loads(file.read_text()))
 
     def test_repair_requires_constraints_before_mutation(self):
-        with patch.object(sys, 'argv', ['script', 'repair-openssl', '--python', sys.executable]), patch.object(module, 'snapshot') as save:
+        with patch.object(sys, 'argv', ['script', 'repair-openssl', '--python', sys.executable, '--constraints', '/nonexistent/fhs-constraints.txt']), patch.object(module, 'snapshot') as save:
             with self.assertRaises(SystemExit) as result:
                 module.main()
             self.assertEqual(2, result.exception.code)
             save.assert_not_called()
+
+    def test_constraints_skip_broken_link_and_reject_conflicting_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            broken = root/'broken'; broken.symlink_to(root/'missing')
+            valid = root/'valid'; valid.write_text('cryptography===43.0.3\n')
+            self.assertEqual(valid, module.select_constraints(candidates=[broken, valid]))
+            other = root/'other'; other.write_text('cryptography===50.0.2\n')
+            with self.assertRaises(ValueError):
+                module.select_constraints(candidates=[valid, other])
+            with self.assertRaises(ValueError):
+                module.select_constraints(candidates=[broken])
+
+    def test_repair_resolves_all_three_packages_together(self):
+        with tempfile.TemporaryDirectory() as folder:
+            constraints = Path(folder)/'upper-constraints.txt'
+            constraints.write_text('cryptography===43.0.3\n')
+            with patch.object(sys, 'argv', ['script', 'repair-openssl', '--python', sys.executable]), \
+                 patch.object(module.os, 'geteuid', return_value=0), \
+                 patch.object(module, 'select_constraints', return_value=constraints), \
+                 patch.object(module, 'snapshot'), patch.object(module, 'diagnose', return_value=0), \
+                 patch.object(module, 'run') as commands:
+                self.assertEqual(0, module.main())
+                args = commands.call_args.args[0]
+                self.assertEqual(['pyOpenSSL', 'cryptography', 'jwcrypto'], args[-3:])
+                self.assertEqual(constraints, args[args.index('--constraint') + 1])
+                self.assertEqual(1, commands.call_count)
 
     def test_update_stops_if_bootstrap_fails_without_touching_openssl(self):
         commands = []

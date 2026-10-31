@@ -833,3 +833,14 @@ ironic-dbsync entry point without invoking it. Six focused checks passed,
 including real duplicate dist-info precedence and a newer Ironic entry point.
 The reported pyOpenSSL/cryptography dependency conflict remains a separate real
 repair requirement; no deployment package updates were run here.
+
+### 2026-10-31 — Include jwcrypto in constrained Bifrost environment repair
+
+The repaired cryptography/pyOpenSSL pair exposed an installed jwcrypto requirement
+for a newer cryptography. Repair now resolves all three together under local
+constraints. It checks the two installed constraints locations, skips broken
+links and stops before package changes if missing/unreadable or conflicting.
+Explicit --constraints remains available. Diagnostics also report jwcrypto.
+Eight focused tests passed, including fallback past a broken link, conflict
+rejection and a combined constrained pip transaction. Live deployment updates
+remain operator-run; no service restart or database changes were performed here.

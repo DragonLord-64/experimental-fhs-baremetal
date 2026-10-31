@@ -59,20 +59,40 @@ def metadata(python):
     return json.loads(run([python, '-c', METADATA], capture_output=True, text=True).stdout)
 
 
+def select_constraints(explicit=None, candidates=None):
+    if explicit is not None:
+        if not explicit.is_file():
+            raise ValueError('Constraints file unavailable or broken link: ' + str(explicit))
+        explicit.read_bytes()  # Fail before any update if unreadable.
+        return explicit
+    candidates = candidates if candidates is not None else (
+        Path('/opt/stack/requirements/upper-constraints.txt'),
+        Path('/requirements/upper-constraints.txt'))
+    valid = [file for file in candidates if file.is_file()]
+    if not valid:
+        raise ValueError('No readable local upper-constraints.txt found; supply --constraints FILE. No packages changed.')
+    contents = [file.read_bytes() for file in valid]
+    if any(content != contents[0] for content in contents[1:]):
+        raise ValueError('Local constraints files differ; select the installation file with --constraints FILE. No packages changed.')
+    return valid[0]
+
+
 def diagnose(python):
     info = metadata(python)
     print('Python: ' + info['python'].splitlines()[0], flush=True)
     packages = {k.lower().replace('_', '-'): v for k, v in info['packages'].items()}
-    for name in ('pip', 'certifi', 'pyopenssl', 'cryptography', 'eventlet', 'oslo.service', 'ironic'):
+    for name in ('pip', 'certifi', 'pyopenssl', 'cryptography', 'jwcrypto', 'eventlet', 'oslo.service', 'ironic'):
         print(name + ': ' + packages.get(name, 'not installed'), flush=True)
     for name, location in sorted(info.get('locations', {}).items()):
         print(name + ' location: ' + location, flush=True)
     print('Release constraints candidates (use the file matching this installation):', flush=True)
     for parent in (Path('/requirements'), Path('/opt/stack/requirements')):
         for file in sorted(parent.glob('*constraints*.txt')):
-            print('  ' + str(file), flush=True)
+            if file.is_file():
+                print('  ' + str(file), flush=True)
     for file in sorted(Path('/bifrost-base-source').glob('*/requirements/*constraints*.txt')):
-        print('  ' + str(file), flush=True)
+        if file.is_file():
+            print('  ' + str(file), flush=True)
     failures = 0
     for name, minimum in (('pip', (26, 2, 2)), ('certifi', (2026, 10, 19))):
         actual = tuple(int(n) for n in re.findall(r'\d+', packages.get(name, ''))[:3])
@@ -101,12 +121,16 @@ def main():
     parser.add_argument('action', choices=('diagnose', 'update', 'repair-openssl'))
     parser.add_argument('--python', type=Path, default=Path('/var/lib/kolla/venv/bin/python'))
     parser.add_argument('--snapshot-dir', type=Path, default=Path('/var/tmp/bifrost-environment-patches'))
-    parser.add_argument('--constraints', type=Path, help='Local release upper-constraints file; required for repair-openssl')
+    parser.add_argument('--constraints', type=Path, help='Local release constraints; repair otherwise checks /opt/stack/requirements and /requirements')
     args = parser.parse_args()
     if not args.python.is_file():
         parser.error('Python executable does not exist: ' + str(args.python))
-    if args.action == 'repair-openssl' and (not args.constraints or not args.constraints.is_file()):
-        parser.error('repair-openssl requires --constraints pointing to your local release constraints file')
+    if args.action == 'repair-openssl':
+        try:
+            args.constraints = select_constraints(args.constraints)
+        except (ValueError, OSError) as exc:
+            parser.error(str(exc))
+        print('Using constraints: ' + str(args.constraints), flush=True)
     if args.action == 'diagnose':
         return diagnose(args.python)
     if os.geteuid() != 0:
@@ -127,7 +151,7 @@ def main():
         # A separate, deliberate repair: do not guess compatible OpenStack versions.
         run([args.python, '-m', 'pip', '--isolated', 'install', '--no-cache-dir',
              '--index-url', 'https://pypi.org/simple', '--constraint', args.constraints,
-             '--upgrade', 'pyOpenSSL', 'cryptography'])
+             '--upgrade', 'pyOpenSSL', 'cryptography', 'jwcrypto'])
     print('No services restarted. This does not patch IPA, OS images or other virtualenvs.', flush=True)
     return diagnose(args.python)
 

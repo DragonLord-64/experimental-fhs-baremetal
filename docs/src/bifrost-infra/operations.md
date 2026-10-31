@@ -271,16 +271,21 @@ through `https://pypi.org/simple`. It does not restart services or change Ironic
 configuration, node records or databases. The version snapshot is a diagnostic
 record, not a complete environment backup or automatic rollback.
 
-For an OpenSSL/cryptography import failure, use the **local upper-constraints file
-matching the installed OpenStack release**. Diagnostics list common candidate
-locations. Do not substitute constraints from another release.
+For an OpenSSL/cryptography import failure, repair pyOpenSSL, cryptography and
+jwcrypto together. The script checks `/opt/stack/requirements/upper-constraints.txt`
+and `/requirements/upper-constraints.txt`, skips broken links and stops if neither
+file exists or their contents differ. Use constraints matching the installed
+OpenStack release; do not substitute another release.
 
 ```bash
+python3 /provision/scripts/patch-bifrost-environment.py repair-openssl
+
+# Select explicitly if local constraint files differ or live elsewhere.
 python3 /provision/scripts/patch-bifrost-environment.py repair-openssl \
   --constraints /path/to/release/upper-constraints.txt
 ```
 
-This separately updates only pyOpenSSL/cryptography and dependencies selected by
+This separately updates pyOpenSSL/cryptography/jwcrypto and dependencies selected by
 pip under those constraints, then runs diagnostics. It may still fail if the
 release pins are incompatible with the installed environment. Keep Ironic running
 until its imports pass and any current inspection/deployment has finished. Restart
