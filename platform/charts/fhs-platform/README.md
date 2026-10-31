@@ -12,11 +12,8 @@ namespace `hw-management` and prefix `/mid-cbf-hw`.
 ```bash
 # Review the existing platform hostname and LoadBalancer service types.
 vi platform/values-provisioning.yaml
-# Install or upgrade the platform with the provisioning endpoints enabled.
-helm upgrade --install mid-cbf-hw platform/charts/fhs-platform \
-  --namespace hw-management --create-namespace \
-  -f platform/values-provisioning.yaml \
-  --wait --wait-for-jobs --timeout 20m
+# Install/upgrade, wait for readiness, then export credentials and endpoints.
+platform/deploy.sh
 ```
 
 Storage class and capacity overrides live in `aptCacher.persistence`,
@@ -77,7 +74,8 @@ printf '\n'
 
 ## Export Ansible settings
 
-On the cluster management machine, after Helm finishes:
+The deployment helper runs this automatically after Helm succeeds. To export
+again without deploying, run on the cluster management machine:
 
 ```bash
 python3 platform/charts/export-platform.py

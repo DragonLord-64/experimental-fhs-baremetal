@@ -22,6 +22,9 @@ For the current hardware-management workflow only:
 python3 ops/security-provisioning/copy-to-official.py
 ```
 
+The default also copies `platform/deploy.sh`, its existing Helm/export helpers
+and their usage pages. The full scope includes them through `platform/`.
+
 The default copies the `scripts/hwmanage/` application folder, installer, portable Bifrost templates,
 native NetBox playbooks and their dependencies, the affected provisioning entry
 points and their exact usage pages. It also copies `ansible.cfg`, the NetBox

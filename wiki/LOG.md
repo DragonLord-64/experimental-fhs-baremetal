@@ -1117,3 +1117,20 @@ our version additionally changes constraints/runtime handling and configuration.
 The central-config transfer intentionally changes ansible.cfg, shared paths and
 the native inventory's token lookup. No official checkout edits, reconciliation
 or pushes were made; these differences were flagged for user review only.
+
+### 2026-10-31 — platform deploy and export shortcut
+
+Added [platform/deploy.sh](../platform/deploy.sh): invoke the existing Helm
+upgrade/install helper, then the existing platform exporter after success.
+Release `mid-cbf-hw` and namespace `hw-management` match official development2's
+deployment helper. It uses the current Kubernetes context, existing provisioning
+values and the exporter's normal two-file output directory. No extra options or
+configuration layer were added. Updated the default transfer manifest and brief
+operator instructions; full transfer already includes the platform directory.
+
+Validation: shell syntax and whitespace passed. Disposable command stand-ins
+verified Helm/export ordering, release/namespace/readiness arguments, stopping
+before export on Helm failure, invocation outside the repository and rejection
+of unexpected arguments. A disposable default copy retained helper content and
+executable mode. No real Helm operation, secret export or user container change
+was performed; the underlying deployment/export implementations are unchanged.

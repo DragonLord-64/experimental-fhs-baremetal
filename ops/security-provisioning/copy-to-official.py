@@ -64,6 +64,11 @@ if not args.full:
         'playbooks/netbox',
     )
     files = (
+        'platform/deploy.sh',
+        'platform/charts/deploy_upgrage_mid-cbf-hw.sh',
+        'platform/charts/export-platform.py',
+        'platform/README.md',
+        'platform/charts/fhs-platform/README.md',
         'scripts/install-hwmanage.sh',
         'bifrost-infra/docker-compose.yml',
         'playbooks/site.yml',
