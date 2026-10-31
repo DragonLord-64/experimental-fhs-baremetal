@@ -102,3 +102,9 @@ serial-named node; its UUID remains internal. Changed-serial conflict rejection
 replaces UUID-link conflict rejection. Focused suite: 47 passed; transfer suite:
 three passed. Existing unnamed registrations require manual rename/cleanup;
 there is no automatic takeover or deletion.
+
+2026-10-31 import/sync naming: 49 focused tests and 16 lab assertions passed.
+Import preview changes neither NetBox nor Ironic; actual import names the existing
+node with its verified serial. Sync finds an unnamed discovery through its port
+and names it, without creating registrations or moving ports. A harness cache
+failure was corrected and its retained fixture cleaned before the final pass.

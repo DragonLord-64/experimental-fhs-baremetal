@@ -124,14 +124,24 @@ class Ironic:
             raise Error('Saved Ironic inventory unavailable; inspect the node before import')
         return response.json()
 
+    def ensure_name(self, node, name, *, plan=False):
+        """Name this discovery with its verified serial; never replace another node."""
+        name = safe_name(name)
+        if node.get('name') == name:
+            return node
+        match = self.api.find_node(name)
+        if match and normalize(match)['uuid'] != node['uuid']:
+            raise Error('Ironic name '+name+' already belongs to another registration; resolve the duplicate')
+        if plan:
+            return dict(node, name=name)
+        return normalize(self.api.update_node(node['uuid'], retry_on_conflict=False, name=name))
+
     def reconcile(self, host, create=False, plan=False):
         if is_nexus(host):
             raise Error('Switches cannot enter the Ironic lifecycle')
         name = registration_name(host)
         match = self.api.find_node(name)
         old = normalize(match) if match else None
-        if not old and not create:
-            raise Error('Ironic node '+name+' is not enrolled; use node enroll')
         nics = host.get('nics', [])
         addresses = [str(n['mac']).lower() for n in nics]
         if len(set(addresses)) != len(addresses):
@@ -140,11 +150,22 @@ class Ironic:
         owned_ports = {}
         for address in addresses:
             ports = [normalize(p) for p in self.api.ports(details=True, address=address)]
-            if len(ports) > 1 or ports and (not old or (ports[0].get('node_id') or ports[0].get('node_uuid')) != old['uuid']):
+            if len(ports) > 1:
                 raise Error('Provisioning MAC '+address+' has '+str(len(ports))+' matching port(s); owner(s) '+
                             ', '.join(str(p.get('node_id') or p.get('node_uuid')) for p in ports)+
                             '; selected Ironic UUID '+str((old or {}).get('uuid'))+'; ownership preserved')
             owned_ports[address] = ports
+        owners = {p.get('node_id') or p.get('node_uuid')
+                  for ports in owned_ports.values() for p in ports}
+        if None in owners or len(owners) > 1:
+            raise Error('Provisioning ports have missing or conflicting Ironic owners')
+        if not old and owners:
+            # Reuse discovery through its port, including sync before it has a name.
+            old = self.get(next(iter(owners)))
+        if old and owners and owners != {old['uuid']}:
+            raise Error('Ironic serial name and provisioning MAC identify different registrations; ownership preserved')
+        if not old and not create:
+            raise Error('Ironic node '+name+' is not enrolled; use node enroll')
         if old and addresses:
             # Use the SDK query name, not the resource body's node_uuid field.
             existing = [normalize(p) for p in self.api.ports(details=True, node=old['uuid'])]

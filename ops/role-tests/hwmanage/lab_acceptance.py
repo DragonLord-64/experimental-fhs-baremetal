@@ -62,6 +62,9 @@ def main():
             def inspection(self, selected):
                 assert selected == node_uuid
                 return record
+            def ensure_name(self, selected, name, *, plan=False):
+                assert selected['uuid'] == node_uuid and name == prefix
+                return dict(selected, name=name)
         def run():
             return minimal.import_nodes({node_uuid: node}, Ironic(), settings, sync, probe=lambda *_: fru)[0]
         port_uuid = str(uuid.uuid4())
@@ -158,19 +161,28 @@ def main():
                     HWMANAGE_CONFIG_FILE=controller_config, ANSIBLE_CONFIG=str(root/'ansible.cfg'),
                     ANSIBLE_LOCAL_TEMP=str(folder/'ansible-tmp'))
                 env.pop('OS_CLOUD', None)
-                result = subprocess.run([str(Path(sys.executable).parent/'ansible-playbook'), '-i', 'localhost,',
+                command = [str(Path(sys.executable).parent/'ansible-playbook'), '-i', 'localhost,',
                     str(root/'playbooks/netbox/ironic_import.yml'), '--start-at-task',
                     'Import saved inspection and verified remote FRU identity', '-e',
-                    json.dumps(dict(hwmanage_selected_uuids=[node_uuid], hwmanage_config_file=controller_config))],
-                    env=env, capture_output=True, text=True, timeout=180)
+                    json.dumps(dict(hwmanage_selected_uuids=[node_uuid], hwmanage_config_file=controller_config))]
+                preview = subprocess.run([*command, '--check'], env=env, capture_output=True, text=True, timeout=180)
+                if preview.returncode:
+                    print(preview.stdout)
+                    raise AssertionError('Import preview failed')
+                check(not node_updates and sync.find('dcim/devices/', serial=prefix) is None,
+                      'Import plan writes neither NetBox device nor Ironic name')
+                result = subprocess.run(command, env=env, capture_output=True, text=True, timeout=180)
                 if result.returncode:
                     print(result.stdout)
                     raise AssertionError('Standalone import playbook failed; inspect synthetic fixture locally')
+                sync.cache.clear()  # The standalone importer writes through a separate client.
                 created = sync.find('dcim/devices/', serial=prefix)
                 owned.append(('dcim/devices/', created['id']))
                 created = sync.request('GET', f'dcim/devices/{created["id"]}/')
                 owned.append(('ipam/ip-addresses/', created['oob_ip']['id']))
                 check(True, 'Standalone Ansible import task uses immutable UUID selection, native SDK and controller FRU')
+                check(node['name'] == prefix and len(node_updates) == 1,
+                      'Initial import names the existing discovery with verified product serial')
                 # Native inventory deliberately keeps a copied, plain endpoint.
                 import yaml
                 native_options = yaml.safe_load((root/'inventory/dev_env/netbox-inv.yml').read_text())
@@ -198,16 +210,17 @@ def main():
                 from hwmanage_lib.ironic import Ironic as NativeIronic
                 with activated(controller_config):
                     client = NativeIronic()
-                    # Existing serial-named registration; no NetBox UUID link is supplied.
-                    node['name'] = prefix
+                    # Simulate a discovery whose name has not yet been assigned.
+                    node['name'] = None
+                    previous_updates = len(node_updates)
                     host = dict(name=prefix+'-friendly', serial=prefix,
                                 nics=[dict(mac='02:ba:00:00:ee:37')])
-                    planned = client.reconcile(host, create=True, plan=True)
-                    check(planned['uuid'] == node_uuid and not node_updates,
-                          'Serial-name plan resolves existing node without NetBox UUID and excludes unrelated ports')
-                    renamed = client.reconcile(host, create=True)
-                    check(renamed['uuid'] == node_uuid and renamed['name'] == prefix and len(node_updates) == 1,
-                          'Native SDK updates serial-named registration without NetBox UUID or new ports')
+                    planned = client.reconcile(host, create=False, plan=True)
+                    check(planned['uuid'] == node_uuid and len(node_updates) == previous_updates,
+                          'Sync plan resolves unnamed discovery by MAC without writes or NetBox UUID')
+                    renamed = client.reconcile(host, create=False)
+                    check(renamed['uuid'] == node_uuid and renamed['name'] == prefix and len(node_updates) == previous_updates+1,
+                          'Native SDK sync names the discovery without new registrations or ports')
         finally:
             server.shutdown()
             server.server_close()
@@ -238,6 +251,15 @@ def main():
             raise AssertionError('Conflicting serial accepted')
     finally:
         cleanup_errors = []
+        # Discover owned objects even if verification failed before recording IDs.
+        sync.cache.clear()
+        for remaining in sync.list('dcim/devices/', serial=prefix):
+            for key in ('oob_ip', 'primary_ip4', 'primary_ip6'):
+                ip = remaining.get(key)
+                if ip and ('ipam/ip-addresses/', ip['id']) not in owned:
+                    owned.append(('ipam/ip-addresses/', ip['id']))
+            if ('dcim/devices/', remaining['id']) not in owned:
+                owned.append(('dcim/devices/', remaining['id']))
         # Addresses first, then device; object cascade removes interfaces/MACs.
         priority = {'ipam/ip-addresses/': 0, 'dcim/devices/': 1, 'dcim/device-types/': 2,
                     'dcim/manufacturers/': 3}

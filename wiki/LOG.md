@@ -1232,3 +1232,24 @@ rejection. Unit coverage verifies fresh enrollment without a supplied UUID,
 name-addressed lifecycle commands and serial-named ephemeral Bifrost inventory.
 Fixtures and temporary forwarding were cleaned up; no physical node or official
 checkout was changed. Full physical deployment remains untested.
+
+### 2026-10-31 — name discoveries during import and sync
+
+Import now checks the verified product serial's Ironic name before writes, then
+names the existing discovery after successful NetBox apply. It preserves the
+registration and ports and creates no NetBox UUID link. Sync/enrollment also
+resolve a missing serial name through existing provisioning port ownership and
+update that same registration, including unnamed/old-named discoveries. Multiple
+owners or conflicting serial-name ownership fail; no ports move and nothing is
+deleted. Import/sync plans rename neither system. A post-NetBox rename failure
+is reported and can be retried against the existing device.
+
+Validation: 49 focused tests and all 16 native chart/importer/SDK acceptance
+assertions passed in explicit `fhs-test`. New checks cover import plan with zero
+writes, verified-serial naming during import, sync plan without writes and sync
+naming without new registrations/ports. A test-harness negative lookup cache
+initially hid the externally created fixture device; the harness now clears that
+cache and discovers owned objects during cleanup. The retained synthetic fixture
+and parents were removed before the successful rerun; final cleanup and temporary
+forward removal completed. Whitespace checks passed. No physical hardware or
+user deployment was changed; the existing copy manifest includes changed files.

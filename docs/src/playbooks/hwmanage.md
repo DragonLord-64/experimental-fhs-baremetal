@@ -53,7 +53,10 @@ its diagnostic before retrying.
 inventory. It does not collect or refresh saved inspection inventory.
 
 Initial import needs no installed OS or SSH. It creates the minimal NetBox device,
-verified serial, BMC addressing and provisioning interface/MAC. Review the device
+verified serial, BMC addressing and provisioning interface/MAC. It also names
+the existing Ironic discovery with the verified product serial. Plans rename
+neither system. A rename failure is reported even if the NetBox device was
+already written; retrying reuses that device. Review the device
 in NetBox before deploying: assign its intended Linux primary IP, role/tags and
 deployment configuration. The temporary inspection DHCP address is not a Linux
 address assignment.
@@ -147,16 +150,12 @@ it is separate from the node deployment profile.
 NetBox is the default source except for `node list`, which defaults to Ironic.
 Operations find Ironic by the NetBox product serial and use its existing
 registration. Enrollment creates a node with that serial as its name when absent;
-Ironic generates its own internal UUID. Duplicate selected serials or a MAC owned
-by another registration fail before changes. There is no automatic claiming,
-renaming or deletion of conflicting discoveries.
-
-For an existing unnamed/old-named discovery, explicitly rename the registration
-to its product serial first, or remove an unwanted duplicate registration yourself:
-
-```bash
-baremetal node set --name SYS1412 CURRENT_NODE_NAME_OR_UUID
-```
+Ironic generates its own internal UUID. Sync/enrollment can also find an unnamed
+or old-named discovery through its existing provisioning MAC and update that
+registration's name to the NetBox product serial. Ports remain attached to the
+same registration. Duplicate selected serials, multiple port owners or a serial
+name already belonging to a different registration fail; nothing is deleted or
+reassigned. `--plan` performs no naming or inventory changes.
 
 Existing NetBox `ironic_uuid` values are ignored and no longer created or updated.
 They may be removed from NetBox separately; the wrapper does not need them.

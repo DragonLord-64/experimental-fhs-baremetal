@@ -250,6 +250,7 @@ class LifecycleContracts(unittest.TestCase):
             ironic.Ironic(api).reconcile(dict(name='a', nics=[dict(mac='00:11:22:33:44:55')]), create=True)
         api.update_node.assert_not_called()
         api.find_node.return_value = None
+        api.get_node.return_value = dict(uuid='not-the-port-owner', name=None)
         with self.assertRaises(common.Error):
             ironic.Ironic(api).reconcile(dict(uuid='missing', name='a'), create=True)
         api.create_node.assert_not_called()
@@ -310,6 +311,38 @@ class LifecycleContracts(unittest.TestCase):
         host = inventory.from_netbox(api)['friendly-device']
         self.assertEqual(host['serial'], 'SYS1412')
         self.assertNotIn('uuid', host)
+
+    def test_discovery_name_update_and_duplicate_guard(self):
+        api = Mock()
+        api.find_node.return_value = None
+        api.update_node.return_value = dict(uuid='discovery', name='SYS1412')
+        client = ironic.Ironic(api)
+        node = dict(uuid='discovery', name=None)
+        self.assertEqual(client.ensure_name(node, 'SYS1412', plan=True)['name'], 'SYS1412')
+        api.update_node.assert_not_called()
+        client.ensure_name(node, 'SYS1412')
+        api.update_node.assert_called_once_with('discovery', retry_on_conflict=False, name='SYS1412')
+        api.update_node.reset_mock()
+        api.find_node.return_value = dict(uuid='different', name='SYS1412')
+        with self.assertRaisesRegex(common.Error, 'duplicate'):
+            client.ensure_name(node, 'SYS1412')
+        api.update_node.assert_not_called()
+
+    def test_sync_renames_discovery_found_by_mac_without_creating_ports(self):
+        api = Mock()
+        api.find_node.return_value = None
+        api.get_node.return_value = dict(uuid='discovery', name=None, provision_state='enroll')
+        api.ports.return_value = [dict(node_id='discovery', address='02:00:00:00:00:01', is_pxe_enabled=True)]
+        api.update_node.return_value = dict(uuid='discovery', name='SYS1412')
+        host = dict(name='friendly-device', serial='SYS1412', nics=[dict(mac='02:00:00:00:00:01')])
+        client = ironic.Ironic(api)
+        client.reconcile(host, create=False, plan=True)
+        api.update_node.assert_not_called()
+        client.reconcile(host, create=False)
+        self.assertEqual(api.update_node.call_args.args[0], 'discovery')
+        self.assertEqual(api.update_node.call_args.kwargs['name'], 'SYS1412')
+        api.create_node.assert_not_called()
+        api.create_port.assert_not_called()
 
     def test_native_lifecycle_uses_serial_name(self):
         client = ironic.Ironic(Mock())

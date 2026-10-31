@@ -205,12 +205,15 @@ def import_nodes(nodes, ironic, settings, sync, probe=remote_fru):
             if any(counts[key][item[key]] > 1 for key in counts):
                 raise ValueError('Selected discoveries contain duplicate chassis identities')
             resolve_device(sync, item)
+            ironic.ensure_name(nodes[item['uuid']], item['serial'], plan=True)
             ready.append(item)
         except Exception:
             failed(item['uuid'])
     for item in ready:
         try:
-            results.append(apply(sync, item, settings))
+            device = apply(sync, item, settings)
+            ironic.ensure_name(nodes[item['uuid']], item['serial'], plan=sync.check)
+            results.append(device)
             print(item['uuid']+': completed', flush=True)
         except Exception:
             failed(item['uuid'])
