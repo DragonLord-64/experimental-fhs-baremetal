@@ -42,6 +42,15 @@ hwmanage node list -i ironic
 hwmanage inventory import -i ironic --all
 ```
 
+Import continues after per-node inspection, identity or write failures. Each failed
+UUID is reported; the command exits nonzero if any node failed. Successful writes
+are retained. Duplicate observed serials/BMC addresses reject every involved node
+before writes. A write failure can leave partial objects for that node; review
+its diagnostic before retrying.
+
+`node sync` updates Ironic registration settings and ports from the selected
+inventory. It does not collect or refresh saved inspection inventory.
+
 Initial import needs no installed OS or SSH. It creates the minimal NetBox device,
 verified serial, BMC addressing and provisioning interface/MAC. Review the device
 in NetBox before deploying: assign its intended Linux primary IP, role/tags and

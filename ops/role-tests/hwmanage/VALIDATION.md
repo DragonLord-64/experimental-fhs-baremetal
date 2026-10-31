@@ -69,3 +69,8 @@ YAML and the configured mount were checked locally, without recreating a contain
 2026-10-31 scripts mount follow-up: all 11 lab assertions passed with the final
 application path `scripts/hwmanage/`, using the same existing chart and synthetic
 fixture cleanup. The extra application mount has been removed from Compose.
+
+2026-10-31 per-node failure handling: all 11 lab assertions passed after adding
+batch continuation. Mixed failure/success and duplicate-owner rejection are
+covered by focused unit tests (37 total passed); the live fixture exercises
+persistence and wrapper execution, not physical hardware failures.

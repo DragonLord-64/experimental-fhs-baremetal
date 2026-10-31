@@ -283,6 +283,42 @@ class MinimalImportContracts(unittest.TestCase):
         client.targets.assert_called_once_with(None)
         service.assert_called_once_with(client.targets.return_value, client, plan=True)
 
+    def test_batch_continues_after_read_conflict_and_apply_failures(self):
+        nodes = {u: {'uuid': u} for u in ('missing', 'conflict', 'write-fail', 'good')}
+        client = Mock()
+        client.inspection.side_effect = lambda u: (_ for _ in ()).throw(ValueError('missing inventory')) if u == 'missing' else u
+        def observed(node, record, settings, probe):
+            return dict(uuid=node['uuid'], serial=node['uuid'], bmc=node['uuid'])
+        def resolve(sync, item):
+            if item['uuid'] == 'conflict':
+                raise ValueError('identity conflict')
+        def apply(sync, item, settings):
+            if item['uuid'] == 'write-fail':
+                raise ValueError('write failed')
+            return item
+        with patch.object(self.helper, 'observation', side_effect=observed), \
+                patch.object(self.helper, 'resolve_device', side_effect=resolve), \
+                patch.object(self.helper, 'apply', side_effect=apply) as write, \
+                contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(self.helper.ImportFailures) as caught:
+                self.helper.import_nodes(nodes, client, {}, Mock())
+        self.assertEqual(caught.exception.failures, ['missing', 'conflict', 'write-fail'])
+        self.assertEqual([r['uuid'] for r in caught.exception.results], ['good'])
+        self.assertEqual([call.args[1]['uuid'] for call in write.call_args_list], ['write-fail', 'good'])
+
+    def test_batch_rejects_all_duplicate_owners_but_imports_other_nodes(self):
+        nodes = {u: {'uuid': u} for u in ('a', 'b', 'c')}
+        def observed(node, *args):
+            return dict(uuid=node['uuid'], serial='duplicate' if node['uuid'] != 'c' else 'unique', bmc=node['uuid'])
+        with patch.object(self.helper, 'observation', side_effect=observed), \
+                patch.object(self.helper, 'resolve_device'), patch.object(self.helper, 'apply', return_value={}) as write, \
+                contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(self.helper.ImportFailures) as caught:
+                self.helper.import_nodes(nodes, Mock(), {}, Mock())
+        self.assertEqual(caught.exception.failures, ['a', 'b'])
+        self.assertEqual(write.call_count, 1)
+        self.assertEqual(write.call_args.args[1]['uuid'], 'c')
+
     def test_import_settings_default_and_override(self):
         import fhs_netbox
         api = Mock()

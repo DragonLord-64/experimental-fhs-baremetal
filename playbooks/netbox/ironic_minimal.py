@@ -29,7 +29,7 @@ def boot_port(record, onboard_interfaces=()):
     port = ports[0]
     # No universal PCI/driver heuristic: qualification must be explicit.
     if not (port.get('onboard') is True or port.get('name') in onboard_interfaces):
-        raise ValueError('Boot interface lacks approved motherboard qualification; configure onboard_interfaces after review')
+        raise ValueError('Boot interface '+str(port.get('name'))+' lacks approved motherboard qualification; configure onboard_interfaces after review')
     return {'name': port['name'], 'mac': mac}
 
 
@@ -157,14 +157,49 @@ def apply(sync, item, settings):
     return device
 
 
+class ImportFailures(RuntimeError):
+    def __init__(self, results, failures):
+        self.results = results
+        self.failures = failures
+        super().__init__(f'{len(results)} node(s) completed; {len(failures)} node(s) failed: '+', '.join(failures))
+
+
 def import_nodes(nodes, ironic, settings, sync, probe=remote_fru):
-    items = [observation(n, ironic.inspection(n['uuid']), settings, probe) for n in nodes.values()]
-    if len({i['serial'] for i in items}) != len(items) or len({i['bmc'] for i in items}) != len(items):
-        raise ValueError('Selected discoveries contain duplicate chassis identities')
-    # Resolve all physical identity conflicts before creating anything.
+    from collections import Counter
+    items, failures, results = [], [], []
+
+    def failed(uuid):
+        failures.append(uuid)
+        print(uuid+': FAILED', file=sys.stderr, flush=True)
+        traceback.print_exc()
+
+    for node in nodes.values():
+        uuid = node['uuid']
+        print(uuid+': reading inspection and verifying identity', flush=True)
+        try:
+            items.append(observation(node, ironic.inspection(uuid), settings, probe))
+        except Exception:
+            failed(uuid)
+    # Check the whole observed batch before writes; reject every duplicate owner.
+    counts = {key: Counter(item[key] for item in items) for key in ('serial', 'bmc')}
+    ready = []
     for item in items:
-        resolve_device(sync, item)
-    return [apply(sync, item, settings) for item in items]
+        try:
+            if any(counts[key][item[key]] > 1 for key in counts):
+                raise ValueError('Selected discoveries contain duplicate chassis identities')
+            resolve_device(sync, item)
+            ready.append(item)
+        except Exception:
+            failed(item['uuid'])
+    for item in ready:
+        try:
+            results.append(apply(sync, item, settings))
+            print(item['uuid']+': completed', flush=True)
+        except Exception:
+            failed(item['uuid'])
+    if failures:
+        raise ImportFailures(results, failures)
+    return results
 
 
 def import_selected(nodes, ironic, *, plan=False):
@@ -216,6 +251,8 @@ def main(argv=None):
         result = import_selected(nodes, ironic, plan=args.plan)
         print(str(len(result))+' minimal device(s) '+('planned' if args.plan else 'imported'))
         return 0
+    except ImportFailures as error:
+        print(str(error), file=sys.stderr)
     except Error as error:
         print(str(error), file=sys.stderr)
     except Exception:

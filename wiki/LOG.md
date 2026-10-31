@@ -1039,3 +1039,23 @@ from the original executable layout; Ansible syntax, shell syntax and whitespace
 checks passed. All 11 synthetic native importer/wrapper assertions passed against
 the existing healthy chart in explicit `fhs-test` context. Fixture objects and
 the temporary forward were cleaned up; user containers were not changed.
+
+### 2026-10-31 — continue imports after individual node failures
+
+The [minimal importer](../playbooks/netbox/ironic_minimal.py) now reports each
+failed UUID and continues other nodes after observation, identity-conflict or
+write failures. Duplicate serial/BMC observations still reject all implicated
+nodes before writes. Successful writes are retained; any failures produce a
+nonzero exit and completed/failed counts. A failed write can leave partial
+objects; diagnostics and repeat identity checks remain necessary.
+
+Boot qualification errors include the inspected interface name for review in
+`scripts/hwmanage/import.yml`. Registration `node sync` remains a database/port
+reconciliation command, not inspection collection; the operator guide says so.
+
+Validation: 37 focused tests passed, including mixed read/conflict/write failures
+with a successful later node and rejection of every duplicate owner while an
+independent node succeeds. All 11 existing native importer/wrapper lab assertions
+passed against the healthy chart in explicit `fhs-test` context. Synthetic objects
+and the temporary forward were cleaned up. Whitespace checks passed; no physical
+hardware or deployed-node state was changed.
