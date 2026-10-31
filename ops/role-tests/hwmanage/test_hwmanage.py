@@ -61,7 +61,10 @@ class DiagnosticContracts(unittest.TestCase):
     def test_copy_removes_only_obsolete_application_import_settings(self):
         obsolete = ('scripts/hwmanage/import.yml', 'hwmanage/import.yml',
                     'bifrost-infra/hwmanage/import.yml',
-                    'bifrost-infra/templates/hwmanage-import.yml')
+                    'bifrost-infra/templates/hwmanage-import.yml',
+                    'bifrost-infra/templates/hwmanage-profile.yml',
+                    'bifrost-infra/templates/hwmanage-nodes.yml',
+                    'bifrost-infra/templates/hwmanage-bmc-secrets.yml')
         for flags in ([], ['--diagnostics-only']):
             with tempfile.TemporaryDirectory() as directory:
                 destination = Path(directory)
@@ -127,7 +130,9 @@ class DiagnosticContracts(unittest.TestCase):
             self.assertGreater(cli.parser().parse_args(argv).verbose, 0)
 
     def test_diagnostics_copy_scope(self):
-        names = ('scripts/hwmanage/hwmanage', 'scripts/hwmanage/config.yml', 'scripts/hwmanage/README.md',
+        names = ('inventory/templates/hwmanage-profile.json',
+                 'inventory/templates/hwmanage-nodes.yml', 'inventory/templates/hwmanage-bmc-secrets.yml',
+                 'scripts/hwmanage/hwmanage', 'scripts/hwmanage/config.yml', 'scripts/hwmanage/README.md',
                  'scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
                  'ansible.cfg', 'inventory/dev_env/netbox-inv.yml', 'inventory/dev_env/group_vars/all/paths.yml',
                  'scripts/hwmanage/lookup_plugins/hwmanage_config.py', 'scripts/hwmanage/hwmanage_lib/settings.py',

@@ -1,0 +1,28 @@
+# Native YAML example; replace per-node identity/address values and supply credentials separately.
+example-node:
+  name: example-node
+  driver: redfish
+  boot_interface: ipxe
+  driver_interfaces:
+    raid: none
+  driver_info:
+    redfish_address: https://192.0.2.20
+    redfish_system_id: /redfish/v1/Systems/1
+    redfish_verify_ca: true
+  nics:
+  - mac: 02:00:00:00:00:01
+  sys_mac_address: 02:00:00:00:00:01
+  ipv4_address: 192.0.2.30
+  ipv4_subnet_mask: 255.255.0.0
+  ipv4_nameserver: 192.168.128.13
+  ansible_user: ubuntu
+  host_groups:
+  - device_roles_fpga-host-server
+  instance_info:
+    image_source: http://192.168.1.7:8080/fhs_noble_2026_01_22.qcow2
+    image_checksum: b3564be482a4ff2bc31fda3e16c87a8e
+    capabilities:
+      boot_mode: uefi
+  properties:
+    root_device:
+      size: '> 900'

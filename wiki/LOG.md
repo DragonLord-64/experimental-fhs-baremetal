@@ -1165,3 +1165,23 @@ Validation: 42 focused tests passed. New disposable default/diagnostics copy
 checks verify all four obsolete paths are removed, central config is delivered,
 and an external resource override is preserved. Whitespace checks passed.
 No official checkout or lab deployment was changed.
+
+### 2026-10-31 — inventory templates and ready-to-paste NetBox JSON
+
+Moved hardware-management templates from `bifrost-infra/templates/` to
+[inventory/templates/](../inventory/templates/). The deployment profile is now
+JSON for direct NetBox Config Context entry. Image URL/checksum, driver, boot,
+RAID and subnet/DNS values copy the existing Bifrost baremetal group vars; the
+root-disk size hint copies the existing per-node inventory convention. No login
+values were copied from per-node inventory. Native node YAML shares the actual
+deployment defaults, while its per-node identity fields remain illustrative.
+
+The shared `> 900` root-disk hint matches both previously supplied SYS1412 NVMe
+disks; docs explain a per-device serial selector to narrow it. Updated copy
+scopes transfer templates and remove old template paths after successful copies.
+
+Validation: 42 focused tests passed, including new template content transfer and
+old-location cleanup. JSON parsed and its deployment fields matched existing
+Bifrost source values; credential-field and whitespace checks passed. This copies
+the configured checksum, not a new image-byte verification. No deployment or
+hardware operation was performed.

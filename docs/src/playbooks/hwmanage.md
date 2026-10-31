@@ -87,7 +87,7 @@ The importer verifies identity through a controller-side IPMI FRU read.
 The import playbook installs `ipmitool` on the provisioning host, not the target OS.
 The controller therefore needs package-install privileges for the first run.
 
-Copy `bifrost-infra/templates/hwmanage-bmc-secrets.yml` to
+Copy `inventory/templates/hwmanage-bmc-secrets.yml` to
 `/provision/files.d/credentials/redfish.yml`, supply the BMC login and encrypt it:
 
 ```bash
@@ -124,32 +124,18 @@ platform, BMC and import settings files are used.
 
 ## Shared deployment settings
 
-Copy the contents of
-`bifrost-infra/templates/hwmanage-profile.yml` into a NetBox config context and
-assign it to the intended device roles/tags. Replace the example network, image
-URL, checksum and root disk with approved values. These are native Bifrost fields:
+Paste [hwmanage-profile.json](../../../inventory/templates/hwmanage-profile.json)
+into a NetBox config context and assign it to the intended device roles/tags.
+It uses the existing Bifrost image URL/checksum, network defaults and root-disk
+size hint. Its JSON is directly accepted by NetBox; no conversion is needed.
 
-```yaml
-driver: redfish
-boot_interface: ipxe
-driver_interfaces:
-  raid: none
-ipv4_subnet_mask: 255.255.255.0
-ipv4_nameserver: 192.0.2.53
-ipv4_gateway: 192.0.2.1
-instance_info:
-  image_source: http://192.0.2.10:8080/approved-image.qcow2
-  image_checksum: REPLACE_WITH_VERIFIED_CHECKSUM
-  capabilities:
-    boot_mode: uefi
-properties:
-  root_device:
-    name: /dev/disk/by-id/REPLACE_WITH_APPROVED_DISK
-```
+The `> 900` disk-size hint matches both 1 TB NVMe disks on SYS1412. To select
+one specifically, set `properties.root_device.serial` in that device's local
+config context to narrow the selection. A serial override is device-specific.
 
 For direct Bifrost use, merge the same settings into its existing
 `inventory/group_vars/baremetal` and apply node-specific overrides in the node
-mapping. `bifrost-infra/templates/hwmanage-nodes.yml` shows the mapping format.
+mapping. `inventory/templates/hwmanage-nodes.yml` shows the mapping format.
 Keep installer DHCP/image-build/service configuration in Bifrost group vars;
 it is separate from the node deployment profile.
 

@@ -18,11 +18,14 @@ scope.add_argument('--diagnostics-only', action='store_true',
 args = parser.parse_args()
 destination = args.destination.resolve()
 
-def remove_old_import_settings():
+def remove_obsolete_application_files():
     # Only obsolete application-owned files; external site settings are untouched.
     for name in ('scripts/hwmanage/import.yml', 'hwmanage/import.yml',
                  'bifrost-infra/hwmanage/import.yml',
-                 'bifrost-infra/templates/hwmanage-import.yml'):
+                 'bifrost-infra/templates/hwmanage-import.yml',
+                 'bifrost-infra/templates/hwmanage-profile.yml',
+                 'bifrost-infra/templates/hwmanage-nodes.yml',
+                 'bifrost-infra/templates/hwmanage-bmc-secrets.yml'):
         old = destination / name
         if old.is_file() or old.is_symlink():
             old.unlink()
@@ -42,17 +45,20 @@ if args.diagnostics_only:
     shutil.copytree(source / 'scripts/hwmanage', destination / 'scripts/hwmanage', dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
     print('Copied scripts/hwmanage/')
+    shutil.copytree(source / 'inventory/templates', destination / 'inventory/templates', dirs_exist_ok=True)
+    print('Copied inventory/templates/')
     for name in ('scripts/install-hwmanage.sh', 'bifrost-infra/docker-compose.yml',
                  'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'docs/src/playbooks/hwmanage.md', 'ansible.cfg',
-                 'inventory/dev_env/netbox-inv.yml', 'inventory/dev_env/group_vars/all/paths.yml',
-                 'playbooks/netbox/defaults.yml'):
+                 'inventory/README.md',
+        'inventory/dev_env/netbox-inv.yml', 'inventory/dev_env/group_vars/all/paths.yml',
+                 'playbooks/netbox/defaults.yml', 'inventory/README.md'):
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source / name, target)
         print(f'Copied {name}')
-    remove_old_import_settings()
+    remove_obsolete_application_files()
     raise SystemExit(0)
 
 if args.bifrost_only:
@@ -72,7 +78,7 @@ if args.bifrost_only:
 if not args.full:
     directories = (
         'scripts/hwmanage',
-        'bifrost-infra/templates',
+        'inventory/templates',
         'playbooks/netbox',
     )
     files = (
@@ -89,6 +95,7 @@ if not args.full:
         'playbooks/hwmanage_check_hosts.yml',
         'playbooks/hwmanage_wait.yml',
         'inventory/dev_env/hwmanage-vars.yml',
+        'inventory/README.md',
         'inventory/dev_env/netbox-inv.yml',
         'inventory/dev_env/group_vars/all/paths.yml',
         'ansible.cfg',
@@ -106,11 +113,11 @@ if not args.full:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source / name, target)
         print(f'Copied {name}')
-    remove_old_import_settings()
+    remove_obsolete_application_files()
     raise SystemExit(0)
 
 for name in ('roles', 'playbooks', 'platform', 'docs/src',
-             'scripts/hwmanage', 'bifrost-infra/templates',
+             'scripts/hwmanage', 'inventory/templates',
              'inventory/dev_env/group_vars/all',
              'inventory/dev_env/group_vars/device_roles_fpga-host-server'):
     shutil.copytree(source / name, destination / name, dirs_exist_ok=True,
@@ -147,4 +154,4 @@ for name in ('elasticsearch.yaml', 'grafana.yaml', 'kibana.yaml',
         old_values.unlink()
         print(f'Removed platform/{name}')
 
-remove_old_import_settings()
+remove_obsolete_application_files()

@@ -25,7 +25,7 @@ python3 ops/security-provisioning/copy-to-official.py
 The default also copies `platform/deploy.sh`, its existing Helm/export helpers
 and their usage pages. The full scope includes them through `platform/`.
 
-The default copies the `scripts/hwmanage/` application folder, installer, portable Bifrost templates,
+The default copies the `scripts/hwmanage/` application folder, installer, inventory templates,
 native NetBox playbooks and their dependencies, the affected provisioning entry
 points and their exact usage pages. It also copies `ansible.cfg`, the NetBox
 inventory source and shared `group_vars/all/paths.yml` for central configuration.
@@ -38,7 +38,8 @@ The original `scripts/hwmanage` executable, if present, is preserved as
 After a successful application copy, the helper deletes old `import.yml` files
 under `scripts/hwmanage/`, `hwmanage/` and `bifrost-infra/hwmanage/`, plus the old
 `bifrost-infra/templates/hwmanage-import.yml` template. `config.yml` is the single
-application configuration. External resource/site files are retained.
+application configuration. External resource/site files are retained. Templates now live in `inventory/templates/`;
+the helper also removes their old copies from `bifrost-infra/templates/`.
 This is a file copy, not a merge or a deployment.
 
 For only the wrapper/import diagnostics update on an existing hwmanage checkout:

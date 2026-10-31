@@ -89,3 +89,16 @@ ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit 
 See [platform installation](../platform/charts/fhs-platform/README.md),
 [Filebeat setup](../roles/filebeat/README.md) and
 [site tags](../docs/src/playbooks/site.yml.md).
+
+## Hardware management templates
+
+- [NetBox deployment profile (JSON)](templates/hwmanage-profile.json): paste into
+  an active NetBox Config Context. Uses the existing Bifrost image URL/checksum,
+  subnet/DNS and root-disk size hint. Assign it to the intended device role/tag.
+- [Native node inventory (YAML)](templates/hwmanage-nodes.yml): per-node identity
+  and address example using the same deployment defaults.
+- [BMC credential format](templates/hwmanage-bmc-secrets.yml): copy outside Git,
+  fill in the login and protect it with Vault. Select its path in hwmanage config.
+
+The shared disk hint is `> 900` GB. For hosts with multiple matching disks,
+select the intended OS disk with a device-specific `properties.root_device.serial`.

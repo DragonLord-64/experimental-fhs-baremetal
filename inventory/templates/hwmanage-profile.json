@@ -1,0 +1,21 @@
+{
+  "driver": "redfish",
+  "boot_interface": "ipxe",
+  "driver_interfaces": {
+    "raid": "none"
+  },
+  "ipv4_subnet_mask": "255.255.0.0",
+  "ipv4_nameserver": "192.168.128.13",
+  "instance_info": {
+    "image_source": "http://192.168.1.7:8080/fhs_noble_2026_01_22.qcow2",
+    "image_checksum": "b3564be482a4ff2bc31fda3e16c87a8e",
+    "capabilities": {
+      "boot_mode": "uefi"
+    }
+  },
+  "properties": {
+    "root_device": {
+      "size": "> 900"
+    }
+  }
+}
