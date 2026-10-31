@@ -9,6 +9,7 @@ Private workspace for testing changes before user-controlled transfer to SKA.
 - [Shared source / experimental boundary](wiki/source-boundary.md)
 - [Test environment plan](wiki/test-environment-plan.md)
 - [Original project README](README.md)
+- [Hardware management](hwmanage/README.md)
 - [Platform deployment](platform/README.md)
 
 The source README remains upstream documentation; experimental planning starts here.

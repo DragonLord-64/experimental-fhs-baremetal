@@ -14,13 +14,15 @@ scope.add_argument('--full', action='store_true',
 scope.add_argument('--bifrost-only', action='store_true',
                    help='Copy only the six Bifrost environment repair/build files')
 scope.add_argument('--diagnostics-only', action='store_true',
-                   help='Copy only wrapper/import diagnostics and its usage page')
+                   help='Copy the hwmanage application, import diagnostics and usage page')
 args = parser.parse_args()
 destination = args.destination.resolve()
 
 if args.diagnostics_only:
-    for name in ('scripts/hwmanage_lib/common.py', 'scripts/hwmanage_lib/cli.py',
-                 'scripts/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
+    shutil.copytree(source / 'hwmanage', destination / 'hwmanage', dirs_exist_ok=True,
+                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+    print('Copied hwmanage/')
+    for name in ('scripts/install-hwmanage.sh', 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'docs/src/playbooks/hwmanage.md'):
         target = destination / name
@@ -45,12 +47,11 @@ if args.bifrost_only:
 # Exact feature manifest: preserve destination roles, site overrides and unrelated docs.
 if not args.full:
     directories = (
-        'scripts/hwmanage_lib',
+        'hwmanage',
         'bifrost-infra/templates',
         'playbooks/netbox',
     )
     files = (
-        'scripts/hwmanage',
         'scripts/install-hwmanage.sh',
         'playbooks/site.yml',
         'playbooks/provision.yml',
@@ -75,7 +76,7 @@ if not args.full:
     raise SystemExit(0)
 
 for name in ('roles', 'playbooks', 'platform', 'docs/src',
-             'scripts/hwmanage_lib', 'bifrost-infra/templates',
+             'hwmanage', 'bifrost-infra/templates',
              'inventory/dev_env/group_vars/all',
              'inventory/dev_env/group_vars/device_roles_fpga-host-server'):
     shutil.copytree(source / name, destination / name, dirs_exist_ok=True,
@@ -83,7 +84,7 @@ for name in ('roles', 'playbooks', 'platform', 'docs/src',
                                                  'platform-secrets.yml', 'platform-endpoints.yml'))
     print(f'Copied {name}/')
 
-for name in ('scripts/hwmanage', 'scripts/install-hwmanage.sh',
+for name in ('scripts/install-hwmanage.sh',
              'inventory/dev_env/hwmanage-vars.yml',
              'bifrost-infra/Dockerfile', 'bifrost-infra/prepare-python-constraints.py',
              'scripts/patch-bifrost-environment.py', 'scripts/deploy-bifrost-container.sh', 'ansible.cfg', 'inventory/README.md',

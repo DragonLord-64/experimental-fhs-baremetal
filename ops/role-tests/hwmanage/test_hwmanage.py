@@ -13,13 +13,13 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(ROOT/'scripts'))
+sys.path.insert(0, str(ROOT/'hwmanage'))
 from hwmanage_lib import cli, common, inventory, ironic, provision
 
 
 class ParserContracts(unittest.TestCase):
     def test_help_has_no_optional_imports(self):
-        code = "import sys; sys.path.insert(0, 'scripts'); from hwmanage_lib.cli import main; main(['--help'])"
+        code = "import sys; sys.path.insert(0, 'hwmanage'); from hwmanage_lib.cli import main; main(['--help'])"
         result = subprocess.run([sys.executable, '-S', '-c', code], cwd=ROOT, capture_output=True)
         self.assertEqual(result.returncode, 0)
         for argv in (['node', 'deploy', '--help'], ['inventory', 'export', '--help'], ['config', 'dnsmasq', 'add-host', '--help']):
@@ -87,14 +87,31 @@ class DiagnosticContracts(unittest.TestCase):
                 self.assertEqual(transfer.credentials(secrets, netbox_url='https://netbox.example/'),
                                  ('https://netbox.example/', 'test-token', True))
 
+    def test_installer_migrates_only_its_old_link(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bindir = Path(directory)
+            link = bindir/'hwmanage'
+            link.symlink_to(ROOT/'scripts/hwmanage')
+            subprocess.run(['bash', str(ROOT/'scripts/install-hwmanage.sh'), directory],
+                           check=True, capture_output=True)
+            self.assertEqual(link.resolve(), ROOT/'hwmanage/hwmanage')
+            subprocess.run([str(link), '--help'], check=True, capture_output=True)
+            link.unlink()
+            link.symlink_to(bindir/'unrelated')
+            result = subprocess.run(['bash', str(ROOT/'scripts/install-hwmanage.sh'), directory],
+                                    capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(os.readlink(link), str(bindir/'unrelated'))
+
     def test_verbose_parser_positions(self):
         for argv in (['-v', 'inventory', 'import', '--all'],
                      ['inventory', 'import', '--all', '-vv']):
             self.assertGreater(cli.parser().parse_args(argv).verbose, 0)
 
     def test_diagnostics_copy_scope(self):
-        names = ('scripts/hwmanage_lib/common.py', 'scripts/hwmanage_lib/cli.py',
-                 'scripts/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
+        names = ('hwmanage/hwmanage', 'hwmanage/import.yml', 'hwmanage/README.md',
+                 'scripts/install-hwmanage.sh', 'hwmanage/hwmanage_lib/common.py', 'hwmanage/hwmanage_lib/cli.py',
+                 'hwmanage/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
                  'docs/src/playbooks/hwmanage.md')
         with tempfile.TemporaryDirectory() as directory:
@@ -260,6 +277,28 @@ class MinimalImportContracts(unittest.TestCase):
             self.assertEqual(self.helper.main(['--all', '--plan']), 0)
         client.targets.assert_called_once_with(None)
         service.assert_called_once_with(client.targets.return_value, client, plan=True)
+
+    def test_import_settings_default_and_override(self):
+        import fhs_netbox
+        api = Mock()
+        api.base = 'http://netbox.example/api/'
+        api.session.headers = {'Authorization': 'Token test-token'}
+        api.session.verify = True
+        with patch.object(inventory, 'netbox_api', return_value=api), \
+                patch.object(fhs_netbox, 'Sync'), \
+                patch.object(self.helper, 'import_nodes', return_value=[]) as apply, \
+                patch.dict(os.environ, {}, clear=True):
+            self.helper.import_selected({}, Mock(), plan=True)
+            settings = apply.call_args.args[2]
+            self.assertIsNone(settings['site'])
+            self.assertEqual(settings['onboard_interfaces'], [])
+            with tempfile.TemporaryDirectory() as directory:
+                override = Path(directory)/'custom.yml'
+                override.write_text('site: 42\nonboard_interfaces: [eno1]\n')
+                os.environ['HWMANAGE_IMPORT_DEFAULTS'] = str(override)
+                self.helper.import_selected({}, Mock(), plan=True)
+                self.assertEqual(apply.call_args.args[2]['site'], 42)
+                self.assertEqual(apply.call_args.args[2]['onboard_interfaces'], ['eno1'])
 
     def test_repeated_import_preserves_operator_fields(self):
         old = dict(id=10, serial='SERIAL123', name='approved', primary_ip4={'id': 90},

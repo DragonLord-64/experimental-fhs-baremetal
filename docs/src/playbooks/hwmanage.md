@@ -14,8 +14,9 @@ hwmanage provision --help
 
 Run the installer as root inside the provisioning container; no `sudo` or
 container rebuild is needed. It links `/usr/local/bin/hwmanage` to this checkout,
-so source updates apply immediately. Repeat it after recreating the container.
-It refuses to overwrite an existing file or a link to another tool.
+at `/provision/hwmanage/hwmanage`, so source updates apply immediately. Repeat it after recreating the container.
+It updates an existing link to the old `scripts/hwmanage` location, and refuses
+to overwrite a file or a link to another tool.
 
 For a user-owned directory, run `scripts/install-hwmanage.sh "$HOME/.local/bin"`
 and add that directory to `PATH`. Keep running commands from `/provision` so
@@ -46,14 +47,10 @@ address assignment.
 
 ## Prepare import settings
 
-Copy the template to the provisioning host's private resource directory:
-
-```bash
-cp bifrost-infra/templates/hwmanage-import.yml /provision/files.d/hwmanage-import.yml
-```
-
-Edit `/provision/files.d/hwmanage-import.yml` with existing NetBox object IDs and
-reviewed motherboard interface names from inspection:
+Edit the tracked `/provision/hwmanage/import.yml` with existing NetBox object IDs
+and reviewed motherboard interface names from inspection. These settings are not
+secrets; keep the reviewed values in your repository. The supplied IDs are unset
+and must be filled in before creating devices:
 
 ```yaml
 site: 1
@@ -64,7 +61,8 @@ onboard_interfaces:
   - enp2s0f0
 ```
 
-The numeric IDs above are examples, not automatic object selections. A boot MAC
+The numeric IDs above are examples, not automatic object selections.
+Set `HWMANAGE_IMPORT_DEFAULTS=/path/to/import.yml` for a local override. A boot MAC
 must match exactly one inspected interface; `onboard_interfaces` qualifies that
 interface after hardware review. The importer verifies FRU through controller-side
 IPMI when the inspection does not establish FRU identity. The import playbook

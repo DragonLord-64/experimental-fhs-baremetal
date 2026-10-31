@@ -173,7 +173,7 @@ def import_selected(nodes, ironic, *, plan=False):
     from hwmanage_lib.common import yaml_load
     from hwmanage_lib.inventory import netbox_api
     api = netbox_api()
-    settings = yaml_load(os.environ.get('HWMANAGE_IMPORT_DEFAULTS', '/provision/files.d/hwmanage-import.yml'))
+    settings = yaml_load(os.environ.get('HWMANAGE_IMPORT_DEFAULTS', str(HERE.parents[1]/'hwmanage/import.yml')))
     token = api.session.headers['Authorization'].split(' ', 1)[1]
     sync = Sync({'netbox_url': api.base[:-5], 'netbox_token': token,
                  'validate_certs': api.session.verify}, plan)
@@ -197,7 +197,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.verbose:
         os.environ["HWMANAGE_VERBOSE"] = str(args.verbose)
-    sys.path.insert(0, str(HERE.parents[1]/'scripts'))
+    sys.path.insert(0, str(HERE.parents[1]/'hwmanage'))
     from hwmanage_lib.common import Error
     from hwmanage_lib.ironic import Ironic
     try:

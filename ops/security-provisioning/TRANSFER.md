@@ -22,7 +22,7 @@ For the current hardware-management workflow only:
 python3 ops/security-provisioning/copy-to-official.py
 ```
 
-The default copies the `hwmanage` executable/package, portable Bifrost templates,
+The default copies the `hwmanage/` application folder, installer, portable Bifrost templates,
 native NetBox playbooks and their dependencies, the affected provisioning entry
 points and their exact usage pages. It does not copy roles, inventory/group vars,
 platform values or credentials, and performs no cleanup deletions. Matching files
@@ -36,8 +36,11 @@ For only the wrapper/import diagnostics update on an existing hwmanage checkout:
 python3 ops/security-provisioning/copy-to-official.py --diagnostics-only
 ```
 
-This copies the command runner, CLI, NetBox connection/credential loaders,
-standalone Ironic importer, import playbook and usage page. The default and full scopes also include these files.
+This copies the complete `hwmanage/` application folder, installer, NetBox
+credential loader, standalone Ironic importer, import playbook and usage page.
+Run `scripts/install-hwmanage.sh` inside Bifrost after copying to update the PATH
+link. Old destination `scripts/hwmanage*` files are retained but are no longer
+used by the installed command. Review `hwmanage/import.yml` before importing. The default and full scopes also include these files.
 
 For only the six Bifrost environment repair/build files:
 

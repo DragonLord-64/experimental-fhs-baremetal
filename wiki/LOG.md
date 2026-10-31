@@ -985,3 +985,24 @@ Hwmanage suite: 33 tests run, one skipped; transfer suite: three passed.
 New cases cover split plain/Vault credentials, invalid endpoint rejection and
 legacy combined files. `git diff --check` passed. No lab or physical import run;
 the site deployment still needs the updated files and an import retry.
+
+### 2026-10-31 — hwmanage application folder and tracked import settings
+
+Moved the command and package into [hwmanage/](../hwmanage/README.md), keeping
+[scripts/install-hwmanage.sh](../scripts/install-hwmanage.sh) as the installer.
+It migrates the old checkout-owned PATH link while refusing unrelated links.
+Native NetBox playbooks stay independent under `playbooks/netbox/`.
+
+Non-secret [import.yml](../hwmanage/import.yml) is now the default import settings
+file. Site/role/device-type IDs are unset pending operator selection; the FRU ID
+and approved onboard interface names remain explicit. `HWMANAGE_IMPORT_DEFAULTS`
+still selects a local file. Credentials remain outside the repository.
+Updated docs, focused/default/full transfer paths and acceptance entry points.
+Copying retains old destination source files; reinstalling selects the new app.
+
+Validation: 35 focused tests passed with Ansible installed, import playbook syntax,
+installer shell syntax, direct command/importer help and `git diff --check` passed.
+The existing lab chart's services were Ready. After replacing an expired local
+forward, [lab acceptance](../ops/role-tests/hwmanage/VALIDATION.md) passed all 11
+assertions through the relocated wrapper/native importer; synthetic objects and
+the temporary forward were cleaned up. No physical hardware was contacted.

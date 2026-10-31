@@ -50,3 +50,12 @@ FRU transport, inspection agent behavior, cleaning, deployment or switch boot.
 
 Final entrypoint run: all 11 assertions passed after correcting environment-path
 forwarding in the delivered playbook. All synthetic objects were removed.
+
+2026-10-31 relocation check: all 11 assertions passed again using the application
+under `hwmanage/`, against the same running chart and explicit `fhs-test` context.
+The existing retained credential URL's port-forward had expired; a temporary
+loopback service forward restored test access and was stopped after the run.
+The harness cleaned up its synthetic objects. The tracked default settings and
+explicit local override were separately covered by the focused contract suite
+(35 passed under the Ansible environment). This does not establish physical
+BMC behavior or select the site's NetBox IDs/onboard interfaces.

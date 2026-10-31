@@ -19,7 +19,7 @@ def main():
     parser.add_argument('--report', required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
-    sys.path.insert(0, str(root / 'scripts'))
+    sys.path.insert(0, str(root / 'hwmanage'))
     spec = importlib.util.spec_from_file_location('minimal', root / 'playbooks/netbox/ironic_minimal.py')
     minimal = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(minimal)
@@ -127,7 +127,7 @@ def main():
                 created = sync.request('GET', f'dcim/devices/{created["id"]}/')
                 owned.append(('ipam/ip-addresses/', created['oob_ip']['id']))
                 check(True, 'Standalone Ansible import task uses immutable UUID selection, native SDK and controller FRU')
-                wrapper = subprocess.run([sys.executable, str(root/'scripts/hwmanage'),
+                wrapper = subprocess.run([sys.executable, str(root/'hwmanage/hwmanage'),
                     'inventory', 'import', '-i', 'ironic', '--all', '--plan'],
                     env=env, capture_output=True, text=True, timeout=180)
                 if wrapper.returncode:
