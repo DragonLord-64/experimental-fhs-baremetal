@@ -136,14 +136,32 @@ def protected_yaml(path):
     if not (raw.startswith(b'$ANSIBLE_VAULT') or b'!vault' in raw):
         return yaml_load(path)
     try:
+        # Use the same executable and password-file argument as the operator.
+        # Capture decrypted bytes directly; never relay or save them as diagnostics.
+        password = os.environ.get('ANSIBLE_VAULT_PASSWORD_FILE')
+        if raw.startswith(b'$ANSIBLE_VAULT'):
+            import yaml
+            argv = ['ansible-vault', 'view']
+            if password:
+                argv.extend(['--vault-password-file', password])
+            result = subprocess.run([*argv, str(path)], capture_output=True, timeout=30)
+            if result.returncode:
+                raise Error('Vault decryption failed for BMC credentials; check configured password file and Vault identity')
+            raw = result.stdout
+            if b'!vault' not in raw:
+                return yaml.safe_load(raw)
         from ansible import constants as C
         from ansible.cli import CLI
         from ansible.parsing.dataloader import DataLoader
         loader = DataLoader()
-        passwords = [C.DEFAULT_VAULT_PASSWORD_FILE] if C.DEFAULT_VAULT_PASSWORD_FILE else []
+        passwords = [password or C.DEFAULT_VAULT_PASSWORD_FILE] if password or C.DEFAULT_VAULT_PASSWORD_FILE else []
         secrets = CLI.setup_vault_secrets(loader, vault_ids=list(C.DEFAULT_VAULT_IDENTITY_LIST or []),
-                                          vault_password_files=passwords, auto_prompt=False)
+                                          vault_password_files=passwords, auto_prompt=False,
+                                          initialize_context=False)
         loader.set_vault_secrets(secrets)
-        return loader.load_from_file(str(path))
-    except Exception:
-        raise Error('Unable to decrypt protected variables using configured Ansible Vault access') from None
+        return loader.load(raw.decode())
+    except Error:
+        raise
+    except Exception as error:
+        raise Error('Unable to load protected BMC variables (' + type(error).__name__ +
+                    '); interpreter: ' + sys.executable) from None

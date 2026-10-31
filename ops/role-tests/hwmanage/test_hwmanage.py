@@ -386,6 +386,28 @@ class LifecycleContracts(unittest.TestCase):
         self.assertEqual(result['redfish_username'], 'fixture-user')
         self.assertEqual(result['redfish_password'], 'fixture-password')
 
+    def test_whole_file_bmc_vault_with_configured_password(self):
+        vault = Path(sys.executable).with_name('ansible-vault')
+        if not vault.is_file():
+            self.skipTest('Ansible Vault unavailable')
+        from hwmanage_lib.common import protected_yaml
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            password = folder/'password'
+            password.write_text('fixture-vault-password')
+            secrets = folder/'bmc.yml'
+            secrets.write_text('redfish_credentials:\n  default:\n    redfish_username: fixture-user\n    redfish_password: fixture-secret\n')
+            env = dict(os.environ, ANSIBLE_LOCAL_TEMP=str(folder/'tmp'), ANSIBLE_LOG_PATH='/dev/null')
+            subprocess.run([str(vault), 'encrypt', '--vault-password-file', str(password), str(secrets)],
+                           env=env, capture_output=True, check=True)
+            with patch.dict(os.environ, dict(env, ANSIBLE_VAULT_PASSWORD_FILE=str(password),
+                            PATH=str(vault.parent)+os.pathsep+os.environ.get('PATH', ''))):
+                result = protected_yaml(secrets)
+                self.assertEqual(result['redfish_credentials']['default']['redfish_password'], 'fixture-secret')
+                password.write_text('wrong-fixture-password')
+                with self.assertRaisesRegex(Exception, 'Vault decryption failed'):
+                    protected_yaml(secrets)
+
     def test_singular_redfish_credential_default(self):
         values = {'redfish_credentials': {'default': {
             'redfish_username': 'fixture-user', 'redfish_password': 'fixture-password'}}}

@@ -1301,3 +1301,13 @@ passed. Real BMC transport and physical hardware remain untested.
   `default`). Import and export now accept that exact structure; templates show
   it. Validation: 53 wrapper tests, three transfer tests and both export
   credential expressions exercised through Ansible passed.
+
+- 2026-10-31: Operator verified `ansible-vault view` decrypts BMC secrets while
+  importer Python loading fails. Whole-file BMC loading now uses the same Vault
+  CLI with the central configured password file, matching the existing NetBox
+  secret loader. Decrypted bytes remain captured in memory, outside diagnostic
+  files. Inline Vault retains the Python loader; unexpected errors identify the
+  exception class and interpreter without credential content. Exact cause in
+  the operator's Python environment remains unverified. All 54 wrapper tests
+  passed, including real whole-file encryption/decryption and wrong-password
+  rejection.
