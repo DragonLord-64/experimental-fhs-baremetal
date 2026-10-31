@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+"""Explicit hardware management through native Ironic, Bifrost and Ansible."""
+from hwmanage_lib.cli import main
+
+if __name__ == '__main__':
+    raise SystemExit(main())

@@ -1,0 +1,8 @@
+---
+# HWMANAGE_IMPORT_DEFAULTS; replace IDs with existing native NetBox objects.
+site: 1
+role: 1
+device_type: 1
+system_fru_id: '0'
+# Explicit qualification after hardware review; no universal NIC heuristic.
+onboard_interfaces: []

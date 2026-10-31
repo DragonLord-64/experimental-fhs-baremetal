@@ -886,3 +886,47 @@ Running copy-to-official.py without a scope flag now copies six Bifrost files;
 --full explicitly selects the prior broad transfer/cleanup. --bifrost-only remains
 an alias. Disposable default/full checks passed: default preserves unrelated
 inventory/docs/role edits and cleanup candidates; full retains its cleanup.
+
+### 2026-10-31 — Physical auto-discovery and hwmanage interface agreed
+
+The operator supplied saved physical Ironic inspection showing
+auto_discovered=true, a system serial, BMC address and UEFI PXE interface MAC.
+This confirms the observed unknown-node discovery path; FRU model/provenance and
+the future NetBox bridge still require validation. No raw capture or credentials
+were added. Updated [workflow vision](provisioning-workflow-vision.md) with the
+approved hwmanage groups, native YAML fallback, fixed runbooks, explicit metadata
+cleaning and command independence requirements. Runtime implementation is tracked
+separately; this note does not claim end-to-end deployment passed.
+
+Implementation scope and acceptance are tracked in
+[experimental issue #17](https://github.com/DragonLord-64/experimental-fhs-baremetal/issues/17).
+The targeted transfer was exercised in disposable destination folders: feature
+files copied, unrelated roles/group vars/platform/docs preserved, caches excluded,
+explicit six-file Bifrost scope retained and full-transfer cleanup retained.
+
+### 2026-10-31 — hwmanage implementation and focused integration
+
+Delivered the scoped hwmanage interface, portable native inventory bridge, initial
+NetBox import playbook, optional detailed site inventory, fixed runbooks and
+configuration/check helpers under issue #17. Full-provision performs deployment
+prerequisite checks before metadata cleaning. Discovery import snapshots selected
+UUIDs before running the controller-local import playbook. Commands remain
+independent through lazy application dependencies; YAML remains an explicit source.
+
+The preliminary pipeline ran 18 tests with one native inline-extra-vars case
+skipped; that case passed separately with Ansible installed. After final
+preflight/import changes, the native focused suite passed 26 tests with no skips,
+and the updated initial-import playbook passed native syntax validation. Real
+Ansible syntax checks for provisioning/import/wait, native site-vars assertions
+and offline YAML-pattern selection passed. Lab integration ran the actual
+controller import task and native SDK against synthetic Ironic HTTP/FRU evidence
+and the existing chart's real NetBox: ten assertions passed. These results do not
+prove controller package installation or physical cleaning, boot, inspection,
+adoption or OS deployment; hardware lifecycle operations were not exercised.
+See [focused validation](../ops/role-tests/hwmanage/VALIDATION.md) for commands,
+observed evidence and limits.
+
+Final lab rerun passed 11 assertions, including wrapper-to-native-playbook UUID
+selection and environment paths. Nine additional focused checks for root-device
+criteria and native password compatibility passed. Physical lifecycle and
+controller package-installation limits above still apply.

@@ -16,19 +16,30 @@ git -C ../ska-mid-cbf-fhs-baremetal status --short
 git -C ../ska-mid-cbf-fhs-baremetal diff
 ```
 
-For only the current Bifrost environment repair/build changes:
+For the current hardware-management workflow only:
 
 ```sh
 python3 ops/security-provisioning/copy-to-official.py
 ```
 
-The default is the focused Bifrost copy (`--bifrost-only` is also accepted).
-This copies only the patch script, launcher script, Bifrost Dockerfile, constraints
-helper, Bifrost operations guide and quickstart. It does not copy inventory/group vars, roles, platform
-files or other docs, and performs no cleanup deletions. Review those six files
-in official; matching files are overwritten. A destination path is also accepted.
-The patch script's `configure` action supplies the configuration-only guards
-without overwriting your mounted `target` variables.
+The default copies the `hwmanage` executable/package, portable Bifrost templates,
+native NetBox playbooks and their dependencies, the affected provisioning entry
+points and their exact usage pages. It does not copy roles, inventory/group vars,
+platform values or credentials, and performs no cleanup deletions. Matching files
+are overwritten; unrelated destination files are retained. Review the explicit
+manifest in [copy-to-official.py](copy-to-official.py) and the official Git diff.
+This is a file copy, not a merge or a deployment.
+
+For only the six Bifrost environment repair/build files:
+
+```sh
+python3 ops/security-provisioning/copy-to-official.py --bifrost-only
+```
+
+That scope copies the patch script, launcher script, Bifrost Dockerfile,
+constraints helper, operations guide and quickstart. The patch helper's
+`configure` action supplies configuration-only guards without overwriting your
+mounted `target` variables.
 
 Pass a destination path if its folder has another name. With `--full`, the script copies the
 listed source folders/files and overwrites matching files. It does not use Git,

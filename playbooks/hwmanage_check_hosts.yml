@@ -1,0 +1,12 @@
+---
+- name: Check selected management connections
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check Linux Python and SSH
+      ansible.builtin.ping:
+      when: ansible_network_os | default('') not in ['nxos', 'cisco.nxos.nxos']
+    - name: Check Nexus command connectivity
+      cisco.nxos.nxos_command:
+        commands: [show clock]
+      when: ansible_network_os | default('') in ['nxos', 'cisco.nxos.nxos']

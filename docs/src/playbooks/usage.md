@@ -6,3 +6,6 @@ For more information on ansible see [ansible-docs](https://docs.ansible.com/proj
 
 The primary playbook used for the Mid.CBF is [provision.yml](provision.yml.md)
 
+
+[Hardware management](hwmanage.md) provides scoped inventory, lifecycle and
+provisioning commands. YAML and direct Ansible commands remain available.

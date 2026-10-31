@@ -19,35 +19,48 @@ reviewed names, intended addressing, role/tags and deployment configuration.
 3. Review the device in NetBox. Assign the intended Linux primary IP to the
    provisioning interface, rename if desired, apply role/tags and select the
    shared image/deployment profile. Preserve physical identity across renames.
-4. Explicitly enroll/prepare, optionally clean, then deploy, then provision.
-   The operator normally runs three lifecycle commands after the initial import.
+4. Explicitly prepare, clean if using the reimage runbooks, deploy and provision.
+   Individual commands remain available for customized sequences.
 5. Optionally collect the full inventory after provisioning has installed tools.
    Enrich the existing NetBox device with interfaces, MAC/IP associations, modules,
    card/component serials, OS/firmware versions and observed cable identifiers.
 
-Proposed CLI examples only; `fhs` is a placeholder name to design with the user:
+Approved interface, 2026-10-31. Implementation and validation status belong in
+separate delivery evidence; these examples define the target behavior:
 
 ```bash
-fhs import-discovered --host <IRONIC_UUID>
+hwmanage inventory import -i ironic --all
 
-# After reviewing the record in NetBox:
-fhs enroll --host sys1412 --clean
-fhs deploy --host sys1412
-fhs provision --host sys1412 --get inventory
+# Review names, primary IPs, roles/tags and deployment settings in NetBox.
+hwmanage node enroll --limit sys1412
+hwmanage node manage --limit sys1412
+hwmanage node clean --limit sys1412
+hwmanage node provide --limit sys1412
+hwmanage node deploy --limit sys1412
+hwmanage provision --limit sys1412
+hwmanage provision --limit sys1412 --tags inventory
 
-# One explicitly selected process for the lifecycle sequence:
-fhs run --host sys1412 --clean --get inventory
+# Fixed runbook: metadata clean, image deployment, full provisioning, inventory.
+hwmanage run full-provision --limit sys1412
 
-# Explicit fleet operation; never the default:
-fhs provision --all
-
-# Equivalent local input when NetBox is unavailable:
-fhs provision --inventory /provision/files.d/recovery.yml --host sys1412
+# Explicit YAML fallback; use direct Ansible/Bifrost applications if needed.
+hwmanage provision -i /provision/files.d/recovery.yml --limit sys1412
 ```
 
-The source selector, CLI name, multi-host argument form and inventory-collection
-spelling are proposals. Required behavior is explicit targeting, optional cleaning,
-optional collection and one process capable of chaining the lifecycle steps.
+Command groups are `node`, `inventory`, `provision`, `run`, `config` and `check`.
+Every command has brief `--help`, with no `--health` option. Individual playbook
+commands accept applicable Ansible `-e`, `--tags` and `--skip-tags`; new roles do
+not require wrapper changes. Runbooks accept only source/targets and help.
+`inspect-host` manages and inspects; `provide-node` metadata-cleans and deploys;
+`full-provision` also completes provisioning before detailed inventory collection.
+Runbooks do not accept customization flags. Manual cleaning accepts native
+`--clean-steps` and defaults to `erase_devices_metadata`, not secure disk erasure.
+
+NetBox device names are Ansible hostnames; device roles/tags supply groups. Record
+the Ironic UUID independently of names. Ironic sources can select names or UUIDs;
+`inventory import --all` handles unnamed nodes without an Ansible host named None.
+Shared deployment contexts retain Bifrost's existing native YAML fields rather
+than introduce a separate wrapper image schema.
 
 ## Required behavior and ownership
 
@@ -75,12 +88,12 @@ optional collection and one process capable of chaining the lifecycle steps.
   root-device policy for tags/roles; device context may override them. Reuse the
   existing provisioning-interface tag, primary IPv4 and native oob_ip mapping.
   Clearly distinguish the deployed Linux IP from Ironic's temporary DHCP lease.
-- `enroll` means reconcile/register if missing, then prepare the node. An already
-  auto-discovered node must not be registered a second time. Move an eligible node
-  to `manageable`; execute explicit cleaning there only for `--clean`; then
-  `provide` to make it available for deployment. Cleaning remains disabled by
-  default (`cleaning: false`/effective per-node policy). Verify policy before
-  transitions; preparation alone must not accidentally enable automatic cleaning.
+- `enroll` registers missing records in Ironic's enrollment state and reuses
+  existing discovered registrations without resetting their state. `sync` updates
+  approved fields without requesting lifecycle transitions. `manage`, `inspect`,
+  `provide` and `deploy` follow Ironic operations; `adopt` explicitly acknowledges
+  an installed system as active, not a database-only import. Keep automatic
+  cleaning disabled and check effective policy before preparation transitions.
 - Explicit deployment writes the OS. Reject incompatible/active/transient states
   instead of undeploying or reimaging automatically. A failed stage stops that
   node's later stages. Combined runs report per-node progress/failures and do not
@@ -91,8 +104,8 @@ optional collection and one process capable of chaining the lifecycle steps.
   preserve the explicit `ubuntu24-hardening` membership rule rather than applying
   Linux hardening to every device role. Switches never run Linux/SDK tasks or
   enter the bare-metal image lifecycle. Reject incompatible lifecycle selections.
-- Inventory collection is opt-in and normally skipped, using an explicit wrapper
-  option mapped to a `never`/named Ansible tag. Standalone scoped collection remains
+- Inventory collection is opt-in and normally skipped, using the `never`/`inventory` Ansible tags for selective runs. The fixed
+  full-provision runbook includes collection after complete provisioning. Standalone scoped collection remains
   possible. Complete provisioning/SDK installation before SDK-dependent reads.
 - NetBox and Ironic sources are additive. Preserve basic YAML input for lifecycle
   and provisioning tasks, outside the repository by default, with equivalent
@@ -108,26 +121,26 @@ optional collection and one process capable of chaining the lifecycle steps.
 
 | Existing source/evidence | What remains |
 |---|---|
-| Operator supplied a real IPA inspection for a TerraBox: system vendor serial, BMC IP, UEFI boot MAC, complete NIC list and exactly one PXE-valid interface. Another non-provisioning NIC also had carrier. | Unknown-node discovery still needs a physical end-to-end test. Confirm FRU provenance and model; the observed product_name was a date/OEM placeholder. |
+| Operator supplied a real IPA inspection for a TerraBox: system vendor serial, BMC IP, UEFI boot MAC, complete NIC list and exactly one PXE-valid interface. Another non-provisioning NIC also had carrier. | Operator subsequently demonstrated unknown-node registration with auto_discovered=true and the same serial/BMC/boot-MAC structure. Confirm FRU provenance and model; the observed product_name was a date/OEM placeholder. |
 | [YAML Bifrost adapter](../playbooks/netbox/bifrost_import.yml), [remote IPMI probe](../playbooks/netbox/library/fhs_ipmi_probe.py) and [identity parser](../playbooks/netbox/filter_plugins/fhs_inventory.py) | Add an Ironic API source and a minimal pre-OS NetBox importer. Current adapter explicitly requires a node file and the native full importer uses SSH. |
 | [NetBox exporter](../playbooks/netbox/bifrost_export.yml) | Reuse mapping/validation, but replace device-type-wide file export as the operational bridge with exact target selection and direct Ironic reconciliation. Preserve file export for fallback. Merge shared config context and track UUID/serial, not just names. |
 | [NetBox Ansible inventory](../inventory/dev_env/netbox-inv.yml) | Its active/has-primary-IP filter is appropriate for running hosts, not initial unaddressed discovered nodes. The initial import/prepare path needs its own API queries. Ensure role/policy membership and Linux SSH inputs are composed from approved NetBox records. |
-| [Existing lifecycle helper](../scripts/enroll-deploy-inventory.sh) | It chains enrollment/deployment without the proposed explicit host gate. New CLI must dispatch separate actions, default to no cleaning, and reject unscoped runs. No automatic reuse of this broad helper. |
+| [Existing lifecycle helper](../scripts/enroll-deploy-inventory.sh) | It chains enrollment/deployment without the proposed explicit host gate. New CLI must dispatch separate actions and reject unscoped runs; fixed reimage runbooks explicitly include metadata cleaning. No automatic reuse of this broad helper. |
 | [Provisioning entry point](../playbooks/provision.yml), [site roles](../playbooks/site.yml), [Nexus configuration](../playbooks/switch-poap/) | Compose a mixed-family provisioning entry point, retain family isolation and replace host_vars-file assumptions in preflight. Validate its effective scope before application. |
 | [Detailed NetBox importer](../playbooks/netbox/netbox_import.yml), [collection tasks](../playbooks/netbox/tasks/system.yml), [topology](topology-import.md) | Attach optional post-provision collection. Preserve established identity/assets and conflict handling. No invented connections where LLDP/EEPROM/manual evidence is absent. |
 
 The source paths above establish reusable code, not completion of the proposed
-workflow. The user's reported certificate/environment checks passed before the
-ongoing Bifrost install; that does not establish current DHCP/discovery success.
+workflow. The operator reported a successful Bifrost install and supplied a subsequent
+physical unknown-node inspection with auto_discovered=true. This is user-reported
+hardware evidence, not an independently executed lab test.
 Raw screenshots and private host details stay outside Git. Observation structure
 is captured here without copying credentials or a live server list.
 
 ## Delivery sequence and acceptance
 
-1. **Prove unknown discovery.** Complete the current DHCP setup, then on an
-   explicitly selected disposable node demonstrate unknown-MAC PXE boot, a new
-   Ironic registration and saved inspection. Record actual state and interface
-   provenance; discovery must not clean disks or deploy an OS.
+1. **Unknown discovery evidence recorded.** Operator supplied a physical
+   unknown-node registration and saved inspection with auto_discovered=true.
+   Continue to preserve the no-clean/no-deploy discovery boundary.
 2. **Minimal import.** Implement Ironic read + optional remote FRU verification +
    native NetBox upsert. Verify one observed discovery shape, repeat import,
    renamed-device preservation, boot-MAC ambiguity and identity conflict handling.
@@ -162,3 +175,24 @@ the same contracts instead of building a separate parallel provisioning system.
 - [Manual and automatic cleaning](https://docs.openstack.org/ironic/2026.1/admin/cleaning.html)
 - [Bifrost inventory inputs](https://docs.openstack.org/bifrost/latest/user/howto.html)
 - [NetBox config context](https://netbox.readthedocs.io/en/stable/models/extras/configcontext/)
+
+## Non-functional acceptance
+
+Keep each command independent: imports and external applications are loaded only
+by operations needing them. A broken Ironic backend must not block YAML Ansible
+provisioning or help. Use native applications rather than recreate their full
+option surfaces. NetBox outages require explicit YAML selection, never silent
+fallback. Preserve direct commands and portable exported inputs if the wrapper
+itself is unavailable.
+
+Validate parameters and do one or two lightweight progress checks, not elaborate
+recovery. Boot waits must accommodate five-minute firmware boots with longer,
+configurable bounded operation timeouts. Do not automatically retry destructive
+stages. Keep help brief: purpose, arguments and underlying playbook/application.
+
+Configuration helpers cover effective Ironic automated-cleaning policy and a
+dedicated managed dnsmasq include. Switch MAC/group/boot information defaults to
+NetBox and accepts explicit overrides. Validate configuration and preserve Cisco
+POAP/unrelated files. `check systems` reads service/config/API/boot-HTTP health;
+`check hosts` checks scoped Linux or Nexus management connectivity. Neither check
+repairs systems implicitly.

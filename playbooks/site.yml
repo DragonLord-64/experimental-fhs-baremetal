@@ -190,3 +190,9 @@
 
 - name: Check Python certificate trust after provisioning
   ansible.builtin.import_playbook: audit_python_ca.yml
+  when: "'inventory' not in ansible_run_tags"
+
+- name: Collect detailed inventory only when requested
+  ansible.builtin.import_playbook: netbox/netbox_import.yml
+  tags: [never, inventory]
+  when: "'inventory' in ansible_run_tags"

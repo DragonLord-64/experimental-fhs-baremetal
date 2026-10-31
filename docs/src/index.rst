@@ -27,6 +27,7 @@ FHS Baremetal Documentation
    :glob:
 
    playbooks/usage.md
+   playbooks/hwmanage.md
    playbooks/provision.yml.md
    playbooks/preflight.md
    playbooks/site.yml.md

@@ -95,7 +95,7 @@
     tags:
     - always
     when:
-    - '"all" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
+    - '"all" in ansible_run_tags or "inventory" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
   - name: Reconcile exact observed endpoints without moving existing cables
     delegate_to: localhost
     vars:
@@ -109,7 +109,7 @@
       preview: '{{ ansible_check_mode or "compare" in ansible_run_tags or "facts" in ansible_run_tags }}'
     register: topology_result
     when:
-    - '"all" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
+    - '"all" in ansible_run_tags or "inventory" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
     - '"facts" not in ansible_run_tags and topology_observations | length > 0'
     tags:
     - always
@@ -119,7 +119,7 @@
     tags:
     - always
     when:
-    - '"all" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
+    - '"all" in ansible_run_tags or "inventory" in ansible_run_tags or "cables" in ansible_run_tags or "apply" in ansible_run_tags or "compare" in ansible_run_tags'
   tags:
   - cables
   - apply

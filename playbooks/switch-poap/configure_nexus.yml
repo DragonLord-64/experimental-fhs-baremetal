@@ -43,7 +43,6 @@
 
     - name: Provision hostname, users and telemetry
       tags:
-        - never
         - provision
       block:
         - name: Validate hostname and credentials directory

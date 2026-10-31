@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy the current Bifrost changes into the sibling official repository."""
+"""Copy the current hwmanage changes into the sibling official repository."""
 import argparse
 from pathlib import Path
 import shutil
@@ -12,11 +12,11 @@ scope = parser.add_mutually_exclusive_group()
 scope.add_argument('--full', action='store_true',
                    help='Copy the full provisioning update and perform its legacy cleanup')
 scope.add_argument('--bifrost-only', action='store_true',
-                   help='Copy only the Bifrost environment files (the default)')
+                   help='Copy only the six Bifrost environment repair/build files')
 args = parser.parse_args()
 destination = args.destination.resolve()
 
-if not args.full:
+if args.bifrost_only:
     for name in ('scripts/patch-bifrost-environment.py',
                  'scripts/deploy-bifrost-container.sh',
                  'bifrost-infra/Dockerfile',
@@ -29,7 +29,39 @@ if not args.full:
         print(f'Copied {name}')
     raise SystemExit(0)
 
+# Exact feature manifest: preserve destination roles, site overrides and unrelated docs.
+if not args.full:
+    directories = (
+        'scripts/hwmanage_lib',
+        'bifrost-infra/templates',
+        'playbooks/netbox',
+    )
+    files = (
+        'scripts/hwmanage',
+        'playbooks/site.yml',
+        'playbooks/provision.yml',
+        'playbooks/switch-poap/configure_nexus.yml',
+        'playbooks/hwmanage_check_hosts.yml',
+        'playbooks/hwmanage_wait.yml',
+        'inventory/dev_env/hwmanage-vars.yml',
+        'docs/src/playbooks/hwmanage.md',
+        'docs/src/playbooks/site.yml.md',
+        'docs/src/playbooks/usage.md',
+        'docs/src/index.rst',
+    )
+    for name in directories:
+        shutil.copytree(source / name, destination / name, dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        print(f'Copied {name}/')
+    for name in files:
+        target = destination / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source / name, target)
+        print(f'Copied {name}')
+    raise SystemExit(0)
+
 for name in ('roles', 'playbooks', 'platform', 'docs/src',
+             'scripts/hwmanage_lib', 'bifrost-infra/templates',
              'inventory/dev_env/group_vars/all',
              'inventory/dev_env/group_vars/device_roles_fpga-host-server'):
     shutil.copytree(source / name, destination / name, dirs_exist_ok=True,
@@ -37,7 +69,8 @@ for name in ('roles', 'playbooks', 'platform', 'docs/src',
                                                  'platform-secrets.yml', 'platform-endpoints.yml'))
     print(f'Copied {name}/')
 
-for name in ('bifrost-infra/Dockerfile', 'bifrost-infra/prepare-python-constraints.py',
+for name in ('scripts/hwmanage', 'inventory/dev_env/hwmanage-vars.yml',
+             'bifrost-infra/Dockerfile', 'bifrost-infra/prepare-python-constraints.py',
              'scripts/patch-bifrost-environment.py', 'scripts/deploy-bifrost-container.sh', 'ansible.cfg', 'inventory/README.md',
              'inventory/dev_env/netbox-inv.yml'):
     target = destination / name

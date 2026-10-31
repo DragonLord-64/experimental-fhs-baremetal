@@ -1,0 +1,9 @@
+---
+- name: Wait for deployed Linux SSH
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Wait through firmware boot and SSH readiness
+      ansible.builtin.wait_for_connection:
+        timeout: "{{ lookup('env', 'HWMANAGE_TIMEOUT') | default('1800', true) | int }}"
+        sleep: 15

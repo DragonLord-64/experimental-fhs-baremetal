@@ -1,6 +1,7 @@
 # site.yml
 
-Applies configuration to installed FHS servers. [provision.yml](provision.yml.md) wraps this playbook with inventory assertions and a summary.
+Applies configuration to installed FHS servers. Detailed Linux/Nexus inventory
+collection is available through the opt-in `inventory` tag. [provision.yml](provision.yml.md) wraps this playbook with inventory assertions and a summary.
 
 ## Roles and tags
 
@@ -43,6 +44,21 @@ ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit 
 The final command changes the host. Use the table above to select a role tag;
 `--list-tasks` and `--list-tags` do not enumerate every nested task. Each role's
 README shows its settings and commands.
+
+## Detailed NetBox inventory
+
+Provision the selected server before collecting SDK-dependent card inventory:
+
+```bash
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST>
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --limit <HOST> --tags inventory
+```
+
+The inventory stage enriches NetBox using the existing native importer. It is
+skipped on ordinary provisioning runs. Select `--tags all,inventory` to run
+ordinary configuration and collection together; selecting only `inventory`
+does not install the SDK. Mixed Linux/Nexus configuration is available through
+[provision.yml](provision.yml.md) or [hwmanage](hwmanage.md).
 
 ## Ubuntu 24 CIS scope
 

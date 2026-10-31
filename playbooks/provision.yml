@@ -14,7 +14,7 @@
           - inventory_hostname is defined
           - ansible_host is defined
           - sys_mac_address is defined
-        fail_msg: "ansible_host and sys_mac_address must be set in host_vars/{{ inventory_hostname }}.yml"
+        fail_msg: "ansible_host and sys_mac_address must be set in the selected inventory"
 
 - name: Apply main site.yml
   ansible.builtin.import_playbook: site.yml
@@ -26,3 +26,8 @@
     - name: Report
       ansible.builtin.debug:
         msg: "Provisioned {{ inventory_hostname }} — groups: {{ group_names | join(', ') }}"
+
+- name: Configure Nexus identity, users and telemetry
+  ansible.builtin.import_playbook: switch-poap/configure_nexus.yml
+  vars:
+    switch_group: nexus:device_roles_nexus-switch:device_roles_nexus_switch
