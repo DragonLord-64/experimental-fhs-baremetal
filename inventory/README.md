@@ -39,6 +39,15 @@ device_roles_fpga-host-server`, with additional explicit Linux server groups.
 The standard commands below load only the NetBox plugin. If you need
 additional static inheritance, use an explicitly reviewed groups-only file and pass that file as a second `-i` argument. Site plays
 target `device_roles_fpga-host-server`; CIS targets `ubuntu24_cis_production`.
+For NetBox inventory, assign the tag with slug `ubuntu24-hardening` to each
+Ubuntu 24.04 server intended for CIS hardening. This creates membership in
+`ubuntu24_cis_production` independently of device role. Devices must be active
+and have a primary IP address. Review the selected hosts before applying:
+
+```bash
+ansible-playbook -i inventory/dev_env/netbox-inv.yml playbooks/site.yml --list-hosts --tags ubuntu24_cis
+```
+
 Keep switches out of Linux policy groups.
 
 ## Trust NetBox before loading inventory

@@ -45,13 +45,20 @@ README shows its settings and commands.
 
 ## Ubuntu 24 CIS scope
 
-The NetBox inventory assigns the `fpga-host-server` device role/tag to
-`ubuntu24_cis_production`. For other Linux servers, assign this NetBox config
-context to the intended devices:
+In NetBox, create a tag with slug `ubuntu24-hardening` and assign it to each
+Ubuntu 24.04 server that should receive this policy. Servers with any device
+role can use this tag, including `fpga-host-server`.
 
-```json
-{"fhs_linux_server": true}
+`inventory/dev_env/netbox-inv.yml` selects the tagged devices:
+
+```yaml
+groups:
+  ubuntu24_cis_production: "'ubuntu24-hardening' in (tags | default([]) | map(attribute='slug') | list)"
 ```
+
+The `ubuntu24_cis` command tag selects the hardening tasks; the NetBox tag
+selects their hosts. The inventory also requires devices to be active and have
+a primary IP address.
 
 Confirm the policy scope before applying it:
 

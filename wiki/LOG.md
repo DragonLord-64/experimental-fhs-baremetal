@@ -660,3 +660,11 @@ Verified that the official checkout retains the Bifrost Compose Vault password
 file mount and environment variable, and its quickstart documents creating the
 file. Removed interactive Vault password flags from documentation commands and
 documented the existing Compose configuration in the NetBox inventory guide.
+
+### 2026-10-30 — Explicit Ubuntu hardening membership
+
+NetBox inventory selects `ubuntu24_cis_production` through the
+`ubuntu24-hardening` tag independently of device role. Updated inventory and
+site-playbook usage instructions. Five local expression cases passed: tagged
+FPGA/other servers included; untagged FPGA, legacy context and missing tags
+excluded. Source/link and whitespace checks passed. No deployment was run.
