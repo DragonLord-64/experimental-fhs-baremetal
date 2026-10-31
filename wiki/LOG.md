@@ -700,3 +700,11 @@ Replaced site-playbook and security-remediation commentary in the gRPC role
 README with its installation purpose and a NetBox tag/service selection table.
 Removed standalone Poetry role retirement commentary from its prerequisites.
 Documentation/link and whitespace checks passed; no runtime changes.
+
+### 2026-10-30 — Record the user's documentation preferences
+
+Recorded current-system, operator-first documentation preferences in
+[the documentation note](documentation-preferences.md), linked from the wiki
+index and repository instructions. Includes concrete configuration/command
+examples, role-focused scope, deployed-environment context and preservation of
+intentional README deletions. Source/link and whitespace checks passed.

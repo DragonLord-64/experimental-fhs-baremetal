@@ -34,6 +34,8 @@ The user authorizes changes needed for tests on `dragonvm`: stop, remove, rebuil
 
 ## Knowledge wiki
 
+- Follow the [user documentation preferences](wiki/documentation-preferences.md) for README and usage-documentation edits.
+
 - Write documentation in the user's existing repository voice and style. Read nearby existing docs before drafting. Keep it brief and practical: short descriptions, actual tags, commands, and the usual way to run things. Avoid lengthy tutorials and generic background. Each role has one concise README in its own folder, referenced/included by Read the Docs.
 - Write usage docs for a first-time operator of the current system. Show the variable's file location, YAML/file format, URL format and command in code blocks. Keep old/new deployment comparisons and change history in the experimental notes, not core usage guides.
 
