@@ -53,8 +53,8 @@ def from_netbox(api=None):
         if role.get('slug') == 'nexus-switch' or 'nexus-switch' in tags:
             groups.append('nexus')
         host = dict(context, name=name, host_groups=groups, netbox_device_id=device['id'],
-                    serial=device.get('serial'), tags=tags,
-                    uuid=(device.get('custom_fields') or {}).get('ironic_uuid'))
+                    serial=device.get('serial'), tags=tags)
+        host.pop('uuid', None)  # Legacy context/custom fields do not select Ironic registrations.
         primary = device.get('primary_ip4') or {}
         if primary.get('address'):
             host['ansible_host'] = primary['address'].split('/')[0]

@@ -95,3 +95,10 @@ real SDK requests against synthetic summary/detail port endpoints and an unrelat
 port. A linked unnamed node was planned without writes and renamed through PATCH
 with its original UUID and ports. Focused suite: 43 passed. This does not establish
 ownership of the user's actual Ironic ports; explicit conflicts remain rejected.
+
+2026-10-31 serial-name model: all 14 assertions passed with no NetBox UUID supplied
+to reconciliation or persisted by the importer. The native SDK resolves the
+serial-named node; its UUID remains internal. Changed-serial conflict rejection
+replaces UUID-link conflict rejection. Focused suite: 47 passed; transfer suite:
+three passed. Existing unnamed registrations require manual rename/cleanup;
+there is no automatic takeover or deletion.

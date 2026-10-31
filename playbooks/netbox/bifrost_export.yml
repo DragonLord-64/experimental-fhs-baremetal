@@ -86,7 +86,7 @@
         \ bifrost_capabilities} %} {% for key in ['capabilities', 'root_device'] %} {% if fields.get(key) not in [none, ''] %}{% set _ = properties.update({key:\
         \ fields[key]}) %}{% endif %} {% endfor %} {% set additional = extra.get('properties', {}) if extra is mapping else {} %} {% set additional = additional\
         \ | dict2items | rejectattr('key', 'in', ['cpu_arch', 'ram', 'disk_size', 'cpus']) | list | items2dict %} {% set properties = properties | combine(additional)\
-        \ %} {% set uuid = extra.get('uuid', fields.ironic_uuid | default('', true)) if extra is mapping else '' %} {% set lan_ip = (device.primary_ip4\
+        \ %} {% set uuid = extra.get('uuid', '') if extra is mapping else '' %} {% set lan_ip = (device.primary_ip4\
         \ | default({}, true)).get('address', '') | regex_replace('/.*$', '') %} {{ {'name': device.name, 'nics': nics, 'redfish_address': endpoint,\n \
         \   'redfish_system_id': fields.redfish_system_id | default('', true),\n    'redfish_verify_ca': fields.redfish_verify_ca | default(false, true),\n\
         \    'raw_extra': extra,\n    'extra': (extra if extra is mapping else {}) | combine({'properties': properties}) | combine({'uuid': uuid} if uuid\

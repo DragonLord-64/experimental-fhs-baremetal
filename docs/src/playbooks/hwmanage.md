@@ -34,8 +34,9 @@ inventory. A service failure never silently switches inventory sources.
 
 Every action requires `--limit PATTERN` or `--all`. Use the reviewed NetBox device
 name for NetBox input, an Ironic name/UUID for Ironic input, or a YAML inventory
-host key. Device roles are inventory groups, not hostnames. Names can change;
-the imported Ironic UUID identifies the same registration.
+host key. Device roles are inventory groups, not hostnames. NetBox is the source
+of truth. Its product serial is the Ironic node name; the NetBox device name
+remains your command/Ansible target name. No Ironic UUID field is needed in NetBox.
 
 ```bash
 hwmanage node list -i ironic
@@ -104,7 +105,9 @@ redfish_credentials:
   devices: {}
 ```
 
-Per-device overrides use the Ironic UUID or reviewed hostname under `devices`.
+Per-device credential overrides use the product serial or reviewed NetBox hostname
+under `devices`. Legacy UUID-keyed credentials still work for direct discovery
+imports; enrollment from NetBox uses serial/name keys or the shared defaults.
 No BMC password belongs in a NetBox config context.
 
 The direct import playbook installs the controller's `ipmitool` and invokes the
@@ -142,7 +145,21 @@ it is separate from the node deployment profile.
 ## Individual node operations
 
 NetBox is the default source except for `node list`, which defaults to Ironic.
-Operations resolve the existing UUID rather than create a duplicate discovery.
+Operations find Ironic by the NetBox product serial and use its existing
+registration. Enrollment creates a node with that serial as its name when absent;
+Ironic generates its own internal UUID. Duplicate selected serials or a MAC owned
+by another registration fail before changes. There is no automatic claiming,
+renaming or deletion of conflicting discoveries.
+
+For an existing unnamed/old-named discovery, explicitly rename the registration
+to its product serial first, or remove an unwanted duplicate registration yourself:
+
+```bash
+baremetal node set --name SYS1412 CURRENT_NODE_NAME_OR_UUID
+```
+
+Existing NetBox `ironic_uuid` values are ignored and no longer created or updated.
+They may be removed from NetBox separately; the wrapper does not need them.
 
 ```bash
 hwmanage node show --limit SYS1412

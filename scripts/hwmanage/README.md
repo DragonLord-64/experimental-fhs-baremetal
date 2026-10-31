@@ -19,3 +19,7 @@ credentials stay in `/provision/files.d/credentials/`.
 See the [operator guide](../../docs/src/playbooks/hwmanage.md) for file formats,
 credential paths and commands. Native import playbooks remain in
 `playbooks/netbox/`.
+
+NetBox's product serial is the Ironic node name. The wrapper creates or updates
+that name and does not require an Ironic UUID custom field in NetBox. Conflicting
+registrations fail for manual cleanup; they are never automatically removed.

@@ -87,16 +87,13 @@ def resolve_device(sync, item):
     from fhs_netbox import physical_serial
     serial = physical_serial(item['serial'])
     by_serial = unique(sync.list('dcim/devices/', serial=serial))
-    by_uuid = unique([d for d in sync.list('dcim/devices/')
-                      if (d.get('custom_fields') or {}).get('ironic_uuid') == item['uuid']])
     by_name = unique(sync.list('dcim/devices/', name=item['name']))
-    matches = [d for d in (by_serial, by_uuid, by_name) if d]
+    matches = [d for d in (by_serial, by_name) if d]
     if len({d['id'] for d in matches}) > 1:
-        raise ValueError('Serial, UUID and default name identify different NetBox devices')
+        raise ValueError('Serial and default name identify different NetBox devices')
     old = matches[0] if matches else None
-    if old and (old.get('serial') != serial or
-                (old.get('custom_fields') or {}).get('ironic_uuid') not in (None, '', item['uuid'])):
-        raise ValueError('Existing device has a conflicting serial or Ironic UUID')
+    if old and old.get('serial') != serial:
+        raise ValueError('Existing device has a conflicting serial')
     return old
 
 
@@ -149,16 +146,13 @@ def apply(sync, item, settings):
         raise ValueError('Existing BMC interface has conflicting purpose')
     if old and old.get('oob_ip') and old['oob_ip'].get('address', '').split('/')[0] != item['bmc']:
         raise ValueError('Existing BMC address conflicts with observed identity')
-    sync.ensure('extras/custom-fields/', {'name': 'ironic_uuid'},
-                {'name': 'ironic_uuid', 'type': 'text', 'object_types': ['dcim.device']}, 'Ironic UUID field')
     if old:
         # Do not change name, status, primary IP, tags, role or deployment context.
-        data = {'custom_fields': {'ironic_uuid': item['uuid']}}
+        data = {}
         key = {'id': old['id']}
     else:
         data = dict(defaults)
-        data.update(name=item['name'], serial=item['serial'], status='planned',
-                    custom_fields={'ironic_uuid': item['uuid']})
+        data.update(name=item['name'], serial=item['serial'], status='planned')
         key = {'name': item['name']}
     device = sync.ensure('dcim/devices/', key, data, 'discovered chassis')
     tag = sync.ensure('extras/tags/', {'slug': 'provisioning-interface'},

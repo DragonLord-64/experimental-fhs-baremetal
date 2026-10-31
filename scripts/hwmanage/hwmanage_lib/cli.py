@@ -103,13 +103,14 @@ def summary(hosts):
 
 
 def node_command(args, hosts):
-    from .ironic import Ironic, clean_steps, guard
+    from .ironic import Ironic, clean_steps, guard, registration_name, validate_registration_names
     if args.action in ('list', 'show'):
         summary(hosts)
         return
     from .common import is_nexus
     if any(is_nexus(h) for h in hosts.values()):
         raise Error('Switches cannot enter the Ironic lifecycle')
+    validate_registration_names(hosts)
     if args.action == 'deploy':
         from .provision import effective_hosts, deployment_preflight
         hosts = effective_hosts(hosts)
@@ -122,7 +123,7 @@ def node_command(args, hosts):
             if args.action in ('enroll', 'sync'):
                 node = client.reconcile(host, create=args.action == 'enroll', plan=args.plan)
             else:
-                match = client.api.find_node(host.get('uuid') or host.get('name'))
+                match = client.api.find_node(registration_name(host))
                 if not match:
                     raise Error('Node is not enrolled')
                 from .ironic import normalize
@@ -138,10 +139,11 @@ def node_command(args, hosts):
 
 
 def runbook(args, hosts):
-    from .ironic import Ironic, guard, normalize, automatic_clean_disabled, DEFAULT_CLEAN
+    from .ironic import Ironic, guard, normalize, automatic_clean_disabled, DEFAULT_CLEAN, validate_registration_names
     from .common import is_nexus
     from .provision import apply, effective_hosts, deployment_preflight
     hosts = effective_hosts(hosts)
+    validate_registration_names(hosts)
     if args.action != 'inspect-host':
         deployment_preflight(hosts)
     client = Ironic()

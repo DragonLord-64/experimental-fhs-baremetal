@@ -139,6 +139,7 @@ class DiagnosticContracts(unittest.TestCase):
                  'scripts/hwmanage/hwmanage_lib/common.py', 'scripts/hwmanage/hwmanage_lib/cli.py',
                  'scripts/hwmanage/hwmanage_lib/inventory.py', 'playbooks/netbox/netbox_transfer.py',
                  'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
+                 'playbooks/netbox/bifrost_export.yml',
                  'docs/src/playbooks/hwmanage.md')
         with tempfile.TemporaryDirectory() as directory:
             destination = Path(directory)
@@ -241,7 +242,7 @@ class LifecycleContracts(unittest.TestCase):
         with self.assertRaises(common.Error):
             ironic.guard(dict(provision_state='available'), 'inspect')
 
-    def test_conflicts_before_mutation_and_stale_uuid(self):
+    def test_mac_conflicts_prevent_mutation_even_with_stale_legacy_uuid(self):
         api = Mock()
         api.find_node.return_value = dict(uuid='u', name='a', provision_state='enroll')
         api.ports.return_value = [dict(node_uuid='other', address='00:11:22:33:44:55')]
@@ -253,11 +254,11 @@ class LifecycleContracts(unittest.TestCase):
             ironic.Ironic(api).reconcile(dict(uuid='missing', name='a'), create=True)
         api.create_node.assert_not_called()
 
-    def test_linked_unnamed_discovery_uses_detailed_ports_and_native_node_filter(self):
+    def test_serial_name_reuses_registration_ignoring_legacy_uuid(self):
         api = Mock()
-        discovery = dict(uuid='discovered', name=None, provision_state='enroll',
+        discovery = dict(uuid='discovered', name='SYS1412', provision_state='enroll',
                          properties={'serial_number': 'SYS1412'})
-        api.find_node.side_effect = lambda value: discovery if value == 'discovered' else None
+        api.find_node.side_effect = lambda value: discovery if value == 'SYS1412' else None
         def ports(**query):
             self.assertTrue(query.get('details'))
             self.assertNotIn('node_uuid', query)
@@ -266,7 +267,7 @@ class LifecycleContracts(unittest.TestCase):
                          address='a8:a1:59:fb:a6:bb', pxe_enabled=True)]
         api.ports.side_effect = ports
         api.update_node.return_value = dict(discovery, name='SYS1412')
-        host = dict(uuid='discovered', name='SYS1412', serial='SYS1412',
+        host = dict(uuid='obsolete-link', name='friendly-device', serial='SYS1412',
                     nics=[dict(mac='a8:a1:59:fb:a6:bb')])
         client = ironic.Ironic(api)
         self.assertEqual(client.reconcile(host, create=True, plan=True)['uuid'], 'discovered')
@@ -276,6 +277,46 @@ class LifecycleContracts(unittest.TestCase):
         self.assertEqual(api.update_node.call_args.kwargs['name'], 'SYS1412')
         api.create_node.assert_not_called()
         api.create_port.assert_not_called()
+        self.assertEqual({c.args[0] for c in api.find_node.call_args_list}, {'SYS1412'})
+
+    def test_enroll_creates_serial_name_without_supplied_uuid(self):
+        api = Mock()
+        api.find_node.return_value = None
+        api.ports.return_value = []
+        api.create_node.return_value = dict(uuid='generated', name='SYS1412')
+        host = dict(name='friendly-device', serial='SYS1412', netbox_device_id=24,
+                    uuid='ignored-legacy-link', driver='redfish',
+                    driver_info={'redfish_address': 'https://192.0.2.20'},
+                    nics=[dict(mac='02:00:00:00:00:01')])
+        with patch.object(ironic, 'credentials', return_value=host['driver_info']):
+            result = ironic.Ironic(api).reconcile(host, create=True)
+        self.assertEqual(result['uuid'], 'generated')
+        api.find_node.assert_called_once_with('SYS1412')
+        self.assertEqual(api.create_node.call_args.kwargs['name'], 'SYS1412')
+        self.assertNotIn('uuid', api.create_node.call_args.kwargs)
+        api.create_port.assert_called_once_with(node_uuid='generated', address='02:00:00:00:00:01', pxe_enabled=True)
+
+    def test_duplicate_serials_and_missing_netbox_serial_fail_locally(self):
+        with self.assertRaisesRegex(common.Error, 'duplicate'):
+            ironic.validate_registration_names({'a': dict(serial='SYS1412'), 'b': dict(serial='SYS1412')})
+        with self.assertRaisesRegex(common.Error, 'product serial'):
+            ironic.registration_name(dict(name='friendly-device', netbox_device_id=24))
+
+    def test_netbox_legacy_uuid_field_is_not_loaded(self):
+        api = Mock()
+        device = dict(id=24, name='friendly-device', serial='SYS1412', tags=[],
+                      custom_fields={'ironic_uuid': 'old-link'}, config_context={'uuid': 'another-old-link'})
+        api.rows.side_effect = lambda path: [device] if path == 'dcim/devices/' else []
+        host = inventory.from_netbox(api)['friendly-device']
+        self.assertEqual(host['serial'], 'SYS1412')
+        self.assertNotIn('uuid', host)
+
+    def test_native_lifecycle_uses_serial_name(self):
+        client = ironic.Ironic(Mock())
+        client.get = Mock(return_value=dict(provision_state='manageable'))
+        with patch.object(ironic, 'run') as run, contextlib.redirect_stdout(io.StringIO()):
+            client.action(dict(uuid='internal-only', name='SYS1412', provision_state='manageable'), 'inspect')
+        self.assertEqual(run.call_args.args[0][-1], 'SYS1412')
 
     def test_native_clean_argv_and_final_state(self):
         client = ironic.Ironic(Mock())
@@ -294,10 +335,13 @@ class LifecycleContracts(unittest.TestCase):
             def capture(argv, **kwargs):
                 values = json.loads(Path(argv[argv.index('-e')+1][1:]).read_text())
                 calls.append((argv, values))
+                source = json.loads(Path(kwargs['env']['BIFROST_INVENTORY_SOURCE']).read_text())
+                self.assertEqual(set(source), {'SYS1412'})
+                self.assertEqual(source['SYS1412']['uuid'], 'internal-only')
             with patch.dict(os.environ, HWMANAGE_BIFROST_PLAYBOOKS=directory), patch.object(provision, 'run', side_effect=capture), patch.object(ironic, 'credentials', return_value={}):
-                provision.bifrost_deploy(dict(name='a'))
+                provision.bifrost_deploy(dict(name='friendly-device', serial='SYS1412', uuid='internal-only'))
             argv, values = calls[0]
-            self.assertEqual(argv[argv.index('--limit')+1], 'localhost,a')
+            self.assertEqual(argv[argv.index('--limit')+1], 'localhost,SYS1412')
             self.assertGreaterEqual(values['wait_timeout'], 900)
             self.assertNotIn('wait_for_node_deploy_timeout', values)
 
@@ -479,14 +523,15 @@ class MinimalImportContracts(unittest.TestCase):
         item = dict(uuid='u', serial='SERIAL123', name='SERIAL123', bmc='192.0.2.1',
                     port=dict(name='eno1', mac='02:00:00:00:00:01'))
         self.helper.apply(sync, item, {})
-        update = next(call.args[2] for call in sync.ensure.call_args_list
-                      if call.args[0] == 'dcim/devices/' and call.args[1] == {'id': 10} and 'custom_fields' in call.args[2])
-        self.assertEqual(update, {'custom_fields': {'ironic_uuid': 'u'}})
+        updates = [call.args[2] for call in sync.ensure.call_args_list
+                   if call.args[0] == 'dcim/devices/']
+        self.assertEqual(updates[0], {})
+        self.assertTrue(all('custom_fields' not in update for update in updates))
+        self.assertFalse(any(call.args[0] == 'extras/custom-fields/' for call in sync.ensure.call_args_list))
         sync.ensure.reset_mock()
         item['uuid'] = 'different'
-        with self.assertRaises(ValueError):
-            self.helper.apply(sync, item, {})
-        sync.ensure.assert_not_called()
+        self.helper.apply(sync, item, {})  # Rediscovery UUID is not physical identity.
+        self.assertFalse(any('custom_fields' in call.args[2] for call in sync.ensure.call_args_list))
 
     def test_defaults_resolve_names_slugs_and_model_without_writes(self):
         sync = Mock()

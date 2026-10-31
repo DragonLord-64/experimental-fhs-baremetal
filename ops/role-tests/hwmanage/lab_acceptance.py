@@ -198,14 +198,16 @@ def main():
                 from hwmanage_lib.ironic import Ironic as NativeIronic
                 with activated(controller_config):
                     client = NativeIronic()
-                    host = dict(uuid=node_uuid, name=prefix, serial=prefix,
+                    # Existing serial-named registration; no NetBox UUID link is supplied.
+                    node['name'] = prefix
+                    host = dict(name=prefix+'-friendly', serial=prefix,
                                 nics=[dict(mac='02:ba:00:00:ee:37')])
                     planned = client.reconcile(host, create=True, plan=True)
                     check(planned['uuid'] == node_uuid and not node_updates,
-                          'Linked discovery plan reads detailed ownership and filters unrelated node ports')
+                          'Serial-name plan resolves existing node without NetBox UUID and excludes unrelated ports')
                     renamed = client.reconcile(host, create=True)
                     check(renamed['uuid'] == node_uuid and renamed['name'] == prefix and len(node_updates) == 1,
-                          'Native SDK renames linked discovery with UUID and existing ports preserved')
+                          'Native SDK updates serial-named registration without NetBox UUID or new ports')
         finally:
             server.shutdown()
             server.server_close()
@@ -214,7 +216,7 @@ def main():
         device = sync.request('GET', f'dcim/devices/{first["id"]}/')
         ports = sync.list('dcim/interfaces/', device_id=device['id'])
         check(device['serial'] == prefix and device['name'] == prefix, 'Unnamed Ironic discovery imported by verified FRU serial')
-        check(device['custom_fields']['ironic_uuid'] == node_uuid, 'Ironic UUID linkage persisted')
+        check(not device.get('custom_fields', {}).get('ironic_uuid'), 'Import does not persist an Ironic UUID link')
         check(len(ports) == 2 and {p['name'] for p in ports} == {'eno1', 'bmc'}, 'Only provisioning and BMC interfaces imported')
         boot = next(p for p in ports if p['name'] == 'eno1')
         check(boot['primary_mac_address']['mac_address'].lower() == '02:ba:00:00:ee:37', 'Native NetBox primary MAC persisted')
@@ -227,13 +229,13 @@ def main():
         check(again['id'] == first['id'] and len(sync.list('dcim/devices/', serial=prefix)) == 1, 'Repeated discovery reuses one device')
         check(actual['name'] == approved and actual['primary_ip4']['id'] == primary['id'] and any(t['id'] == tag['id'] for t in actual['tags']) and actual['status']['value'] == 'active', 'Operator name, primary IP, tags and status preserved')
         before = len(sync.plan)
-        bad = dict(minimal.observation(node, record, settings, lambda *_: fru), uuid=str(uuid.uuid4()))
+        bad = dict(minimal.observation(node, record, settings, lambda *_: fru), serial=prefix+'-other', name=approved)
         try:
             minimal.apply(sync, bad, settings)
         except ValueError:
-            check(len(sync.plan) == before, 'Conflicting UUID rejected before writes')
+            check(len(sync.plan) == before, 'Conflicting serial rejected before writes')
         else:
-            raise AssertionError('Conflicting UUID accepted')
+            raise AssertionError('Conflicting serial accepted')
     finally:
         cleanup_errors = []
         # Addresses first, then device; object cascade removes interfaces/MACs.

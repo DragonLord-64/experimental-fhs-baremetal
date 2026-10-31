@@ -1,6 +1,7 @@
 # Native YAML example; replace per-node identity/address values and supply credentials separately.
 example-node:
   name: example-node
+  serial: example-node
   driver: redfish
   boot_interface: ipxe
   driver_interfaces:

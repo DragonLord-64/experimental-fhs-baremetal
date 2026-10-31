@@ -1203,3 +1203,32 @@ renamed the linked node through native PATCH without UUID changes or new ports.
 The healthy existing chart was inspected with explicit `fhs-test`; fixture objects
 and temporary forwarding were cleaned up. Whitespace checks passed. Actual user
 port ownership remains unverified until retry; no physical node was changed.
+
+### 2026-10-31 — serial-named Ironic registrations, NetBox authoritative
+
+At the user's request, the wrapper now uses the NetBox product serial as the
+Ironic node name. NetBox device names remain operator/Ansible targets. Enrollment
+finds or creates that serial name; Ironic UUIDs are generated/resolved internally
+and no longer read from NetBox. Bifrost receives the serial name and any runtime
+UUID; native lifecycle commands use the node name. Duplicate selected serials
+and MAC ownership conflicts fail without claiming or deleting registrations.
+Existing unnamed/old-named discoveries need explicit operator rename or cleanup.
+No saved-inspection serial lookup is performed just to reconcile an existing node.
+
+The minimal importer matches NetBox by physical serial/default name, no longer
+creates or updates an `ironic_uuid` custom field, and accepts rediscovery under
+a different Ironic UUID. Existing legacy metadata is ignored and retained rather
+than deleted globally. Native Bifrost export no longer falls back to that field.
+Credential overrides prefer product serial/NetBox name; direct discovery imports
+retain compatibility with legacy UUID-keyed credentials. The copy helper includes
+the changed native exporter. Updated operator docs and template comments.
+
+Validation: 47 focused and three transfer tests passed; native Bifrost-export
+playbook syntax and whitespace checks passed. All 14 existing chart/importer/
+native-SDK acceptance assertions passed in explicit `fhs-test` context. They
+verified serial-name lookup without a NetBox UUID, no UUID persistence on new
+imports, retained names/primary IP/tags/status, rediscovery and conflicting serial
+rejection. Unit coverage verifies fresh enrollment without a supplied UUID,
+name-addressed lifecycle commands and serial-named ephemeral Bifrost inventory.
+Fixtures and temporary forwarding were cleaned up; no physical node or official
+checkout was changed. Full physical deployment remains untested.

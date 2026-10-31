@@ -117,13 +117,13 @@ def apply(hosts, options=None, *, inventory_only=False, wait=False, wait_only=Fa
 
 
 def bifrost_deploy(host, options=None):
-    from .ironic import timeout, credentials
+    from .ironic import timeout, credentials, registration_name
     directory_root = Path(os.environ.get('HWMANAGE_BIFROST_PLAYBOOKS', '/bifrost/playbooks'))
     play = directory_root/'deploy-dynamic.yaml'
     if not play.is_file():
         raise Error('Bifrost deploy-dynamic.yaml is unavailable; run inside the provisioning container')
     with workspace() as directory:
-        host = dict(host, driver_info=credentials(host))
+        host = dict(host, name=registration_name(host), driver_info=credentials(host))
         source = temp_json(directory, 'baremetal.json', {host['name']: host})
         variables = temp_json(directory, 'vars.json', {'wait_for_node_deploy': True,
             'wait_timeout': timeout(), 'automated_clean': False})

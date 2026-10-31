@@ -2,12 +2,30 @@
 import json
 import os
 from pathlib import Path
-from .common import Error, ROOT, is_nexus, run, temp_json, workspace, yaml_load, protected_yaml
+from .common import Error, ROOT, is_nexus, run, temp_json, workspace, yaml_load, protected_yaml, safe_name
 
 DEFAULT_CLEAN = [{'interface': 'deploy', 'step': 'erase_devices_metadata'}]
 STATES = {'manage': {'enroll', 'available'}, 'inspect': {'manageable'},
           'clean': {'manageable'}, 'provide': {'manageable'},
           'deploy': {'available'}, 'adopt': {'manageable'}}
+
+
+def registration_name(host):
+    """NetBox product serial is the Ironic name; native input may already be named."""
+    serial = host.get('serial') or (host.get('properties') or {}).get('serial_number')
+    if serial:
+        return safe_name(serial)
+    if host.get('netbox_device_id') is not None:
+        raise Error('NetBox device needs its product serial before Ironic operations')
+    if not host.get('name'):
+        raise Error('Ironic node is unnamed; name it with its product serial before lifecycle operations')
+    return safe_name(host['name'])
+
+
+def validate_registration_names(hosts):
+    names = [registration_name(h) for h in hosts.values()]
+    if len(set(names)) != len(names):
+        raise Error('Selected devices have duplicate Ironic serial names; remove the duplicate inventory entry')
 
 
 def timeout():
@@ -65,7 +83,8 @@ def credentials(host):
     values = values or {}
     values = values.get('redfish_credentials', values)
     defaults = values.get('defaults', {})
-    individual = values.get('devices', {}).get(host.get('uuid'), values.get('devices', {}).get(host.get('name'), {}))
+    devices = values.get('devices', {})
+    individual = devices.get(host.get('serial'), devices.get(host.get('name'), devices.get(host.get('uuid'), {})))
     return dict(host.get('driver_info', {}), **dict(defaults, **individual))
 
 
@@ -108,24 +127,11 @@ class Ironic:
     def reconcile(self, host, create=False, plan=False):
         if is_nexus(host):
             raise Error('Switches cannot enter the Ironic lifecycle')
-        by_id = self.api.find_node(host['uuid']) if host.get('uuid') else None
-        by_name = self.api.find_node(host['name']) if host.get('name') else None
-        if by_id and by_name and normalize(by_id)['uuid'] != normalize(by_name)['uuid']:
-            raise Error('Ironic UUID/name identity conflict')
-        old = normalize(by_id or by_name) if by_id or by_name else None
-        if host.get('uuid') and not by_id and by_name:
-            raise Error('Requested UUID differs from existing named registration')
-        if host.get('uuid') and not by_id:
-            raise Error('Linked Ironic UUID is missing; resolve the stale identity before enrollment')
+        name = registration_name(host)
+        match = self.api.find_node(name)
+        old = normalize(match) if match else None
         if not old and not create:
-            raise Error('Node is not enrolled; use node enroll')
-        if old and host.get('serial'):
-            serial = (old.get('properties') or {}).get('serial_number')
-            if not serial:
-                record = self.inspection(old['uuid'])
-                serial = record.get('inventory', record).get('system_vendor', {}).get('serial_number')
-            if not serial or serial != host['serial']:
-                raise Error('Ironic serial conflicts with approved physical identity')
+            raise Error('Ironic node '+name+' is not enrolled; use node enroll')
         nics = host.get('nics', [])
         addresses = [str(n['mac']).lower() for n in nics]
         if len(set(addresses)) != len(addresses):
@@ -146,6 +152,7 @@ class Ironic:
             if pxe and pxe != set(addresses):
                 raise Error('Provisioning MAC conflicts with existing boot ports')
         attrs = {key: host[key] for key in ('name', 'driver', 'boot_interface', 'properties', 'instance_info') if host.get(key) is not None}
+        attrs['name'] = name
         attrs['driver_info'] = credentials(host)
         if host.get('serial'):
             attrs['properties'] = dict(attrs.get('properties', {}), serial_number=host['serial'])
@@ -160,14 +167,12 @@ class Ironic:
             for field in ('driver_info', 'properties', 'instance_info'):
                 attrs[field] = dict(old.get(field) or {}, **attrs.get(field, {}))
         if plan:
-            return old or dict(uuid=host.get('uuid'), provision_state='enroll', maintenance=False)
+            return old or dict(name=name, provision_state='enroll', maintenance=False)
         if old:
             result = normalize(self.api.update_node(old['uuid'], retry_on_conflict=False, **attrs))
         else:
             if not attrs.get('driver') or not attrs['driver_info'] or not host.get('nics'):
                 raise Error('Enrollment needs driver, driver_info and provisioning nics')
-            if host.get('uuid'):
-                attrs['uuid'] = host['uuid']
             result = normalize(self.api.create_node(**attrs))
         for address, ports in owned_ports.items():
             if not ports:
@@ -184,7 +189,8 @@ class Ironic:
         if plan:
             return
         uuid = node['uuid']
-        print(uuid+': '+action, flush=True)
+        target = node.get('name') or uuid
+        print(target+': '+action, flush=True)
         if action == 'deploy':
             from .provision import bifrost_deploy
             bifrost_deploy(dict(host, uuid=uuid), options)
@@ -193,7 +199,7 @@ class Ironic:
             if action == 'clean':
                 # stdin avoids clean-step args (which can include secrets) in argv.
                 argv += ['--clean-steps', '-']
-            argv.append(uuid)
+            argv.append(target)
             run(argv, timeout=timeout()+30, data=json.dumps(steps or DEFAULT_CLEAN) if action == 'clean' else None)
         final = self.get(uuid)
         expected = {'manage': 'manageable', 'inspect': 'manageable', 'clean': 'manageable',
