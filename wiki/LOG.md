@@ -777,3 +777,21 @@ for the normalized URL on the existing fhs-test NetBox. All four corrected
 requests passed through actual Ansible URI tasks for zero, one and repeated
 trailing slashes (12 HTTP reads). No hardware or inventory writes were performed.
 Private fixture/logs remain under fhs-security-20261030/url-check on dragonvm.
+
+### 2026-10-31 — Import Bifrost servers using controller-side IPMI
+
+Added [the Bifrost adapter](../playbooks/netbox/bifrost_import.yml), reusing node
+OS/BMC addresses and credentials without another bootstrap inventory. It installs
+ipmitool on the controller, reads FRU and BMC metadata through bounded lanplus
+commands, and retains the native SSH/component/topology stages. Remote FRU
+failure or an absent unambiguous system serial stops the host before writes.
+Passwords use environment variables and suppressed credential-task output.
+
+Six focused unit tests and Ansible syntax checks passed. Against the existing
+fhs-test chart NetBox, a synthetic BMC client exercised initial import, stable
+identity on a Vault-encrypted repeat, rejected credentials and missing serial.
+No physical BMC or target server was contacted; network IPMI compatibility still
+needs verification on the deployment network. Private fixture logs are under
+fhs-bifrost-ipmi-check/private on dragonvm. Sphinx built successfully; external
+Python inventory fetching was unavailable, and a clean build also reported an
+existing platform export-anchor warning. Source/link and whitespace checks passed.

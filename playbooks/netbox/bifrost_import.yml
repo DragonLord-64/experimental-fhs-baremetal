@@ -1,0 +1,73 @@
+---
+- name: Read selected Bifrost servers for NetBox import
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  gather_subset: [min]
+  tags: [always]
+  vars:
+    bifrost_inventory_source: "{{ lookup('env', 'BIFROST_INVENTORY_SOURCE') }}"
+    bifrost_inventory_defaults_file: "{{ bifrost_inventory_source | dirname }}/group_vars/baremetal"
+  tasks:
+    - name: Require a Bifrost inventory file
+      ansible.builtin.assert:
+        that:
+          - bifrost_inventory_source | length > 0
+          - bifrost_inventory_source != 'ironic'
+        fail_msg: Set BIFROST_INVENTORY_SOURCE to the existing Bifrost YAML/JSON inventory file.
+    - name: Read private Bifrost node definitions (Vault supported)
+      ansible.builtin.include_vars:
+        file: "{{ bifrost_inventory_source }}"
+        name: _bifrost_nodes
+      no_log: true
+    - name: Inspect optional Bifrost shared defaults
+      ansible.builtin.stat:
+        path: "{{ bifrost_inventory_defaults_file }}"
+      register: _bifrost_defaults_stat
+    - name: Read shared Bifrost driver defaults (Vault supported)
+      ansible.builtin.include_vars:
+        file: "{{ bifrost_inventory_defaults_file }}"
+        name: _bifrost_defaults
+      when: _bifrost_defaults_stat.stat.exists
+      no_log: true
+    - name: Adapt private node definitions without writing another inventory
+      block:
+        - name: Validate and normalize selected Bifrost hosts
+          ansible.builtin.set_fact:
+            _bifrost_hosts: "{{ _bifrost_nodes | fhs_bifrost_import_hosts(bifrost_import_nodes | default([]), (_bifrost_defaults | default({})).get('driver_info', {}), bifrost_import_ssh_user | default('ubuntu')) }}"
+          no_log: true
+      rescue:
+        - name: Report invalid Bifrost selection without exposing credentials
+          ansible.builtin.fail:
+            msg: Check selected Bifrost node names, ipv4_address and driver_info credentials; names, OS addresses and BMC addresses must be unique.
+    - name: Install remote IPMI client on the Ansible controller
+      ansible.builtin.package:
+        name: ipmitool
+        state: present
+      become: "{{ ansible_facts.user_id != 'root' }}"
+      check_mode: false
+    - name: Add selected SSH hosts with remote IPMI settings
+      ansible.builtin.add_host:
+        name: "{{ item.name }}"
+        groups: fhs_bifrost_import
+        ansible_host: "{{ item.ansible_host }}"
+        ansible_connection: ssh
+        ansible_user: "{{ item.ansible_user }}"
+        ansible_ssh_private_key_file: "{{ item.ansible_ssh_private_key_file | default(omit) }}"
+        ansible_python_interpreter: "{{ item.ansible_python_interpreter | default(omit) }}"
+        ansible_become: "{{ item.ansible_become | default(omit) }}"
+        ansible_become_password: "{{ item.ansible_become_password | default(omit) }}"
+        bootstrap_site: "{{ item.bootstrap_site | default(bootstrap_site | default(omit)) }}"
+        bootstrap_role: "{{ item.bootstrap_role | default(bootstrap_role | default(omit)) }}"
+        system_fru_id: "{{ item.system_fru_id | default(omit) }}"
+        netbox_ipmi_address: "{{ item.netbox_ipmi_address }}"
+        netbox_ipmi_username: "{{ item.netbox_ipmi_username }}"
+        netbox_ipmi_password: "{{ item.netbox_ipmi_password }}"
+        netbox_ipmi_port: "{{ item.netbox_ipmi_port }}"
+      loop: "{{ _bifrost_hosts }}"
+      no_log: true
+
+- name: Import selected Bifrost servers using the existing inventory stages
+  ansible.builtin.import_playbook: netbox_import.yml
+  vars:
+    netbox_import_hosts: fhs_bifrost_import

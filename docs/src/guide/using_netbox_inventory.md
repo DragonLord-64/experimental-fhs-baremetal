@@ -2,6 +2,12 @@
 
 NetBox owns device, interface, address and selected configuration facts. Protected controller files own authentication. The dynamic Ansible inventory and Bifrost export are separate consumers.
 
+For servers already defined in Bifrost, the
+[Bifrost import command](../playbooks/development.md#import-servers-using-bifrost-inventory)
+uses that file directly, reads FRU through controller-side network IPMI and
+keeps the normal SSH discovery stages. You do not need to create a second
+bootstrap inventory before the first NetBox import.
+
 ## 1. Configure Ansible inventory
 
 Run these commands inside the provisioning container, from `/provision`.

@@ -19,6 +19,30 @@
     changed_when: false
     failed_when: false
     check_mode: false
+    when: netbox_ipmi_address | default('') | length == 0
+  - name: Read BMC firmware information through controller network IPMI
+    fhs_ipmi_probe:
+      address: '{{ netbox_ipmi_address }}'
+      username: '{{ netbox_ipmi_username }}'
+      password: '{{ netbox_ipmi_password }}'
+      port: '{{ netbox_ipmi_port | default(623) }}'
+      timeout: '{{ netbox_ipmi_timeout | default(45) }}'
+      binary: '{{ netbox_ipmi_binary | default(''ipmitool'') }}'
+      command: mc_info
+      channel: '{{ bmc_lan_channel | default(1) }}'
+    delegate_to: '{{ netbox_ipmi_delegate | default(''localhost'') }}'
+    become: false
+    vars:
+      ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    register: remote_bmc_info_probe
+    check_mode: false
+    no_log: true
+    when: netbox_ipmi_address | default('') | length > 0
+  - name: Use remote mc_info result
+    ansible.builtin.set_fact:
+      bmc_info_probe: '{{ remote_bmc_info_probe }}'
+    no_log: true
+    when: netbox_ipmi_address | default('') | length > 0
   - name: Read BMC management LAN channel
     ansible.builtin.command:
       argv:
@@ -30,6 +54,30 @@
     changed_when: false
     failed_when: false
     check_mode: false
+    when: netbox_ipmi_address | default('') | length == 0
+  - name: Read BMC management LAN channel through controller network IPMI
+    fhs_ipmi_probe:
+      address: '{{ netbox_ipmi_address }}'
+      username: '{{ netbox_ipmi_username }}'
+      password: '{{ netbox_ipmi_password }}'
+      port: '{{ netbox_ipmi_port | default(623) }}'
+      timeout: '{{ netbox_ipmi_timeout | default(45) }}'
+      binary: '{{ netbox_ipmi_binary | default(''ipmitool'') }}'
+      command: lan_print
+      channel: '{{ bmc_lan_channel | default(1) }}'
+    delegate_to: '{{ netbox_ipmi_delegate | default(''localhost'') }}'
+    become: false
+    vars:
+      ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    register: remote_bmc_lan_probe
+    check_mode: false
+    no_log: true
+    when: netbox_ipmi_address | default('') | length > 0
+  - name: Use remote lan_print result
+    ansible.builtin.set_fact:
+      bmc_lan_probe: '{{ remote_bmc_lan_probe }}'
+    no_log: true
+    when: netbox_ipmi_address | default('') | length > 0
   - name: Record available BMC firmware from management controller only
     ansible.builtin.set_fact:
       hardware_fields: '{{ hardware_fields | combine({"bmc_firmware": bmc_firmware}) }}'

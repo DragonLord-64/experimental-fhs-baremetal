@@ -14,6 +14,36 @@
     failed_when: false
     check_mode: false
     no_log: true
+    when: netbox_ipmi_address | default('') | length == 0
+  - name: Read FRU over network IPMI from the controller
+    fhs_ipmi_probe:
+      address: "{{ netbox_ipmi_address }}"
+      username: "{{ netbox_ipmi_username }}"
+      password: "{{ netbox_ipmi_password }}"
+      port: "{{ netbox_ipmi_port | default(623) }}"
+      timeout: "{{ netbox_ipmi_timeout | default(45) }}"
+      binary: "{{ netbox_ipmi_binary | default('ipmitool') }}"
+      command: fru
+    delegate_to: "{{ netbox_ipmi_delegate | default('localhost') }}"
+    become: false
+    vars:
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    register: remote_fru_probe
+    check_mode: false
+    no_log: true
+    when: netbox_ipmi_address | default('') | length > 0
+  - name: Require successful remote FRU discovery before inventory writes
+    ansible.builtin.assert:
+      that:
+        - remote_fru_probe.rc | default(1) == 0
+        - remote_fru_probe.stdout | default('') | trim | length > 0
+      fail_msg: Remote IPMI FRU discovery failed; check controller ipmitool, BMC address, credentials and network IPMI access. No local FRU fallback is used.
+    when: netbox_ipmi_address | default('') | length > 0
+  - name: Use the remote FRU result with the existing identity parser
+    ansible.builtin.set_fact:
+      fru_probe: "{{ remote_fru_probe }}"
+    no_log: true
+    when: netbox_ipmi_address | default('') | length > 0
   - name: Normalize distinct chassis product and motherboard identities
     ansible.builtin.set_fact:
       system_identity: '{{ fru_probe | fhs_fru_identity(identity_overrides, system_fru_id | default(motherboard_fru_id | default("0"))) }}'
@@ -22,6 +52,12 @@
         serial: '{{ bootstrap_chassis_serial | default(server_info.serial | default("")) }}'
         manufacturer: '{{ bootstrap_manufacturer | default(server_info.manufacturer | default("")) }}'
         model: '{{ bootstrap_device_type | default(server_info.part_number | default(server_info.model | default(""))) }}'
+  - name: Require a verified serial from remote FRU or an explicit override
+    ansible.builtin.assert:
+      that:
+        - system_identity.identity.serial | default('') | length > 0
+      fail_msg: Remote FRU has no unambiguous system Product Serial. Check system_fru_id or supply a verified bootstrap_chassis_serial; no serial is inferred from the Bifrost name.
+    when: netbox_ipmi_address | default('') | length > 0
   - name: Retain discovered identity fields and motherboard component
     ansible.builtin.set_fact:
       hardware_fields: '{{ hardware_fields | combine(system_identity | fhs_identity_metadata) }}'

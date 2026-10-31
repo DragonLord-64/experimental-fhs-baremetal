@@ -13,6 +13,62 @@ holds SDK/NIC discovery, topology commands, API retries, certificate validation,
 site/role defaults and Bifrost export settings. Override individual settings
 per run with `-e key=value`.
 
+## Import servers from Bifrost inventory
+
+Run inside the provisioning container from `/provision`. Use the existing
+Bifrost YAML/JSON node mapping; no separate bootstrap inventory is required.
+
+```bash
+export BIFROST_INVENTORY_SOURCE=/bifrost/playbooks/inventory/terabox1501b_inventory.yaml
+
+ansible-playbook -i localhost, playbooks/netbox/bifrost_import.yml \
+  -e '{"bifrost_import_nodes":["sys1391","sys1412"],"bootstrap_site":"MDA","bootstrap_role":"fpga-host-server"}' \
+  --tags compare
+```
+
+Replace the node names and physical NetBox site name. `bootstrap_site` is not a
+URL. The node's OS hostname becomes its NetBox name; the verified FRU serial
+identifies its physical chassis. No serial is inferred from a Bifrost node name.
+
+After reviewing the preview, repeat with `--tags apply`. The same stage tags
+listed below work with this wrapper. Omitting `bifrost_import_nodes` selects all
+nodes in the Bifrost file. If using `--limit`, include `localhost` so the adapter
+can run.
+
+The adapter reads `name`, `ipv4_address` (or `ansible_host`) and `driver_info`.
+It uses `ipmi_address`, `ipmi_username`, `ipmi_password` and optional `ipmi_port`.
+For existing Redfish entries it uses the host from `redfish_address` and the
+Redfish username/password for network IPMI; HTTPS port 443 does not become the
+IPMI port. These BMC accounts must also have network IPMI enabled. IPMI defaults
+to UDP 623 using `lanplus`.
+
+Shared `driver_info` defaults are read from `group_vars/baremetal` beside the
+Bifrost source file; node settings override those defaults. Set
+`bifrost_inventory_defaults_file` to another defaults file if needed.
+Vault-encrypted source/default files are supported. Missing credentials or
+ambiguous OS/BMC mappings stop before importing.
+
+SSH defaults to `ubuntu`; change it with `-e bifrost_import_ssh_user=<USER>`.
+Per-node `ansible_user`, `ansible_ssh_private_key_file` and
+`ansible_python_interpreter` are accepted. The usual `-e ansible_user=...` and
+SSH options also apply. The target still needs SSH and Python for OS/component
+inventory; it does not need `ipmitool` for FRU or BMC reads in this workflow.
+
+The wrapper installs `ipmitool` on the controller/provisioning container before
+reading hardware, including preview/check-mode runs. A non-root controller needs
+sudo for that package installation. It does not install packages on the target
+servers, enroll/provide Ironic nodes, clean disks or deploy an OS.
+
+FRU, BMC firmware and BMC LAN reads execute on the controller. Passwords pass
+through the client environment, not command arguments; credential tasks suppress
+logs. A failed remote FRU probe or missing system serial stops that host before
+NetBox writes. Existing explicit identity overrides still apply. Module reads
+are bounded by `netbox_ipmi_timeout` (45 seconds by default).
+
+The shared platform endpoints and Vault secrets are loaded by the normal
+importer. Switches still use their own inventory/connection settings; use
+`netbox_import.yml` for a combined server/switch topology run.
+
 ## Import stages
 
 ```bash
@@ -60,9 +116,11 @@ preserved. Observed connections are created on unoccupied endpoints.
 
 ## Linux system identity
 
-`netbox_import.yml` reads device identity from local `ipmitool fru` over the
-configured connection. Linux DMI facts and sysfs are not identity sources.
-Discovery uses the same privilege settings as BIOS/BMC reads. No IPMI network credentials are added or tool installed.
+`netbox_import.yml` reads device identity from local `ipmitool fru` over SSH,
+or controller-side network IPMI when the Bifrost adapter supplies BMC settings. Linux DMI facts and sysfs are not identity sources.
+Local discovery uses the target’s existing privilege settings and installed tools.
+The Bifrost wrapper installs the client on the controller and reads BMC credentials
+from the Bifrost inventory.
 `facts`, `compare` and check mode keep these probes read-only.
 
 `system_fru_id` selects the system record (default `0`; older

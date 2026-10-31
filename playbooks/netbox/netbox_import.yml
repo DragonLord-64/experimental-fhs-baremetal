@@ -1,5 +1,5 @@
 - name: Route selected Linux servers and Nexus switches
-  hosts: all
+  hosts: "{{ netbox_import_hosts | default('all') }}"
   gather_facts: false
   connection: local
   any_errors_fatal: false

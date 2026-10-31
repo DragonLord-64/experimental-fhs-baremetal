@@ -2,6 +2,25 @@
 
 NetBox discovery/export lives under `playbooks/netbox/`; switch POAP and Nexus configuration live under `playbooks/switch-poap/`. Their tasks, plugins and supporting scripts moved together without behavior changes. Other development playbooks remain in place. Run from `/provision` with the required collections, Python packages and private variables available.
 
+(import-servers-using-bifrost-inventory)=
+## Import servers using Bifrost inventory
+
+Inside the provisioning container, from `/provision`:
+
+```bash
+export BIFROST_INVENTORY_SOURCE=/bifrost/playbooks/inventory/terabox1501b_inventory.yaml
+ansible-playbook -i localhost, playbooks/netbox/bifrost_import.yml \
+  -e '{"bifrost_import_nodes":["sys1391","sys1412"],"bootstrap_site":"MDA","bootstrap_role":"fpga-host-server"}' \
+  --tags compare
+```
+
+Replace names/site and repeat with `--tags apply` after reviewing the preview.
+The wrapper installs controller-side `ipmitool`, reuses Bifrost BMC credentials
+for remote FRU discovery and uses SSH for OS/components. No target-side IPMI
+package is required. It reads the shared platform endpoints/Vault secrets and
+never invokes Bifrost enrollment, cleaning or OS deployment. See
+[adapter settings](https://gitlab.com/ska-telescope/sdi/ska-mid-cbf-fhs-baremetal/-/blob/development2/playbooks/netbox/README.md#import-servers-from-bifrost-inventory).
+
 ## NetBox discovery and export
 
 | Playbook | Ownership |
