@@ -4,5 +4,5 @@ site: null
 role: null
 device_type: null
 system_fru_id: '0'
-# Explicit qualification after hardware review; no universal NIC heuristic.
-onboard_interfaces: []
+# Optional expected interface name; null selects the unique inspected boot MAC match.
+provisioning_interface: null

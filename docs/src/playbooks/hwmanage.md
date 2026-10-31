@@ -60,7 +60,7 @@ address assignment.
 ## Prepare import settings
 
 Edit the tracked `/provision/scripts/hwmanage/import.yml` with existing NetBox object IDs
-and reviewed motherboard interface names from inspection. These settings are not
+for new devices. These settings are not
 secrets; keep the reviewed values in your repository. The supplied IDs are unset
 and must be filled in before creating devices:
 
@@ -69,16 +69,23 @@ site: 1
 role: 1
 device_type: 1
 system_fru_id: '0'
-onboard_interfaces:
-  - enp2s0f0
+provisioning_interface: null
 ```
 
-The numeric IDs above are examples, not automatic object selections.
-Set `HWMANAGE_IMPORT_DEFAULTS=/path/to/import.yml` for a local override. A boot MAC
-must match exactly one inspected interface; `onboard_interfaces` qualifies that
-interface after hardware review. The importer verifies FRU through controller-side
-IPMI when the inspection does not establish FRU identity. The import playbook
-installs `ipmitool` on the provisioning host, not the uninstalled target OS.
+`site`, `role` and `device_type` are IDs of existing NetBox objects assigned to
+new devices. Existing devices retain their site, role and device type. The IDs
+above are examples, not automatic selections. `system_fru_id` selects the IPMI
+FRU record for chassis manufacturer/model/serial verification; normally use `'0'`.
+
+`provisioning_interface: null` selects the interface whose MAC uniquely matches
+Ironic's inspected boot PXE MAC. No onboard declaration is needed. Set a name such
+as `enp2s0f0` only to require that interface; a conflicting boot MAC is rejected.
+Missing or ambiguous boot MAC matches are rejected. Old `onboard_interfaces`
+settings are no longer used.
+
+Set `HWMANAGE_IMPORT_DEFAULTS=/path/to/import.yml` for a local settings file.
+The importer verifies identity through a controller-side IPMI FRU read.
+The import playbook installs `ipmitool` on the provisioning host, not the target OS.
 The controller therefore needs package-install privileges for the first run.
 
 Copy `bifrost-infra/templates/hwmanage-bmc-secrets.yml` to

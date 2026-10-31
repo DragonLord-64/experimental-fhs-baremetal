@@ -332,14 +332,14 @@ class MinimalImportContracts(unittest.TestCase):
             self.helper.import_selected({}, Mock(), plan=True)
             settings = apply.call_args.args[2]
             self.assertIsNone(settings['site'])
-            self.assertEqual(settings['onboard_interfaces'], [])
+            self.assertEqual(settings['provisioning_interface'], None)
             with tempfile.TemporaryDirectory() as directory:
                 override = Path(directory)/'custom.yml'
-                override.write_text('site: 42\nonboard_interfaces: [eno1]\n')
+                override.write_text('site: 42\nprovisioning_interface: eno1\n')
                 os.environ['HWMANAGE_IMPORT_DEFAULTS'] = str(override)
                 self.helper.import_selected({}, Mock(), plan=True)
                 self.assertEqual(apply.call_args.args[2]['site'], 42)
-                self.assertEqual(apply.call_args.args[2]['onboard_interfaces'], ['eno1'])
+                self.assertEqual(apply.call_args.args[2]['provisioning_interface'], 'eno1')
 
     def test_repeated_import_preserves_operator_fields(self):
         old = dict(id=10, serial='SERIAL123', name='approved', primary_ip4={'id': 90},
@@ -361,15 +361,25 @@ class MinimalImportContracts(unittest.TestCase):
             self.helper.apply(sync, item, {})
         sync.ensure.assert_not_called()
 
-    def test_boot_mac_and_qualification_required(self):
-        record = dict(inventory=dict(boot={'pxe_interface': '02:00:00:00:00:01'},
-            interfaces=[dict(name='eno1', mac_address='02:00:00:00:00:01')]))
+    def test_boot_mac_automatically_selects_unique_interface(self):
+        record = dict(inventory=dict(boot={'pxe_interface': 'a8:a1:59:fb:a6:bb'},
+            interfaces=[dict(name='enp193s0f1np1', mac_address='54:9b:24:2c:a8:41'),
+                        dict(name='enp2s0f0', mac_address='a8:a1:59:fb:a6:bb'),
+                        dict(name='enp2s0f1', mac_address='a8:a1:59:fb:a6:bc')]))
+        self.assertEqual(self.helper.boot_port(record),
+                         dict(name='enp2s0f0', mac='a8:a1:59:fb:a6:bb'))
+        self.assertEqual(self.helper.boot_port(record, 'enp2s0f0')['name'], 'enp2s0f0')
+        with self.assertRaises(ValueError):
+            self.helper.boot_port(record, 'enp2s0f1')
+        record['inventory']['interfaces'].append(dict(name='duplicate', mac_address='a8:a1:59:fb:a6:bb'))
         with self.assertRaises(ValueError):
             self.helper.boot_port(record)
-        self.assertEqual(self.helper.boot_port(record, ['eno1'])['name'], 'eno1')
         record['inventory']['boot'] = {}
         with self.assertRaises(ValueError):
-            self.helper.boot_port(record, ['eno1'])
+            self.helper.boot_port(record)
+        record['inventory']['boot'] = {'pxe_interface': '00:00:00:00:00:00'}
+        with self.assertRaises(ValueError):
+            self.helper.boot_port(record)
 
 
 if __name__ == '__main__':

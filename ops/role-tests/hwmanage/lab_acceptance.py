@@ -57,7 +57,7 @@ def main():
         fru = '\n'.join(['FRU Device Description : Builtin FRU Device (ID 0)',
             ' Product Manufacturer : Synthetic Vendor', ' Product Part Number : Synthetic Model',
             ' Product Serial : '+prefix])
-        settings = dict(site=site['id'], role=role['id'], device_type=dtype['id'], onboard_interfaces=['eno1'])
+        settings = dict(site=site['id'], role=role['id'], device_type=dtype['id'])
         class Ironic:
             def inspection(self, selected):
                 assert selected == node_uuid

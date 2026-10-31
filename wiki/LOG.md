@@ -1059,3 +1059,21 @@ independent node succeeds. All 11 existing native importer/wrapper lab assertion
 passed against the healthy chart in explicit `fhs-test` context. Synthetic objects
 and the temporary forward were cleaned up. Whitespace checks passed; no physical
 hardware or deployed-node state was changed.
+
+### 2026-10-31 — automatic provisioning interface selection
+
+The user confirmed motherboard classification is not required for provisioning
+port selection. The [minimal importer](../playbooks/netbox/ironic_minimal.py) now
+uses the unique inspected boot-MAC match without mandatory `onboard_interfaces`.
+It still rejects absent/invalid boot MACs, ambiguous matches and missing interface
+names. Optional `provisioning_interface` constrains the expected name and fails
+on mismatch; null enables automatic selection. Old onboard settings are unused.
+Tracked settings and operator documentation explain this and the NetBox object
+IDs/FRU selector; existing devices retain their site/role/device type.
+
+Validation: 37 focused tests passed, including a representative multi-NIC record,
+automatic selection without an onboard flag, expected-name mismatch, duplicate
+MACs and missing/invalid boot MACs. All 11 native importer/wrapper assertions
+passed against the existing healthy chart in explicit `fhs-test` context with
+no onboard setting in the synthetic fixture. Synthetic objects and the temporary
+forward were cleaned up. Whitespace checks passed; physical hardware is untested.

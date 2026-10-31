@@ -74,3 +74,7 @@ fixture cleanup. The extra application mount has been removed from Compose.
 batch continuation. Mixed failure/success and duplicate-owner rejection are
 covered by focused unit tests (37 total passed); the live fixture exercises
 persistence and wrapper execution, not physical hardware failures.
+
+2026-10-31 automatic boot-port selection: all 11 lab assertions passed with
+`onboard_interfaces` removed from fixture settings. Unique inspected boot-MAC
+selection is covered by the focused multi-NIC test; 37 focused tests passed.

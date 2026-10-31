@@ -17,7 +17,7 @@ def __getattr__(name):
     raise AttributeError(name)
 
 
-def boot_port(record, onboard_interfaces=()):
+def boot_port(record, provisioning_interface=None):
     inventory = record.get('inventory', record)
     boot = inventory.get('boot', {})
     mac = str(boot.get('pxe_interface', '')).lower().replace('-', ':')
@@ -27,9 +27,10 @@ def boot_port(record, onboard_interfaces=()):
     if len(ports) != 1:
         raise ValueError('Boot MAC must match exactly one inspected interface')
     port = ports[0]
-    # No universal PCI/driver heuristic: qualification must be explicit.
-    if not (port.get('onboard') is True or port.get('name') in onboard_interfaces):
-        raise ValueError('Boot interface '+str(port.get('name'))+' lacks approved motherboard qualification; configure onboard_interfaces after review')
+    if not isinstance(port.get('name'), str) or not port['name']:
+        raise ValueError('Boot interface needs an inspected name')
+    if provisioning_interface and port['name'] != provisioning_interface:
+        raise ValueError('Configured provisioning_interface conflicts with inspected boot MAC')
     return {'name': port['name'], 'mac': mac}
 
 
@@ -48,7 +49,7 @@ def fru_identity(text, fru_id='0'):
 def observation(node, record, settings, probe):
     from fhs_netbox import physical_serial
     inventory = record.get('inventory', record)
-    port = boot_port(record, settings.get('onboard_interfaces', []))
+    port = boot_port(record, settings.get('provisioning_interface'))
     # SMBIOS system_vendor.serial_number is not proof of FRU Product Serial.
     # A controller IPMI FRU read remains the default, independent of Linux/SSH.
     identity = fru_identity(probe(node, inventory), str(settings.get('system_fru_id', '0')))
