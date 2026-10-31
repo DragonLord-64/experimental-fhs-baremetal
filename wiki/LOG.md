@@ -1289,3 +1289,9 @@ passed. Real BMC transport and physical hardware remain untested.
   21 native lab acceptance assertions passed, including rename preview,
   relationship preservation and repeat-run idempotence. Physical hardware was
   not exercised.
+
+- 2026-10-31: Corrected BMC credential loading to accept the existing platform
+  `redfish.credentials.default.redfish.username/password` structure in discovery
+  import and Bifrost export. Earlier defaults/device overrides remain supported.
+  Updated the copyable template and usage example. Validation: 52 wrapper tests,
+  three transfer tests and an Ansible credential-mapping fixture passed.

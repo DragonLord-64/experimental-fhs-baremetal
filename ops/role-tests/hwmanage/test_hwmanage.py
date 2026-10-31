@@ -378,6 +378,14 @@ class LifecycleContracts(unittest.TestCase):
             self.assertGreaterEqual(values['wait_timeout'], 900)
             self.assertNotIn('wait_for_node_deploy_timeout', values)
 
+    def test_existing_platform_redfish_credentials(self):
+        values = {'redfish': {'credentials': {'default': {'redfish': {
+            'username': 'fixture-user', 'password': 'fixture-password'}}}}}
+        with patch.object(ironic.Path, 'exists', return_value=True), patch.object(ironic, 'protected_yaml', return_value=values):
+            result = ironic.credentials({'driver_info': {'redfish_password': '******'}})
+        self.assertEqual(result['redfish_username'], 'fixture-user')
+        self.assertEqual(result['redfish_password'], 'fixture-password')
+
     def test_protected_credentials_win(self):
         with patch.object(ironic.Path, 'exists', return_value=True), patch.object(ironic, 'protected_yaml', return_value={'defaults': {'ipmi_password': 'protected'}}):
             value = ironic.credentials({'driver_info': {'ipmi_password': '******'}})

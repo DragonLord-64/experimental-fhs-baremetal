@@ -85,11 +85,13 @@ def credentials(host):
     path = os.environ.get('HWMANAGE_BMC_SECRETS', '/provision/files.d/credentials/redfish.yml')
     values = protected_yaml(path) if Path(path).exists() else {}
     values = values or {}
+    nested = values.get('redfish', {}).get('credentials', {}).get('default', {}).get('redfish', {})
+    standard = {('redfish_' + key): nested[key] for key in ('username', 'password') if key in nested}
     values = values.get('redfish_credentials', values)
     defaults = values.get('defaults', {})
     devices = values.get('devices', {})
     individual = devices.get(host.get('serial'), devices.get(host.get('name'), devices.get(host.get('uuid'), {})))
-    return dict(host.get('driver_info', {}), **dict(defaults, **individual))
+    return dict(host.get('driver_info', {}), **dict(standard, **dict(defaults, **individual)))
 
 
 class Ironic:

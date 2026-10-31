@@ -114,14 +114,16 @@ ansible-vault encrypt /provision/files.d/credentials/redfish.yml
 The credential format is:
 
 ```yaml
-redfish_credentials:
-  defaults:
-    redfish_username: REPLACE_USER
-    redfish_password: REPLACE_PASSWORD
-  devices: {}
+redfish:
+  credentials:
+    default:
+      redfish:
+        username: REPLACE_USER
+        password: REPLACE_PASSWORD
 ```
 
-Per-device credential overrides use the product serial or reviewed NetBox hostname
+The earlier `redfish_credentials.defaults` format is also accepted.
+Per-device credential overrides in `redfish_credentials.devices` use the product serial or reviewed NetBox hostname
 under `devices`. Legacy UUID-keyed credentials still work for direct discovery
 imports; enrollment from NetBox uses serial/name keys or the shared defaults.
 No BMC password belongs in a NetBox config context.
