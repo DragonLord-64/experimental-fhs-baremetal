@@ -1,0 +1,37 @@
+---
+- name: Reuse pip setting validation
+  ansible.builtin.include_role:
+    name: setup_pip_source
+    tasks_from: validate
+    public: true
+
+- name: Require configured HTTP proxy endpoints
+  ansible.builtin.assert:
+    that:
+      - apt_cache_url | default('') is match('^http://[^/]+')
+      - git_proxy_url | default('') is match('^http://[^/]+')
+    fail_msg: Set apt_cache_url and git_proxy_url to reachable HTTP proxy URLs.
+
+- name: Check public CA source files
+  ansible.builtin.include_tasks: file.yml
+  vars:
+    preflight_file: "{{ item.src }}"
+  loop: "{{ platform_ca_certificates | default([]) }}"
+
+- name: Check proxy TCP listeners from the managed server
+  ansible.builtin.wait_for:
+    host: "{{ item | urlsplit('hostname') }}"
+    port: "{{ (item | urlsplit('port')) | default(80, true) }}"
+    timeout: "{{ preflight_timeout | default(10) }}"
+    connect_timeout: 3
+  loop: "{{ [apt_cache_url, git_proxy_url] }}"
+  changed_when: false
+  check_mode: false
+  when: preflight_check_endpoints | default(true) | bool
+
+- name: Check pip HTTPS from the managed server
+  ansible.builtin.include_tasks: https.yml
+  vars:
+    preflight_https_url: "{{ pip_index_url }}"
+    preflight_https_ca_files: "{{ [pip_ca_bundle] if pip_ca_bundle | default('') | length > 0 else [] }}"
+  when: pip_index_url is match('^https://')

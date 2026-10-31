@@ -1,0 +1,33 @@
+---
+- name: Check provisioning inputs without changing hosts
+  hosts: device_roles_fpga-host-server
+  gather_facts: false
+  become: false
+  vars:
+    preflight_selected_checks: "{{ preflight_checks | default(['distribution', 'users']) }}"
+  tasks:
+    - name: Validate selected checks
+      ansible.builtin.assert:
+        that:
+          - preflight_selected_checks is sequence and preflight_selected_checks is not string
+          - preflight_selected_checks | length > 0
+          - preflight_selected_checks | difference(['distribution', 'users', 'filebeat_setup', 'filebeat']) | length == 0
+        fail_msg: Select distribution, users, filebeat_setup or filebeat in preflight_checks.
+
+    - name: Check distribution settings and access
+      ansible.builtin.include_tasks: tasks/preflight/distribution.yml
+      when: "'distribution' in preflight_selected_checks"
+
+    - name: Check managed account and SDK inputs
+      ansible.builtin.include_tasks: tasks/preflight/users.yml
+      when: "'users' in preflight_selected_checks"
+
+    - name: Check Filebeat inputs
+      ansible.builtin.include_tasks: tasks/preflight/filebeat.yml
+      loop: "{{ preflight_selected_checks | intersect(['filebeat_setup', 'filebeat']) }}"
+      loop_control:
+        loop_var: preflight_filebeat_scope
+
+    - name: Report selected preflight completion
+      ansible.builtin.debug:
+        msg: "Passed {{ preflight_selected_checks | join(', ') }} on {{ inventory_hostname }}; no provisioning changes applied."

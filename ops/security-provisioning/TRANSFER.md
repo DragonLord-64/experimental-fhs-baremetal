@@ -88,3 +88,10 @@ tags are no longer selected by `site.yml`. See [user setup](../../roles/manage_u
 Lab commands/results live beside this note, outside copied source. Lab success
 does not establish production DNS, certificate issuance, credentials, hardware
 behavior or a completed official deployment.
+
+The old `manage_venvs`, `manage_bittware_sdk` and `manage_gitlab-runner` entry
+points now stop with migration instructions. Copy their replacement main task
+files too; the plain-copy script leaves any obsolete files on disk, but those
+entry points no longer run duplicate implementations. The optional
+`playbooks/preflight.yml` command is documented in
+[preflight usage](../../docs/src/playbooks/preflight.md).

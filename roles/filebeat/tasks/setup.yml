@@ -1,31 +1,6 @@
 ---
-- name: Require setup package, authentication file and verified endpoints
-  ansible.builtin.assert:
-    that:
-      - filebeat_package_path | length > 0
-      - filebeat_package_path.endswith('.deb')
-      - filebeat_setup_credentials_file | length > 0
-      - filebeat_elasticsearch_hosts | length > 0
-      - filebeat_elasticsearch_hosts | select('match', '^https://') | list | length == filebeat_elasticsearch_hosts | length
-      - filebeat_ssl_verification_mode in ['full', 'strict', 'certificate']
-    fail_msg: Set package, setup credentials and verified HTTPS Elasticsearch URLs in monitoring group vars.
-
-- name: Load separate controller-side setup credentials (Vault supported)
-  ansible.builtin.include_vars:
-    file: "{{ filebeat_setup_credentials_file }}"
-    name: filebeat_setup_credentials
-  no_log: true
-
-- name: Validate setup authentication
-  ansible.builtin.assert:
-    that:
-      - >-
-        (filebeat_setup_credentials.filebeat_elasticsearch_api_key | default('') | length > 0)
-        !=
-        ((filebeat_setup_credentials.filebeat_elasticsearch_username | default('') | length > 0)
-        and (filebeat_setup_credentials.filebeat_elasticsearch_password | default('') | length > 0))
-    fail_msg: Supply either a setup API key (id:key) or setup username and password.
-  no_log: true
+- name: Validate setup inputs
+  ansible.builtin.import_tasks: setup_inputs.yml
 
 - name: Create private setup workspace on delegate
   ansible.builtin.tempfile:

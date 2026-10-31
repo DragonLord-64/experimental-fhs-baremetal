@@ -1,0 +1,29 @@
+---
+- name: Require an explicitly approved controller key directory
+  ansible.builtin.assert:
+    that: fhs_keys_dir | length > 0
+    fail_msg: Set fhs_keys_dir to the approved key directory for this inventory.
+
+- name: Find all user public key files on controller
+  ansible.builtin.find:
+    paths: "{{ fhs_keys_dir }}"
+    patterns: "*.pub"
+  register: found_key_files
+  delegate_to: localhost
+  become: false
+
+- name: Abort if no public key files are found
+  ansible.builtin.fail:
+    msg: |
+      No public key files (*.pub) were found in "{{ fhs_keys_dir }}".
+      • Ensure the directory exists on your Ansible controller.
+      • Populate it with files named after your users (e.g., aschell.pub).
+  when: found_key_files.matched == 0
+
+- name: Resolve managed account names
+  ansible.builtin.set_fact:
+    fhs_key_usernames: "{{ found_key_files.files | map(attribute='path') | map('basename') | map('regex_replace', '[.]pub$', '') | list }}"
+
+- name: Resolve complete user environment membership
+  ansible.builtin.set_fact:
+    fhs_managed_usernames: "{{ (fhs_key_usernames + (fhs_users | map(attribute='name') | list) + [ansible_user]) | unique | list }}"

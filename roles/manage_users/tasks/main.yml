@@ -1,4 +1,7 @@
 ---
+- name: Read account inputs
+  ansible.builtin.import_tasks: inputs.yml
+
 - name: Create accounts and configure access
   ansible.builtin.import_tasks: accounts.yml
 

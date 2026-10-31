@@ -1,24 +1,7 @@
-# SPDX-License-Identifier: BSD-3-Clause
 ---
-# tasks file for bittware_sdk
-- name: FPGA host packages + group
-  ansible.builtin.import_tasks: packages.yml
-
-- name: Bittware SDK
-  ansible.builtin.import_tasks: bittware_sdk.yml
-  when: fpga_update_bittware_sdk | bool
-
-- name: Bittware venvs
-  ansible.builtin.import_tasks: bittware_venvs.yml
-  when: users_setup_venvs | bool
-
-
-# - name: Ensure correct file ownership
-#   ansible.builtin.file:
-#     path: "{{ item }}"
-#     state: touch
-#     owner: "{{ ansible_user }}"
-#     group: "{{ fpga_bittware_group }}"
-#   loop:
-#     - /opt/bwsdk/bwusb_config.json
-#   become: true
+- name: Explain retired role migration
+  ansible.builtin.fail:
+    msg: >-
+      This standalone role is retired. Use manage_users for accounts, the system
+      SDK and shared/personal BittWare environments. Select --tags manage_users
+      in playbooks/site.yml and configure environment group vars.

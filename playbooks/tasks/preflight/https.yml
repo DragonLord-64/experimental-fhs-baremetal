@@ -1,0 +1,29 @@
+---
+- name: Verify HTTPS reachability and issuing CA
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json, ssl, sys, urllib.request, urllib.error
+        url, paths, timeout = sys.argv[1], json.loads(sys.argv[2]), float(sys.argv[3])
+        context = ssl.create_default_context(cadata='\n'.join(open(path).read() for path in paths)) if paths else ssl.create_default_context()
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, method='HEAD'), context=context, timeout=timeout) as response:
+                if not response.url.startswith('https://'):
+                    raise SystemExit('HTTPS endpoint redirected to insecure HTTP')
+                status = response.status
+        except urllib.error.HTTPError as error:
+            if not error.url.startswith('https://'):
+                raise SystemExit('HTTPS endpoint redirected to insecure HTTP')
+            status = error.code
+        if status not in (200, 204, 401, 403, 405):
+            raise SystemExit('Unexpected HTTP status: ' + str(status))
+        print('HTTPS verified; HTTP status ' + str(status))
+      - "{{ preflight_https_url }}"
+      - "{{ preflight_https_ca_files | default([]) | to_json }}"
+      - "{{ preflight_timeout | default(10) | string }}"
+  delegate_to: "{{ preflight_https_host | default(inventory_hostname) }}"
+  changed_when: false
+  check_mode: false
+  when: preflight_check_endpoints | default(true) | bool

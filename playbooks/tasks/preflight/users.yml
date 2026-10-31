@@ -1,0 +1,30 @@
+---
+- name: Reuse account input discovery
+  ansible.builtin.include_role:
+    name: manage_users
+    tasks_from: inputs
+    public: true
+
+- name: Check selected SDK archive
+  ansible.builtin.include_tasks: file.yml
+  vars:
+    preflight_file: "{{ fpga_bittware_sdk_deb }}"
+  when: fhs_setup_user_environments | bool and fpga_update_bittware_sdk | bool
+
+- name: Reuse SDK archive header validation
+  ansible.builtin.include_role:
+    name: manage_users
+    tasks_from: sdk_inputs
+  when: fhs_setup_user_environments | bool and fpga_update_bittware_sdk | bool
+
+- name: Inspect existing SDK installer when no archive installation is selected
+  ansible.builtin.stat:
+    path: "{{ fpga_bittware_sdk_root }}/bin/bw_pip"
+  register: preflight_existing_sdk
+  when: fhs_setup_user_environments | bool and not fpga_update_bittware_sdk | bool
+
+- name: Require installed SDK or selected archive
+  ansible.builtin.assert:
+    that: preflight_existing_sdk.stat.executable | default(false)
+    fail_msg: SDK installation is disabled but bw_pip is missing or not executable.
+  when: fhs_setup_user_environments | bool and not fpga_update_bittware_sdk | bool

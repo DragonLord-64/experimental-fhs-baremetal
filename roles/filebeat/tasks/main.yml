@@ -1,31 +1,11 @@
 ---
-- name: Validate installation and endpoint settings
+- name: Require supported target OS
   ansible.builtin.assert:
-    that:
-      - ansible_facts.os_family == 'Debian'
-      - filebeat_package_path | length > 0
-      - filebeat_credentials_file | length > 0
-      - filebeat_elasticsearch_hosts is sequence and filebeat_elasticsearch_hosts is not string
-      - filebeat_elasticsearch_hosts | length > 0
-      - filebeat_elasticsearch_hosts | select('match', '^https?://') | list | length == filebeat_elasticsearch_hosts | length
-      - filebeat_package_path.endswith('.deb')
-      - filebeat_ssl_verification_mode in ['full', 'strict', 'certificate']
-      - filebeat_journald_seek in ['head', 'tail', 'since']
-    fail_msg: Set controller package/credentials paths and reachable Elasticsearch URLs for a supported Linux package.
+    that: ansible_facts.os_family == 'Debian'
+    fail_msg: Filebeat installation requires a Debian-family target.
 
-- name: Load controller-side publishing credentials (Vault supported)
-  ansible.builtin.include_vars:
-    file: "{{ filebeat_credentials_file }}"
-    name: filebeat_credentials
-  no_log: true
-
-- name: Validate publishing credentials
-  ansible.builtin.assert:
-    that:
-      - filebeat_credentials.filebeat_elasticsearch_username | default('') | length > 0
-      - filebeat_credentials.filebeat_elasticsearch_password | default('') | length > 0
-    fail_msg: Credentials file must define filebeat_elasticsearch_username and filebeat_elasticsearch_password.
-  no_log: true
+- name: Validate publishing inputs
+  ansible.builtin.import_tasks: publishing_inputs.yml
 
 - name: Prepare Elasticsearch from the control host
   ansible.builtin.import_tasks: setup.yml

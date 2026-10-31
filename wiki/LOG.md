@@ -622,3 +622,22 @@ ownership-drift repair and SDK-version upgrade for four personal environments
 and the shared environment. Syntax, source boundaries and documentation builds
 passed. Tests used a synthetic SDK, not proprietary packages or hardware; the
 container was removed. See [results](../ops/role-tests/user-environments/VALIDATION.md).
+
+### 2026-10-30 — Retired duplicate roles and explicit preflight
+
+Removed the standalone venv/SDK/runner implementations. Their old main entry
+points now stop with migration instructions; `manage_users` remains the single
+site workflow. No active source play invokes the retired roles.
+
+Added [preflight usage](../docs/src/playbooks/preflight.md) for selected
+distribution, account/SDK and Filebeat inputs. It reuses input validation, reads
+files and checks TCP/verified HTTPS without account, package or setup changes.
+Credential contents are suppressed; input-only bootstrap is explicit. NetBox
+inventory still requires working controller trust/token before the play starts.
+
+The focused [fixture](../ops/role-tests/preflight/README.md) passed success with
+zero changes, missing artifacts, invalid credential fields, TLS failures,
+downgrade rejection, bootstrap and retired-entry-point cases. Input hashes stayed
+intact. Syntax, source boundaries and documentation builds passed. CI and
+dependency declarations were unchanged; temporary importer failures were not
+repaired or rerun. No production deployment was performed.

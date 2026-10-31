@@ -1,51 +1,7 @@
 ---
-- name: Validate venv definitions before writing
-  ansible.builtin.assert:
-    that:
-      - item.path is match('^/[^ ]+$')
-      - item.python is match('^/[^ ]+$')
-      - item.owner | default('root') | length > 0
-      - item.mode | default('0750') is string
-      - item.mode | default('0750') is match('^0[0-7]{3}$')
-  loop: "{{ venvs }}"
-
-- name: Install venv apt prerequisites
-  ansible.builtin.apt:
-    name: "{{ venv_apt_packages }}"
-    state: present
-    cache_valid_time: 3600
-
-- name: Ensure venv parent directories exist
-  ansible.builtin.file:
-    path: "{{ item.path | dirname }}"
-    state: directory
-  loop: "{{ venvs }}"
-
-- name: Ensure venv directories exist for their intended owners
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: directory
-    owner: "{{ item.owner | default('root') }}"
-    group: "{{ item.group | default('bittware') }}"
-    mode: "{{ item.mode | default('0750') }}"
-  loop: "{{ venvs }}"
-
-- name: Create venvs as their owners
-  ansible.builtin.command:
-    argv: ["{{ item.python }}", -m, venv, "{{ item.path }}"]
-    creates: "{{ item.path }}/bin/python"
-  loop: "{{ venvs }}"
-  become: true
-  become_user: "{{ item.owner | default('root') }}"
-
-- name: Install venv packages as their owners
-  ansible.builtin.pip:
-    name: "{{ item.1 }}"
-    virtualenv: "{{ item.0.path }}"
-    state: present
-  loop: "{{ venvs | subelements('packages', skip_missing=True) }}"
-  become: true
-  become_user: "{{ item.0.owner | default('root') }}"
-
-- name: Apply venv ownership and permissions
-  ansible.builtin.import_tasks: permissions.yml
+- name: Explain retired role migration
+  ansible.builtin.fail:
+    msg: >-
+      This standalone role is retired. Use manage_users for accounts, the system
+      SDK and shared/personal BittWare environments. Select --tags manage_users
+      in playbooks/site.yml and configure environment group vars.

@@ -1,0 +1,14 @@
+---
+- name: Inspect required file
+  ansible.builtin.stat:
+    path: "{{ preflight_file }}"
+    get_checksum: false
+  delegate_to: "{{ preflight_file_host | default('localhost') }}"
+  register: preflight_file_status
+
+- name: Require readable regular file
+  ansible.builtin.assert:
+    that:
+      - preflight_file_status.stat.isreg | default(false)
+      - preflight_file_status.stat.readable | default(false)
+    fail_msg: "Missing or unreadable file on {{ preflight_file_host | default('localhost') }}: {{ preflight_file }}"

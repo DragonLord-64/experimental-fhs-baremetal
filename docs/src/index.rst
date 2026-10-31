@@ -28,6 +28,7 @@ FHS Baremetal Documentation
 
    playbooks/usage.md
    playbooks/provision.yml.md
+   playbooks/preflight.md
    playbooks/site.yml.md
    playbooks/certificate-update.md
    playbooks/development.md

@@ -28,6 +28,8 @@ Additional accounts, including the local development account and `gitlab-runner`
 
 ## Commands
 
+Use [preflight](preflight.md) to check selected inputs before applying roles.
+
 From the repository root, install the declared collections and external roles into the configured paths:
 
 ```bash

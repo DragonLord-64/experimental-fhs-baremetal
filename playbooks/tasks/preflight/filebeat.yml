@@ -1,0 +1,41 @@
+---
+- name: Reuse Filebeat input and private credential validation
+  block:
+    - name: Read selected Filebeat inputs without installing or setting up
+      ansible.builtin.include_role:
+        name: filebeat
+        tasks_from: "{{ 'setup_inputs' if preflight_filebeat_scope == 'filebeat_setup' else 'publishing_inputs' }}"
+        public: true
+  rescue:
+    - name: Report invalid Filebeat inputs without exposing credentials
+      ansible.builtin.fail:
+        msg: Filebeat input/credential validation failed; check the selected credential file, required fields and endpoint settings.
+
+- name: Require HTTPS Elasticsearch endpoints
+  ansible.builtin.assert:
+    that:
+      - filebeat_elasticsearch_hosts is sequence and filebeat_elasticsearch_hosts is not string
+      - filebeat_elasticsearch_hosts | length > 0
+      - filebeat_elasticsearch_hosts | select('match', '^https://') | list | length == filebeat_elasticsearch_hosts | length
+    fail_msg: Configure verified HTTPS Elasticsearch URLs, including explicit ingress port 443 where required.
+
+- name: Check selected Filebeat package
+  ansible.builtin.include_tasks: file.yml
+  vars:
+    preflight_file: "{{ filebeat_package_path }}"
+
+- name: Check Elasticsearch CA files on their actual client
+  ansible.builtin.include_tasks: file.yml
+  vars:
+    preflight_file: "{{ item }}"
+    preflight_file_host: "{{ filebeat_setup_delegate if preflight_filebeat_scope == 'filebeat_setup' else inventory_hostname }}"
+  loop: "{{ filebeat_setup_ssl_certificate_authorities if preflight_filebeat_scope == 'filebeat_setup' else filebeat_ssl_certificate_authorities }}"
+  when: preflight_check_endpoints | default(true) | bool
+
+- name: Check Elasticsearch HTTPS from its actual client
+  ansible.builtin.include_tasks: https.yml
+  vars:
+    preflight_https_url: "{{ item }}"
+    preflight_https_host: "{{ filebeat_setup_delegate if preflight_filebeat_scope == 'filebeat_setup' else inventory_hostname }}"
+    preflight_https_ca_files: "{{ filebeat_setup_ssl_certificate_authorities if preflight_filebeat_scope == 'filebeat_setup' else filebeat_ssl_certificate_authorities }}"
+  loop: "{{ filebeat_elasticsearch_hosts }}"
