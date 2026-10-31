@@ -58,8 +58,6 @@ def load(path=None):
     defaults = values['import']['new_device_defaults']
     if not isinstance(defaults, dict) or set(defaults) != {'site', 'role', 'device_type'}:
         raise Error('import.new_device_defaults requires site, role and device_type')
-    if any(v is not None and (type(v) is not int or v <= 0) for v in defaults.values()):
-        raise Error('New-device IDs must be positive integers or null')
     name = values['import']['provisioning_interface']
     if name is not None and (not isinstance(name, str) or not name):
         raise Error('import.provisioning_interface must be a name or null')

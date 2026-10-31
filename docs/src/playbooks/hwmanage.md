@@ -64,15 +64,20 @@ Edit the `import` section of `/provision/scripts/hwmanage/config.yml`:
 ```yaml
 import:
   new_device_defaults:
-    site: 1
-    role: 1
-    device_type: 1
+    site: MDA
+    role: FPGA HOST SERVER
+    device_type: Terabox1501b
   system_fru_id: '0'
   provisioning_interface: null
 ```
 
-The numeric IDs are existing NetBox objects for new devices; existing devices keep
-their site, role and device type. Replace these example IDs with your site's IDs.
+Use existing NetBox names or slugs for site and device role, and the model name
+or slug for device type. The values above are examples. Resolution is exact;
+missing or ambiguous matches fail before writes for that node. Use a unique slug
+when names/models repeat. Existing devices retain their site, role and device type.
+These defaults are resolved only when creating a device; unrelated commands do
+not query or validate their NetBox matches. Numeric IDs remain supported for
+older configurations.
 `system_fru_id` selects the IPMI FRU record for chassis identity, normally `'0'`.
 The provisioning interface is the unique inspected boot-MAC match. Set a name
 only to require that interface; missing, ambiguous or conflicting matches fail.

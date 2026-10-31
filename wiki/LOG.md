@@ -1134,3 +1134,21 @@ before export on Helm failure, invocation outside the repository and rejection
 of unexpected arguments. A disposable default copy retained helper content and
 executable mode. No real Helm operation, secret export or user container change
 was performed; the underlying deployment/export implementations are unchanged.
+
+### 2026-10-31 — NetBox names in new-device defaults
+
+[Import defaults](../scripts/hwmanage/config.yml) now accept existing NetBox site
+and device-role names or slugs, and device-type model names or slugs. The importer
+resolves exact matches to IDs only when creating a device. Missing or ambiguous
+matches fail before that node's writes; every matching ID is considered rather
+than choosing the first result. Numeric values remain compatible. Existing device
+assignments are preserved, and unrelated commands no longer reject string defaults.
+Documentation uses human-readable examples instead of requiring ID lookup.
+
+Validation: 41 focused tests passed, covering names/slugs/models, ambiguity,
+missing matches and unrelated command config loading. All 12 native importer/
+wrapper/inventory assertions passed against the existing healthy chart in explicit
+`fhs-test` context; the live fixture supplied site name, role slug and type model.
+Synthetic objects and the temporary forward were cleaned up. Whitespace checks
+passed. No physical hardware or official checkout was changed; the existing copy
+manifest already includes all changed application/importer files.

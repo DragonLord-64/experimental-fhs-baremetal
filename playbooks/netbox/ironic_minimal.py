@@ -100,12 +100,34 @@ def resolve_device(sync, item):
     return old
 
 
+def new_device_defaults(sync, settings):
+    resolved = {}
+    for key, path, field in [('site', 'dcim/sites/', 'name'),
+                             ('role', 'dcim/device-roles/', 'name'),
+                             ('device_type', 'dcim/device-types/', 'model')]:
+        value = settings.get(key)
+        if type(value) is int and value > 0:
+            resolved[key] = value  # Compatibility with existing numeric settings.
+            continue
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError('New devices require a NetBox name or slug for '+key)
+        matches = {}
+        for attribute in (field, 'slug'):
+            for row in sync.list(path, **{attribute: value}):
+                if row.get(attribute) == value:
+                    matches[row['id']] = row
+        if len(matches) != 1:
+            reason = 'not found' if not matches else 'ambiguous; use a unique slug'
+            raise ValueError('NetBox '+key+' '+repr(value)+' '+reason)
+        resolved[key] = next(iter(matches))
+    return resolved
+
+
 def apply(sync, item, settings):
     from fhs_netbox import scalar
     old = resolve_device(sync, item)
     # Validate configuration/ownership before any write, including on repeated import.
-    if not old and not all(settings.get(k) for k in ('site', 'role', 'device_type')):
-        raise ValueError('New devices require explicit numeric site, role and device_type settings')
+    defaults = new_device_defaults(sync, settings) if not old else None
     ports = sync.list('dcim/interfaces/', device_id=old['id']) if old else []
     tagged = [p for p in ports if any(t.get('slug') == 'provisioning-interface' for t in p.get('tags', []))]
     if len(tagged) > 1 or tagged and tagged[0]['name'] != item['port']['name']:
@@ -134,7 +156,7 @@ def apply(sync, item, settings):
         data = {'custom_fields': {'ironic_uuid': item['uuid']}}
         key = {'id': old['id']}
     else:
-        data = {k: int(settings[k]) for k in ('site', 'role', 'device_type')}
+        data = dict(defaults)
         data.update(name=item['name'], serial=item['serial'], status='planned',
                     custom_fields={'ironic_uuid': item['uuid']})
         key = {'name': item['name']}

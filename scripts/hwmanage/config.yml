@@ -16,6 +16,7 @@ inventory:
 bifrost:
   playbooks_directory: /bifrost/playbooks
 import:
+  # Existing NetBox names or slugs; device_type uses its model name or slug.
   new_device_defaults:
     site: null
     role: null

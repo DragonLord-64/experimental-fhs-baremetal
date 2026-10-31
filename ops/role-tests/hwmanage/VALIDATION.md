@@ -84,3 +84,8 @@ native NetBox inventory with a plain copied endpoint and central credential path
 Direct import and wrapper plan both use the same selected config; the fixture
 no longer relies on per-setting environment overrides. Local focused suite:
 40 passed, including direct Ansible/Vault and shared group-var path resolution.
+
+2026-10-31 human-readable defaults: all 12 lab assertions passed with a site name,
+device-role slug and device-type model replacing numeric fixture IDs. Focused
+suite: 41 passed, including exact matching, ambiguous/missing names and config
+loading for unrelated commands. Existing device assignments remain unchanged.

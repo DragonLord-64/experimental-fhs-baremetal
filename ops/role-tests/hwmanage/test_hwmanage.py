@@ -163,6 +163,7 @@ class CentralConfigContracts(unittest.TestCase):
             path = Path(directory)/'config.yml'
             values = settings.load()[1]
             values['inventory']['default'] = 'ironic'
+            values['import']['new_device_defaults'] = dict(site='MDA', role='FPGA HOST SERVER', device_type='Terabox1501b')
             path.write_text(json.dumps(values))
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(cli.main(['config', 'show', '--config', str(path)]), 0)
@@ -440,6 +441,24 @@ class MinimalImportContracts(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.helper.apply(sync, item, {})
         sync.ensure.assert_not_called()
+
+    def test_defaults_resolve_names_slugs_and_model_without_writes(self):
+        sync = Mock()
+        rows = {'dcim/sites/': [dict(id=1, name='MDA', slug='mda')],
+                'dcim/device-roles/': [dict(id=2, name='FPGA HOST SERVER', slug='fpga-host-server')],
+                'dcim/device-types/': [dict(id=3, model='Terabox1501b', slug='terabox1501b')]}
+        sync.list.side_effect = lambda path, **filters: rows[path]
+        self.assertEqual(self.helper.new_device_defaults(sync,
+            dict(site='MDA', role='fpga-host-server', device_type='Terabox1501b')),
+            dict(site=1, role=2, device_type=3))
+        sync.ensure.assert_not_called()
+        rows['dcim/sites/'].append(dict(id=4, name='MDA', slug='another-site'))
+        with self.assertRaisesRegex(ValueError, 'ambiguous'):
+            self.helper.new_device_defaults(sync, dict(site='MDA'))
+        with self.assertRaisesRegex(ValueError, 'not found'):
+            self.helper.new_device_defaults(sync, dict(site='missing'))
+        with self.assertRaisesRegex(ValueError, 'name or slug'):
+            self.helper.new_device_defaults(sync, dict(site=None))
 
     def test_boot_mac_automatically_selects_unique_interface(self):
         record = dict(inventory=dict(boot={'pxe_interface': 'a8:a1:59:fb:a6:bb'},

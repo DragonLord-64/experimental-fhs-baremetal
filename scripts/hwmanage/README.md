@@ -9,7 +9,7 @@ hwmanage --help
 ```
 
 Edit [config.yml](config.yml) for controller paths, endpoints, inventory and import
-defaults. Set existing NetBox site, role and device-type IDs under
+defaults. Set existing NetBox site/role names or slugs and device-type model or slug under
 `import.new_device_defaults`.
 Use `hwmanage config show` or `hwmanage config validate` to inspect settings.
 The provisioning interface is selected from the inspected boot MAC. These are
