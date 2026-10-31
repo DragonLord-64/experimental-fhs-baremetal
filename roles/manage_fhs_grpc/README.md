@@ -1,21 +1,21 @@
 # Manage FHS gRPC
 
-FSP/VCC gRPC controllers are supported services. This role installs and manages
-them; `site.yml` currently does not include the role. The
-[certificate-update playbook](../../docs/src/playbooks/certificate-update.md)
-is a one-off security remediation that can remove affected controller
-installations and environments. Its cleanup is not a retirement of the services
-or a replacement for controller installation.
+Installs and configures an FSP or VCC gRPC controller, its Python environment
+and systemd service. Assign exactly one NetBox tag to the target server:
 
-Installs one controller selected by NetBox `grpc-fsp` or `grpc-vcc` tag.
-Neither tag skips installation; both fail before filesystem/account changes.
+| NetBox tag | Controller service |
+|---|---|
+| `grpc-fsp` | `fsp-grpc.service` |
+| `grpc-vcc` | `vcc-grpc.service` |
+
+Without either tag, the role skips installation. Assigning both tags fails before
+filesystem or account changes.
 The NetBox inventory plugin emits string slugs; dictionary tags with `slug` are
 also accepted. Switching tags stops/disables and removes the previous role-owned
 `fsp-grpc.service` or `vcc-grpc.service`, then starts the selected controller.
 These two unit names are reserved for this role.
 
-Poetry installation belongs to this role; the standalone manage_poetry role is
-retired. Python with venv support and the approved archives from
+The role installs Poetry. Python with venv support and the approved archives from
 `playbooks/development/update_repositories.yml`
 are prerequisites. Default controller releases are 0.0.3, Poetry is pinned to
 2.2.1. `manage_grpc_archive_dir` is controller-side. Archives must contain the

@@ -693,3 +693,10 @@ individual role tags. The plain transfer script removes the destination's old
 copying. A disposable transfer check passed with obsolete paths present and on
 rerun without them, preserving an unrelated file. Tag-selection source checks,
 source/link checks and whitespace checks passed. No deployment was run.
+
+### 2026-10-30 — Keep the gRPC role introduction about its use
+
+Replaced site-playbook and security-remediation commentary in the gRPC role
+README with its installation purpose and a NetBox tag/service selection table.
+Removed standalone Poetry role retirement commentary from its prerequisites.
+Documentation/link and whitespace checks passed; no runtime changes.
