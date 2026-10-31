@@ -25,6 +25,5 @@
       environment:
         HWMANAGE_IMPORT_DEFAULTS: "{{ hwmanage_import_defaults | default(lookup('ansible.builtin.env', 'HWMANAGE_IMPORT_DEFAULTS') | default('/provision/files.d/hwmanage-import.yml', true)) }}"
         HWMANAGE_BMC_SECRETS: "{{ hwmanage_bmc_secrets | default(lookup('ansible.builtin.env', 'HWMANAGE_BMC_SECRETS') | default('/provision/files.d/credentials/redfish.yml', true)) }}"
-      no_log: true
       check_mode: false
       changed_when: not ansible_check_mode

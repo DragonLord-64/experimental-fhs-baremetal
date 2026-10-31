@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import sys
+import traceback
 from .common import Error
 
 RUNBOOKS = {
@@ -13,6 +14,11 @@ RUNBOOKS = {
 
 
 class Parser(argparse.ArgumentParser):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_argument('-v', '--verbose', action='count', default=argparse.SUPPRESS,
+                          help='Show application output and increase Ansible verbosity (repeat for more detail)')
+
     def error(self, message):
         # argparse's default errors can echo an unknown argument containing a secret.
         self.print_usage(sys.stderr)
@@ -120,9 +126,8 @@ def node_command(args, hosts):
                 node = normalize(match)
                 client.action(node, args.action, host=host, steps=steps, options=args, plan=args.plan)
             print(str(node.get('uuid') or key)+': '+('planned ' if args.plan else 'completed ')+args.action)
-        except Exception as error:
-            if isinstance(error, Error):
-                print(str(error), file=sys.stderr)
+        except Exception:
+            traceback.print_exc()
             failures += 1
             print(str(host.get('uuid') or key)+': failed '+args.action+'; later stages stopped, inspect protected state/logs', file=sys.stderr)
     if failures:
@@ -169,9 +174,8 @@ def runbook(args, hosts):
                     apply({host['name']: host})
                     apply({host['name']: host}, inventory_only=True)
             print(node['uuid']+': completed '+args.action)
-        except Exception as error:
-            if isinstance(error, Error):
-                print(str(error), file=sys.stderr)
+        except Exception:
+            traceback.print_exc()
             failures += 1
             print(str(host.get('uuid') or key)+': failed runbook; later stages stopped, inspect before retry', file=sys.stderr)
     if failures:
@@ -233,13 +237,14 @@ def dispatch(args):
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    verbosity = getattr(args, 'verbose', 0)
+    if verbosity:
+        os.environ['HWMANAGE_VERBOSE'] = str(verbosity)
     try:
         dispatch(args)
         return 0
     except Error as error:
         print('hwmanage: '+str(error), file=sys.stderr)
-    except ImportError:
-        print('hwmanage: optional dependency missing for this command; install its native application requirements', file=sys.stderr)
     except Exception:
-        print('hwmanage: command failed; inspect protected inputs and service logs privately. No payload logged.', file=sys.stderr)
+        traceback.print_exc()
     return 1

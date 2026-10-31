@@ -946,3 +946,25 @@ dangling symlink, and executable installer content in targeted/full copies.
 These cover runtime/link and copy behavior beyond the controller's syntax/policy
 checks, which are left to the controller. No container or hardware operations
 were run; `/usr/local/bin` on the host was not changed.
+
+### 2026-10-31 — hwmanage import diagnostics
+
+[hwmanage](../scripts/hwmanage_lib/common.py) now relays Ansible output while it
+runs and prints failed application output. `-v` exposes other application output
+and increases Ansible verbosity. The [importer](../playbooks/netbox/ironic_minimal.py)
+prints unexpected exception tracebacks; its playbook no longer censors the
+command result. Other tasks' explicit secret protection remains in place.
+The [usage page](../docs/src/playbooks/hwmanage.md) documents private handling
+of output, which can contain credentials or inventory data.
+
+The [copy helper](../ops/security-provisioning/copy-to-official.py) adds
+`--diagnostics-only` for existing official hwmanage checkouts; default/full
+copies already include these files. No official checkout was changed here.
+
+Focused hwmanage contracts: 31 tests passed, one skipped. New coverage checks
+stdout/stderr separation, failure/timeout private files, verbosity parsing and
+exact diagnostic copy content with unrelated destination content preserved.
+Ansible import syntax passed using a writable `/tmp` local-temp override after
+the default home temp path was blocked by the sandbox. `git diff --check` passed.
+No lab or physical import was run; the photographed import's cause remains
+unconfirmed until the updated command exposes its error.

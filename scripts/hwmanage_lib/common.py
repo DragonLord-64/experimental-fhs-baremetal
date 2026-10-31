@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import sys
+import threading
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -21,15 +23,47 @@ def load_module(name, path):
 
 
 def run(argv, *, timeout=180, env=None, data=None):
-    # Application diagnostics can include credentials and inventory payloads.
+    # Ansible progress is live; other application output is exposed with -v.
+    visible = str(argv[0]).startswith("ansible") or bool(os.environ.get("HWMANAGE_VERBOSE"))
     if str(argv[0]).startswith('ansible'):
         env = dict(os.environ if env is None else env, ANSIBLE_LOG_PATH='/dev/null',
                    ANSIBLE_CACHE_PLUGIN='memory')
+    if str(argv[0]).startswith('ansible-playbook') and os.environ.get('HWMANAGE_VERBOSE'):
+        argv = [*argv, '-'+('v'*min(int(os.environ['HWMANAGE_VERBOSE']), 4))]
     fd, diagnostic = tempfile.mkstemp(prefix='hwmanage-diagnostic-', suffix='.log')
     os.fchmod(fd, 0o600)
     try:
-        result = subprocess.run([str(v) for v in argv], input=data, capture_output=True,
-                                text=True, timeout=timeout, env=env)
+        if visible:
+            print('Running: '+str(argv[0]), flush=True)
+            output = []
+            errors = []
+            with subprocess.Popen([str(v) for v in argv], stdin=subprocess.PIPE if data is not None else None,
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env) as process:
+                def relay(stream, captured, destination):
+                    for line in stream:
+                        captured.append(line)
+                        print(line, end='', file=destination, flush=True)
+                reader = threading.Thread(target=relay, args=(process.stdout, output, sys.stdout))
+                error_reader = threading.Thread(target=relay, args=(process.stderr, errors, sys.stderr))
+                reader.start()
+                error_reader.start()
+                try:
+                    if data is not None:
+                        process.stdin.write(data)
+                        process.stdin.close()
+                    process.wait(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+                    reader.join()
+                    error_reader.join()
+                    raise subprocess.TimeoutExpired(argv, timeout, output=''.join(output), stderr=''.join(errors)) from None
+                reader.join()
+                error_reader.join()
+                result = subprocess.CompletedProcess(argv, process.returncode, ''.join(output), ''.join(errors))
+        else:
+            result = subprocess.run([str(v) for v in argv], input=data, capture_output=True,
+                                    text=True, timeout=timeout, env=env)
     except FileNotFoundError:
         os.close(fd)
         os.unlink(diagnostic)
@@ -43,6 +77,9 @@ def run(argv, *, timeout=180, env=None, data=None):
         stream.write(result.stdout or '')
         stream.write(result.stderr or '')
     if result.returncode:
+        if not visible:
+            print(result.stdout or '', end='', flush=True)
+            print(result.stderr or '', end='', file=sys.stderr, flush=True)
         raise Error(str(argv[0])+' failed (exit '+str(result.returncode)+'); private diagnostics: '+diagnostic)
     if str(argv[0]).startswith('ansible-playbook'):
         print('ansible-playbook completed (exit 0); private diagnostics: '+diagnostic, flush=True)

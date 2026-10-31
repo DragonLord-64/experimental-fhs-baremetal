@@ -13,8 +13,20 @@ scope.add_argument('--full', action='store_true',
                    help='Copy the full provisioning update and perform its legacy cleanup')
 scope.add_argument('--bifrost-only', action='store_true',
                    help='Copy only the six Bifrost environment repair/build files')
+scope.add_argument('--diagnostics-only', action='store_true',
+                   help='Copy only wrapper/import diagnostics and its usage page')
 args = parser.parse_args()
 destination = args.destination.resolve()
+
+if args.diagnostics_only:
+    for name in ('scripts/hwmanage_lib/common.py', 'scripts/hwmanage_lib/cli.py',
+                 'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
+                 'docs/src/playbooks/hwmanage.md'):
+        target = destination / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source / name, target)
+        print(f'Copied {name}')
+    raise SystemExit(0)
 
 if args.bifrost_only:
     for name in ('scripts/patch-bifrost-environment.py',

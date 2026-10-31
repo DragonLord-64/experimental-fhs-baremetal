@@ -30,6 +30,15 @@ are overwritten; unrelated destination files are retained. Review the explicit
 manifest in [copy-to-official.py](copy-to-official.py) and the official Git diff.
 This is a file copy, not a merge or a deployment.
 
+For only the wrapper/import diagnostics update on an existing hwmanage checkout:
+
+```sh
+python3 ops/security-provisioning/copy-to-official.py --diagnostics-only
+```
+
+This copies the command runner, CLI, standalone Ironic importer, import playbook
+and usage page. The default and full scopes also include these files.
+
 For only the six Bifrost environment repair/build files:
 
 ```sh

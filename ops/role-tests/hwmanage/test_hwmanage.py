@@ -35,6 +35,49 @@ class ParserContracts(unittest.TestCase):
         self.assertEqual(cli.parser().parse_args(['config', 'dnsmasq', 'add-host', '--limit', 'a', '--image', 'poap.py']).boot_file, 'poap.py')
 
 
+class DiagnosticContracts(unittest.TestCase):
+    def test_verbose_preserves_stdout_and_exposes_stderr(self):
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with patch.dict(os.environ, {'HWMANAGE_VERBOSE': '1'}), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            result = common.run([sys.executable, '-c',
+                                 'import sys; print("payload"); print("detail", file=sys.stderr)'])
+        self.assertEqual(result, 'payload\n')
+        self.assertIn('payload', stdout.getvalue())
+        self.assertIn('detail', stderr.getvalue())
+
+    def test_failure_and_timeout_keep_private_diagnostics(self):
+        for code, timeout in [('import sys; print("failure", flush=True); sys.exit(3)', 5),
+                              ('import time; print("waiting", flush=True); time.sleep(5)', 0.1)]:
+            with patch.dict(os.environ, {'HWMANAGE_VERBOSE': '1'}), contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(common.Error) as caught:
+                    common.run([sys.executable, '-c', code], timeout=timeout)
+            path = Path(str(caught.exception).split('private diagnostics: ', 1)[1].split(';', 1)[0])
+            try:
+                self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+                self.assertTrue(path.read_text().strip())
+            finally:
+                path.unlink()
+
+    def test_verbose_parser_positions(self):
+        for argv in (['-v', 'inventory', 'import', '--all'],
+                     ['inventory', 'import', '--all', '-vv']):
+            self.assertGreater(cli.parser().parse_args(argv).verbose, 0)
+
+    def test_diagnostics_copy_scope(self):
+        names = ('scripts/hwmanage_lib/common.py', 'scripts/hwmanage_lib/cli.py',
+                 'playbooks/netbox/ironic_import.yml', 'playbooks/netbox/ironic_minimal.py',
+                 'docs/src/playbooks/hwmanage.md')
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            sentinel = destination/'site-settings'
+            sentinel.write_text('preserve')
+            subprocess.run([sys.executable, str(ROOT/'ops/security-provisioning/copy-to-official.py'),
+                            '--diagnostics-only', directory], check=True, capture_output=True)
+            for name in names:
+                self.assertEqual((destination/name).read_bytes(), (ROOT/name).read_bytes())
+            self.assertEqual(sentinel.read_text(), 'preserve')
+
+
 class LifecycleContracts(unittest.TestCase):
     def test_rejects_active_maintenance_and_transient(self):
         for state, maintenance in [('active', False), ('cleaning', False), ('available', True)]:

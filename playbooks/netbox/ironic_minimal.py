@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import re
 import sys
+import traceback
 
 # Reuse native importer API, serial validation, manufacturer and FRU parsers.
 HERE = Path(__file__).resolve().parent
@@ -191,8 +192,11 @@ def main(argv=None):
     targets.add_argument('--limit', help='One exact Ironic UUID or name')
     targets.add_argument('--all', action='store_true', help='Import all Ironic discoveries, including unnamed nodes')
     targets.add_argument('--selected-uuids', help=argparse.SUPPRESS)
+    parser.add_argument('-v', '--verbose', action='count', default=0, help='Show remote application output')
     parser.add_argument('--plan', action='store_true', help='Validate without NetBox writes')
     args = parser.parse_args(argv)
+    if args.verbose:
+        os.environ["HWMANAGE_VERBOSE"] = str(args.verbose)
     sys.path.insert(0, str(HERE.parents[1]/'scripts'))
     from hwmanage_lib.common import Error
     from hwmanage_lib.ironic import Ironic
@@ -215,7 +219,7 @@ def main(argv=None):
     except Error as error:
         print(str(error), file=sys.stderr)
     except Exception:
-        print('Import failed; inspect protected configuration and service diagnostics privately.', file=sys.stderr)
+        traceback.print_exc()
     return 1
 
 

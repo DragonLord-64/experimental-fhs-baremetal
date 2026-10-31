@@ -323,3 +323,17 @@ Lifecycle waits default to 1,800 seconds, allowing for slow firmware boots.
 `HWMANAGE_TIMEOUT` adjusts lifecycle waits; `HWMANAGE_ANSIBLE_TIMEOUT` adjusts
 provisioning execution. A timeout stops the workflow: inspect native application
 state before repeating a cleaning or deployment operation.
+
+## Command output
+
+Ansible output is shown as it runs. Import failures show their error or Python
+traceback. Add `-v` to show other application output and Ansible detail; repeat
+as `-vv` or `-vvv` for more Ansible detail:
+
+```bash
+hwmanage inventory import --all --plan -v
+```
+
+Application output and tracebacks may contain credentials or inventory data.
+Keep terminal captures and the private diagnostic files local; redact before sharing.
+Tasks elsewhere that explicitly protect secrets with `no_log` retain that setting.
